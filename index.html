@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GolfTrip — Plan Your Perfect Golf Holiday in 60 Seconds</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -568,31 +568,42 @@ textarea{resize:vertical;min-height:80px}
 // ─── SUPABASE ─────────────────────────────────────────────────
 const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let supabase = null;
 let currentUser = null;
 const chipSelections = {dest:'',style:'',accomm:'',weather:''};
 let dateMode = 'flexible';
 
-// ─── AUTH STATE ───────────────────────────────────────────────
-supabase.auth.onAuthStateChange((event, session) => {
-  currentUser = session?.user || null;
-  updateNavAuth();
-});
+// Initialise Supabase safely — if it fails, site still works
+try {
+  const sb = window.supabase || window.supabaseJs;
+  if (sb && sb.createClient) {
+    supabase = sb.createClient(SUPABASE_URL, SUPABASE_KEY);
+    supabase.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
+      updateNavAuth();
+    });
+    updateNavAuth();
+  }
+} catch(e) {
+  console.warn('Supabase failed to initialise:', e.message);
+}
 
 async function updateNavAuth() {
-  const { data: { user } } = await supabase.auth.getUser();
-  currentUser = user;
-  if (user) {
-    document.getElementById('authNavBtn').style.display = 'none';
-    document.getElementById('userGreeting').style.display = 'inline';
-    document.getElementById('userGreeting').textContent = '👋 ' + (user.email.split('@')[0]);
-  } else {
-    document.getElementById('authNavBtn').style.display = 'inline-block';
-    document.getElementById('userGreeting').style.display = 'none';
-  }
+  if (!supabase) return;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    currentUser = user;
+    if (user) {
+      document.getElementById('authNavBtn').style.display = 'none';
+      document.getElementById('userGreeting').style.display = 'inline';
+      document.getElementById('userGreeting').textContent = '👋 ' + (user.email.split('@')[0]);
+    } else {
+      document.getElementById('authNavBtn').style.display = 'inline-block';
+      document.getElementById('userGreeting').style.display = 'none';
+    }
+  } catch(e) { console.warn('Auth check failed:', e.message); }
 }
-updateNavAuth();
 
 // ─── NAVIGATION ───────────────────────────────────────────────
 function showPage(p) {
@@ -667,11 +678,13 @@ function switchTab(tab) {
 }
 
 async function handleGoogle() {
+  if (!supabase) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth not available. Please try email sign in.</div>'; return; }
   const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
   if (error) document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + error.message + '</div>';
 }
 
 async function handleAuth() {
+  if (!supabase) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth service unavailable. Please try again shortly.</div>'; return; }
   const email = document.getElementById('authEmail').value;
   const pass = document.getElementById('authPassword').value;
   if (!email || !pass) {
@@ -786,7 +799,7 @@ Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real ven
     }
 
     // Save to Supabase if logged in
-    if (currentUser) {
+    if (supabase && currentUser) {
       const { data: reqData } = await supabase.from('trip_requests').insert({
         user_id: currentUser.id,
         departure_airport: airport,
