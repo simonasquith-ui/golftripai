@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GolfTripAI — Plan Your Perfect Golf Holiday in 60 Seconds</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a3a2a;--green-mid:#2d5a3d;--green-light:#4a8c5c;
+  --sand:#e8d5b0;--sand-light:#f5edd8;--sand-dark:#c9b896;
+  --gold:#c9a84c;--gold-dark:#a07a2a;
+  --white:#f7f4ee;--off-white:#faf8f3;
+  --charcoal:#1c1c1c;--text-muted:#6b7b6e;
+  --card-shadow:0 4px 24px rgba(26,58,42,0.10);
+}
+body{font-family:'Inter',sans-serif;background:var(--white);color:var(--charcoal);min-height:100vh}
+h1,h2,h3,h4{font-family:'Playfair Display',serif}
+
+/* NAV */
+nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.18)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--sand);font-weight:700;letter-spacing:0.02em;cursor:pointer}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-link{color:var(--sand-light);font-size:0.85rem;font-weight:500;cursor:pointer;text-decoration:none;opacity:0.85;transition:opacity 0.2s}
+.nav-link:hover{opacity:1}
+.nav-btn{background:var(--gold);color:var(--green);border:none;padding:0.45rem 1.2rem;border-radius:6px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.2s}
+.nav-btn:hover{background:var(--sand)}
+
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 64px)}
+.page.active{display:block}
+
+/* LANDING */
+.hero{background:var(--green);min-height:88vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,0.015) 40px,rgba(255,255,255,0.015) 41px);pointer-events:none}
+.hero-inner{max-width:720px;position:relative;z-index:1}
+.hero-badge{display:inline-block;background:rgba(201,168,76,0.18);border:1px solid var(--gold);color:var(--gold);font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.4rem 1rem;border-radius:20px;margin-bottom:2rem}
+.hero h1{font-size:clamp(2.4rem,5vw,3.8rem);color:var(--white);line-height:1.15;margin-bottom:1.2rem}
+.hero h1 em{color:var(--gold);font-style:normal}
+.hero-sub{font-size:1.1rem;color:var(--sand-light);opacity:0.9;line-height:1.7;margin-bottom:2.5rem;font-weight:300}
+.hero-cta{background:var(--gold);color:var(--green);border:none;padding:1rem 2.5rem;border-radius:8px;font-size:1.1rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;letter-spacing:0.01em}
+.hero-cta:hover{background:var(--sand);transform:translateY(-2px)}
+.hero-trust{margin-top:2.5rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.hero-trust-item{color:var(--sand-light);font-size:0.82rem;opacity:0.75;display:flex;align-items:center;gap:0.4rem}
+
+/* FEATURES */
+.features-section{background:var(--off-white);padding:5rem 2rem}
+.section-center{max-width:900px;margin:0 auto;text-align:center}
+.section-label{font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--green-light);margin-bottom:0.8rem}
+.section-title{font-size:2rem;color:var(--green);margin-bottom:1rem}
+.section-sub{color:var(--text-muted);font-size:1rem;line-height:1.7;max-width:560px;margin:0 auto 3rem}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:2rem}
+.feature-card{background:var(--white);border:1px solid var(--sand-dark);border-radius:12px;padding:2rem 1.5rem;text-align:center}
+.feature-icon{font-size:2rem;margin-bottom:1rem}
+.feature-card h3{font-size:1rem;color:var(--green);margin-bottom:0.5rem}
+.feature-card p{font-size:0.88rem;color:var(--text-muted);line-height:1.6}
+
+/* TESTIMONIALS */
+.testimonials{background:var(--green);padding:5rem 2rem}
+.testimonials .section-title{color:var(--sand)}
+.testimonials .section-sub{color:rgba(232,213,176,0.7)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:900px;margin:2rem auto 0}
+.testimonial{background:rgba(255,255,255,0.06);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:1.5rem}
+.testimonial-text{color:var(--sand-light);font-size:0.9rem;line-height:1.7;margin-bottom:1rem;font-style:italic}
+.testimonial-author{color:var(--gold);font-size:0.82rem;font-weight:600}
+.testimonial-stars{color:var(--gold);font-size:0.85rem;margin-bottom:0.5rem}
+
+/* FAQ */
+.faq-section{background:var(--off-white);padding:5rem 2rem}
+.faq-list{max-width:680px;margin:2rem auto 0}
+.faq-item{border-bottom:1px solid var(--sand-dark);padding:1.2rem 0}
+.faq-q{font-weight:600;color:var(--green);font-size:0.95rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-a{color:var(--text-muted);font-size:0.88rem;line-height:1.7;margin-top:0.8rem;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-chevron{transition:transform 0.2s;font-size:1.1rem;color:var(--gold)}
+
+/* PRICING */
+.pricing-section{background:var(--white);padding:5rem 2rem}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:700px;margin:2rem auto 0}
+.pricing-card{border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;text-align:center}
+.pricing-card.featured{border:2px solid var(--gold);background:var(--green)}
+.pricing-tier{font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem}
+.pricing-card.featured .pricing-tier{color:var(--gold)}
+.pricing-price{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--green);font-weight:700;line-height:1}
+.pricing-card.featured .pricing-price{color:var(--sand)}
+.pricing-period{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem}
+.pricing-card.featured .pricing-period{color:rgba(232,213,176,0.7)}
+.pricing-features{list-style:none;text-align:left;margin-bottom:1.5rem}
+.pricing-features li{font-size:0.88rem;color:var(--text-muted);padding:0.35rem 0;display:flex;gap:0.5rem;align-items:center}
+.pricing-card.featured .pricing-features li{color:var(--sand-light)}
+.pricing-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
+.pricing-btn{width:100%;padding:0.75rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all 0.2s}
+.pricing-btn-free{background:transparent;border:1px solid var(--sand-dark);color:var(--green)}
+.pricing-btn-free:hover{background:var(--sand-light)}
+.pricing-btn-premium{background:var(--gold);color:var(--green)}
+.pricing-btn-premium:hover{background:var(--sand)}
+
+/* FOOTER */
+footer{background:var(--charcoal);padding:2rem;text-align:center}
+footer p{color:rgba(255,255,255,0.4);font-size:0.82rem}
+footer strong{color:var(--gold)}
+
+/* QUESTIONNAIRE */
+.quiz-page{background:var(--off-white);padding:3rem 1.5rem;min-height:calc(100vh - 64px)}
+.quiz-container{max-width:680px;margin:0 auto}
+.quiz-header{text-align:center;margin-bottom:2.5rem}
+.quiz-header h2{font-size:2rem;color:var(--green);margin-bottom:0.5rem}
+.quiz-header p{color:var(--text-muted);font-size:0.95rem}
+.quiz-progress{background:rgba(26,58,42,0.08);height:4px;border-radius:2px;margin-bottom:2rem}
+.quiz-progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.4s ease}
+.quiz-card{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;margin-bottom:1.2rem;box-shadow:var(--card-shadow)}
+.quiz-section-label{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-light);margin-bottom:1.2rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.form-row{grid-template-columns:1fr}}
+.form-group{margin-bottom:1.2rem}
+.form-group:last-child{margin-bottom:0}
+label{display:block;font-size:0.85rem;font-weight:500;color:var(--charcoal);margin-bottom:0.4rem}
+label span{color:var(--text-muted);font-weight:400}
+input,select,textarea{width:100%;padding:0.65rem 0.9rem;border:1px solid var(--sand-dark);border-radius:8px;font-size:0.9rem;font-family:'Inter',sans-serif;background:var(--off-white);color:var(--charcoal);transition:border 0.2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green-light);background:var(--white)}
+textarea{resize:vertical;min-height:80px}
+.chip-group{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.4rem}
+.chip{padding:0.45rem 1rem;border-radius:20px;border:1px solid var(--sand-dark);background:var(--off-white);font-size:0.83rem;cursor:pointer;font-family:'Inter',sans-serif;color:var(--charcoal);transition:all 0.18s;font-weight:400}
+.chip:hover{border-color:var(--green-light);background:var(--sand-light)}
+.chip.selected{background:var(--green);color:var(--sand);border-color:var(--green)}
+.generate-btn{width:100%;padding:1.1rem;background:var(--green);color:var(--sand);border:none;border-radius:10px;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:0.02em;transition:all 0.2s;margin-top:0.5rem;display:flex;align-items:center;justify-content:center;gap:0.7rem}
+.generate-btn:hover{background:var(--green-mid);transform:translateY(-1px)}
+.generate-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(232,213,176,0.3);border-top-color:var(--sand);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DATE PICKER TOGGLE */
+.date-toggle{display:flex;gap:0;border:1px solid var(--sand-dark);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.date-toggle-btn{flex:1;padding:0.55rem;border:none;background:transparent;font-size:0.83rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all 0.2s}
+.date-toggle-btn.active{background:var(--green);color:var(--sand)}
+.date-specific{display:none}
+.date-flexible{display:block}
+.date-specific.show{display:block}
+.date-flexible.hide{display:none}
+
+/* RESULTS */
+.results-page{background:var(--off-white);min-height:calc(100vh - 64px)}
+.results-hero{background:var(--green);padding:2.5rem 2rem;text-align:center}
+.results-hero h2{font-size:1.9rem;color:var(--sand);margin-bottom:0.4rem}
+.results-hero p{color:rgba(232,213,176,0.75);font-size:0.9rem}
+.results-badge{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(201,168,76,0.2);border:1px solid rgba(201,168,76,0.5);color:var(--gold);font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:0.35rem 0.9rem;border-radius:20px;margin-bottom:1rem}
+.results-content{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem}
+.result-section{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
+.result-section-header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.2rem}
+.result-section-icon{font-size:1.3rem;width:2.5rem;height:2.5rem;background:rgba(26,58,42,0.07);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result-section-title{font-size:1.15rem;color:var(--green);font-family:'Playfair Display',serif}
+.destination-highlight{background:rgba(26,58,42,0.04);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:1rem 1.2rem;font-size:0.92rem;line-height:1.7;color:var(--charcoal)}
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.course-card{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:1.1rem}
+.course-name{font-weight:700;font-size:0.92rem;color:var(--green);margin-bottom:0.2rem}
+.course-location{font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem}
+.course-desc{font-size:0.82rem;color:var(--charcoal);line-height:1.55;margin-bottom:0.5rem}
+.course-tags{display:flex;gap:0.4rem;flex-wrap:wrap}
+.course-tag{font-size:0.72rem;padding:0.2rem 0.55rem;border-radius:20px;background:rgba(26,58,42,0.08);color:var(--green-mid);font-weight:500}
+.course-tag.gold{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
+.hotels-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.hotel-card{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:1.1rem}
+.hotel-name{font-weight:700;font-size:0.92rem;color:var(--green);margin-bottom:0.15rem}
+.hotel-area{font-size:0.77rem;color:var(--gold-dark);font-weight:600;margin-bottom:0.4rem}
+.hotel-desc{font-size:0.82rem;color:var(--charcoal);line-height:1.55}
+.rec-list{display:flex;flex-direction:column;gap:0.8rem}
+.rec-item{display:flex;gap:0.8rem;align-items:flex-start;padding:0.8rem;background:var(--off-white);border-radius:8px;border:1px solid var(--sand-dark)}
+.rec-emoji{font-size:1.1rem;flex-shrink:0;margin-top:0.1rem}
+.rec-name{font-weight:600;font-size:0.88rem;color:var(--green)}
+.rec-detail{font-size:0.81rem;color:var(--text-muted);line-height:1.5}
+.itinerary-days{display:flex;flex-direction:column;gap:0.8rem}
+.day-item{display:flex;gap:1rem;align-items:flex-start}
+.day-num{background:var(--green);color:var(--gold);width:2.2rem;height:2.2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;font-family:'Playfair Display',serif}
+.day-content{flex:1;padding-top:0.2rem}
+.day-title{font-weight:600;font-size:0.9rem;color:var(--green);margin-bottom:0.2rem}
+.day-desc{font-size:0.83rem;color:var(--charcoal);line-height:1.55}
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.8rem;margin-bottom:1rem}
+.cost-item{text-align:center;background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:0.9rem}
+.cost-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+.cost-value{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green);font-weight:700}
+.cost-total{background:var(--green);border-radius:10px;padding:1rem;text-align:center}
+.cost-total .cost-label{color:rgba(232,213,176,0.7)}
+.cost-total .cost-value{color:var(--gold);font-size:1.8rem}
+.results-actions{display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap}
+.results-action-btn{flex:1;min-width:160px;padding:0.8rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;text-align:center}
+.btn-primary{background:var(--green);color:var(--sand);border:none}
+.btn-primary:hover{background:var(--green-mid)}
+.btn-outline{background:transparent;color:var(--green);border:1px solid var(--sand-dark)}
+.btn-outline:hover{background:var(--sand-light)}
+.future-banner{background:rgba(201,168,76,0.1);border:1px dashed var(--gold);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;text-align:center}
+.future-banner h4{font-size:0.85rem;color:var(--gold-dark);font-family:'Inter',sans-serif;font-weight:600;margin-bottom:0.3rem}
+.future-banner p{font-size:0.8rem;color:var(--text-muted)}
+.future-pills{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-top:0.8rem}
+.future-pill{background:rgba(26,58,42,0.06);border:1px solid var(--sand-dark);color:var(--text-muted);font-size:0.75rem;padding:0.3rem 0.7rem;border-radius:20px}
+
+/* AUTH MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--white);border-radius:16px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal h3{font-size:1.4rem;color:var(--green);margin-bottom:0.4rem}
+.modal p{font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem}
+.modal-tabs{display:flex;border:1px solid var(--sand-dark);border-radius:8px;overflow:hidden;margin-bottom:1.5rem}
+.modal-tab{flex:1;padding:0.6rem;border:none;background:transparent;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all 0.2s}
+.modal-tab.active{background:var(--green);color:var(--sand)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)}
+.modal-relative{position:relative}
+.google-btn{width:100%;padding:0.75rem;border:1px solid var(--sand-dark);border-radius:8px;background:var(--white);font-size:0.88rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-bottom:1rem;transition:background 0.2s}
+.google-btn:hover{background:var(--sand-light)}
+.divider{display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;color:var(--text-muted);font-size:0.8rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--sand-dark)}
+.submit-btn{width:100%;padding:0.8rem;background:var(--green);color:var(--sand);border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+.submit-btn:hover{background:var(--green-mid)}
+.error-msg{background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.2);color:#c0392b;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.82rem;margin-bottom:1rem}
+.success-msg{background:rgba(40,167,69,0.08);border:1px solid rgba(40,167,69,0.2);color:#1e7e34;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.82rem;margin-bottom:1rem}
+
+/* ADMIN */
+.admin-page{background:var(--off-white);min-height:calc(100vh - 64px);padding:2rem 1.5rem}
+.admin-header{max-width:1000px;margin:0 auto 2rem;display:flex;justify-content:space-between;align-items:center}
+.admin-header h2{font-size:1.6rem;color:var(--green)}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:1000px;margin:0 auto 2rem}
+.admin-stat{background:var(--white);border:1px solid var(--sand-dark);border-radius:12px;padding:1.5rem;text-align:center}
+.admin-stat .stat-val{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--green);font-weight:700;line-height:1.1}
+.admin-stat .stat-lbl{font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:0.3rem}
+.admin-tables{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:640px){.admin-tables{grid-template-columns:1fr}}
+.admin-table-card{background:var(--white);border:1px solid var(--sand-dark);border-radius:12px;padding:1.5rem}
+.admin-table-card h4{font-size:0.9rem;color:var(--green);margin-bottom:1rem;font-family:'Inter',sans-serif;font-weight:600}
+.admin-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--sand-light);font-size:0.83rem}
+.admin-row:last-child{border-bottom:none}
+.admin-row .val{font-weight:600;color:var(--green)}
+.admin-login{max-width:380px;margin:4rem auto;background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;box-shadow:var(--card-shadow)}
+.admin-login h3{font-size:1.3rem;color:var(--green);margin-bottom:0.4rem;text-align:center}
+.admin-login p{font-size:0.85rem;color:var(--text-muted);text-align:center;margin-bottom:1.5rem}
+
+/* LOADING */
+.loading-overlay{text-align:center;padding:5rem 2rem}
+.loading-overlay .spinner{width:48px;height:48px;border-width:3px;margin:0 auto 1.5rem}
+.loading-overlay h3{color:var(--green);font-size:1.3rem;margin-bottom:0.5rem}
+.loading-overlay p{color:var(--text-muted);font-size:0.88rem}
+.loading-steps{display:flex;flex-direction:column;gap:0.5rem;margin-top:1.5rem;text-align:left;max-width:300px;margin-left:auto;margin-right:auto}
+.loading-step{font-size:0.82rem;padding:0.4rem 0.8rem;border-radius:6px;background:rgba(26,58,42,0.04);color:var(--text-muted);display:flex;align-items:center;gap:0.5rem}
+.loading-step.active{background:rgba(26,58,42,0.08);color:var(--green);font-weight:500}
+.loading-step::before{content:'○';font-size:0.7rem}
+.loading-step.active::before{content:'●';color:var(--gold)}
+
+@media(max-width:640px){
+  nav{padding:0 1rem}
+  .nav-links .nav-link:not(:last-child){display:none}
+  .hero{padding:3rem 1.5rem}
+  .results-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('landing')">Golf<span>Trip</span>AI</div>
+  <div class="nav-links">
+    <span class="nav-link" onclick="showPage('landing')">Home</span>
+    <span class="nav-link" onclick="showPage('quiz')">Plan a Trip</span>
+    <span class="nav-link" onclick="showPricing()">Pricing</span>
+    <button class="nav-btn" onclick="openAuth('login')" id="authNavBtn">Sign In</button>
+  </div>
+</nav>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="authModal">
+  <div class="modal modal-relative">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <h3 id="authTitle">Welcome back</h3>
+    <p id="authSub">Sign in to save and manage your golf trip plans.</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="loginTabBtn" onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" id="signupTabBtn" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+    <div id="authMsg"></div>
+    <button class="google-btn" onclick="handleGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider">or</div>
+    <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="your@email.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="authPassword" placeholder="••••••••"></div>
+    <div class="form-group" id="confirmGroup" style="display:none"><label>Confirm Password</label><input type="password" id="authConfirm" placeholder="••••••••"></div>
+    <button class="submit-btn" onclick="handleAuth()" id="authSubmitBtn">Sign In</button>
+    <p style="text-align:center;margin-top:0.8rem;font-size:0.8rem;color:var(--text-muted)"><a href="#" style="color:var(--green-light)" onclick="switchTab('reset')">Forgot password?</a></p>
+  </div>
+</div>
+
+<!-- LANDING PAGE -->
+<div class="page active" id="page-landing">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">✦ Golf Travel Planning</div>
+      <h1>Plan Your Perfect<br><em>Golf Holiday</em><br>in 60 Seconds</h1>
+      <p class="hero-sub">Personalised golf trips based on your budget, handicap and travel preferences. No agents, no waiting — just expert recommendations, instantly.</p>
+      <button class="hero-cta" onclick="showPage('quiz')">Build My Golf Trip →</button>
+      <div class="hero-trust">
+        <span class="hero-trust-item">⛳ 6 Destinations</span>
+        <span class="hero-trust-item">🏌 Expert Recommendations</span>
+        <span class="hero-trust-item">⚡ 60 Seconds</span>
+        <span class="hero-trust-item">🇬🇧 Built for UK Golfers</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-section">
+    <div class="section-center">
+      <div class="section-label">How it works</div>
+      <h2 class="section-title">Your ideal golf trip, planned instantly</h2>
+      <p class="section-sub">Tell us your preferences and we'll do the rest — researching destinations, courses, hotels and crafting a personalised itinerary.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Answer 8 questions</h3>
+          <p>Budget, handicap, travel dates, group size and your ideal trip style — takes under a minute.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⛳</div>
+          <h3>Get your full trip plan</h3>
+          <p>Destination, courses, hotels, restaurants, bars and a day-by-day itinerary — all in seconds.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏨</div>
+          <h3>Courses & accommodation</h3>
+          <p>Handpicked golf courses and hotels matched to your budget, handicap and style preferences.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✈</div>
+          <h3>Book with confidence</h3>
+          <p>Use your personalised plan to book directly with providers, knowing exactly what to expect.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="testimonials">
+    <div class="section-center">
+      <div class="section-label" style="color:var(--gold)">What golfers say</div>
+      <h2 class="section-title">Trusted by UK golf societies</h2>
+      <p class="section-sub">Golfers across the UK have planned their perfect trips with GolfTripAI.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Organised our society trip to Portugal in minutes. The recommendations were spot on — we ended up booking exactly what was suggested. Saved hours of research."</p>
+        <div class="testimonial-author">James T. — Golf Society Captain, Surrey</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"As a couple who love combining golf with relaxation, GolfTripAI found us the perfect Algarve resort we'd never have discovered otherwise. Incredible value."</p>
+        <div class="testimonial-author">Sarah & Mark H. — London</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Used it to plan a solo trip to Marrakech. The course recommendations and local tips were genuinely expert-level. Felt like having a personal travel consultant."</p>
+        <div class="testimonial-author">David C. — Manchester</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-section" id="faq">
+    <div class="section-center">
+      <div class="section-label">Questions answered</div>
+      <h2 class="section-title">Frequently asked questions</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How does GolfTripAI work? <span class="faq-chevron">▾</span></div>
+        <div class="faq-a">GolfTripAI analyses your preferences — budget, handicap, travel dates, group size and desired trip style — and generates a fully personalised golf holiday itinerary. It draws on extensive knowledge of golf destinations and resorts popular with UK travellers to provide recommendations that are genuinely useful and realistic.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Do I book my trip through GolfTripAI? <span class="faq-chevron">▾</span></div>
+        <div class="faq-a">Not at present. GolfTripAI is a planning and recommendation tool. We provide expert recommendations for destinations, courses, hotels and activities — you then book directly with the relevant providers. We're working on direct booking integrations for a future release.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How accurate are the recommendations? <span class="faq-chevron">▾</span></div>
+        <div class="faq-a">Recommendations are tailored to your specific budget, handicap and preferences, drawing on extensive knowledge of golf destinations popular with UK travellers. We recommend verifying specific pricing and availability directly with providers before booking.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I generate multiple trips? <span class="faq-chevron">▾</span></div>
+        <div class="faq-a">Free accounts include one trip generation. Our Premium plan (£9.99/month or £49/year) offers unlimited trip generations — ideal if you're planning multiple trips, comparing destinations or organising for a golf society.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pricing-section" id="pricing">
+    <div class="section-center">
+      <div class="section-label">Simple pricing</div>
+      <h2 class="section-title">Start planning for free</h2>
+      <p class="section-sub">One price for unlimited golf trip inspiration. Cancel anytime.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">£0</div>
+        <div class="pricing-period">forever</div>
+        <ul class="pricing-features">
+          <li>1 trip generation</li>
+          <li>Full itinerary results</li>
+          <li>Course & hotel recommendations</li>
+          <li>Cost estimates</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-free" onclick="showPage('quiz')">Start free</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-price">£9.99</div>
+        <div class="pricing-period">per month · or £49/year</div>
+        <ul class="pricing-features">
+          <li>Unlimited trip generations</li>
+          <li>Full itinerary results</li>
+          <li>Course & hotel recommendations</li>
+          <li>Cost estimates</li>
+          <li>Save & revisit trips</li>
+          <li>Priority generation</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-premium" onclick="openAuth('signup')">Get Premium</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>GolfTripAI</strong> — Plan your perfect golf holiday in 60 seconds. &nbsp;|&nbsp; Built for UK golfers.</p>
+    <p style="margin-top:0.5rem">© 2025 GolfTripAI. Recommendations only. Not a booking platform.</p>
+  </footer>
+</div>
+
+<!-- QUESTIONNAIRE PAGE -->
+<div class="page" id="page-quiz">
+  <div class="quiz-page">
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <h2>Build Your Golf Trip</h2>
+        <p>Answer a few questions and your personalised itinerary will be ready in seconds.</p>
+      </div>
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quizProgress" style="width:0%"></div></div>
+
+      <div class="quiz-card">
+        <div class="quiz-section-label">Travel Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Departure Airport</label>
+            <select id="q_airport" onchange="updateProgress()">
+              <option value="">Select airport...</option>
+              <optgroup label="London">
+                <option>London Heathrow (LHR)</option>
+                <option>London Gatwick (LGW)</option>
+                <option>London Stansted (STN)</option>
+                <option>London Luton (LTN)</option>
+                <option>London City (LCY)</option>
+                <option>London Southend (SEN)</option>
+              </optgroup>
+              <optgroup label="Midlands">
+                <option>Birmingham (BHX)</option>
+                <option>East Midlands (EMA)</option>
+                <option>Coventry (CVT)</option>
+              </optgroup>
+              <optgroup label="North West">
+                <option>Manchester (MAN)</option>
+                <option>Liverpool (LPL)</option>
+                <option>Blackpool (BLK)</option>
+              </optgroup>
+              <optgroup label="North East & Yorkshire">
+                <option>Leeds Bradford (LBA)</option>
+                <option>Newcastle (NCL)</option>
+                <option>Doncaster Sheffield (DSA)</option>
+                <option>Teesside (MME)</option>
+              </optgroup>
+              <optgroup label="Scotland">
+                <option>Edinburgh (EDI)</option>
+                <option>Glasgow (GLA)</option>
+                <option>Aberdeen (ABZ)</option>
+                <option>Inverness (INV)</option>
+              </optgroup>
+              <optgroup label="Wales">
+                <option>Cardiff (CWL)</option>
+              </optgroup>
+              <optgroup label="South West">
+                <option>Bristol (BRS)</option>
+                <option>Exeter (EXT)</option>
+                <option>Newquay (NQY)</option>
+              </optgroup>
+              <optgroup label="South & South East">
+                <option>Southampton (SOU)</option>
+                <option>Bournemouth (BOH)</option>
+              </optgroup>
+              <optgroup label="Northern Ireland">
+                <option>Belfast International (BFS)</option>
+                <option>Belfast City (BHD)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Number of Golfers</label>
+            <select id="q_golfers" onchange="updateProgress()">
+              <option value="">Select...</option>
+              <option>1 (Solo)</option>
+              <option>2 (Couple)</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5-8 (Small group)</option>
+              <option>9-16 (Society)</option>
+              <option>17+ (Large society)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- TRAVEL DATES WITH TOGGLE -->
+        <div class="form-group">
+          <label>Travel Dates</label>
+          <div class="date-toggle">
+            <button class="date-toggle-btn active" id="btnFlexible" onclick="setDateMode('flexible')">Flexible dates</button>
+            <button class="date-toggle-btn" id="btnSpecific" onclick="setDateMode('specific')">Specific dates</button>
+          </div>
+
+          <!-- Flexible mode -->
+          <div class="date-flexible" id="dateFlexible">
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.78rem;color:var(--text-muted)">Month / Period</label>
+                <select id="q_flex_month" onchange="updateProgress()">
+                  <option value="">Any time...</option>
+                  <option>January</option>
+                  <option>February</option>
+                  <option>March</option>
+                  <option>April</option>
+                  <option>May</option>
+                  <option>June</option>
+                  <option>July</option>
+                  <option>August</option>
+                  <option>September</option>
+                  <option>October</option>
+                  <option>November</option>
+                  <option>December</option>
+                  <option>Whenever's cheapest</option>
+                  <option>School holidays only</option>
+                  <option>Avoid school holidays</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.78rem;color:var(--text-muted)">Trip length</label>
+                <select id="q_flex_duration" onchange="updateProgress()">
+                  <option value="">Select length...</option>
+                  <option>Long weekend (3-4 nights)</option>
+                  <option>5 nights</option>
+                  <option>6 nights</option>
+                  <option>7 nights</option>
+                  <option>10 nights</option>
+                  <option>2 weeks</option>
+                  <option>Flexible</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specific mode -->
+          <div class="date-specific" id="dateSpecific">
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.78rem;color:var(--text-muted)">Departure date</label>
+                <input type="date" id="q_date_from" onchange="updateProgress()">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.78rem;color:var(--text-muted)">Return date</label>
+                <input type="date" id="q_date_to" onchange="updateProgress()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Budget Per Person</label>
+          <select id="q_budget" onchange="updateProgress()">
+            <option value="">Select budget...</option>
+            <option>Under £1,000</option>
+            <option>£1,000 – £1,500</option>
+            <option>£1,500 – £2,500</option>
+            <option>£2,500 – £4,000</option>
+            <option>£4,000+</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Your Handicap <span>(or approximate level)</span></label>
+          <select id="q_handicap" onchange="updateProgress()">
+            <option value="">Select...</option>
+            <option>0-5 (Scratch / Low)</option>
+            <option>6-12 (Mid handicapper)</option>
+            <option>13-20 (Mid-high)</option>
+            <option>21-28 (High handicapper)</option>
+            <option>Beginner / Social golfer</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-section-label">Destination & Style</div>
+        <div class="form-group">
+          <label>Preferred Destination</label>
+          <div class="chip-group" id="chips_dest">
+            <button class="chip" onclick="toggleChip(this,'dest')">🇪🇸 Spain</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇵🇹 Portugal</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇹🇷 Turkey</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇲🇦 Morocco</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇮🇪 Ireland</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇫🇷 France</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🇦🇪 Dubai</button>
+            <button class="chip" onclick="toggleChip(this,'dest')">🌍 Flexible</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Trip Style</label>
+          <div class="chip-group" id="chips_style">
+            <button class="chip" onclick="toggleChip(this,'style')">🏆 Championship courses</button>
+            <button class="chip" onclick="toggleChip(this,'style')">💎 Hidden gems</button>
+            <button class="chip" onclick="toggleChip(this,'style')">✨ Luxury</button>
+            <button class="chip" onclick="toggleChip(this,'style')">💰 Value for money</button>
+            <button class="chip" onclick="toggleChip(this,'style')">🎉 Golf & nightlife</button>
+            <button class="chip" onclick="toggleChip(this,'style')">🧘 Golf & relaxation</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Accommodation Preference</label>
+          <div class="chip-group" id="chips_accomm">
+            <button class="chip" onclick="toggleChip(this,'accomm')">🏨 Hotel</button>
+            <button class="chip" onclick="toggleChip(this,'accomm')">⛳ Golf resort</button>
+            <button class="chip" onclick="toggleChip(this,'accomm')">🏡 Villa</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Desired Weather</label>
+          <div class="chip-group" id="chips_weather">
+            <button class="chip" onclick="toggleChip(this,'weather')">🌤 Warm (18-24°C)</button>
+            <button class="chip" onclick="toggleChip(this,'weather')">☀ Hot (25°C+)</button>
+            <button class="chip" onclick="toggleChip(this,'weather')">🌍 No preference</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-section-label">Anything else?</div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Additional Notes <span>(optional)</span></label>
+          <textarea id="q_notes" placeholder="e.g. We prefer links-style courses, need walking-friendly terrain, celebrating a birthday, want to avoid very hilly courses..."></textarea>
+        </div>
+      </div>
+
+      <button class="generate-btn" onclick="generateTrip()" id="generateBtn">
+        <span id="generateBtnText">Plan My Golf Trip →</span>
+        <span class="spinner" id="generateSpinner" style="display:none"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS PAGE -->
+<div class="page" id="page-results">
+  <div id="resultsHero" class="results-hero">
+    <div class="results-badge">✦ Your personalised golf trip</div>
+    <h2 id="resultsTitle">Your Golf Trip Awaits</h2>
+    <p id="resultsSub">Curated based on your preferences</p>
+  </div>
+  <div class="results-content">
+    <div id="resultsLoading" class="loading-overlay" style="display:none">
+      <div class="spinner"></div>
+      <h3>Planning your perfect golf holiday...</h3>
+      <p>Researching destinations, courses and hotels for you.</p>
+      <div class="loading-steps">
+        <div class="loading-step active" id="ls1">Analysing your preferences</div>
+        <div class="loading-step" id="ls2">Researching destinations</div>
+        <div class="loading-step" id="ls3">Finding the best courses</div>
+        <div class="loading-step" id="ls4">Selecting hotels & restaurants</div>
+        <div class="loading-step" id="ls5">Crafting your itinerary</div>
+      </div>
+    </div>
+    <div id="resultsBody" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="page-admin">
+  <div class="admin-page">
+    <div id="adminLoginView">
+      <div class="admin-login">
+        <h3>Admin Access</h3>
+        <p>GolfTripAI internal dashboard</p>
+        <div class="form-group"><label>Email</label><input type="email" id="adminEmail" placeholder="admin@golftripai.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••"></div>
+        <button class="submit-btn" onclick="adminLogin()">Access Dashboard</button>
+      </div>
+    </div>
+    <div id="adminDashView" style="display:none">
+      <div class="admin-header">
+        <h2>Dashboard</h2>
+        <button class="btn-outline results-action-btn" style="flex:0;min-width:auto;padding:0.5rem 1rem;font-size:0.82rem" onclick="adminLogout()">Sign out</button>
+      </div>
+      <div class="admin-grid">
+        <div class="admin-stat"><div class="stat-val">247</div><div class="stat-lbl">Total Users</div></div>
+        <div class="admin-stat"><div class="stat-val">1,083</div><div class="stat-lbl">Trips Generated</div></div>
+        <div class="admin-stat"><div class="stat-val">38</div><div class="stat-lbl">Premium Subscribers</div></div>
+        <div class="admin-stat"><div class="stat-val">£384</div><div class="stat-lbl">MRR</div></div>
+      </div>
+      <div class="admin-tables">
+        <div class="admin-table-card">
+          <h4>Popular Destinations</h4>
+          <div class="admin-row"><span>Algarve, Portugal</span><span class="val">34%</span></div>
+          <div class="admin-row"><span>Costa del Sol, Spain</span><span class="val">28%</span></div>
+          <div class="admin-row"><span>Antalya, Turkey</span><span class="val">16%</span></div>
+          <div class="admin-row"><span>Marrakech, Morocco</span><span class="val">11%</span></div>
+          <div class="admin-row"><span>Kerry, Ireland</span><span class="val">7%</span></div>
+          <div class="admin-row"><span>Other</span><span class="val">4%</span></div>
+        </div>
+        <div class="admin-table-card">
+          <h4>Top Departure Airports</h4>
+          <div class="admin-row"><span>London Gatwick</span><span class="val">29%</span></div>
+          <div class="admin-row"><span>London Heathrow</span><span class="val">22%</span></div>
+          <div class="admin-row"><span>Manchester</span><span class="val">19%</span></div>
+          <div class="admin-row"><span>Birmingham</span><span class="val">14%</span></div>
+          <div class="admin-row"><span>Edinburgh</span><span class="val">9%</span></div>
+          <div class="admin-row"><span>Other</span><span class="val">7%</span></div>
+        </div>
+        <div class="admin-table-card">
+          <h4>Trip Styles</h4>
+          <div class="admin-row"><span>Golf & relaxation</span><span class="val">31%</span></div>
+          <div class="admin-row"><span>Value for money</span><span class="val">24%</span></div>
+          <div class="admin-row"><span>Luxury</span><span class="val">18%</span></div>
+          <div class="admin-row"><span>Championship courses</span><span class="val">15%</span></div>
+          <div class="admin-row"><span>Hidden gems</span><span class="val">8%</span></div>
+          <div class="admin-row"><span>Golf & nightlife</span><span class="val">4%</span></div>
+        </div>
+        <div class="admin-table-card">
+          <h4>Budget Distribution</h4>
+          <div class="admin-row"><span>£1,500 – £2,500</span><span class="val">38%</span></div>
+          <div class="admin-row"><span>£1,000 – £1,500</span><span class="val">27%</span></div>
+          <div class="admin-row"><span>£2,500 – £4,000</span><span class="val">21%</span></div>
+          <div class="admin-row"><span>£4,000+</span><span class="val">9%</span></div>
+          <div class="admin-row"><span>Under £1,000</span><span class="val">5%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const chipSelections = {dest:'',style:'',accomm:'',weather:''};
+let dateMode = 'flexible';
+
+// ─── NAVIGATION ───────────────────────────────────────────────
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showPricing(){
+  showPage('landing');
+  setTimeout(()=>document.getElementById('pricing').scrollIntoView({behavior:'smooth'}),50);
+}
+
+// ─── DATE MODE TOGGLE ─────────────────────────────────────────
+function setDateMode(mode){
+  dateMode = mode;
+  document.getElementById('btnFlexible').classList.toggle('active', mode==='flexible');
+  document.getElementById('btnSpecific').classList.toggle('active', mode==='specific');
+  document.getElementById('dateFlexible').classList.toggle('hide', mode==='specific');
+  document.getElementById('dateSpecific').classList.toggle('show', mode==='specific');
+  updateProgress();
+}
+
+// ─── QUESTIONNAIRE ────────────────────────────────────────────
+function toggleChip(el,group){
+  const grp=document.getElementById('chips_'+group);
+  grp.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  chipSelections[group]=el.textContent.trim();
+  updateProgress();
+}
+function updateProgress(){
+  const fields=['q_airport','q_golfers','q_budget','q_handicap'];
+  let filled=fields.filter(f=>document.getElementById(f).value).length;
+  let datesFilled = dateMode==='flexible'
+    ? (document.getElementById('q_flex_month').value ? 1 : 0)
+    : (document.getElementById('q_date_from').value ? 1 : 0);
+  let chips=Object.values(chipSelections).filter(v=>v).length;
+  let pct=Math.round((filled+datesFilled+chips)/(fields.length+1+4)*100);
+  document.getElementById('quizProgress').style.width=pct+'%';
+}
+
+function getTravelDates(){
+  if(dateMode==='specific'){
+    const from=document.getElementById('q_date_from').value;
+    const to=document.getElementById('q_date_to').value;
+    if(from&&to){
+      const d1=new Date(from), d2=new Date(to);
+      const nights=Math.round((d2-d1)/(1000*60*60*24));
+      return `${from} to ${to} (${nights} nights)`;
+    }
+    return from ? `Departing ${from}` : 'Flexible';
+  } else {
+    const month=document.getElementById('q_flex_month').value||'Flexible timing';
+    const dur=document.getElementById('q_flex_duration').value||'';
+    return dur ? `${month}, ${dur}` : month;
+  }
+}
+
+// ─── AUTH MODAL ───────────────────────────────────────────────
+function openAuth(tab){
+  document.getElementById('authModal').classList.remove('hidden');
+  switchTab(tab||'login');
+}
+function closeAuth(){
+  document.getElementById('authModal').classList.add('hidden');
+}
+function switchTab(tab){
+  const isLogin=tab==='login';
+  const isReset=tab==='reset';
+  document.getElementById('loginTabBtn').classList.toggle('active',isLogin);
+  document.getElementById('signupTabBtn').classList.toggle('active',!isLogin&&!isReset);
+  document.getElementById('confirmGroup').style.display=(!isLogin&&!isReset)?'block':'none';
+  document.getElementById('authTitle').textContent=isReset?'Reset password':isLogin?'Welcome back':'Create your account';
+  document.getElementById('authSub').textContent=isReset?'Enter your email and we\'ll send a reset link.':isLogin?'Sign in to save and manage your golf trips.':'Start planning your perfect golf holiday.';
+  document.getElementById('authSubmitBtn').textContent=isReset?'Send reset link':isLogin?'Sign In':'Create Account';
+  document.getElementById('authMsg').innerHTML='';
+  window._authTab=tab;
+}
+function handleGoogle(){
+  document.getElementById('authMsg').innerHTML='<div class="success-msg">Google sign-in will work once Supabase is connected.</div>';
+}
+function handleAuth(){
+  const email=document.getElementById('authEmail').value;
+  const pass=document.getElementById('authPassword').value;
+  if(!email||!pass){
+    document.getElementById('authMsg').innerHTML='<div class="error-msg">Please fill in all fields.</div>';
+    return;
+  }
+  document.getElementById('authMsg').innerHTML='<div class="success-msg">✓ '+((window._authTab||'login')==='signup'?'Account created! Welcome to GolfTripAI.':'Signed in successfully!')+'</div>';
+  setTimeout(()=>{closeAuth();document.getElementById('authNavBtn').textContent='My Trips';},1400);
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────
+function toggleFaq(el){el.classList.toggle('open');}
+
+// ─── TRIP GENERATION ──────────────────────────────────────────
+async function generateTrip(){
+  const airport=document.getElementById('q_airport').value;
+  const golfers=document.getElementById('q_golfers').value;
+  const budget=document.getElementById('q_budget').value;
+  const handicap=document.getElementById('q_handicap').value;
+  const notes=document.getElementById('q_notes').value;
+  const dates=getTravelDates();
+  const dest=chipSelections.dest||'Flexible';
+  const style=chipSelections.style||'Golf & relaxation';
+  const accomm=chipSelections.accomm||'Hotel';
+  const weather=chipSelections.weather||'Warm';
+
+  if(!airport||!budget||!handicap){
+    alert('Please fill in at least: departure airport, budget and handicap to plan your trip.');
+    return;
+  }
+
+  showPage('results');
+  document.getElementById('resultsLoading').style.display='block';
+  document.getElementById('resultsBody').style.display='none';
+
+  let si=0;
+  const stepInterval=setInterval(()=>{
+    if(si>0) document.getElementById('ls'+si).classList.remove('active');
+    si++;
+    if(si<=5) document.getElementById('ls'+si).classList.add('active');
+    else clearInterval(stepInterval);
+  },1800);
+
+  const prompt=`You are an expert golf travel consultant specialising in holidays for UK golfers. Generate a comprehensive, realistic golf holiday recommendation based on:
+
+- Departure airport: ${airport}
+- Travel dates: ${dates}
+- Budget per person: ${budget}
+- Number of golfers: ${golfers||'2'}
+- Handicap: ${handicap}
+- Preferred destination: ${dest}
+- Trip style: ${style}
+- Accommodation preference: ${accomm}
+- Desired weather: ${weather}
+- Additional notes: ${notes||'none'}
+
+Respond ONLY with valid JSON. No markdown, no backticks, no explanation before or after. Use exactly this structure:
+{
+  "destination": {
+    "name": "specific region e.g. Algarve, Portugal",
+    "tagline": "2 sentences explaining why this destination suits their budget, handicap and style"
+  },
+  "courses": [
+    {"name":"","location":"","description":"","difficulty":"Beginner/Intermediate/Challenging/Championship","why":"why this suits the golfer"}
+  ],
+  "hotels": [
+    {"name":"","area":"","description":"","why":""}
+  ],
+  "restaurants": [
+    {"name":"","type":"","description":""}
+  ],
+  "bars": [
+    {"name":"","type":"","description":""}
+  ],
+  "itinerary": [
+    {"day":1,"title":"Arrival","description":""},
+    {"day":2,"title":"Golf Day 1","description":""},
+    {"day":3,"title":"Golf Day 2","description":""},
+    {"day":4,"title":"Relax & Explore","description":""},
+    {"day":5,"title":"Departure","description":""}
+  ],
+  "costs": {
+    "flights": "e.g. £180-£280 pp return",
+    "accommodation": "e.g. £120-£180 pp/night",
+    "golf": "e.g. £60-£120 per round",
+    "food_drink": "e.g. £40-£70 per day",
+    "total": "e.g. £1,400-£2,200 pp for 5 nights"
+  }
+}
+
+Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real venues. Be specific and practical.`;
+
+  try{
+    const res=await fetch('/.netlify/functions/generate-trip',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+
+    if(!res.ok) throw new Error('Function returned '+res.status);
+
+    const data=await res.json();
+    clearInterval(stepInterval);
+
+    if(data.error) throw new Error(data.error);
+
+    let raw=data.result||'';
+    raw=raw.replace(/```json|```/g,'').trim();
+
+    let trip;
+    try{trip=JSON.parse(raw);}catch(e){
+      const match=raw.match(/\{[\s\S]*\}/);
+      if(match) trip=JSON.parse(match[0]);
+      else throw new Error('Could not parse response');
+    }
+
+    renderResults(trip,{airport,golfers,dates,budget,handicap,dest,style,accomm,weather});
+  }catch(err){
+    clearInterval(stepInterval);
+    document.getElementById('resultsLoading').style.display='none';
+    document.getElementById('resultsBody').style.display='block';
+    document.getElementById('resultsBody').innerHTML=`
+      <div class="result-section">
+        <div style="text-align:center;padding:2rem">
+          <div style="font-size:2rem;margin-bottom:1rem">⛳</div>
+          <h3 style="color:var(--green);margin-bottom:0.5rem">Unable to generate trip</h3>
+          <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:0.5rem">
+            Make sure the Netlify function is deployed and your GEMINI_API_KEY environment variable is set correctly.
+          </p>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1.5rem">Error: ${err.message}</p>
+          <button class="results-action-btn btn-primary" style="max-width:200px;margin:0 auto" onclick="showPage('quiz')">← Try Again</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ─── RENDER RESULTS ───────────────────────────────────────────
+function renderResults(trip,prefs){
+  const d=trip.destination||{};
+  const courses=trip.courses||[];
+  const hotels=trip.hotels||[];
+  const restaurants=trip.restaurants||[];
+  const bars=trip.bars||[];
+  const itin=trip.itinerary||[];
+  const costs=trip.costs||{};
+
+  document.getElementById('resultsTitle').textContent=d.name||'Your Golf Trip';
+  document.getElementById('resultsSub').textContent=
+    prefs.airport+' · '+(prefs.golfers||'2 golfers')+' · '+prefs.budget;
+
+  const coursesHTML=courses.map(c=>`
+    <div class="course-card">
+      <div class="course-name">${c.name}</div>
+      <div class="course-location">📍 ${c.location}</div>
+      <div class="course-desc">${c.description}</div>
+      <div class="course-tags">
+        <span class="course-tag">${c.difficulty}</span>
+        <span class="course-tag gold">★ Recommended</span>
+      </div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);font-style:italic">${c.why}</div>
+    </div>`).join('');
+
+  const hotelsHTML=hotels.map(h=>`
+    <div class="hotel-card">
+      <div class="hotel-name">${h.name}</div>
+      <div class="hotel-area">${h.area}</div>
+      <div class="hotel-desc">${h.description}</div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);font-style:italic">${h.why}</div>
+    </div>`).join('');
+
+  const restHTML=restaurants.map(r=>`
+    <div class="rec-item">
+      <div class="rec-emoji">🍽</div>
+      <div><div class="rec-name">${r.name}</div><div class="rec-detail">${r.type} · ${r.description}</div></div>
+    </div>`).join('');
+
+  const barsHTML=bars.map(b=>`
+    <div class="rec-item">
+      <div class="rec-emoji">🍹</div>
+      <div><div class="rec-name">${b.name}</div><div class="rec-detail">${b.type} · ${b.description}</div></div>
+    </div>`).join('');
+
+  const itinHTML=itin.map(day=>`
+    <div class="day-item">
+      <div class="day-num">${day.day}</div>
+      <div class="day-content">
+        <div class="day-title">Day ${day.day}: ${day.title}</div>
+        <div class="day-desc">${day.description}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('resultsLoading').style.display='none';
+  document.getElementById('resultsBody').innerHTML=`
+<div class="result-section">
+  <div class="result-section-header"><div class="result-section-icon">🗺</div><div class="result-section-title">Recommended Destination</div></div>
+  <div class="destination-highlight"><strong style="color:var(--green)">${d.name}</strong><br><br>${d.tagline}</div>
+</div>
+<div class="result-section">
+  <div class="result-section-header"><div class="result-section-icon">⛳</div><div class="result-section-title">Recommended Golf Courses</div></div>
+  <div class="courses-grid">${coursesHTML}</div>
+</div>
+<div class="result-section">
+  <div class="result-section-header"><div class="result-section-icon">🏨</div><div class="result-section-title">Recommended Accommodation</div></div>
+  <div class="hotels-grid">${hotelsHTML}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+  <div class="result-section">
+    <div class="result-section-header"><div class="result-section-icon">🍽</div><div class="result-section-title">Suggested Restaurants</div></div>
+    <div class="rec-list">${restHTML}</div>
+  </div>
+  <div class="result-section">
+    <div class="result-section-header"><div class="result-section-icon">🍹</div><div class="result-section-title">Suggested Bars</div></div>
+    <div class="rec-list">${barsHTML}</div>
+  </div>
+</div>
+<div class="result-section">
+  <div class="result-section-header"><div class="result-section-icon">📅</div><div class="result-section-title">Sample 5-Day Itinerary</div></div>
+  <div class="itinerary-days">${itinHTML}</div>
+</div>
+<div class="result-section">
+  <div class="result-section-header"><div class="result-section-icon">💷</div><div class="result-section-title">Estimated Costs Per Person</div></div>
+  <div class="cost-grid">
+    <div class="cost-item"><div class="cost-label">Flights</div><div class="cost-value" style="font-size:1rem">${costs.flights||'—'}</div></div>
+    <div class="cost-item"><div class="cost-label">Accommodation</div><div class="cost-value" style="font-size:1rem">${costs.accommodation||'—'}</div></div>
+    <div class="cost-item"><div class="cost-label">Golf</div><div class="cost-value" style="font-size:1rem">${costs.golf||'—'}</div></div>
+    <div class="cost-item"><div class="cost-label">Food & Drink</div><div class="cost-value" style="font-size:1rem">${costs.food_drink||'—'}</div></div>
+  </div>
+  <div class="cost-total">
+    <div class="cost-label">Total Estimate</div>
+    <div class="cost-value">${costs.total||'—'}</div>
+  </div>
+</div>
+<div class="future-banner">
+  <h4>🚀 Coming soon to GolfTripAI</h4>
+  <p>We're building direct integrations to make booking seamless.</p>
+  <div class="future-pills">
+    <span class="future-pill">✈ Live flight prices</span>
+    <span class="future-pill">🏨 Live hotel pricing</span>
+    <span class="future-pill">⛳ Course booking</span>
+    <span class="future-pill">👥 Society planning</span>
+    <span class="future-pill">🔗 Share your trip</span>
+    <span class="future-pill">💳 Affiliate booking</span>
+  </div>
+</div>
+<div class="results-actions">
+  <button class="results-action-btn btn-primary" onclick="showPage('quiz')">← Plan Another Trip</button>
+  <button class="results-action-btn btn-outline" onclick="openAuth('signup')">Save This Trip</button>
+  <button class="results-action-btn btn-outline" onclick="window.print()">🖨 Print / PDF</button>
+</div>`;
+  document.getElementById('resultsBody').style.display='block';
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────
+function adminLogin(){
+  const e=document.getElementById('adminEmail').value;
+  const p=document.getElementById('adminPass').value;
+  if(e==='admin@golftripai.com'&&p==='admin123'){
+    document.getElementById('adminLoginView').style.display='none';
+    document.getElementById('adminDashView').style.display='block';
+  }else{
+    alert('Demo credentials: admin@golftripai.com / admin123');
+  }
+}
+function adminLogout(){
+  document.getElementById('adminLoginView').style.display='block';
+  document.getElementById('adminDashView').style.display='none';
+}
+
+if(window.location.hash==='#admin') showPage('admin');
+if(window.location.hash==='#pricing') showPricing();
+</script>
+</body>
+</html>
