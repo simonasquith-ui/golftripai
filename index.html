@@ -569,7 +569,7 @@ textarea{resize:vertical;min-height:80px}
 const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
 
-let supabase = null;
+let sbClient = null;
 let currentUser = null;
 const chipSelections = {dest:'',style:'',accomm:'',weather:''};
 let dateMode = 'flexible';
@@ -578,8 +578,8 @@ let dateMode = 'flexible';
 try {
   const sb = window.supabase || window.supabaseJs;
   if (sb && sb.createClient) {
-    supabase = sb.createClient(SUPABASE_URL, SUPABASE_KEY);
-    supabase.auth.onAuthStateChange((event, session) => {
+    sbClient = sb.createClient(SUPABASE_URL, SUPABASE_KEY);
+    sbClient.auth.onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       updateNavAuth();
     });
@@ -590,9 +590,9 @@ try {
 }
 
 async function updateNavAuth() {
-  if (!supabase) return;
+  if (!sbClient) return;
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await sbClient.auth.getUser();
     currentUser = user;
     if (user) {
       document.getElementById('authNavBtn').style.display = 'none';
@@ -678,13 +678,13 @@ function switchTab(tab) {
 }
 
 async function handleGoogle() {
-  if (!supabase) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth not available. Please try email sign in.</div>'; return; }
-  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+  if (!sbClient) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth not available. Please try email sign in.</div>'; return; }
+  const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google' });
   if (error) document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + error.message + '</div>';
 }
 
 async function handleAuth() {
-  if (!supabase) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth service unavailable. Please try again shortly.</div>'; return; }
+  if (!sbClient) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth service unavailable. Please try again shortly.</div>'; return; }
   const email = document.getElementById('authEmail').value;
   const pass = document.getElementById('authPassword').value;
   if (!email || !pass) {
@@ -695,7 +695,7 @@ async function handleAuth() {
   const tab = window._authTab || 'login';
   let result;
   if (tab === 'reset') {
-    result = await supabase.auth.resetPasswordForEmail(email);
+    result = await sbClient.auth.resetPasswordForEmail(email);
     if (result.error) {
       document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + result.error.message + '</div>';
     } else {
@@ -705,9 +705,9 @@ async function handleAuth() {
     return;
   }
   if (tab === 'signup') {
-    result = await supabase.auth.signUp({ email, password: pass });
+    result = await sbClient.auth.signUp({ email, password: pass });
   } else {
-    result = await supabase.auth.signInWithPassword({ email, password: pass });
+    result = await sbClient.auth.signInWithPassword({ email, password: pass });
   }
   if (result.error) {
     document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + result.error.message + '</div>';
@@ -799,8 +799,8 @@ Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real ven
     }
 
     // Save to Supabase if logged in
-    if (supabase && currentUser) {
-      const { data: reqData } = await supabase.from('trip_requests').insert({
+    if (sbClient && currentUser) {
+      const { data: reqData } = await sbClient.from('trip_requests').insert({
         user_id: currentUser.id,
         departure_airport: airport,
         travel_dates: dates,
@@ -814,7 +814,7 @@ Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real ven
         notes
       }).select().single();
       if (reqData) {
-        await supabase.from('trip_results').insert({
+        await sbClient.from('trip_results').insert({
           trip_request_id: reqData.id,
           ai_response: trip
         });
