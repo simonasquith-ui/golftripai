@@ -16,8 +16,19 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { prompt } = JSON.parse(event.body)
     const apiKey = process.env.GEMINI_API_KEY
+
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'GEMINI_API_KEY environment variable is not set' })
+      }
+    }
+
+    const { prompt } = JSON.parse(event.body)
+
+    console.log('Calling Gemini API...')
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -36,8 +47,27 @@ exports.handler = async (event) => {
 
     const data = await response.json()
 
+    console.log('Gemini response status:', response.status)
+    console.log('Gemini response:', JSON.stringify(data).substring(0, 500))
+
+    if (!response.ok) {
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ 
+          error: 'Gemini API error: ' + (data.error?.message || response.status)
+        })
+      }
+    }
+
     if (!data.candidates || !data.candidates[0]) {
-      throw new Error('No response from Gemini')
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ 
+          error: 'No candidates in Gemini response: ' + JSON.stringify(data)
+        })
+      }
     }
 
     const result = data.candidates[0].content.parts[0].text
@@ -50,7 +80,9 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({ result })
     }
+
   } catch (err) {
+    console.log('Function error:', err.message)
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
