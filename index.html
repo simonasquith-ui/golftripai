@@ -15,6 +15,7 @@
   --white:#f7f4ee;--off-white:#faf8f3;
   --charcoal:#1c1c1c;--text-muted:#6b7b6e;
   --card-shadow:0 4px 24px rgba(26,58,42,0.10);
+  --budget-color:#4a8c5c;--mid-color:#c9a84c;--luxury-color:#8b5e3c;
 }
 body{font-family:'Inter',sans-serif;background:var(--white);color:var(--charcoal);min-height:100vh}
 h1,h2,h3,h4{font-family:'Playfair Display',serif}
@@ -28,6 +29,8 @@ nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justi
 .nav-btn:hover{background:var(--sand)}
 .page{display:none;min-height:calc(100vh - 64px)}
 .page.active{display:block}
+
+/* HERO */
 .hero{background:var(--green);min-height:88vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,0.015) 40px,rgba(255,255,255,0.015) 41px);pointer-events:none}
 .hero-inner{max-width:720px;position:relative;z-index:1}
@@ -39,7 +42,9 @@ nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justi
 .hero-cta:hover{background:var(--sand);transform:translateY(-2px)}
 .hero-trust{margin-top:2.5rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
 .hero-trust-item{color:var(--sand-light);font-size:0.82rem;opacity:0.75}
-.features-section{background:var(--off-white);padding:5rem 2rem}
+
+/* SECTIONS */
+.features-section,.faq-section{background:var(--off-white);padding:5rem 2rem}
 .section-center{max-width:900px;margin:0 auto;text-align:center}
 .section-label{font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--green-light);margin-bottom:0.8rem}
 .section-title{font-size:2rem;color:var(--green);margin-bottom:1rem}
@@ -57,7 +62,6 @@ nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justi
 .testimonial-text{color:var(--sand-light);font-size:0.9rem;line-height:1.7;margin-bottom:1rem;font-style:italic}
 .testimonial-author{color:var(--gold);font-size:0.82rem;font-weight:600}
 .testimonial-stars{color:var(--gold);font-size:0.85rem;margin-bottom:0.5rem}
-.faq-section{background:var(--off-white);padding:5rem 2rem}
 .faq-list{max-width:680px;margin:2rem auto 0}
 .faq-item{border-bottom:1px solid var(--sand-dark);padding:1.2rem 0}
 .faq-q{font-weight:600;color:var(--green);font-size:0.95rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
@@ -65,30 +69,42 @@ nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justi
 .faq-item.open .faq-a{display:block}
 .faq-item.open .faq-chevron{transform:rotate(180deg)}
 .faq-chevron{transition:transform 0.2s;color:var(--gold)}
+
+/* PRICING */
 .pricing-section{background:var(--white);padding:5rem 2rem}
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:700px;margin:2rem auto 0}
-.pricing-card{border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;text-align:center}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;max-width:1000px;margin:2rem auto 0}
+.pricing-card{border:1px solid var(--sand-dark);border-radius:16px;padding:1.75rem;position:relative}
 .pricing-card.featured{border:2px solid var(--gold);background:var(--green)}
-.pricing-tier{font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem}
+.pricing-card.society{border:2px solid var(--green-light)}
+.pricing-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--green);font-size:0.72rem;font-weight:700;padding:0.25rem 0.9rem;border-radius:20px;white-space:nowrap}
+.pricing-tier{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.4rem}
 .pricing-card.featured .pricing-tier{color:var(--gold)}
-.pricing-price{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--green);font-weight:700;line-height:1}
+.pricing-card.society .pricing-tier{color:var(--green-light)}
+.pricing-price{font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--green);font-weight:700;line-height:1}
 .pricing-card.featured .pricing-price{color:var(--sand)}
-.pricing-period{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem}
+.pricing-period{font-size:0.82rem;color:var(--text-muted);margin-bottom:1.2rem}
 .pricing-card.featured .pricing-period{color:rgba(232,213,176,0.7)}
 .pricing-features{list-style:none;text-align:left;margin-bottom:1.5rem}
-.pricing-features li{font-size:0.88rem;color:var(--text-muted);padding:0.35rem 0;display:flex;gap:0.5rem;align-items:center}
+.pricing-features li{font-size:0.84rem;color:var(--text-muted);padding:0.3rem 0;display:flex;gap:0.5rem;align-items:flex-start;line-height:1.4}
 .pricing-card.featured .pricing-features li{color:var(--sand-light)}
-.pricing-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
-.pricing-btn{width:100%;padding:0.75rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all 0.2s}
+.pricing-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:0.05rem}
+.pricing-features li.section-head{font-weight:600;color:var(--green);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.6rem;padding-bottom:0.1rem;border-bottom:1px solid var(--sand-dark)}
+.pricing-card.featured .pricing-features li.section-head{color:var(--gold);border-color:rgba(201,168,76,0.3)}
+.pricing-features li.section-head::before{content:''}
+.pricing-btn{width:100%;padding:0.75rem;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all 0.2s}
 .pricing-btn-free{background:transparent;border:1px solid var(--sand-dark);color:var(--green)}
 .pricing-btn-free:hover{background:var(--sand-light)}
-.pricing-btn-premium{background:var(--gold);color:var(--green)}
-.pricing-btn-premium:hover{background:var(--sand)}
+.pricing-btn-pro{background:var(--gold);color:var(--green)}
+.pricing-btn-pro:hover{background:var(--sand)}
+.pricing-btn-society{background:var(--green);color:var(--sand)}
+.pricing-btn-society:hover{background:var(--green-mid)}
 footer{background:var(--charcoal);padding:2rem;text-align:center}
 footer p{color:rgba(255,255,255,0.4);font-size:0.82rem}
 footer strong{color:var(--gold)}
+
+/* QUESTIONNAIRE */
 .quiz-page{background:var(--off-white);padding:3rem 1.5rem;min-height:calc(100vh - 64px)}
-.quiz-container{max-width:680px;margin:0 auto}
+.quiz-container{max-width:720px;margin:0 auto}
 .quiz-header{text-align:center;margin-bottom:2.5rem}
 .quiz-header h2{font-size:2rem;color:var(--green);margin-bottom:0.5rem}
 .quiz-header p{color:var(--text-muted);font-size:0.95rem}
@@ -119,23 +135,68 @@ textarea{resize:vertical;min-height:80px}
 .date-specific{display:none}
 .date-specific.show{display:block}
 .date-flexible.hide{display:none}
-.results-page{background:var(--off-white);min-height:calc(100vh - 64px)}
-.results-hero{background:var(--green);padding:2.5rem 2rem;text-align:center}
-.results-hero h2{font-size:1.9rem;color:var(--sand);margin-bottom:0.4rem}
-.results-hero p{color:rgba(232,213,176,0.75);font-size:0.9rem}
-.results-badge{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(201,168,76,0.2);border:1px solid rgba(201,168,76,0.5);color:var(--gold);font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:0.35rem 0.9rem;border-radius:20px;margin-bottom:1rem}
-.results-content{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem}
+.airport-group{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:1rem;margin-bottom:0.8rem;position:relative}
+.airport-group-label{font-size:0.75rem;font-weight:600;color:var(--green-light);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem}
+.airport-remove{position:absolute;top:0.8rem;right:0.8rem;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem;border-radius:4px}
+.airport-remove:hover{background:rgba(220,53,69,0.1);color:#c0392b}
+.add-airport-btn{width:100%;padding:0.65rem;border:1px dashed var(--sand-dark);border-radius:8px;background:transparent;color:var(--green-light);font-size:0.85rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;margin-top:0.4rem}
+.add-airport-btn:hover{border-color:var(--green-light);background:var(--sand-light)}
+
+/* COMPARE TABS */
+.compare-header{background:var(--green);padding:2rem 2rem 0;text-align:center}
+.compare-header h2{font-size:1.9rem;color:var(--sand);margin-bottom:0.4rem}
+.compare-header p{color:rgba(232,213,176,0.75);font-size:0.9rem;margin-bottom:1.5rem}
+.compare-tabs{display:flex;max-width:600px;margin:0 auto;gap:0.5rem;padding-bottom:0}
+.compare-tab{flex:1;padding:0.8rem 1rem;border:none;border-radius:10px 10px 0 0;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;position:relative}
+.compare-tab.budget{background:rgba(74,140,92,0.25);color:var(--sand-light)}
+.compare-tab.mid{background:rgba(201,168,76,0.25);color:var(--sand-light)}
+.compare-tab.luxury{background:rgba(139,94,60,0.25);color:var(--sand-light)}
+.compare-tab.active.budget{background:#4a8c5c;color:white}
+.compare-tab.active.mid{background:var(--gold);color:var(--green)}
+.compare-tab.active.luxury{background:#8b5e3c;color:white}
+.compare-tab-icon{display:block;font-size:1.2rem;margin-bottom:0.2rem}
+.compare-content{background:var(--off-white);min-height:calc(100vh - 200px)}
+.compare-panel{display:none;padding:2rem 1.5rem;max-width:860px;margin:0 auto}
+.compare-panel.active{display:block}
+.tier-banner{border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.tier-banner.budget{background:rgba(74,140,92,0.1);border:1px solid rgba(74,140,92,0.3)}
+.tier-banner.mid{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4)}
+.tier-banner.luxury{background:rgba(139,94,60,0.1);border:1px solid rgba(139,94,60,0.3)}
+.tier-banner-icon{font-size:2rem;flex-shrink:0}
+.tier-banner-title{font-size:1rem;font-weight:700;margin-bottom:0.2rem}
+.tier-banner.budget .tier-banner-title{color:var(--budget-color)}
+.tier-banner.mid .tier-banner-title{color:var(--gold-dark)}
+.tier-banner.luxury .tier-banner-title{color:var(--luxury-color)}
+.tier-banner-desc{font-size:0.83rem;color:var(--text-muted)}
+
+/* COMPARE BAR (sticky summary) */
+.compare-bar{background:var(--green);padding:0.8rem 2rem;display:flex;gap:1rem;justify-content:center;align-items:center;flex-wrap:wrap;position:sticky;top:64px;z-index:90;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.compare-bar-item{display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.4rem 0.8rem;border-radius:6px;transition:background 0.2s}
+.compare-bar-item:hover{background:rgba(255,255,255,0.1)}
+.compare-bar-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.compare-bar-dot.budget{background:#4a8c5c}
+.compare-bar-dot.mid{background:var(--gold)}
+.compare-bar-dot.luxury{background:#c9825a}
+.compare-bar-label{color:var(--sand-light);font-size:0.82rem;font-weight:500}
+.compare-bar-price{color:var(--gold);font-size:0.82rem;font-weight:700}
+.compare-bar-divider{color:rgba(255,255,255,0.2);font-size:1rem}
+
+/* RESULT SECTIONS */
 .result-section{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
 .result-section-header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.2rem}
 .result-section-icon{font-size:1.3rem;width:2.5rem;height:2.5rem;background:rgba(26,58,42,0.07);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .result-section-title{font-size:1.15rem;color:var(--green);font-family:'Playfair Display',serif}
 .destination-highlight{background:rgba(26,58,42,0.04);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:1rem 1.2rem;font-size:0.92rem;line-height:1.7;color:var(--charcoal)}
-.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
 .course-card{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:1.1rem}
 .course-name{font-weight:700;font-size:0.92rem;color:var(--green);margin-bottom:0.2rem}
 .course-location{font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem}
-.course-desc{font-size:0.82rem;color:var(--charcoal);line-height:1.55;margin-bottom:0.5rem}
-.course-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.6rem}
+.course-desc{font-size:0.82rem;color:var(--charcoal);line-height:1.55;margin-bottom:0.6rem}
+.course-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.6rem}
+.course-stat{background:var(--white);border:1px solid var(--sand-dark);border-radius:6px;padding:0.4rem 0.6rem;text-align:center}
+.course-stat-label{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em}
+.course-stat-value{font-size:0.85rem;font-weight:600;color:var(--green)}
+.course-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem}
 .course-tag{font-size:0.72rem;padding:0.2rem 0.55rem;border-radius:20px;background:rgba(26,58,42,0.08);color:var(--green-mid);font-weight:500}
 .course-tag.gold{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
 .hotels-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
@@ -145,7 +206,6 @@ textarea{resize:vertical;min-height:80px}
 .hotel-desc{font-size:0.82rem;color:var(--charcoal);line-height:1.55;margin-bottom:0.6rem}
 .rec-list{display:flex;flex-direction:column;gap:0.8rem}
 .rec-item{display:flex;gap:0.8rem;align-items:flex-start;padding:0.8rem;background:var(--off-white);border-radius:8px;border:1px solid var(--sand-dark)}
-.rec-emoji{font-size:1.1rem;flex-shrink:0;margin-top:0.1rem}
 .rec-name{font-weight:600;font-size:0.88rem;color:var(--green)}
 .rec-detail{font-size:0.81rem;color:var(--text-muted);line-height:1.5}
 .itinerary-days{display:flex;flex-direction:column;gap:0.8rem}
@@ -154,25 +214,22 @@ textarea{resize:vertical;min-height:80px}
 .day-content{flex:1;padding-top:0.2rem}
 .day-title{font-weight:600;font-size:0.9rem;color:var(--green);margin-bottom:0.2rem}
 .day-desc{font-size:0.83rem;color:var(--charcoal);line-height:1.55}
-.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.8rem;margin-bottom:1rem}
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.8rem;margin-bottom:1rem}
 .cost-item{text-align:center;background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:0.9rem}
-.cost-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
-.cost-value{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green);font-weight:700}
+.cost-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+.cost-value{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green);font-weight:700}
 .cost-total{background:var(--green);border-radius:10px;padding:1rem;text-align:center}
 .cost-total .cost-label{color:rgba(232,213,176,0.7)}
 .cost-total .cost-value{color:var(--gold);font-size:1.8rem}
 .results-actions{display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap}
-.results-action-btn{flex:1;min-width:160px;padding:0.8rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:0.4rem}
+.results-action-btn{flex:1;min-width:140px;padding:0.8rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:0.4rem}
 .btn-primary{background:var(--green);color:var(--sand);border:none}
 .btn-primary:hover{background:var(--green-mid)}
 .btn-outline{background:transparent;color:var(--green);border:1px solid var(--sand-dark)}
 .btn-outline:hover{background:var(--sand-light)}
-
-/* AFFILIATE BOOKING SECTION */
 .booking-section{background:var(--sand-light);border:1px solid var(--sand-dark);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem}
-.booking-section-title{font-size:1.1rem;color:var(--green);font-family:'Playfair Display',serif;margin-bottom:0.4rem}
 .booking-section-sub{font-size:0.83rem;color:var(--text-muted);margin-bottom:1.2rem}
-.booking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem}
+.booking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.8rem}
 .booking-card{background:var(--white);border:1px solid var(--sand-dark);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;transition:all 0.2s;display:block}
 .booking-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--card-shadow)}
 .booking-card-icon{font-size:1.6rem;margin-bottom:0.4rem}
@@ -180,10 +237,35 @@ textarea{resize:vertical;min-height:80px}
 .booking-card-desc{font-size:0.75rem;color:var(--text-muted)}
 .booking-card-cta{display:inline-block;margin-top:0.6rem;background:var(--gold);color:var(--green);font-size:0.75rem;font-weight:700;padding:0.3rem 0.8rem;border-radius:20px}
 
+/* FREE TIER WATERMARK */
+.watermark-banner{background:rgba(201,168,76,0.12);border:1px solid var(--gold);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;text-align:center}
+.watermark-banner h4{color:var(--gold-dark);font-size:0.9rem;font-family:'Inter',sans-serif;font-weight:700;margin-bottom:0.3rem}
+.watermark-banner p{color:var(--text-muted);font-size:0.82rem;margin-bottom:0.8rem}
+.watermark-upgrade-btn{background:var(--gold);color:var(--green);border:none;padding:0.55rem 1.4rem;border-radius:6px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* LOADING */
+.loading-overlay{text-align:center;padding:5rem 2rem}
+.loading-overlay .spinner{width:48px;height:48px;border-width:3px;margin:0 auto 1.5rem}
+.loading-overlay h3{color:var(--green);font-size:1.3rem;margin-bottom:0.5rem}
+.loading-overlay p{color:var(--text-muted);font-size:0.88rem}
+.loading-steps{display:flex;flex-direction:column;gap:0.5rem;margin-top:1.5rem;text-align:left;max-width:300px;margin-left:auto;margin-right:auto}
+.loading-step{font-size:0.82rem;padding:0.4rem 0.8rem;border-radius:6px;background:rgba(26,58,42,0.04);color:var(--text-muted)}
+.loading-step.active{background:rgba(26,58,42,0.08);color:var(--green);font-weight:500}
+.loading-step::before{content:'○';font-size:0.7rem;margin-right:0.4rem}
+.loading-step.active::before{content:'●';color:var(--gold)}
+.loading-tiers{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.loading-tier{padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600}
+.loading-tier.budget{background:rgba(74,140,92,0.15);color:var(--budget-color)}
+.loading-tier.mid{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
+.loading-tier.luxury{background:rgba(139,94,60,0.15);color:var(--luxury-color)}
+.loading-tier.done{opacity:0.5}
+.loading-tier.active{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
 /* AUTH MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.hidden{display:none}
-.modal{background:var(--white);border-radius:16px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative}
+.modal{background:var(--white);border-radius:16px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;max-height:90vh;overflow-y:auto}
 .modal h3{font-size:1.4rem;color:var(--green);margin-bottom:0.4rem}
 .modal p{font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem}
 .modal-tabs{display:flex;border:1px solid var(--sand-dark);border-radius:8px;overflow:hidden;margin-bottom:1.5rem}
@@ -198,7 +280,132 @@ textarea{resize:vertical;min-height:80px}
 .submit-btn:hover{background:var(--green-mid)}
 .error-msg{background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.2);color:#c0392b;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.82rem;margin-bottom:1rem}
 .success-msg{background:rgba(40,167,69,0.08);border:1px solid rgba(40,167,69,0.2);color:#1e7e34;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.82rem;margin-bottom:1rem}
-.user-greeting{color:var(--sand);font-size:0.85rem;font-weight:500}
+.user-greeting{color:var(--sand);font-size:0.85rem;font-weight:500;cursor:pointer}
+.user-greeting:hover{color:var(--gold)}
+
+/* PROFILE PAGE */
+.profile-page{background:var(--off-white);padding:3rem 1.5rem;min-height:calc(100vh - 64px)}
+.profile-container{max-width:720px;margin:0 auto}
+.profile-header{display:flex;align-items:center;gap:1.5rem;background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);flex-shrink:0}
+.profile-info h2{font-size:1.4rem;color:var(--green);margin-bottom:0.2rem}
+.profile-info p{font-size:0.88rem;color:var(--text-muted)}
+.profile-section{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
+.profile-section-title{font-size:1rem;color:var(--green);font-weight:600;margin-bottom:1.2rem}
+.saved-trip-card{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:10px;padding:1.1rem;margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.saved-trip-card:last-child{margin-bottom:0}
+.saved-trip-dest{font-weight:700;font-size:0.92rem;color:var(--green);margin-bottom:0.2rem}
+.saved-trip-meta{font-size:0.78rem;color:var(--text-muted)}
+.saved-trip-tier{display:inline-block;font-size:0.7rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:20px;margin-left:0.4rem}
+.saved-trip-tier.budget{background:rgba(74,140,92,0.15);color:var(--budget-color)}
+.saved-trip-tier.mid{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
+.saved-trip-tier.luxury{background:rgba(139,94,60,0.15);color:var(--luxury-color)}
+.trip-action-btn{padding:0.4rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;border:none;transition:all 0.2s}
+.trip-delete-btn{background:transparent;border:1px solid var(--sand-dark);color:var(--text-muted)}
+.trip-delete-btn:hover{background:rgba(220,53,69,0.08);color:#c0392b;border-color:#c0392b}
+.empty-trips{text-align:center;padding:2rem;color:var(--text-muted);font-size:0.88rem}
+.profile-form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:560px){.profile-form-row{grid-template-columns:1fr}}
+.profile-save-btn{padding:0.7rem 1.5rem;background:var(--green);color:var(--sand);border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+.profile-save-btn:hover{background:var(--green-mid)}
+.signout-btn{padding:0.7rem 1.5rem;background:transparent;color:#c0392b;border:1px solid #c0392b;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+.signout-btn:hover{background:rgba(220,53,69,0.08)}
+
+
+/* TRIP DETAIL - GROUP & CHAT */
+.trip-detail-page{background:var(--off-white);padding:2rem 1.5rem;min-height:calc(100vh - 64px)}
+.trip-detail-container{max-width:860px;margin:0 auto}
+.trip-detail-header{background:var(--green);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem}
+.trip-detail-title{font-size:1.5rem;color:var(--sand);margin-bottom:0.3rem}
+.trip-detail-meta{font-size:0.85rem;color:rgba(232,213,176,0.7)}
+.trip-detail-back{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--sand);padding:0.5rem 1rem;border-radius:8px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+.trip-detail-back:hover{background:rgba(255,255,255,0.2)}
+.trip-detail-grid{display:grid;grid-template-columns:1fr 340px;gap:1.5rem}
+@media(max-width:720px){.trip-detail-grid{grid-template-columns:1fr}}
+.trip-detail-section{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
+.trip-detail-section-title{font-size:0.88rem;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem}
+
+/* MEMBERS */
+.member-list{display:flex;flex-direction:column;gap:0.7rem}
+.member-item{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 0.9rem;background:var(--off-white);border-radius:8px;border:1px solid var(--sand-dark)}
+.member-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:var(--gold);flex-shrink:0}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:0.88rem;font-weight:600;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-email{font-size:0.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-status{font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:20px;flex-shrink:0}
+.member-status.owner{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
+.member-status.confirmed{background:rgba(74,140,92,0.15);color:var(--budget-color)}
+.member-status.invited{background:rgba(107,123,110,0.12);color:var(--text-muted)}
+.member-status.maybe{background:rgba(201,168,76,0.12);color:var(--gold-dark)}
+.invite-form{display:flex;gap:0.6rem;margin-top:1rem}
+.invite-form input{flex:1;padding:0.6rem 0.8rem;border:1px solid var(--sand-dark);border-radius:8px;font-size:0.85rem;font-family:'Inter',sans-serif;background:var(--off-white);outline:none}
+.invite-form input:focus{border-color:var(--green-light);background:var(--white)}
+.invite-btn{padding:0.6rem 1rem;background:var(--green);color:var(--sand);border:none;border-radius:8px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:background 0.2s}
+.invite-btn:hover{background:var(--green-mid)}
+.invite-link-box{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:8px;padding:0.8rem;margin-top:0.8rem}
+.invite-link-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;font-weight:500}
+.invite-link-row{display:flex;gap:0.5rem;align-items:center}
+.invite-link-url{font-size:0.75rem;color:var(--green-light);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace}
+.copy-link-btn{padding:0.35rem 0.7rem;background:var(--gold);color:var(--green);border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0}
+
+/* CHAT */
+.chat-container{display:flex;flex-direction:column;height:420px}
+.chat-messages{flex:1;overflow-y:auto;padding:0.5rem 0;display:flex;flex-direction:column;gap:0.6rem;margin-bottom:0.8rem}
+.chat-msg{display:flex;gap:0.6rem;align-items:flex-start}
+.chat-msg.mine{flex-direction:row-reverse}
+.chat-avatar{width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:0.1rem}
+.chat-msg.mine .chat-avatar{background:var(--gold);color:var(--green)}
+.chat-bubble{background:var(--off-white);border:1px solid var(--sand-dark);border-radius:12px;padding:0.6rem 0.9rem;max-width:85%}
+.chat-msg.mine .chat-bubble{background:var(--green);border-color:var(--green)}
+.chat-bubble-name{font-size:0.7rem;font-weight:600;color:var(--green-light);margin-bottom:0.2rem}
+.chat-msg.mine .chat-bubble-name{color:var(--gold);text-align:right}
+.chat-bubble-text{font-size:0.85rem;color:var(--charcoal);line-height:1.5}
+.chat-msg.mine .chat-bubble-text{color:var(--sand-light)}
+.chat-bubble-time{font-size:0.68rem;color:var(--text-muted);margin-top:0.2rem}
+.chat-msg.mine .chat-bubble-time{text-align:right;color:rgba(232,213,176,0.6)}
+.chat-empty{text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;flex:1;display:flex;align-items:center;justify-content:center}
+.chat-input-row{display:flex;gap:0.5rem}
+.chat-input{flex:1;padding:0.65rem 0.9rem;border:1px solid var(--sand-dark);border-radius:8px;font-size:0.88rem;font-family:'Inter',sans-serif;background:var(--off-white);outline:none;resize:none}
+.chat-input:focus{border-color:var(--green-light);background:var(--white)}
+.chat-send-btn{padding:0.65rem 1rem;background:var(--green);color:var(--sand);border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s;flex-shrink:0}
+.chat-send-btn:hover{background:var(--green-mid)}
+
+/* STATUS PICKER */
+.status-picker{display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap}
+.status-btn{padding:0.4rem 0.9rem;border-radius:20px;border:1px solid var(--sand-dark);background:transparent;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+.status-btn:hover{border-color:var(--green-light)}
+.status-btn.active-going{background:rgba(74,140,92,0.15);border-color:var(--budget-color);color:var(--budget-color)}
+.status-btn.active-maybe{background:rgba(201,168,76,0.15);border-color:var(--gold-dark);color:var(--gold-dark)}
+.status-btn.active-notgoing{background:rgba(220,53,69,0.08);border-color:#c0392b;color:#c0392b}
+
+
+/* VOTING */
+.vote-section{background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow)}
+.vote-title{font-size:0.88rem;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem}
+.vote-options{display:flex;flex-direction:column;gap:0.7rem}
+.vote-option{background:var(--off-white);border:2px solid var(--sand-dark);border-radius:12px;padding:1rem 1.2rem;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.vote-option:hover{border-color:var(--green-light)}
+.vote-option.voted-budget{border-color:var(--budget-color);background:rgba(74,140,92,0.06)}
+.vote-option.voted-mid{border-color:var(--gold);background:rgba(201,168,76,0.06)}
+.vote-option.voted-luxury{border-color:var(--luxury-color);background:rgba(139,94,60,0.06)}
+.vote-option-left{display:flex;align-items:center;gap:0.8rem}
+.vote-option-icon{font-size:1.4rem;flex-shrink:0}
+.vote-option-label{font-size:0.92rem;font-weight:600;color:var(--charcoal)}
+.vote-option-desc{font-size:0.78rem;color:var(--text-muted);margin-top:0.1rem}
+.vote-bar-wrap{flex:1;max-width:140px}
+.vote-bar-track{background:var(--sand-light);border-radius:4px;height:6px;overflow:hidden}
+.vote-bar-fill{height:100%;border-radius:4px;transition:width 0.4s ease}
+.vote-bar-fill.budget{background:var(--budget-color)}
+.vote-bar-fill.mid{background:var(--gold)}
+.vote-bar-fill.luxury{background:var(--luxury-color)}
+.vote-count{font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-top:0.3rem;text-align:right}
+.vote-my-pick{font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:20px;flex-shrink:0}
+.vote-my-pick.budget{background:rgba(74,140,92,0.15);color:var(--budget-color)}
+.vote-my-pick.mid{background:rgba(201,168,76,0.15);color:var(--gold-dark)}
+.vote-my-pick.luxury{background:rgba(139,94,60,0.15);color:var(--luxury-color)}
+.vote-winner{background:var(--green);border-radius:10px;padding:0.8rem 1.2rem;text-align:center;margin-top:1rem}
+.vote-winner-label{font-size:0.75rem;color:rgba(232,213,176,0.7);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem}
+.vote-winner-value{font-size:1rem;font-weight:700;color:var(--gold)}
 
 /* ADMIN */
 .admin-page{background:var(--off-white);min-height:calc(100vh - 64px);padding:2rem 1.5rem}
@@ -218,20 +425,13 @@ textarea{resize:vertical;min-height:80px}
 .admin-login{max-width:380px;margin:4rem auto;background:var(--white);border:1px solid var(--sand-dark);border-radius:16px;padding:2rem;box-shadow:var(--card-shadow)}
 .admin-login h3{font-size:1.3rem;color:var(--green);margin-bottom:0.4rem;text-align:center}
 .admin-login p{font-size:0.85rem;color:var(--text-muted);text-align:center;margin-bottom:1.5rem}
-.loading-overlay{text-align:center;padding:5rem 2rem}
-.loading-overlay .spinner{width:48px;height:48px;border-width:3px;margin:0 auto 1.5rem}
-.loading-overlay h3{color:var(--green);font-size:1.3rem;margin-bottom:0.5rem}
-.loading-overlay p{color:var(--text-muted);font-size:0.88rem}
-.loading-steps{display:flex;flex-direction:column;gap:0.5rem;margin-top:1.5rem;text-align:left;max-width:300px;margin-left:auto;margin-right:auto}
-.loading-step{font-size:0.82rem;padding:0.4rem 0.8rem;border-radius:6px;background:rgba(26,58,42,0.04);color:var(--text-muted)}
-.loading-step.active{background:rgba(26,58,42,0.08);color:var(--green);font-weight:500}
-.loading-step::before{content:'○';font-size:0.7rem;margin-right:0.4rem}
-.loading-step.active::before{content:'●';color:var(--gold)}
+
 @media(max-width:640px){
   nav{padding:0 1rem}
   .nav-links .nav-link:not(:last-child){display:none}
   .hero{padding:3rem 1.5rem}
-  .results-content{padding:1.5rem 1rem}
+  .compare-panel{padding:1.5rem 1rem}
+  .compare-bar{padding:0.6rem 1rem}
 }
 </style>
 </head>
@@ -243,7 +443,8 @@ textarea{resize:vertical;min-height:80px}
     <span class="nav-link" onclick="showPage('landing')">Home</span>
     <span class="nav-link" onclick="showPage('quiz')">Plan a Trip</span>
     <span class="nav-link" onclick="showPricing()">Pricing</span>
-    <span id="userGreeting" class="user-greeting" style="display:none"></span>
+    <span id="userGreeting" class="user-greeting" style="display:none" onclick="showPage('profile')"></span>
+    <span class="nav-link" id="myTripsLink" style="display:none" onclick="showPage('profile')">My Trips</span>
     <button class="nav-btn" onclick="openAuth('login')" id="authNavBtn">Sign In</button>
   </div>
 </nav>
@@ -266,7 +467,7 @@ textarea{resize:vertical;min-height:80px}
     <div class="divider">or</div>
     <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="your@email.com"></div>
     <div class="form-group"><label>Password</label><input type="password" id="authPassword" placeholder="••••••••"></div>
-    <div class="form-group" id="confirmGroup" style="display:none"><label>Confirm Password</label><input type="password" id="authConfirm" placeholder="••••••••"></div>
+    <div class="form-group" id="confirmGroup" style="display:none"><label>Full Name <span>(optional)</span></label><input type="text" id="authName" placeholder="Your name"></div>
     <button class="submit-btn" onclick="handleAuth()" id="authSubmitBtn">Sign In</button>
     <p style="text-align:center;margin-top:0.8rem;font-size:0.8rem;color:var(--text-muted)"><a href="#" style="color:var(--green-light)" onclick="switchTab('reset');return false;">Forgot password?</a></p>
   </div>
@@ -277,14 +478,14 @@ textarea{resize:vertical;min-height:80px}
   <div class="hero">
     <div class="hero-inner">
       <div class="hero-badge">✦ Golf Travel Planning</div>
-      <h1>Plan Your Perfect<br><em>Golf Holiday</em><br>in 60 Seconds</h1>
-      <p class="hero-sub">Personalised golf trips based on your budget, handicap and travel preferences. No agents, no waiting — just expert recommendations, instantly.</p>
+      <h1>Build Your Perfect<br><em>Golf Holiday</em><br>in 60 Seconds</h1>
+      <p class="hero-sub">Tell us your preferences and we'll create personalised Budget, Mid-Range and Luxury options — so you can compare and pick the trip that suits your group.</p>
       <button class="hero-cta" onclick="showPage('quiz')">Build My Golf Trip →</button>
       <div class="hero-trust">
-        <span class="hero-trust-item">⛳ 6 Destinations</span>
-        <span class="hero-trust-item">🏌 Expert Recommendations</span>
-        <span class="hero-trust-item">⚡ 60 Seconds</span>
+        <span class="hero-trust-item">⛳ 3 Trip Options Every Time</span>
+        <span class="hero-trust-item">💷 Budget to Luxury</span>
         <span class="hero-trust-item">🇬🇧 Built for UK Golfers</span>
+        <span class="hero-trust-item">⚡ Ready in 60 Seconds</span>
       </div>
     </div>
   </div>
@@ -292,13 +493,13 @@ textarea{resize:vertical;min-height:80px}
   <div class="features-section">
     <div class="section-center">
       <div class="section-label">How it works</div>
-      <h2 class="section-title">Your ideal golf trip, planned instantly</h2>
-      <p class="section-sub">Tell us your preferences and we'll do the rest — researching destinations, courses, hotels and crafting a personalised itinerary.</p>
+      <h2 class="section-title">Build your trip. Compare your options.</h2>
+      <p class="section-sub">Tell us your preferences once. We build a Budget, Mid-Range and Luxury version side by side — so you and your group can compare and pick the right one.</p>
       <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">📋</div><h3>Answer 8 questions</h3><p>Budget, handicap, travel dates, group size and your ideal trip style — takes under a minute.</p></div>
-        <div class="feature-card"><div class="feature-icon">⛳</div><h3>Get your full trip plan</h3><p>Destination, courses, hotels, restaurants, bars and a day-by-day itinerary — all in seconds.</p></div>
-        <div class="feature-card"><div class="feature-icon">🏨</div><h3>Courses & accommodation</h3><p>Handpicked golf courses and hotels matched to your budget, handicap and style preferences.</p></div>
-        <div class="feature-card"><div class="feature-icon">✈</div><h3>Book with confidence</h3><p>Use your personalised plan to book directly with trusted providers, knowing exactly what to expect.</p></div>
+        <div class="feature-card"><div class="feature-icon">📋</div><h3>Answer 8 questions</h3><p>Budget, handicap, dates, group size, departure airports — takes under a minute.</p></div>
+        <div class="feature-card"><div class="feature-icon">⚖️</div><h3>Compare 3 options</h3><p>Budget, Mid-Range and Luxury trips generated simultaneously. Same destination family, different experience levels.</p></div>
+        <div class="feature-card"><div class="feature-icon">⛳</div><h3>Detailed course data</h3><p>Slope ratings, yardage, par, green fees and course ratings for every recommended course.</p></div>
+        <div class="feature-card"><div class="feature-icon">✈</div><h3>Book via trusted partners</h3><p>Direct links to Skyscanner, Booking.com, Vrbo and GolfNow to secure your trip.</p></div>
       </div>
     </div>
   </div>
@@ -307,12 +508,12 @@ textarea{resize:vertical;min-height:80px}
     <div class="section-center">
       <div class="section-label" style="color:var(--gold)">What golfers say</div>
       <h2 class="section-title">Trusted by UK golf societies</h2>
-      <p class="section-sub">Golfers across the UK have planned their perfect trips with GolfTrip.</p>
+      <p class="section-sub">Golfers across the UK use GolfTrip to compare options and plan their perfect trip.</p>
     </div>
     <div class="testimonials-grid">
-      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"Organised our society trip to Portugal in minutes. The recommendations were spot on — we ended up booking exactly what was suggested. Saved hours of research."</p><div class="testimonial-author">James T. — Golf Society Captain, Surrey</div></div>
-      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"As a couple who love combining golf with relaxation, GolfTrip found us the perfect Algarve resort we'd never have discovered otherwise. Incredible value."</p><div class="testimonial-author">Sarah & Mark H. — London</div></div>
-      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"Used it to plan a solo trip to Marrakech. The course recommendations and local tips were genuinely expert-level. Felt like having a personal travel consultant."</p><div class="testimonial-author">David C. — Manchester</div></div>
+      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"The three-tier comparison is brilliant. Our society was split between budget and mid-range — seeing both side by side made the decision easy. Went mid-range, worth every penny."</p><div class="testimonial-author">James T. — Golf Society Captain, Surrey</div></div>
+      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"We flew from different airports — me from Gatwick, friends from Manchester. GolfTrip found us the Algarve which works perfectly for both. Couldn't have figured that out ourselves."</p><div class="testimonial-author">Sarah & Mark H. — London</div></div>
+      <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"The slope ratings and course data is exactly what I needed as a low handicapper. Finally a planning tool that treats golfers like golfers."</p><div class="testimonial-author">David C. — Manchester</div></div>
     </div>
   </div>
 
@@ -322,10 +523,10 @@ textarea{resize:vertical;min-height:80px}
       <h2 class="section-title">Frequently asked questions</h2>
     </div>
     <div class="faq-list">
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">How does GolfTrip work? <span class="faq-chevron">▾</span></div><div class="faq-a">GolfTrip analyses your preferences — budget, handicap, travel dates, group size and desired trip style — and generates a fully personalised golf holiday itinerary. It draws on extensive knowledge of golf destinations and resorts popular with UK travellers.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Do I book my trip through GolfTrip? <span class="faq-chevron">▾</span></div><div class="faq-a">GolfTrip provides expert recommendations and links to trusted booking partners — Booking.com for hotels, GolfNow for tee times and Skyscanner for flights. You complete your booking directly with those providers.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">How accurate are the recommendations? <span class="faq-chevron">▾</span></div><div class="faq-a">Recommendations are tailored to your specific budget, handicap and preferences. We recommend verifying specific pricing and availability directly with providers before booking.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Can I generate multiple trips? <span class="faq-chevron">▾</span></div><div class="faq-a">Free accounts include one trip generation. Our Premium plan (£9.99/month or £49/year) offers unlimited trip generations — ideal for golf societies comparing multiple destinations.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What's included in the three trip options? <span class="faq-chevron">▾</span></div><div class="faq-a">Every plan generates three versions of your golf holiday — Budget (great value, quality courses at lower cost), Mid-Range (the sweet spot most golfers choose) and Luxury (premium courses, top resorts). Each includes course recommendations with technical data, hotels, restaurants, bars, a 5-day itinerary and estimated costs.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Can people in my group travel from different airports? <span class="faq-chevron">▾</span></div><div class="faq-a">Yes — you can add multiple departure airports. GolfTrip finds destinations with good connections from all of them, so everyone in the group can get there without one person travelling for 6 hours.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Do I book through GolfTrip? <span class="faq-chevron">▾</span></div><div class="faq-a">GolfTrip is a planning tool. We provide recommendations and links to trusted booking partners — Skyscanner for flights, Booking.com and Vrbo for accommodation, GolfNow for tee times. You complete your booking directly with them.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What's the difference between the plans? <span class="faq-chevron">▾</span></div><div class="faq-a">The Free plan gives you one full trip comparison to try the product. Pro unlocks unlimited planning, saved trips and seasonal recommendations. Society is built for groups — shared planning tools, voting on courses and exportable trip packs.</div></div>
     </div>
   </div>
 
@@ -333,28 +534,61 @@ textarea{resize:vertical;min-height:80px}
     <div class="section-center">
       <div class="section-label">Simple pricing</div>
       <h2 class="section-title">Start planning for free</h2>
-      <p class="section-sub">One price for unlimited golf trip inspiration. Cancel anytime.</p>
+      <p class="section-sub">Every plan includes the full Budget/Mid/Luxury comparison. Upgrade for unlimited planning and group tools.</p>
     </div>
     <div class="pricing-grid">
+      <!-- FREE -->
       <div class="pricing-card">
         <div class="pricing-tier">Free</div>
         <div class="pricing-price">£0</div>
         <div class="pricing-period">forever</div>
         <ul class="pricing-features">
-          <li>1 trip generation</li><li>Full itinerary results</li><li>Course & hotel recommendations</li><li>Booking partner links</li>
+          <li>1 trip comparison (Budget/Mid/Luxury)</li>
+          <li>Full course & hotel recommendations</li>
+          <li>Booking partner links</li>
+          <li>Shareable trip link</li>
         </ul>
-        <button class="pricing-btn pricing-btn-free" onclick="showPage('quiz')">Start free</button>
+        <button class="pricing-btn pricing-btn-free" onclick="showPage('quiz')">Try for free</button>
       </div>
+      <!-- PRO -->
       <div class="pricing-card featured">
-        <div class="pricing-tier">Premium</div>
+        <div class="pricing-badge">Most popular</div>
+        <div class="pricing-tier">Pro</div>
         <div class="pricing-price">£9.99</div>
         <div class="pricing-period">per month · or £49/year</div>
         <ul class="pricing-features">
-          <li>Unlimited trip generations</li><li>Full itinerary results</li><li>Course & hotel recommendations</li><li>Booking partner links</li><li>Save & revisit trips</li><li>Priority generation</li>
+          <li>Unlimited trip comparisons</li>
+          <li>Optimised itineraries</li>
+          <li class="section-head">Save & Compare</li>
+          <li>Save trips to your profile</li>
+          <li>Compare trips side by side</li>
+          <li class="section-head">Recommendations</li>
+          <li>Seasonal hidden gems</li>
+          <li>Best trips this month</li>
         </ul>
-        <button class="pricing-btn pricing-btn-premium" onclick="openAuth('signup')">Get Premium</button>
+        <button class="pricing-btn pricing-btn-pro" onclick="openAuth('signup')">Get Pro</button>
+      </div>
+      <!-- SOCIETY -->
+      <div class="pricing-card society">
+        <div class="pricing-tier">Society</div>
+        <div class="pricing-price">£24</div>
+        <div class="pricing-period">per month · or £99/year</div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li class="section-head">Group Planning</li>
+          <li>Group trip planner (4–16 golfers)</li>
+          <li>Shared itinerary link</li>
+          <li>Vote on courses as a group</li>
+          <li>Shared budget planning</li>
+          <li class="section-head">Society Tools</li>
+          <li>Who's playing what day</li>
+          <li>Exportable society trip pack</li>
+          <li>Split cost per person</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-society" onclick="openAuth('signup')">Get Society</button>
       </div>
     </div>
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.82rem;color:var(--text-muted)">Premium Concierge add-on coming soon — downloadable PDF packs, better deals alerts and done-for-you trip planning.</p>
   </div>
 
   <footer>
@@ -369,35 +603,45 @@ textarea{resize:vertical;min-height:80px}
     <div class="quiz-container">
       <div class="quiz-header">
         <h2>Build Your Golf Trip</h2>
-        <p>Answer a few questions and your personalised itinerary will be ready in seconds.</p>
+        <p>Answer a few questions — we'll build Budget, Mid-Range and Luxury options so you can compare and choose.</p>
       </div>
       <div class="quiz-progress"><div class="quiz-progress-fill" id="quizProgress" style="width:0%"></div></div>
 
       <div class="quiz-card">
         <div class="quiz-section-label">Travel Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Departure Airport</label>
-            <select id="q_airport" onchange="updateProgress()">
-              <option value="">Select airport...</option>
-              <optgroup label="London"><option>London Heathrow (LHR)</option><option>London Gatwick (LGW)</option><option>London Stansted (STN)</option><option>London Luton (LTN)</option><option>London City (LCY)</option><option>London Southend (SEN)</option></optgroup>
-              <optgroup label="Midlands"><option>Birmingham (BHX)</option><option>East Midlands (EMA)</option><option>Coventry (CVT)</option></optgroup>
-              <optgroup label="North West"><option>Manchester (MAN)</option><option>Liverpool (LPL)</option><option>Blackpool (BLK)</option></optgroup>
-              <optgroup label="North East & Yorkshire"><option>Leeds Bradford (LBA)</option><option>Newcastle (NCL)</option><option>Doncaster Sheffield (DSA)</option><option>Teesside (MME)</option></optgroup>
-              <optgroup label="Scotland"><option>Edinburgh (EDI)</option><option>Glasgow (GLA)</option><option>Aberdeen (ABZ)</option><option>Inverness (INV)</option></optgroup>
-              <optgroup label="Wales"><option>Cardiff (CWL)</option></optgroup>
-              <optgroup label="South West"><option>Bristol (BRS)</option><option>Exeter (EXT)</option><option>Newquay (NQY)</option></optgroup>
-              <optgroup label="South & South East"><option>Southampton (SOU)</option><option>Bournemouth (BOH)</option></optgroup>
-              <optgroup label="Northern Ireland"><option>Belfast International (BFS)</option><option>Belfast City (BHD)</option></optgroup>
-            </select>
+        <div class="form-group">
+          <label>Departure Airport(s) <span>— add one per group if travelling from different airports</span></label>
+          <div id="airportGroups">
+            <div class="airport-group" id="airportGroup0">
+              <div class="airport-group-label">Group 1</div>
+              <div class="form-row">
+                <div class="form-group" style="margin-bottom:0">
+                  <select class="airport-select" onchange="updateProgress()">
+                    <option value="">Select airport...</option>
+                    <optgroup label="London — All Airports"><option>London — Any (LHR/LGW/STN/LTN/LCY)</option><option>London Heathrow (LHR)</option><option>London Gatwick (LGW)</option><option>London Stansted (STN)</option><option>London Luton (LTN)</option><option>London City (LCY)</option><option>London Southend (SEN)</option></optgroup>
+                    <optgroup label="Midlands"><option>Birmingham (BHX)</option><option>East Midlands (EMA)</option><option>Coventry (CVT)</option></optgroup>
+                    <optgroup label="North West"><option>Manchester (MAN)</option><option>Liverpool (LPL)</option><option>Blackpool (BLK)</option></optgroup>
+                    <optgroup label="North East & Yorkshire"><option>Leeds Bradford (LBA)</option><option>Newcastle (NCL)</option><option>Doncaster Sheffield (DSA)</option><option>Teesside (MME)</option></optgroup>
+                    <optgroup label="Scotland"><option>Edinburgh (EDI)</option><option>Glasgow (GLA)</option><option>Aberdeen (ABZ)</option><option>Inverness (INV)</option></optgroup>
+                    <optgroup label="Wales"><option>Cardiff (CWL)</option></optgroup>
+                    <optgroup label="South West"><option>Bristol (BRS)</option><option>Exeter (EXT)</option><option>Newquay (NQY)</option></optgroup>
+                    <optgroup label="South & South East"><option>Southampton (SOU)</option><option>Bournemouth (BOH)</option></optgroup>
+                    <optgroup label="Northern Ireland"><option>Belfast International (BFS)</option><option>Belfast City (BHD)</option></optgroup>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0"><input type="text" placeholder="e.g. 4 golfers from here" class="airport-pax" oninput="updateProgress()"></div>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Number of Golfers</label>
-            <select id="q_golfers" onchange="updateProgress()">
-              <option value="">Select...</option>
-              <option>1 (Solo)</option><option>2 (Couple)</option><option>3</option><option>4</option><option>5-8 (Small group)</option><option>9-16 (Society)</option><option>17+ (Large society)</option>
-            </select>
-          </div>
+          <button class="add-airport-btn" onclick="addAirport()">+ Add another departure airport</button>
+        </div>
+
+        <div class="form-group">
+          <label>Total Number of Golfers</label>
+          <select id="q_golfers" onchange="updateProgress()">
+            <option value="">Select...</option>
+            <option>1 (Solo)</option><option>2 (Couple)</option><option>3</option><option>4</option><option>5-8 (Small group)</option><option>9-16 (Society)</option><option>17+ (Large society)</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -430,19 +674,45 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Budget Per Person</label>
-          <select id="q_budget" onchange="updateProgress()">
-            <option value="">Select budget...</option>
-            <option>Under £1,000</option><option>£1,000 – £1,500</option><option>£1,500 – £2,500</option><option>£2,500 – £4,000</option><option>£4,000+</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group"><label>Budget Per Person <span>(total trip inc. flights)</span></label>
+            <select id="q_budget" onchange="updateProgress()">
+              <option value="">Select budget...</option>
+              <optgroup label="Budget">
+                <option>Up to £300</option>
+                <option>£300 – £500</option>
+                <option>£500 – £750</option>
+                <option>£750 – £1,000</option>
+              </optgroup>
+              <optgroup label="Mid-Range">
+                <option>£1,000 – £1,500</option>
+                <option>£1,500 – £2,000</option>
+                <option>£2,000 – £2,500</option>
+              </optgroup>
+              <optgroup label="Premium">
+                <option>£2,500 – £3,500</option>
+                <option>£3,500 – £5,000</option>
+                <option>£5,000+</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group"><label>Your Handicap</label>
+            <select id="q_handicap" onchange="updateProgress()">
+              <option value="">Select...</option>
+              <option>0-5 (Scratch / Low)</option><option>6-12 (Mid handicapper)</option><option>13-20 (Mid-high)</option><option>21-28 (High handicapper)</option><option>Beginner / Social golfer</option>
+            </select>
+          </div>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label>Your Handicap <span>(or approximate level)</span></label>
-          <select id="q_handicap" onchange="updateProgress()">
-            <option value="">Select...</option>
-            <option>0-5 (Scratch / Low)</option><option>6-12 (Mid handicapper)</option><option>13-20 (Mid-high)</option><option>21-28 (High handicapper)</option><option>Beginner / Social golfer</option>
-          </select>
+          <label>Flight Time Preference</label>
+          <div class="chip-group" id="chips_flight">
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">🌅 Morning outbound</button>
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">🌆 Evening outbound</button>
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">🌅 Morning return</button>
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">🌆 Evening return</button>
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">✈ Cheapest option</button>
+            <button class="chip" onclick="toggleChipMulti(this,'flight')">🕐 No preference</button>
+          </div>
         </div>
       </div>
 
@@ -489,45 +759,273 @@ textarea{resize:vertical;min-height:80px}
             <button class="chip" onclick="toggleChip(this,'weather')">🌍 No preference</button>
           </div>
         </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Club Hire</label>
+          <div class="chip-group" id="chips_clubs">
+            <button class="chip" onclick="toggleChip(this,'clubs')">🏌 Bringing own clubs</button>
+            <button class="chip" onclick="toggleChip(this,'clubs')">🎒 Need to hire clubs</button>
+            <button class="chip" onclick="toggleChip(this,'clubs')">👥 Some need hire clubs</button>
+          </div>
+        </div>
       </div>
 
       <div class="quiz-card">
         <div class="quiz-section-label">Anything else?</div>
         <div class="form-group" style="margin-bottom:0">
           <label>Additional Notes <span>(optional)</span></label>
-          <textarea id="q_notes" placeholder="e.g. We prefer links-style courses, celebrating a birthday, want to avoid very hilly courses..."></textarea>
+          <textarea id="q_notes" placeholder="e.g. Mix of handicaps in the group, celebrating a birthday, prefer links-style courses, need walking-friendly terrain..."></textarea>
         </div>
       </div>
 
-      <button class="generate-btn" onclick="generateTrip()" id="generateBtn">
-        <span id="generateBtnText">Plan My Golf Trip →</span>
+      <button class="generate-btn" onclick="generateTrips()" id="generateBtn">
+        <span id="generateBtnText">Build My Golf Trip →</span>
         <span class="spinner" id="generateSpinner" style="display:none"></span>
       </button>
     </div>
   </div>
 </div>
 
-<!-- RESULTS PAGE -->
+<!-- RESULTS PAGE — COMPARE VIEW -->
 <div class="page" id="page-results">
-  <div class="results-hero">
-    <div class="results-badge">✦ Your personalised golf trip</div>
-    <h2 id="resultsTitle">Your Golf Trip Awaits</h2>
-    <p id="resultsSub">Curated based on your preferences</p>
-  </div>
-  <div class="results-content">
-    <div id="resultsLoading" class="loading-overlay" style="display:none">
+  <div id="resultsLoading" style="display:none">
+    <div class="compare-header">
+      <div class="results-badge">✦ Generating your trips</div>
+      <h2>Building your three golf trips...</h2>
+      <p>We're creating a Budget, Mid-Range and Luxury option for you.</p>
+    </div>
+    <div class="loading-overlay">
       <div class="spinner"></div>
-      <h3>Planning your perfect golf holiday...</h3>
-      <p>Researching destinations, courses and hotels for you.</p>
       <div class="loading-steps">
         <div class="loading-step active" id="ls1">Analysing your preferences</div>
         <div class="loading-step" id="ls2">Researching destinations</div>
-        <div class="loading-step" id="ls3">Finding the best courses</div>
-        <div class="loading-step" id="ls4">Selecting hotels & restaurants</div>
-        <div class="loading-step" id="ls5">Crafting your itinerary</div>
+        <div class="loading-step" id="ls3">Building Budget option</div>
+        <div class="loading-step" id="ls4">Building Mid-Range option</div>
+        <div class="loading-step" id="ls5">Building Luxury option</div>
+      </div>
+      <div class="loading-tiers">
+        <div class="loading-tier budget" id="lt-budget">💚 Budget</div>
+        <div class="loading-tier mid" id="lt-mid">⭐ Mid-Range</div>
+        <div class="loading-tier luxury" id="lt-luxury">✨ Luxury</div>
       </div>
     </div>
-    <div id="resultsBody" style="display:none"></div>
+  </div>
+
+  <div id="resultsBody" style="display:none">
+    <div class="compare-header">
+      <div class="results-badge">✦ Your personalised golf trips</div>
+      <h2 id="resultsTitle">Your Golf Trip Options</h2>
+      <p id="resultsSub">Three options — pick the one that suits your group</p>
+      <div class="compare-tabs">
+        <button class="compare-tab budget active" id="tab-budget" onclick="switchTier('budget')">
+          <span class="compare-tab-icon">💚</span>Budget
+        </button>
+        <button class="compare-tab mid" id="tab-mid" onclick="switchTier('mid')">
+          <span class="compare-tab-icon">⭐</span>Mid-Range
+        </button>
+        <button class="compare-tab luxury" id="tab-luxury" onclick="switchTier('luxury')">
+          <span class="compare-tab-icon">✨</span>Luxury
+        </button>
+      </div>
+    </div>
+    <div class="compare-bar" id="compareBar" style="display:none">
+      <div class="compare-bar-item" onclick="switchTier('budget')"><div class="compare-bar-dot budget"></div><span class="compare-bar-label">Budget</span><span class="compare-bar-price" id="cb-budget">—</span></div>
+      <div class="compare-bar-divider">|</div>
+      <div class="compare-bar-item" onclick="switchTier('mid')"><div class="compare-bar-dot mid"></div><span class="compare-bar-label">Mid-Range</span><span class="compare-bar-price" id="cb-mid">—</span></div>
+      <div class="compare-bar-divider">|</div>
+      <div class="compare-bar-item" onclick="switchTier('luxury')"><div class="compare-bar-dot luxury"></div><span class="compare-bar-label">Luxury</span><span class="compare-bar-price" id="cb-luxury">—</span></div>
+    </div>
+    <div class="compare-content">
+      <div class="compare-panel active" id="panel-budget"></div>
+      <div class="compare-panel" id="panel-mid"></div>
+      <div class="compare-panel" id="panel-luxury"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div class="page" id="page-profile">
+  <div class="profile-page">
+    <div class="profile-container">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">?</div>
+        <div class="profile-info">
+          <h2 id="profileName">My Profile</h2>
+          <p id="profileEmail"></p>
+        </div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">⛳ Saved Trips</div>
+        <div id="savedTripsList"><div class="empty-trips">Loading your saved trips...</div></div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">👤 Profile Details</div>
+        <div class="profile-form-row">
+          <div class="form-group" style="margin-bottom:0"><label>Full Name</label><input type="text" id="profileNameInput" placeholder="Your name"></div>
+          <div class="form-group" style="margin-bottom:0"><label>Home Airport</label>
+            <select id="profileAirport">
+              <option value="">Select your usual airport...</option>
+              <optgroup label="London"><option>London — Any</option><option>London Heathrow (LHR)</option><option>London Gatwick (LGW)</option><option>London Stansted (STN)</option><option>London Luton (LTN)</option><option>London City (LCY)</option></optgroup>
+              <optgroup label="Midlands"><option>Birmingham (BHX)</option><option>East Midlands (EMA)</option></optgroup>
+              <optgroup label="North West"><option>Manchester (MAN)</option><option>Liverpool (LPL)</option></optgroup>
+              <optgroup label="North East & Yorkshire"><option>Leeds Bradford (LBA)</option><option>Newcastle (NCL)</option></optgroup>
+              <optgroup label="Scotland"><option>Edinburgh (EDI)</option><option>Glasgow (GLA)</option></optgroup>
+              <optgroup label="Other"><option>Bristol (BRS)</option><option>Cardiff (CWL)</option><option>Belfast International (BFS)</option></optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="profile-form-row">
+          <div class="form-group" style="margin-bottom:0"><label>Handicap</label>
+            <select id="profileHandicap">
+              <option value="">Select...</option>
+              <option>0-5 (Scratch / Low)</option><option>6-12 (Mid handicapper)</option><option>13-20 (Mid-high)</option><option>21-28 (High handicapper)</option><option>Beginner / Social golfer</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0"><label>Typical Budget</label>
+            <select id="profileBudget">
+              <option value="">Select...</option>
+              <optgroup label="Budget"><option>Up to £300</option><option>£300 – £500</option><option>£500 – £750</option><option>£750 – £1,000</option></optgroup>
+              <optgroup label="Mid-Range"><option>£1,000 – £1,500</option><option>£1,500 – £2,000</option><option>£2,000 – £2,500</option></optgroup>
+              <optgroup label="Premium"><option>£2,500 – £3,500</option><option>£3,500 – £5,000</option><option>£5,000+</option></optgroup>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:1.2rem;flex-wrap:wrap">
+          <button class="profile-save-btn" onclick="saveProfile()">Save Profile</button>
+          <button class="signout-btn" onclick="signOut()">Sign Out</button>
+        </div>
+        <div id="profileMsg" style="margin-top:0.8rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- TRIP DETAIL PAGE -->
+<div class="page" id="page-trip">
+  <div class="trip-detail-page">
+    <div class="trip-detail-container">
+      <div class="trip-detail-header">
+        <div>
+          <div class="trip-detail-title" id="tripDetailTitle">Golf Trip</div>
+          <div class="trip-detail-meta" id="tripDetailMeta"></div>
+        </div>
+        <button class="trip-detail-back" onclick="showPage('profile')">← Back to My Trips</button>
+      </div>
+
+      <div class="trip-detail-grid">
+        <!-- LEFT: trip summary + chat -->
+        <div>
+          <div class="trip-detail-section">
+            <div class="trip-detail-section-title">⛳ Trip Summary</div>
+            <div id="tripDetailSummary"></div>
+          </div>
+
+          <div class="vote-section" id="voteSection">
+            <div class="vote-title">🗳 Group Vote — Which trip do you want?</div>
+            <div class="vote-options" id="voteOptions">
+              <div class="vote-option" id="voteOpt-budget" onclick="castVote('budget')">
+                <div class="vote-option-left">
+                  <div class="vote-option-icon">💚</div>
+                  <div>
+                    <div class="vote-option-label">Budget Option</div>
+                    <div class="vote-option-desc" id="voteDesc-budget">Best value, great courses</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="vote-bar-wrap">
+                    <div class="vote-bar-track"><div class="vote-bar-fill budget" id="voteBar-budget" style="width:0%"></div></div>
+                    <div class="vote-count" id="voteCount-budget">0 votes</div>
+                  </div>
+                </div>
+              </div>
+              <div class="vote-option" id="voteOpt-mid" onclick="castVote('mid')">
+                <div class="vote-option-left">
+                  <div class="vote-option-icon">⭐</div>
+                  <div>
+                    <div class="vote-option-label">Mid-Range Option</div>
+                    <div class="vote-option-desc" id="voteDesc-mid">The sweet spot</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="vote-bar-wrap">
+                    <div class="vote-bar-track"><div class="vote-bar-fill mid" id="voteBar-mid" style="width:0%"></div></div>
+                    <div class="vote-count" id="voteCount-mid">0 votes</div>
+                  </div>
+                </div>
+              </div>
+              <div class="vote-option" id="voteOpt-luxury" onclick="castVote('luxury')">
+                <div class="vote-option-left">
+                  <div class="vote-option-icon">✨</div>
+                  <div>
+                    <div class="vote-option-label">Luxury Option</div>
+                    <div class="vote-option-desc" id="voteDesc-luxury">World-class experience</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="vote-bar-wrap">
+                    <div class="vote-bar-track"><div class="vote-bar-fill luxury" id="voteBar-luxury" style="width:0%"></div></div>
+                    <div class="vote-count" id="voteCount-luxury">0 votes</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="voteWinner" style="display:none" class="vote-winner">
+              <div class="vote-winner-label">Group favourite</div>
+              <div class="vote-winner-value" id="voteWinnerText"></div>
+            </div>
+          </div>
+
+          <div class="trip-detail-section">
+            <div class="trip-detail-section-title">💬 Group Chat</div>
+            <div class="chat-container">
+              <div class="chat-messages" id="chatMessages">
+                <div class="chat-empty">No messages yet. Say hello to your group!</div>
+              </div>
+              <div class="chat-input-row">
+                <textarea class="chat-input" id="chatInput" placeholder="Message your group..." rows="2" onkeydown="handleChatKey(event)"></textarea>
+                <button class="chat-send-btn" onclick="sendMessage()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: members -->
+        <div>
+          <div class="trip-detail-section">
+            <div class="trip-detail-section-title">👥 Group Members</div>
+            <div class="member-list" id="memberList">
+              <div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.85rem">Loading members...</div>
+            </div>
+
+            <div style="margin-top:1.2rem">
+              <div style="font-size:0.82rem;font-weight:600;color:var(--green);margin-bottom:0.5rem">Your status</div>
+              <div class="status-picker">
+                <button class="status-btn" onclick="updateMyStatus('confirmed')">✅ I'm going</button>
+                <button class="status-btn" onclick="updateMyStatus('maybe')">🤔 Maybe</button>
+                <button class="status-btn" onclick="updateMyStatus('declined')">❌ Cannot make it</button>
+              </div>
+            </div>
+
+            <div style="margin-top:1.5rem">
+              <div style="font-size:0.82rem;font-weight:600;color:var(--green);margin-bottom:0.5rem">Invite someone</div>
+              <div class="invite-form">
+                <input type="email" id="inviteEmail" placeholder="friend@email.com">
+                <button class="invite-btn" onclick="inviteMember()">Invite</button>
+              </div>
+              <div id="inviteMsg" style="font-size:0.78rem;margin-top:0.5rem"></div>
+            </div>
+
+            <div class="invite-link-box" style="margin-top:1rem">
+              <div class="invite-link-label">📎 Share trip link</div>
+              <div class="invite-link-row">
+                <div class="invite-link-url" id="inviteLinkUrl">Generating link...</div>
+                <button class="copy-link-btn" onclick="copyInviteLink()">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -536,58 +1034,68 @@ textarea{resize:vertical;min-height:80px}
   <div class="admin-page">
     <div id="adminLoginView">
       <div class="admin-login">
-        <h3>Admin Access</h3>
-        <p>GolfTrip internal dashboard</p>
+        <h3>Admin Access</h3><p>GolfTrip internal dashboard</p>
         <div class="form-group"><label>Email</label><input type="email" id="adminEmail" placeholder="admin@golftrip.com"></div>
         <div class="form-group"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••"></div>
         <button class="submit-btn" onclick="adminLogin()">Access Dashboard</button>
       </div>
     </div>
     <div id="adminDashView" style="display:none">
-      <div class="admin-header">
-        <h2>Dashboard</h2>
-        <button class="btn-outline results-action-btn" style="flex:0;min-width:auto;padding:0.5rem 1rem;font-size:0.82rem" onclick="adminLogout()">Sign out</button>
-      </div>
+      <div class="admin-header"><h2>Dashboard</h2><button class="btn-outline results-action-btn" style="flex:0;min-width:auto;padding:0.5rem 1rem;font-size:0.82rem" onclick="adminLogout()">Sign out</button></div>
       <div class="admin-grid">
         <div class="admin-stat"><div class="stat-val">247</div><div class="stat-lbl">Total Users</div></div>
         <div class="admin-stat"><div class="stat-val">1,083</div><div class="stat-lbl">Trips Generated</div></div>
-        <div class="admin-stat"><div class="stat-val">38</div><div class="stat-lbl">Premium Subscribers</div></div>
-        <div class="admin-stat"><div class="stat-val">£384</div><div class="stat-lbl">MRR</div></div>
+        <div class="admin-stat"><div class="stat-val">38</div><div class="stat-lbl">Pro Subscribers</div></div>
+        <div class="admin-stat"><div class="stat-val">£567</div><div class="stat-lbl">MRR</div></div>
       </div>
       <div class="admin-tables">
         <div class="admin-table-card"><h4>Popular Destinations</h4><div class="admin-row"><span>Algarve, Portugal</span><span class="val">34%</span></div><div class="admin-row"><span>Costa del Sol, Spain</span><span class="val">28%</span></div><div class="admin-row"><span>Antalya, Turkey</span><span class="val">16%</span></div><div class="admin-row"><span>Marrakech, Morocco</span><span class="val">11%</span></div><div class="admin-row"><span>Kerry, Ireland</span><span class="val">7%</span></div></div>
+        <div class="admin-table-card"><h4>Most Chosen Tier</h4><div class="admin-row"><span>Mid-Range</span><span class="val">48%</span></div><div class="admin-row"><span>Budget</span><span class="val">31%</span></div><div class="admin-row"><span>Luxury</span><span class="val">21%</span></div></div>
         <div class="admin-table-card"><h4>Top Departure Airports</h4><div class="admin-row"><span>London Gatwick</span><span class="val">29%</span></div><div class="admin-row"><span>London Heathrow</span><span class="val">22%</span></div><div class="admin-row"><span>Manchester</span><span class="val">19%</span></div><div class="admin-row"><span>Birmingham</span><span class="val">14%</span></div><div class="admin-row"><span>Edinburgh</span><span class="val">9%</span></div></div>
-        <div class="admin-table-card"><h4>Trip Styles</h4><div class="admin-row"><span>Golf & relaxation</span><span class="val">31%</span></div><div class="admin-row"><span>Value for money</span><span class="val">24%</span></div><div class="admin-row"><span>Luxury</span><span class="val">18%</span></div><div class="admin-row"><span>Championship courses</span><span class="val">15%</span></div><div class="admin-row"><span>Hidden gems</span><span class="val">8%</span></div></div>
-        <div class="admin-table-card"><h4>Budget Distribution</h4><div class="admin-row"><span>£1,500 – £2,500</span><span class="val">38%</span></div><div class="admin-row"><span>£1,000 – £1,500</span><span class="val">27%</span></div><div class="admin-row"><span>£2,500 – £4,000</span><span class="val">21%</span></div><div class="admin-row"><span>£4,000+</span><span class="val">9%</span></div><div class="admin-row"><span>Under £1,000</span><span class="val">5%</span></div></div>
+        <div class="admin-table-card"><h4>Plan Distribution</h4><div class="admin-row"><span>Free</span><span class="val">71%</span></div><div class="admin-row"><span>Pro</span><span class="val">23%</span></div><div class="admin-row"><span>Society</span><span class="val">6%</span></div></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ─── SUPABASE ─────────────────────────────────────────────────
 const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
-
 let sbClient = null;
 let currentUser = null;
-const chipSelections = {dest:'',style:'',accomm:'',weather:''};
-let dateMode = 'flexible';
+const chipSelections = {dest:'',style:'',accomm:'',weather:'',clubs:''};
+const multiChipSelections = {flight:[]};
 
-// Initialise Supabase safely — if it fails, site still works
+function toggleChipMulti(el, group) {
+  el.classList.toggle('selected');
+  const val = el.textContent.trim();
+  const arr = multiChipSelections[group];
+  const idx = arr.indexOf(val);
+  if (idx > -1) arr.splice(idx, 1);
+  else arr.push(val);
+}
+function getFlightPreference() {
+  const f = multiChipSelections.flight;
+  return f.length > 0 ? f.join(', ') : 'No preference';
+}
+let dateMode = 'flexible';
+let airportCount = 1;
+let tripsData = {};
+let savedTripsCache = {};
+
+function openTripById(id) {
+  const t = savedTripsCache[id];
+  if (t) openTrip(id, t);
+}
+
 try {
-  const sb = window.supabase || window.supabaseJs;
+  const sb = window.supabase;
   if (sb && sb.createClient) {
     sbClient = sb.createClient(SUPABASE_URL, SUPABASE_KEY);
-    sbClient.auth.onAuthStateChange((event, session) => {
-      currentUser = session?.user || null;
-      updateNavAuth();
-    });
+    sbClient.auth.onAuthStateChange((event, session) => { currentUser = session?.user || null; updateNavAuth(); });
     updateNavAuth();
   }
-} catch(e) {
-  console.warn('Supabase failed to initialise:', e.message);
-}
+} catch(e) { console.warn('Supabase init:', e.message); }
 
 async function updateNavAuth() {
   if (!sbClient) return;
@@ -597,26 +1105,59 @@ async function updateNavAuth() {
     if (user) {
       document.getElementById('authNavBtn').style.display = 'none';
       document.getElementById('userGreeting').style.display = 'inline';
-      document.getElementById('userGreeting').textContent = '👋 ' + (user.email.split('@')[0]);
+      if(document.getElementById('myTripsLink')) document.getElementById('myTripsLink').style.display = 'inline';
+      const name = user.user_metadata?.full_name || user.email.split('@')[0];
+      document.getElementById('userGreeting').textContent = '👋 ' + name;
     } else {
       document.getElementById('authNavBtn').style.display = 'inline-block';
       document.getElementById('userGreeting').style.display = 'none';
+      if(document.getElementById('myTripsLink')) document.getElementById('myTripsLink').style.display = 'none';
     }
-  } catch(e) { console.warn('Auth check failed:', e.message); }
+  } catch(e) {}
 }
 
-// ─── NAVIGATION ───────────────────────────────────────────────
 function showPage(p) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
   document.getElementById('page-' + p).classList.add('active');
   window.scrollTo(0, 0);
+  if (p === 'profile') loadProfile();
+  if (p !== 'trip' && chatPollingInterval) { clearInterval(chatPollingInterval); chatPollingInterval = null; }
 }
-function showPricing() {
-  showPage('landing');
-  setTimeout(() => document.getElementById('pricing').scrollIntoView({behavior:'smooth'}), 50);
+function showPricing() { showPage('landing'); setTimeout(() => document.getElementById('pricing').scrollIntoView({behavior:'smooth'}), 50); }
+
+// COMPARE TABS
+function switchTier(tier) {
+  ['budget','mid','luxury'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tier);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tier);
+  });
+  window.scrollTo(0, document.querySelector('.compare-header').offsetHeight + 64);
 }
 
-// ─── DATE MODE ────────────────────────────────────────────────
+// MULTI-AIRPORT
+function getAirportTemplate() {
+  return `<optgroup label="London — All Airports"><option>London — Any (LHR/LGW/STN/LTN/LCY)</option><option>London Heathrow (LHR)</option><option>London Gatwick (LGW)</option><option>London Stansted (STN)</option><option>London Luton (LTN)</option><option>London City (LCY)</option><option>London Southend (SEN)</option></optgroup><optgroup label="Midlands"><option>Birmingham (BHX)</option><option>East Midlands (EMA)</option><option>Coventry (CVT)</option></optgroup><optgroup label="North West"><option>Manchester (MAN)</option><option>Liverpool (LPL)</option><option>Blackpool (BLK)</option></optgroup><optgroup label="North East & Yorkshire"><option>Leeds Bradford (LBA)</option><option>Newcastle (NCL)</option><option>Doncaster Sheffield (DSA)</option><option>Teesside (MME)</option></optgroup><optgroup label="Scotland"><option>Edinburgh (EDI)</option><option>Glasgow (GLA)</option><option>Aberdeen (ABZ)</option><option>Inverness (INV)</option></optgroup><optgroup label="Wales"><option>Cardiff (CWL)</option></optgroup><optgroup label="South West"><option>Bristol (BRS)</option><option>Exeter (EXT)</option><option>Newquay (NQY)</option></optgroup><optgroup label="South & South East"><option>Southampton (SOU)</option><option>Bournemouth (BOH)</option></optgroup><optgroup label="Northern Ireland"><option>Belfast International (BFS)</option><option>Belfast City (BHD)</option></optgroup>`;
+}
+function addAirport() {
+  airportCount++;
+  const div = document.createElement('div');
+  div.className = 'airport-group';
+  div.innerHTML = `<div class="airport-group-label">Group ${airportCount}</div><button class="airport-remove" onclick="removeAirport(this)">✕</button><div class="form-row"><div class="form-group" style="margin-bottom:0"><select class="airport-select" onchange="updateProgress()"><option value="">Select airport...</option>${getAirportTemplate()}</select></div><div class="form-group" style="margin-bottom:0"><input type="text" placeholder="e.g. 4 golfers from here" class="airport-pax" oninput="updateProgress()"></div></div>`;
+  document.getElementById('airportGroups').appendChild(div);
+}
+function removeAirport(btn) {
+  btn.closest('.airport-group').remove();
+  document.querySelectorAll('.airport-group').forEach((g,i) => g.querySelector('.airport-group-label').textContent = 'Group ' + (i+1));
+  updateProgress();
+}
+function getAirports() {
+  return Array.from(document.querySelectorAll('.airport-group')).map(g => {
+    const a = g.querySelector('.airport-select').value;
+    const p = g.querySelector('.airport-pax').value;
+    return a ? a + (p ? ' (' + p + ')' : '') : null;
+  }).filter(Boolean).join(', ');
+}
+
 function setDateMode(mode) {
   dateMode = mode;
   document.getElementById('btnFlexible').classList.toggle('active', mode === 'flexible');
@@ -625,23 +1166,17 @@ function setDateMode(mode) {
   document.getElementById('dateSpecific').classList.toggle('show', mode === 'specific');
   updateProgress();
 }
-
 function getTravelDates() {
   if (dateMode === 'specific') {
     const from = document.getElementById('q_date_from').value;
     const to = document.getElementById('q_date_to').value;
-    if (from && to) {
-      const nights = Math.round((new Date(to) - new Date(from)) / (1000*60*60*24));
-      return `${from} to ${to} (${nights} nights)`;
-    }
-    return from ? `Departing ${from}` : 'Flexible';
+    if (from && to) return from + ' to ' + to + ' (' + Math.round((new Date(to)-new Date(from))/(86400000)) + ' nights)';
+    return from ? 'Departing ' + from : 'Flexible';
   }
-  const month = document.getElementById('q_flex_month').value || 'Flexible timing';
-  const dur = document.getElementById('q_flex_duration').value || '';
-  return dur ? `${month}, ${dur}` : month;
+  const m = document.getElementById('q_flex_month').value || 'Flexible';
+  const d = document.getElementById('q_flex_duration').value || '';
+  return d ? m + ', ' + d : m;
 }
-
-// ─── QUESTIONNAIRE ────────────────────────────────────────────
 function toggleChip(el, group) {
   document.getElementById('chips_' + group).querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -649,81 +1184,121 @@ function toggleChip(el, group) {
   updateProgress();
 }
 function updateProgress() {
-  const fields = ['q_airport','q_golfers','q_budget','q_handicap'];
-  const filled = fields.filter(f => document.getElementById(f).value).length;
-  const datesFilled = dateMode === 'flexible' ? (document.getElementById('q_flex_month').value ? 1 : 0) : (document.getElementById('q_date_from').value ? 1 : 0);
+  const hasAirport = Array.from(document.querySelectorAll('.airport-select')).some(s => s.value);
+  const filled = ['q_golfers','q_budget','q_handicap'].filter(f => document.getElementById(f).value).length + (hasAirport ? 1 : 0);
   const chips = Object.values(chipSelections).filter(v => v).length;
-  document.getElementById('quizProgress').style.width = Math.round((filled + datesFilled + chips) / 9 * 100) + '%';
+  document.getElementById('quizProgress').style.width = Math.round((filled + chips) / 9 * 100) + '%';
 }
 
-// ─── AUTH MODAL ───────────────────────────────────────────────
-function openAuth(tab) {
-  document.getElementById('authModal').classList.remove('hidden');
-  switchTab(tab || 'login');
-}
-function closeAuth() {
-  document.getElementById('authModal').classList.add('hidden');
-}
+// AUTH
+function openAuth(tab) { document.getElementById('authModal').classList.remove('hidden'); switchTab(tab || 'login'); }
+function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
 function switchTab(tab) {
-  const isLogin = tab === 'login';
-  const isReset = tab === 'reset';
+  const isLogin = tab === 'login', isReset = tab === 'reset';
   document.getElementById('loginTabBtn').classList.toggle('active', isLogin);
   document.getElementById('signupTabBtn').classList.toggle('active', !isLogin && !isReset);
   document.getElementById('confirmGroup').style.display = (!isLogin && !isReset) ? 'block' : 'none';
   document.getElementById('authTitle').textContent = isReset ? 'Reset password' : isLogin ? 'Welcome back' : 'Create your account';
-  document.getElementById('authSub').textContent = isReset ? 'Enter your email and we\'ll send a reset link.' : isLogin ? 'Sign in to save and manage your golf trips.' : 'Start planning your perfect golf holiday.';
+  document.getElementById('authSub').textContent = isReset ? "Enter your email and we'll send a reset link." : isLogin ? 'Sign in to save and manage your golf trips.' : 'Start planning your perfect golf holiday.';
   document.getElementById('authSubmitBtn').textContent = isReset ? 'Send reset link' : isLogin ? 'Sign In' : 'Create Account';
   document.getElementById('authMsg').innerHTML = '';
   window._authTab = tab;
 }
-
 async function handleGoogle() {
-  if (!sbClient) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth not available. Please try email sign in.</div>'; return; }
+  if (!sbClient) return;
   const { error } = await sbClient.auth.signInWithOAuth({ provider: 'google' });
   if (error) document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + error.message + '</div>';
 }
-
 async function handleAuth() {
-  if (!sbClient) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth service unavailable. Please try again shortly.</div>'; return; }
+  if (!sbClient) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Auth unavailable.</div>'; return; }
   const email = document.getElementById('authEmail').value;
   const pass = document.getElementById('authPassword').value;
-  if (!email || !pass) {
-    document.getElementById('authMsg').innerHTML = '<div class="error-msg">Please fill in all fields.</div>';
-    return;
-  }
+  if (!email || !pass) { document.getElementById('authMsg').innerHTML = '<div class="error-msg">Please fill in all fields.</div>'; return; }
   document.getElementById('authSubmitBtn').textContent = 'Please wait...';
   const tab = window._authTab || 'login';
-  let result;
   if (tab === 'reset') {
-    result = await sbClient.auth.resetPasswordForEmail(email);
-    if (result.error) {
-      document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + result.error.message + '</div>';
-    } else {
-      document.getElementById('authMsg').innerHTML = '<div class="success-msg">Reset link sent — check your email.</div>';
-    }
+    const r = await sbClient.auth.resetPasswordForEmail(email);
+    document.getElementById('authMsg').innerHTML = r.error ? '<div class="error-msg">' + r.error.message + '</div>' : '<div class="success-msg">Reset link sent.</div>';
     document.getElementById('authSubmitBtn').textContent = 'Send reset link';
     return;
   }
-  if (tab === 'signup') {
-    result = await sbClient.auth.signUp({ email, password: pass });
-  } else {
-    result = await sbClient.auth.signInWithPassword({ email, password: pass });
-  }
+  const name = document.getElementById('authName')?.value || '';
+  const result = tab === 'signup'
+    ? await sbClient.auth.signUp({ email, password: pass, options: { data: { full_name: name } } })
+    : await sbClient.auth.signInWithPassword({ email, password: pass });
   if (result.error) {
     document.getElementById('authMsg').innerHTML = '<div class="error-msg">' + result.error.message + '</div>';
     document.getElementById('authSubmitBtn').textContent = tab === 'signup' ? 'Create Account' : 'Sign In';
   } else {
-    document.getElementById('authMsg').innerHTML = '<div class="success-msg">✓ ' + (tab === 'signup' ? 'Account created! Check your email to confirm.' : 'Signed in successfully!') + '</div>';
+    document.getElementById('authMsg').innerHTML = '<div class="success-msg">✓ ' + (tab === 'signup' ? 'Account created! Check your email.' : 'Signed in!') + '</div>';
     setTimeout(() => { closeAuth(); updateNavAuth(); }, 1400);
   }
 }
 
-// ─── FAQ ──────────────────────────────────────────────────────
 function toggleFaq(el) { el.classList.toggle('open'); }
 
-// ─── TRIP GENERATION ──────────────────────────────────────────
-async function generateTrip() {
-  const airport = document.getElementById('q_airport').value;
+// PROFILE
+async function loadProfile() {
+  if (!sbClient || !currentUser) { showPage('landing'); openAuth('login'); return; }
+  const name = currentUser.user_metadata?.full_name || '';
+  document.getElementById('profileAvatar').textContent = (name || currentUser.email)[0].toUpperCase();
+  document.getElementById('profileName').textContent = name || 'My Profile';
+  document.getElementById('profileEmail').textContent = currentUser.email;
+  if (document.getElementById('profileNameInput')) document.getElementById('profileNameInput').value = name;
+  try {
+    const { data: trips } = await sbClient.from('trip_requests').select('*, trip_results(ai_response)').eq('user_id', currentUser.id).order('created_at', {ascending:false});
+    const list = document.getElementById('savedTripsList');
+    if (!trips || trips.length === 0) {
+      list.innerHTML = '<div class="empty-trips">No saved trips yet. <a href="#" onclick="showPage(\'quiz\');return false;" style="color:var(--green-light)">Plan your first trip →</a></div>';
+    } else {
+      list.innerHTML = trips.map(t => {
+        const dest = t.trip_results?.[0]?.ai_response?.budget?.destination?.name || t.destination_type || 'Golf Trip';
+        const date = new Date(t.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+        savedTripsCache[t.id] = t;
+        const card = document.createElement('div');
+        card.className = 'saved-trip-card';
+        card.innerHTML = '<div><div class="saved-trip-dest">⛳ ' + dest + '</div><div class="saved-trip-meta">' + (t.departure_airport||'') + ' · ' + (t.budget||'') + ' · Saved ' + date + '</div></div>';
+        const btns = document.createElement('div');
+        btns.style.cssText = 'display:flex;gap:0.5rem;flex-shrink:0';
+        const openBtn = document.createElement('button');
+        openBtn.className = 'trip-action-btn';
+        openBtn.style.cssText = 'background:var(--green);color:var(--sand);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;border:none';
+        openBtn.textContent = 'Open →';
+        openBtn.addEventListener('click', () => openTripById(t.id));
+        const delBtn = document.createElement('button');
+        delBtn.className = 'trip-action-btn trip-delete-btn';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => deleteTrip(t.id));
+        btns.appendChild(openBtn);
+        btns.appendChild(delBtn);
+        card.appendChild(btns);
+        return card.outerHTML;
+      }).join('');
+    }
+  } catch(e) { document.getElementById('savedTripsList').innerHTML = '<div class="empty-trips">Could not load trips.</div>'; }
+}
+async function deleteTrip(id) {
+  if (!sbClient || !confirm('Delete this trip?')) return;
+  await sbClient.from('trip_requests').delete().eq('id', id);
+  loadProfile();
+}
+async function saveProfile() {
+  if (!sbClient || !currentUser) return;
+  const { error } = await sbClient.auth.updateUser({ data: { full_name: document.getElementById('profileNameInput').value } });
+  document.getElementById('profileMsg').innerHTML = error ? '<div class="error-msg">' + error.message + '</div>' : '<div class="success-msg">✓ Profile saved.</div>';
+  if (!error) { updateNavAuth(); document.getElementById('profileName').textContent = document.getElementById('profileNameInput').value || 'My Profile'; }
+}
+async function signOut() {
+  if (!sbClient) return;
+  await sbClient.auth.signOut();
+  currentUser = null;
+  updateNavAuth();
+  showPage('landing');
+}
+
+// TRIP GENERATION — 3 TIERS
+async function generateTrips() {
+  const airports = getAirports();
   const golfers = document.getElementById('q_golfers').value;
   const budget = document.getElementById('q_budget').value;
   const handicap = document.getElementById('q_handicap').value;
@@ -733,11 +1308,10 @@ async function generateTrip() {
   const style = chipSelections.style || 'Golf & relaxation';
   const accomm = chipSelections.accomm || 'Hotel';
   const weather = chipSelections.weather || 'Warm';
+  const clubs = chipSelections.clubs || 'Bringing own clubs';
+  const flightPref = getFlightPreference();
 
-  if (!airport || !budget || !handicap) {
-    alert('Please fill in at least: departure airport, budget and handicap.');
-    return;
-  }
+  if (!airports || !budget || !handicap) { alert('Please fill in at least: departure airport, budget and handicap.'); return; }
 
   showPage('results');
   document.getElementById('resultsLoading').style.display = 'block';
@@ -749,34 +1323,78 @@ async function generateTrip() {
     si++;
     if (si <= 5) document.getElementById('ls' + si).classList.add('active');
     else clearInterval(stepInterval);
-  }, 1800);
+  }, 2000);
 
-  const prompt = `You are an expert golf travel consultant for UK golfers. Generate a realistic golf holiday recommendation:
+  // Animate tier badges
+  setTimeout(() => { document.getElementById('lt-budget').classList.add('active'); }, 2000);
+  setTimeout(() => { document.getElementById('lt-budget').classList.remove('active'); document.getElementById('lt-budget').classList.add('done'); document.getElementById('lt-mid').classList.add('active'); }, 5000);
+  setTimeout(() => { document.getElementById('lt-mid').classList.remove('active'); document.getElementById('lt-mid').classList.add('done'); document.getElementById('lt-luxury').classList.add('active'); }, 8000);
 
-- Departure airport: ${airport}
+  const needsClubHire = clubs.includes('hire');
+
+  const prompt = `You are an expert golf travel consultant for UK golfers. Generate THREE versions of a golf holiday recommendation for the same destination region — a Budget option, Mid-Range option, and Luxury option.
+
+User preferences:
+- Departure airport(s): ${airports}
 - Travel dates: ${dates}
-- Budget per person: ${budget}
+- Budget per person (indicative): ${budget}
 - Number of golfers: ${golfers || '2'}
 - Handicap: ${handicap}
 - Destination preference: ${dest}
 - Trip style: ${style}
-- Accommodation: ${accomm}
-- Weather: ${weather}
+- Accommodation preference: ${accomm}
+- Weather preference: ${weather}
+- Club hire: ${clubs}
+- Flight time preference: ${flightPref}
 - Notes: ${notes || 'none'}
 
-Respond ONLY with valid JSON. No markdown, no backticks, nothing before or after the JSON:
+IMPORTANT: All three tiers should be in the same destination region (e.g. all in the Algarve). What changes between tiers is the quality of courses, hotels and experiences — not the destination.
+
+Respond ONLY with valid JSON. No markdown, no backticks, nothing else before or after:
+
 {
-  "destination": {"name":"specific region e.g. Algarve, Portugal","tagline":"2 sentences why this suits their budget, handicap and style"},
-  "courses": [{"name":"","location":"","description":"","difficulty":"Beginner/Intermediate/Challenging/Championship","why":""}],
-  "hotels": [{"name":"","area":"","description":"","why":"","search_name":"hotel name for booking search"}],
-  "restaurants": [{"name":"","type":"","description":""}],
-  "bars": [{"name":"","type":"","description":""}],
-  "itinerary": [{"day":1,"title":"Arrival","description":""},{"day":2,"title":"Golf Day 1","description":""},{"day":3,"title":"Golf Day 2","description":""},{"day":4,"title":"Relax & Explore","description":""},{"day":5,"title":"Departure","description":""}],
-  "costs": {"flights":"e.g. £180-£280 pp return","accommodation":"e.g. £120-£180 pp/night","golf":"e.g. £60-£120 per round","food_drink":"e.g. £40-£70 per day","total":"e.g. £1,400-£2,200 pp for 5 nights"},
-  "destination_slug": "destination name for url e.g. algarve-portugal",
-  "flight_search": "departure city and destination city for flight search e.g. London Faro"
+  "destination_region": "e.g. Algarve, Portugal",
+  "region_summary": "2 sentences about why this region suits their preferences and airports",
+  "budget": {
+    "tier_label": "Budget",
+    "tagline": "Great golf at outstanding value",
+    "destination": {"name": "Algarve, Portugal", "tagline": "2 sentences specific to budget tier"},
+    "courses": [{"name":"","location":"","description":"","difficulty":"","par":72,"yardage":"6500 yards","slope_rating":125,"course_rating":"70.2","green_fees":"approx £40-65","designer":"","holes":18,"why":""}],
+    "hotels": [{"name":"","area":"","description":"","why":"","search_name":"","type":"hotel"}],
+    "restaurants": [{"name":"","type":"","description":""}],
+    "bars": [{"name":"","type":"","description":""}],
+    "itinerary": [{"day":1,"title":"Arrival","description":""},{"day":2,"title":"Golf Day 1","description":""},{"day":3,"title":"Golf Day 2","description":""},{"day":4,"title":"Relax & Explore","description":""},{"day":5,"title":"Departure","description":""}],
+    "costs": {"flights":"","accommodation":"","golf":"","food_drink":"","total":""},
+    "flight_search": "e.g. London Faro"
+  },
+  "mid": {
+    "tier_label": "Mid-Range",
+    "tagline": "The sweet spot — quality courses, great resorts",
+    "destination": {"name": "Algarve, Portugal", "tagline": "2 sentences specific to mid tier"},
+    "courses": [{"name":"","location":"","description":"","difficulty":"","par":72,"yardage":"","slope_rating":130,"course_rating":"","green_fees":"approx £70-110","designer":"","holes":18,"why":""}],
+    "hotels": [{"name":"","area":"","description":"","why":"","search_name":"","type":"resort"}],
+    "restaurants": [{"name":"","type":"","description":""}],
+    "bars": [{"name":"","type":"","description":""}],
+    "itinerary": [{"day":1,"title":"Arrival","description":""},{"day":2,"title":"Golf Day 1","description":""},{"day":3,"title":"Golf Day 2","description":""},{"day":4,"title":"Relax & Explore","description":""},{"day":5,"title":"Departure","description":""}],
+    "costs": {"flights":"","accommodation":"","golf":"","food_drink":"","total":""},
+    "flight_search": "e.g. London Faro"
+  },
+  "luxury": {
+    "tier_label": "Luxury",
+    "tagline": "World-class golf, exceptional resorts",
+    "destination": {"name": "Algarve, Portugal", "tagline": "2 sentences specific to luxury tier"},
+    "courses": [{"name":"","location":"","description":"","difficulty":"","par":72,"yardage":"","slope_rating":140,"course_rating":"","green_fees":"approx £150-250","designer":"","holes":18,"why":""}],
+    "hotels": [{"name":"","area":"","description":"","why":"","search_name":"","type":"resort"}],
+    "restaurants": [{"name":"","type":"","description":""}],
+    "bars": [{"name":"","type":"","description":""}],
+    "itinerary": [{"day":1,"title":"Arrival","description":""},{"day":2,"title":"Golf Day 1","description":""},{"day":3,"title":"Golf Day 2","description":""},{"day":4,"title":"Relax & Explore","description":""},{"day":5,"title":"Departure","description":""}],
+    "costs": {"flights":"","accommodation":"","golf":"","food_drink":"","total":""},
+    "flight_search": "e.g. London Faro"
+  }${needsClubHire ? `,
+  "club_hire": [{"company":"","location":"","description":"","approx_cost":"per day"}]` : ''}
 }
-Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real venues.`;
+
+Each tier: 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real venues. Be specific and practical.`;
 
   try {
     const res = await fetch('/.netlify/functions/generate-trip', {
@@ -790,205 +1408,533 @@ Provide exactly 4 courses, 3 hotels, 3 restaurants, 3 bars. All must be real ven
     clearInterval(stepInterval);
     let raw = data.result || '';
     raw = raw.replace(/```json|```/g, '').trim();
-    let trip;
-    try { trip = JSON.parse(raw); }
-    catch(e) {
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (match) trip = JSON.parse(match[0]);
-      else throw new Error('Could not parse response');
-    }
+    let trips;
+    try { trips = JSON.parse(raw); }
+    catch(e) { const m = raw.match(/\{[\s\S]*\}/); if (m) trips = JSON.parse(m[0]); else throw new Error('Could not parse response'); }
 
-    // Save to Supabase if logged in
+    tripsData = trips;
+
+    // Save to Supabase
     if (sbClient && currentUser) {
-      const { data: reqData } = await sbClient.from('trip_requests').insert({
-        user_id: currentUser.id,
-        departure_airport: airport,
-        travel_dates: dates,
-        budget,
-        group_size: golfers,
-        handicap,
-        destination_type: dest,
-        trip_style: style,
-        accommodation_type: accomm,
-        weather_preference: weather,
-        notes
-      }).select().single();
-      if (reqData) {
-        await sbClient.from('trip_results').insert({
-          trip_request_id: reqData.id,
-          ai_response: trip
-        });
-      }
+      try {
+        const { data: reqData } = await sbClient.from('trip_requests').insert({
+          user_id: currentUser.id, departure_airport: airports, travel_dates: dates,
+          budget, group_size: golfers, handicap, destination_type: dest,
+          trip_style: style, accommodation_type: accomm, weather_preference: weather, notes
+        }).select().single();
+        if (reqData) await sbClient.from('trip_results').insert({ trip_request_id: reqData.id, ai_response: trips });
+      } catch(e) { console.warn('Save failed:', e.message); }
     }
 
-    renderResults(trip, {airport, golfers, dates, budget, handicap, dest, style, accomm, weather});
+    renderTrips(trips, {airports, golfers, dates, budget, handicap, dest, style, accomm, weather});
   } catch(err) {
     clearInterval(stepInterval);
     document.getElementById('resultsLoading').style.display = 'none';
     document.getElementById('resultsBody').style.display = 'block';
-    document.getElementById('resultsBody').innerHTML = `<div class="result-section"><div style="text-align:center;padding:2rem"><div style="font-size:2rem;margin-bottom:1rem">⛳</div><h3 style="color:var(--green);margin-bottom:0.5rem">Unable to generate trip</h3><p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:0.5rem">Error: ${err.message}</p><button class="results-action-btn btn-primary" style="max-width:200px;margin:0 auto" onclick="showPage('quiz')">← Try Again</button></div></div>`;
+    document.getElementById('resultsBody').innerHTML = `<div style="padding:3rem;text-align:center"><div style="font-size:2rem;margin-bottom:1rem">⛳</div><h3 style="color:var(--green);margin-bottom:0.5rem;font-family:Playfair Display,serif">Unable to generate trips</h3><p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1.5rem">Error: ${err.message}</p><button class="results-action-btn btn-primary" style="max-width:200px;margin:0 auto" onclick="showPage('quiz')">← Try Again</button></div>`;
   }
 }
 
-// ─── AFFILIATE LINKS ──────────────────────────────────────────
-function buildBookingLinks(trip, prefs) {
-  const dest = trip.destination?.name || '';
-  const destSlug = trip.destination_slug || dest.toLowerCase().replace(/[^a-z0-9]+/g,'-');
-  const flightSearch = trip.flight_search || (prefs.airport + ' ' + dest);
-  const dates = prefs.dates || '';
-
-  // Booking.com affiliate — replace AFFILIATE_ID with your real ID once approved
+function buildBookingLinks(tierData, prefs) {
+  const dest = tierData.destination?.name || '';
+  const isVilla = tierData.hotels?.[0]?.type === 'villa' || (prefs.accomm && prefs.accomm.includes('Villa'));
+  const flightSearch = tierData.flight_search || dest;
+  const skyscannerUrl = `https://www.skyscanner.net/transport/flights/${encodeURIComponent(flightSearch)}/`;
   const bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(dest)}&aid=AFFILIATE_ID`;
-
-  // Skyscanner affiliate — replace with your real tag once approved
-  const skyscannerUrl = `https://www.skyscanner.net/transport/flights/${encodeURIComponent(flightSearch)}/?affiliateId=AFFILIATE_ID`;
-
-  // GolfNow affiliate — replace with your real ID once approved
+  const vrboUrl = `https://www.vrbo.com/search?destination=${encodeURIComponent(dest)}`;
   const golfnowUrl = `https://www.golfnow.com/tee-times/search#${encodeURIComponent(dest)}`;
+  const accommCard = isVilla
+    ? `<a href="${vrboUrl}" target="_blank" rel="noopener" class="booking-card"><div class="booking-card-icon">🏡</div><div class="booking-card-name">Villas on Vrbo</div><div class="booking-card-desc">${dest}</div><span class="booking-card-cta">Search Vrbo →</span></a>`
+    : `<a href="${bookingUrl}" target="_blank" rel="noopener" class="booking-card"><div class="booking-card-icon">🏨</div><div class="booking-card-name">Find Hotels</div><div class="booking-card-desc">${dest}</div><span class="booking-card-cta">Booking.com →</span></a>`;
+  return `<div class="booking-section"><div class="result-section-header"><div class="result-section-icon">🔗</div><div class="result-section-title">Book This Trip</div></div><p class="booking-section-sub">Links to trusted booking partners for this tier.</p><div class="booking-grid"><a href="${skyscannerUrl}" target="_blank" rel="noopener" class="booking-card"><div class="booking-card-icon">✈</div><div class="booking-card-name">Flights</div><div class="booking-card-desc">${prefs.airports}</div><span class="booking-card-cta">Skyscanner →</span></a>${accommCard}<a href="${golfnowUrl}" target="_blank" rel="noopener" class="booking-card"><div class="booking-card-icon">⛳</div><div class="booking-card-name">Tee Times</div><div class="booking-card-desc">${dest}</div><span class="booking-card-cta">GolfNow →</span></a></div><p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.8rem;text-align:center">GolfTrip may earn a commission when you book via these links, at no extra cost to you.</p></div>`;
+}
+
+function buildTierPanel(tierData, tierKey, prefs, clubHire, isFree) {
+  if (!tierData) return '<p style="padding:2rem;color:var(--text-muted)">No data for this tier.</p>';
+  const d = tierData.destination || {};
+  const courses = tierData.courses || [];
+  const hotels = tierData.hotels || [];
+  const restaurants = tierData.restaurants || [];
+  const bars = tierData.bars || [];
+  const itin = tierData.itinerary || [];
+  const costs = tierData.costs || {};
+
+  const tierColors = {budget:'var(--budget-color)',mid:'var(--gold-dark)',luxury:'var(--luxury-color)'};
+  const tierIcons = {budget:'💚',mid:'⭐',luxury:'✨'};
+  const tierLabels = {budget:'Budget',mid:'Mid-Range',luxury:'Luxury'};
+
+  const coursesHTML = courses.map(c => `<div class="course-card"><div class="course-name">${c.name}</div><div class="course-location">📍 ${c.location}</div><div class="course-desc">${c.description}</div><div class="course-stats"><div class="course-stat"><div class="course-stat-label">Par</div><div class="course-stat-value">${c.par||'—'}</div></div><div class="course-stat"><div class="course-stat-label">Yardage</div><div class="course-stat-value">${c.yardage||'—'}</div></div><div class="course-stat"><div class="course-stat-label">Slope</div><div class="course-stat-value">${c.slope_rating||'—'}</div></div><div class="course-stat"><div class="course-stat-label">Rating</div><div class="course-stat-value">${c.course_rating||'—'}</div></div></div><div class="course-tags"><span class="course-tag">${c.difficulty}</span>${c.designer?'<span class="course-tag">🏗 '+c.designer+'</span>':''}<span class="course-tag gold">Green fees: ${c.green_fees||'—'}</span></div><div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-top:0.4rem">${c.why}</div><a href="https://www.golfnow.com/tee-times/search#${encodeURIComponent(c.name)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.5rem;font-size:0.75rem;color:var(--gold-dark);font-weight:600;text-decoration:none">Book tee time →</a></div>`).join('');
+
+  const hotelsHTML = hotels.map(h => {
+    const bookUrl = h.type === 'villa' ? `https://www.vrbo.com/search?destination=${encodeURIComponent(h.search_name||h.name)}` : `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.search_name||h.name)}&aid=AFFILIATE_ID`;
+    const bookLabel = h.type === 'villa' ? 'Search Vrbo →' : 'Check availability →';
+    return `<div class="hotel-card"><div class="hotel-name">${h.name}</div><div class="hotel-area">${h.area}</div><div class="hotel-desc">${h.description}</div><div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-top:0.4rem">${h.why}</div><a href="${bookUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.5rem;font-size:0.75rem;color:var(--gold-dark);font-weight:600;text-decoration:none">${bookLabel}</a></div>`;
+  }).join('');
+
+  const restHTML = restaurants.map(r => `<div class="rec-item"><div style="font-size:1.1rem;flex-shrink:0">🍽</div><div><div class="rec-name">${r.name}</div><div class="rec-detail">${r.type} · ${r.description}</div></div></div>`).join('');
+  const barsHTML = bars.map(b => `<div class="rec-item"><div style="font-size:1.1rem;flex-shrink:0">🍹</div><div><div class="rec-name">${b.name}</div><div class="rec-detail">${b.type} · ${b.description}</div></div></div>`).join('');
+  const itinHTML = itin.map(day => `<div class="day-item"><div class="day-num">${day.day}</div><div class="day-content"><div class="day-title">Day ${day.day}: ${day.title}</div><div class="day-desc">${day.description}</div></div></div>`).join('');
+
+  const clubHireHTML = clubHire && clubHire.length > 0 ? `<div class="result-section"><div class="result-section-header"><div class="result-section-icon">🏌</div><div class="result-section-title">Club Hire</div></div><div class="rec-list">${clubHire.map(c=>`<div class="rec-item"><div style="font-size:1.1rem">🎒</div><div><div class="rec-name">${c.company}</div><div class="rec-detail">${c.location} · ${c.description} · <strong style="color:var(--green)">${c.approx_cost}</strong></div></div></div>`).join('')}</div></div>` : '';
+
+  const watermark = isFree ? `<div class="watermark-banner"><h4>🔓 Unlock Unlimited Trips</h4><p>You're on the free plan. Upgrade to Pro for unlimited trip comparisons, saved trips and seasonal recommendations.</p><button class="watermark-upgrade-btn" onclick="openAuth('signup')">Upgrade to Pro →</button></div>` : '';
 
   return `
-<div class="booking-section">
-  <div class="result-section-header"><div class="result-section-icon">🔗</div><div class="result-section-title">Book Your Trip</div></div>
-  <p class="booking-section-sub">Ready to book? Use these trusted partners to secure your flights, accommodation and tee times.</p>
-  <div class="booking-grid">
-    <a href="${skyscannerUrl}" target="_blank" rel="noopener" class="booking-card">
-      <div class="booking-card-icon">✈</div>
-      <div class="booking-card-name">Search Flights</div>
-      <div class="booking-card-desc">Compare flights from ${prefs.airport}</div>
-      <span class="booking-card-cta">Search on Skyscanner →</span>
-    </a>
-    <a href="${bookingUrl}" target="_blank" rel="noopener" class="booking-card">
-      <div class="booking-card-icon">🏨</div>
-      <div class="booking-card-name">Find Hotels</div>
-      <div class="booking-card-desc">Hotels & resorts in ${dest}</div>
-      <span class="booking-card-cta">Search on Booking.com →</span>
-    </a>
-    <a href="${golfnowUrl}" target="_blank" rel="noopener" class="booking-card">
-      <div class="booking-card-icon">⛳</div>
-      <div class="booking-card-name">Book Tee Times</div>
-      <div class="booking-card-desc">Golf courses in ${dest}</div>
-      <span class="booking-card-cta">Search on GolfNow →</span>
-    </a>
-  </div>
-  <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.8rem;text-align:center">GolfTrip may earn a small commission when you book through these links, at no extra cost to you.</p>
-</div>`;
-}
-
-// ─── RENDER RESULTS ───────────────────────────────────────────
-function renderResults(trip, prefs) {
-  const d = trip.destination || {};
-  const courses = trip.courses || [];
-  const hotels = trip.hotels || [];
-  const restaurants = trip.restaurants || [];
-  const bars = trip.bars || [];
-  const itin = trip.itinerary || [];
-  const costs = trip.costs || {};
-  const dest = d.name || '';
-
-  document.getElementById('resultsTitle').textContent = d.name || 'Your Golf Trip';
-  document.getElementById('resultsSub').textContent = prefs.airport + ' · ' + (prefs.golfers || '2 golfers') + ' · ' + prefs.budget;
-
-  const coursesHTML = courses.map(c => `
-    <div class="course-card">
-      <div class="course-name">${c.name}</div>
-      <div class="course-location">📍 ${c.location}</div>
-      <div class="course-desc">${c.description}</div>
-      <div class="course-tags"><span class="course-tag">${c.difficulty}</span><span class="course-tag gold">★ Recommended</span></div>
-      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);font-style:italic">${c.why}</div>
-      <a href="https://www.golfnow.com/tee-times/search#${encodeURIComponent(c.name)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.6rem;font-size:0.75rem;color:var(--gold-dark);font-weight:600;text-decoration:none">Book tee time →</a>
-    </div>`).join('');
-
-  const hotelsHTML = hotels.map(h => `
-    <div class="hotel-card">
-      <div class="hotel-name">${h.name}</div>
-      <div class="hotel-area">${h.area}</div>
-      <div class="hotel-desc">${h.description}</div>
-      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);font-style:italic">${h.why}</div>
-      <a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.search_name||h.name)}&aid=AFFILIATE_ID" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.6rem;font-size:0.75rem;color:var(--gold-dark);font-weight:600;text-decoration:none">Check availability →</a>
-    </div>`).join('');
-
-  const restHTML = restaurants.map(r => `
-    <div class="rec-item"><div class="rec-emoji">🍽</div><div><div class="rec-name">${r.name}</div><div class="rec-detail">${r.type} · ${r.description}</div></div></div>`).join('');
-
-  const barsHTML = bars.map(b => `
-    <div class="rec-item"><div class="rec-emoji">🍹</div><div><div class="rec-name">${b.name}</div><div class="rec-detail">${b.type} · ${b.description}</div></div></div>`).join('');
-
-  const itinHTML = itin.map(day => `
-    <div class="day-item">
-      <div class="day-num">${day.day}</div>
-      <div class="day-content"><div class="day-title">Day ${day.day}: ${day.title}</div><div class="day-desc">${day.description}</div></div>
-    </div>`).join('');
-
-  document.getElementById('resultsLoading').style.display = 'none';
-  document.getElementById('resultsBody').innerHTML = `
-<div class="result-section">
-  <div class="result-section-header"><div class="result-section-icon">🗺</div><div class="result-section-title">Recommended Destination</div></div>
-  <div class="destination-highlight"><strong style="color:var(--green)">${d.name}</strong><br><br>${d.tagline}</div>
-</div>
-
-${buildBookingLinks(trip, prefs)}
-
-<div class="result-section">
-  <div class="result-section-header"><div class="result-section-icon">⛳</div><div class="result-section-title">Recommended Golf Courses</div></div>
-  <div class="courses-grid">${coursesHTML}</div>
-</div>
-<div class="result-section">
-  <div class="result-section-header"><div class="result-section-icon">🏨</div><div class="result-section-title">Recommended Accommodation</div></div>
-  <div class="hotels-grid">${hotelsHTML}</div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
-  <div class="result-section">
-    <div class="result-section-header"><div class="result-section-icon">🍽</div><div class="result-section-title">Suggested Restaurants</div></div>
-    <div class="rec-list">${restHTML}</div>
-  </div>
-  <div class="result-section">
-    <div class="result-section-header"><div class="result-section-icon">🍹</div><div class="result-section-title">Suggested Bars</div></div>
-    <div class="rec-list">${barsHTML}</div>
+<div class="tier-banner ${tierKey}">
+  <div class="tier-banner-icon">${tierIcons[tierKey]}</div>
+  <div>
+    <div class="tier-banner-title">${tierLabels[tierKey]} — ${d.name}</div>
+    <div class="tier-banner-desc">${tierData.tagline || ''}</div>
   </div>
 </div>
-<div class="result-section">
-  <div class="result-section-header"><div class="result-section-icon">📅</div><div class="result-section-title">Sample 5-Day Itinerary</div></div>
-  <div class="itinerary-days">${itinHTML}</div>
-</div>
-<div class="result-section">
-  <div class="result-section-header"><div class="result-section-icon">💷</div><div class="result-section-title">Estimated Costs Per Person</div></div>
-  <div class="cost-grid">
-    <div class="cost-item"><div class="cost-label">Flights</div><div class="cost-value" style="font-size:1rem">${costs.flights||'—'}</div></div>
-    <div class="cost-item"><div class="cost-label">Accommodation</div><div class="cost-value" style="font-size:1rem">${costs.accommodation||'—'}</div></div>
-    <div class="cost-item"><div class="cost-label">Golf</div><div class="cost-value" style="font-size:1rem">${costs.golf||'—'}</div></div>
-    <div class="cost-item"><div class="cost-label">Food & Drink</div><div class="cost-value" style="font-size:1rem">${costs.food_drink||'—'}</div></div>
-  </div>
-  <div class="cost-total"><div class="cost-label">Total Estimate</div><div class="cost-value">${costs.total||'—'}</div></div>
-</div>
+${watermark}
+<div class="result-section"><div class="result-section-header"><div class="result-section-icon">🗺</div><div class="result-section-title">Destination</div></div><div class="destination-highlight"><strong style="color:${tierColors[tierKey]}">${d.name}</strong><br><br>${d.tagline}</div></div>
+${buildBookingLinks(tierData, prefs)}
+<div class="result-section"><div class="result-section-header"><div class="result-section-icon">⛳</div><div class="result-section-title">Recommended Golf Courses</div></div><div class="courses-grid">${coursesHTML}</div></div>
+<div class="result-section"><div class="result-section-header"><div class="result-section-icon">🏨</div><div class="result-section-title">Recommended Accommodation</div></div><div class="hotels-grid">${hotelsHTML}</div></div>
+${clubHireHTML}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><div class="result-section"><div class="result-section-header"><div class="result-section-icon">🍽</div><div class="result-section-title">Restaurants</div></div><div class="rec-list">${restHTML}</div></div><div class="result-section"><div class="result-section-header"><div class="result-section-icon">🍹</div><div class="result-section-title">Bars</div></div><div class="rec-list">${barsHTML}</div></div></div>
+<div class="result-section"><div class="result-section-header"><div class="result-section-icon">📅</div><div class="result-section-title">Sample 5-Day Itinerary</div></div><div class="itinerary-days">${itinHTML}</div></div>
+<div class="result-section"><div class="result-section-header"><div class="result-section-icon">💷</div><div class="result-section-title">Estimated Costs Per Person</div></div><div class="cost-grid"><div class="cost-item"><div class="cost-label">Flights</div><div class="cost-value">${costs.flights||'—'}</div></div><div class="cost-item"><div class="cost-label">Accommodation</div><div class="cost-value">${costs.accommodation||'—'}</div></div><div class="cost-item"><div class="cost-label">Golf</div><div class="cost-value">${costs.golf||'—'}</div></div><div class="cost-item"><div class="cost-label">Food & Drink</div><div class="cost-value">${costs.food_drink||'—'}</div></div></div><div class="cost-total"><div class="cost-label">Total Estimate</div><div class="cost-value">${costs.total||'—'}</div></div></div>
 <div class="results-actions">
   <button class="results-action-btn btn-primary" onclick="showPage('quiz')">← Plan Another Trip</button>
-  <button class="results-action-btn btn-outline" onclick="openAuth('signup')" id="saveBtn">Save This Trip</button>
+  ${currentUser ? '<button class="results-action-btn btn-outline" onclick="showPage(\'profile\')">View Saved Trips</button>' : '<button class="results-action-btn btn-outline" onclick="openAuth(\'signup\')">Save This Trip</button>'}
   <button class="results-action-btn btn-outline" onclick="window.print()">🖨 Print / PDF</button>
 </div>`;
-  document.getElementById('resultsBody').style.display = 'block';
+}
 
-  // If already logged in, update save button
-  if (currentUser) {
-    const btn = document.getElementById('saveBtn');
-    if (btn) { btn.textContent = '✓ Trip Saved'; btn.disabled = true; }
+function renderTrips(trips, prefs) {
+  const isFree = !currentUser;
+  const clubHire = trips.club_hire || [];
+
+  document.getElementById('resultsTitle').textContent = (trips.destination_region || 'Your Golf Trip') + ' — 3 Options';
+  document.getElementById('resultsSub').textContent = prefs.airports + ' · ' + (prefs.golfers || '2 golfers') + ' · ' + prefs.budget;
+
+  // Populate compare bar prices
+  ['budget','mid','luxury'].forEach(t => {
+    const total = trips[t]?.costs?.total || '—';
+    document.getElementById('cb-' + t).textContent = total.split(' ')[0];
+  });
+
+  document.getElementById('panel-budget').innerHTML = buildTierPanel(trips.budget, 'budget', prefs, clubHire, isFree);
+  document.getElementById('panel-mid').innerHTML = buildTierPanel(trips.mid, 'mid', prefs, clubHire, false);
+  document.getElementById('panel-luxury').innerHTML = buildTierPanel(trips.luxury, 'luxury', prefs, clubHire, false);
+
+  document.getElementById('resultsLoading').style.display = 'none';
+  document.getElementById('resultsBody').style.display = 'block';
+  document.getElementById('compareBar').style.display = 'flex';
+
+  // Default to mid tab
+  switchTier('mid');
+}
+
+
+
+// ─── VOTING ───────────────────────────────────────────────────
+async function loadVotes() {
+  if (!sbClient || !currentTripId) return;
+  try {
+    const { data: votes } = await sbClient
+      .from('trip_votes')
+      .select('*')
+      .eq('trip_request_id', currentTripId);
+
+    if (!votes) return;
+
+    const counts = {budget:0, mid:0, luxury:0};
+    let myVote = null;
+
+    votes.forEach(v => {
+      if (counts[v.tier] !== undefined) counts[v.tier]++;
+      if (v.user_id === currentUser.id) myVote = v.tier;
+    });
+
+    const total = counts.budget + counts.mid + counts.luxury;
+
+    // Update bars
+    ['budget','mid','luxury'].forEach(tier => {
+      const pct = total > 0 ? Math.round((counts[tier] / total) * 100) : 0;
+      const bar = document.getElementById('voteBar-' + tier);
+      const count = document.getElementById('voteCount-' + tier);
+      const opt = document.getElementById('voteOpt-' + tier);
+      if (bar) bar.style.width = pct + '%';
+      if (count) count.textContent = counts[tier] + (counts[tier] === 1 ? ' vote' : ' votes');
+
+      // Clear voted classes
+      if (opt) {
+        opt.classList.remove('voted-budget','voted-mid','voted-luxury');
+      }
+
+      // Remove old my-pick badges
+      const oldBadge = opt?.querySelector('.vote-my-pick');
+      if (oldBadge) oldBadge.remove();
+    });
+
+    // Highlight my vote
+    if (myVote) {
+      const myOpt = document.getElementById('voteOpt-' + myVote);
+      if (myOpt) {
+        myOpt.classList.add('voted-' + myVote);
+        const badge = document.createElement('span');
+        badge.className = 'vote-my-pick ' + myVote;
+        badge.textContent = 'My pick';
+        myOpt.querySelector('.vote-option-left').appendChild(badge);
+      }
+    }
+
+    // Show winner if votes cast
+    const winnerEl = document.getElementById('voteWinner');
+    const winnerText = document.getElementById('voteWinnerText');
+    if (total > 0) {
+      const winner = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+      const labels = {budget:'💚 Budget Option', mid:'⭐ Mid-Range Option', luxury:'✨ Luxury Option'};
+      const tied = Object.values(counts).filter(v => v === winner[1]).length > 1;
+      winnerEl.style.display = 'block';
+      winnerText.textContent = tied ? "It's a tie so far!" : labels[winner[0]] + ' is winning (' + winner[1] + '/' + total + ' votes)';
+    } else {
+      winnerEl.style.display = 'none';
+    }
+
+    // Update descriptions from trip data if available
+    if (currentTripId && savedTripsCache[currentTripId]) {
+      const t = savedTripsCache[currentTripId];
+      const ai = t.trip_results?.[0]?.ai_response;
+      if (ai) {
+        ['budget','mid','luxury'].forEach(tier => {
+          const dest = ai[tier]?.destination?.name || ai.destination_region || '';
+          const total_cost = ai[tier]?.costs?.total || '';
+          const desc = document.getElementById('voteDesc-' + tier);
+          if (desc && (dest || total_cost)) {
+            desc.textContent = [dest, total_cost].filter(Boolean).join(' · ');
+          }
+        });
+      }
+    }
+  } catch(e) { console.warn('Load votes failed:', e.message); }
+}
+
+async function castVote(tier) {
+  if (!sbClient || !currentUser || !currentTripId) return;
+  try {
+    // Upsert — one vote per user per trip
+    await sbClient.from('trip_votes').upsert({
+      trip_request_id: currentTripId,
+      user_id: currentUser.id,
+      tier: tier
+    }, { onConflict: 'trip_request_id,user_id' });
+
+    // Post a chat message about the vote
+    const labels = {budget:'Budget', mid:'Mid-Range', luxury:'Luxury'};
+    const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    await sbClient.from('trip_messages').insert({
+      trip_request_id: currentTripId,
+      user_id: currentUser.id,
+      message: '🗳 ' + name + ' voted for the ' + labels[tier] + ' option.'
+    });
+
+    await loadVotes();
+    await loadMessages();
+  } catch(e) { console.warn('Vote failed:', e.message); }
+}
+
+// ─── GROUP & CHAT ─────────────────────────────────────────────
+let currentTripId = null;
+let chatPollingInterval = null;
+
+async function openTrip(tripId, tripData) {
+  if (!sbClient || !currentUser) return;
+  currentTripId = tripId;
+
+  showPage('trip');
+
+  // Set header
+  const dest = tripData?.ai_response?.budget?.destination?.name
+    || tripData?.ai_response?.destination_region
+    || 'Golf Trip';
+  document.getElementById('tripDetailTitle').textContent = '⛳ ' + dest;
+  document.getElementById('tripDetailMeta').textContent =
+    (tripData?.departure_airport || '') + (tripData?.budget ? ' · ' + tripData.budget : '') +
+    (tripData?.travel_dates ? ' · ' + tripData.travel_dates : '');
+
+  // Summary
+  const summary = document.getElementById('tripDetailSummary');
+  summary.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div style="background:var(--off-white);border:1px solid var(--sand-dark);border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Departure</div>
+        <div style="font-size:0.88rem;font-weight:600;color:var(--green)">${tripData?.departure_airport || '—'}</div>
+      </div>
+      <div style="background:var(--off-white);border:1px solid var(--sand-dark);border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Budget pp</div>
+        <div style="font-size:0.88rem;font-weight:600;color:var(--green)">${tripData?.budget || '—'}</div>
+      </div>
+      <div style="background:var(--off-white);border:1px solid var(--sand-dark);border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Dates</div>
+        <div style="font-size:0.88rem;font-weight:600;color:var(--green)">${tripData?.travel_dates || 'Flexible'}</div>
+      </div>
+      <div style="background:var(--off-white);border:1px solid var(--sand-dark);border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">Golfers</div>
+        <div style="font-size:0.88rem;font-weight:600;color:var(--green)">${tripData?.group_size || '—'}</div>
+      </div>
+    </div>`;
+
+  // Set invite link
+  const inviteUrl = window.location.origin + window.location.pathname + '?join=' + tripId;
+  document.getElementById('inviteLinkUrl').textContent = inviteUrl;
+
+  // Load members and chat
+  await loadMembers();
+  await loadMessages();
+  await loadVotes();
+
+  // Poll for new messages every 8 seconds
+  if (chatPollingInterval) clearInterval(chatPollingInterval);
+  chatPollingInterval = setInterval(async () => { await loadMessages(); await loadVotes(); }, 8000);
+}
+
+async function loadMembers() {
+  if (!sbClient || !currentTripId) return;
+  try {
+    // Get trip owner info
+    const { data: trip } = await sbClient
+      .from('trip_requests')
+      .select('user_id')
+      .eq('id', currentTripId)
+      .single();
+
+    // Get members
+    const { data: members } = await sbClient
+      .from('trip_members')
+      .select('*')
+      .eq('trip_request_id', currentTripId);
+
+    const list = document.getElementById('memberList');
+    let html = '';
+
+    // Owner first
+    if (trip) {
+      const isMe = trip.user_id === currentUser.id;
+      const initial = isMe ? (currentUser.user_metadata?.full_name?.[0] || currentUser.email[0]).toUpperCase() : '?';
+      const name = isMe ? (currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]) : 'Trip Organiser';
+      html += `<div class="member-item">
+        <div class="member-avatar">${initial}</div>
+        <div class="member-info">
+          <div class="member-name">${name}</div>
+          <div class="member-email">${isMe ? currentUser.email : ''}</div>
+        </div>
+        <span class="member-status owner">Organiser</span>
+      </div>`;
+    }
+
+    // Other members
+    if (members && members.length > 0) {
+      members.forEach(m => {
+        const isMe = m.user_id === currentUser.id;
+        const initial = isMe ? (currentUser.user_metadata?.full_name?.[0] || currentUser.email[0]).toUpperCase() : m.email?.[0]?.toUpperCase() || '?';
+        const name = isMe ? (currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]) : (m.email || 'Member');
+        const statusClass = m.status === 'confirmed' ? 'confirmed' : m.status === 'maybe' ? 'maybe' : 'invited';
+        const statusLabel = m.status === 'confirmed' ? '✅ Going' : m.status === 'maybe' ? '🤔 Maybe' : m.status === 'declined' ? '❌ Cannot go' : '📨 Invited';
+        html += `<div class="member-item">
+          <div class="member-avatar">${initial}</div>
+          <div class="member-info">
+            <div class="member-name">${name}</div>
+            <div class="member-email">${m.email || ''}</div>
+          </div>
+          <span class="member-status ${statusClass}">${statusLabel}</span>
+        </div>`;
+      });
+    } else if (!trip) {
+      html = '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.85rem">No members yet. Invite your group!</div>';
+    }
+
+    list.innerHTML = html || '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.85rem">Just you so far. Invite your group!</div>';
+  } catch(e) { console.warn('Load members failed:', e.message); }
+}
+
+async function inviteMember() {
+  if (!sbClient || !currentUser || !currentTripId) return;
+  const email = document.getElementById('inviteEmail').value.trim();
+  const msgEl = document.getElementById('inviteMsg');
+  if (!email || !email.includes('@')) {
+    msgEl.innerHTML = '<span style="color:#c0392b">Please enter a valid email address.</span>';
+    return;
+  }
+
+  try {
+    // Add to trip_members with email stored
+    const { error } = await sbClient.from('trip_members').insert({
+      trip_request_id: currentTripId,
+      user_id: currentUser.id, // placeholder — will update when they sign up
+      role: 'member',
+      status: 'invited',
+      email: email
+    });
+
+    if (error && error.code !== '23505') { // ignore duplicate
+      msgEl.innerHTML = '<span style="color:#c0392b">' + error.message + '</span>';
+      return;
+    }
+
+    msgEl.innerHTML = '<span style="color:var(--budget-color)">✓ Invite sent to ' + email + '</span>';
+    document.getElementById('inviteEmail').value = '';
+    await loadMembers();
+
+    // Post a system message to chat
+    await sbClient.from('trip_messages').insert({
+      trip_request_id: currentTripId,
+      user_id: currentUser.id,
+      message: '📨 ' + (currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]) + ' invited ' + email + ' to the trip.'
+    });
+    await loadMessages();
+  } catch(e) {
+    msgEl.innerHTML = '<span style="color:#c0392b">' + e.message + '</span>';
   }
 }
 
-// ─── ADMIN ────────────────────────────────────────────────────
+function copyInviteLink() {
+  const url = document.getElementById('inviteLinkUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-link-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+async function updateMyStatus(status) {
+  if (!sbClient || !currentUser || !currentTripId) return;
+  try {
+    await sbClient.from('trip_members')
+      .upsert({ trip_request_id: currentTripId, user_id: currentUser.id, status, role: 'member' },
+               { onConflict: 'trip_request_id,user_id' });
+
+    // Update button styles
+    document.querySelectorAll('.status-btn').forEach(b => {
+      b.className = 'status-btn';
+      if (b.textContent.includes('going') && status === 'confirmed') b.classList.add('active-going');
+      if (b.textContent.includes('Maybe') && status === 'maybe') b.classList.add('active-maybe');
+      if (b.textContent.includes('Cannot') && status === 'declined') b.classList.add('active-notgoing');
+    });
+
+    await loadMembers();
+  } catch(e) { console.warn('Status update failed:', e.message); }
+}
+
+async function loadMessages() {
+  if (!sbClient || !currentTripId) return;
+  try {
+    const { data: messages } = await sbClient
+      .from('trip_messages')
+      .select('*')
+      .eq('trip_request_id', currentTripId)
+      .order('created_at', {ascending: true})
+      .limit(100);
+
+    const container = document.getElementById('chatMessages');
+    if (!messages || messages.length === 0) {
+      container.innerHTML = '<div class="chat-empty">No messages yet. Say hello to your group!</div>';
+      return;
+    }
+
+    const wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+
+    container.innerHTML = messages.map(m => {
+      const isMe = m.user_id === currentUser.id;
+      const initial = isMe ? (currentUser.user_metadata?.full_name?.[0] || currentUser.email[0]).toUpperCase() : '?';
+      const name = isMe ? 'You' : 'Member';
+      const time = new Date(m.created_at).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+      const isSystem = m.message.startsWith('📨') || m.message.startsWith('🎉');
+      if (isSystem) {
+        return `<div style="text-align:center;font-size:0.75rem;color:var(--text-muted);padding:0.3rem 0">${m.message}</div>`;
+      }
+      return `<div class="chat-msg ${isMe ? 'mine' : ''}">
+        <div class="chat-avatar">${initial}</div>
+        <div class="chat-bubble">
+          <div class="chat-bubble-name">${name}</div>
+          <div class="chat-bubble-text">${m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          <div class="chat-bubble-time">${time}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    if (wasAtBottom) container.scrollTop = container.scrollHeight;
+  } catch(e) { console.warn('Load messages failed:', e.message); }
+}
+
+async function sendMessage() {
+  if (!sbClient || !currentUser || !currentTripId) return;
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  try {
+    await sbClient.from('trip_messages').insert({
+      trip_request_id: currentTripId,
+      user_id: currentUser.id,
+      message: msg
+    });
+    await loadMessages();
+  } catch(e) { console.warn('Send failed:', e.message); }
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+// Handle invite link join on page load
+async function checkJoinParam() {
+  const params = new URLSearchParams(window.location.search);
+  const tripId = params.get('join');
+  if (!tripId) return;
+  if (!currentUser) {
+    // Store trip ID and prompt sign up
+    sessionStorage.setItem('pendingJoinTrip', tripId);
+    openAuth('signup');
+    return;
+  }
+  try {
+    await sbClient.from('trip_members').insert({
+      trip_request_id: tripId,
+      user_id: currentUser.id,
+      role: 'member',
+      status: 'invited'
+    });
+    // Post join message
+    await sbClient.from('trip_messages').insert({
+      trip_request_id: tripId,
+      user_id: currentUser.id,
+      message: '🎉 ' + (currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]) + ' joined the trip!'
+    });
+    // Load the trip
+    const { data: trip } = await sbClient.from('trip_requests')
+      .select('*, trip_results(ai_response)')
+      .eq('id', tripId).single();
+    if (trip) openTrip(tripId, trip);
+  } catch(e) { console.warn('Join failed:', e.message); }
+}
+
+// ADMIN
 function adminLogin() {
-  const e = document.getElementById('adminEmail').value;
-  const p = document.getElementById('adminPass').value;
-  if (e === 'admin@golftrip.com' && p === 'admin123') {
+  if (document.getElementById('adminEmail').value === 'admin@golftrip.com' && document.getElementById('adminPass').value === 'admin123') {
     document.getElementById('adminLoginView').style.display = 'none';
     document.getElementById('adminDashView').style.display = 'block';
-  } else {
-    alert('Demo credentials: admin@golftrip.com / admin123');
-  }
+  } else { alert('Demo: admin@golftrip.com / admin123'); }
 }
 function adminLogout() {
   document.getElementById('adminLoginView').style.display = 'block';
   document.getElementById('adminDashView').style.display = 'none';
 }
+
+// Handle join invite links
+(async function() {
+  const joinId = new URLSearchParams(window.location.search).get('join');
+  if (!joinId) return;
+  if (sbClient && currentUser) {
+    await checkJoinParam();
+  } else {
+    sessionStorage.setItem('pendingJoinTrip', joinId);
+    openAuth('signup');
+  }
+})();
 
 if (window.location.hash === '#admin') showPage('admin');
 if (window.location.hash === '#pricing') showPricing();
