@@ -16,64 +16,67 @@ exports.handler = async (event) => {
   }
 
   try {
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GROQ_API_KEY
 
     if (!apiKey) {
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'GEMINI_API_KEY environment variable is not set' })
+        body: JSON.stringify({ error: 'GROQ_API_KEY environment variable is not set' })
       }
     }
 
     const { prompt } = JSON.parse(event.body)
 
-    console.log('Calling Gemini API with key prefix:', apiKey.substring(0, 6))
-
     const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2000
-          }
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert golf travel consultant specialising in holidays for UK golfers. Always respond with valid JSON only. No markdown, no backticks, no explanation before or after the JSON.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
         })
       }
     )
 
     const data = await response.json()
 
-    console.log('Gemini status:', response.status)
-    console.log('Gemini response preview:', JSON.stringify(data).substring(0, 300))
-
     if (!response.ok) {
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({
-          error: 'Gemini API error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data))
+          error: 'Groq API error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data))
         })
       }
     }
 
-    if (!data.candidates || !data.candidates[0]) {
+    if (!data.choices || !data.choices[0]) {
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({
-          error: 'No response from Gemini: ' + JSON.stringify(data)
+          error: 'No response from Groq: ' + JSON.stringify(data)
         })
       }
     }
 
-    const result = data.candidates[0].content.parts[0].text
+    const result = data.choices[0].message.content
 
     return {
       statusCode: 200,
@@ -85,7 +88,6 @@ exports.handler = async (event) => {
     }
 
   } catch (err) {
-    console.log('Function error:', err.message)
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
