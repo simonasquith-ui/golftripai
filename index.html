@@ -25,6 +25,7 @@
 (async function() {
   try {
     var r = await fetch('/.netlify/functions/maps-config');
+    if (!r.ok) { console.warn('Maps config unavailable (' + r.status + ') — map disabled'); return; }
     var data = await r.json();
     if (!data.key) { console.warn('Maps key not available'); return; }
     window.__googleMapsReady = function() { window.__googleMapsLoaded = true; };
@@ -1661,68 +1662,48 @@ async function generateTrip() {
     var destStr = data.compare_mode === 'tiers'
       ? (data.destinations[0] || 'Flexible')
       : data.destinations.join(', ');
-    var modeStr = data.compare_mode === 'tiers'
-      ? 'Compare Budget, Mid-Range and Luxury tiers for the same destination.'
-      : 'Compare these specific destinations at mid-range level: ' + data.destinations.join(', ') + '.';
+    var durationNum = parseInt(data.dates.duration || '5') || 5;
+    var numCourses = Math.max(2, Math.min(3, Math.floor(durationNum * 0.6)));
 
-    // Work out how many rounds of golf to recommend based on trip duration
-    var durationStr = data.dates.duration || '5 nights';
-    var durationNum = parseInt(durationStr) || 5;
-    var numCourses = Math.max(2, Math.min(4, Math.floor(durationNum * 0.6)));
-    var numHotels = 2;
-    var numRestaurants = 3;
+    var tripContext = 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
+      ', dates: ' + dateStr + ', destination: ' + destStr +
+      ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
+      ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.';
 
-    var prompt = 'Generate a golf holiday plan for UK golfers with these details:\n' +
-      '- Departure airports: ' + airportList + '\n' +
-      '- Dates: ' + dateStr + '\n' +
-      '- Budget per person: ' + data.budget + '\n' +
-      '- Total golfers: ' + data.group_size + '\n' +
-      '- Handicap: ' + (data.handicap || 'mixed') + '\n' +
-      '- Destination: ' + destStr + '\n' +
-      '- Trip style: ' + (data.trip_style || 'any') + '\n' +
-      '- Accommodation: ' + (data.accommodation || 'any') + '\n' +
-      '- Weather preference: ' + (data.weather || 'any') + '\n' +
-      '- Flight preferences: ' + (data.flights.join(', ') || 'none') + '\n' +
-      '- Club hire: ' + (data.clubs || 'bringing own') + '\n' +
-      '- Notes: ' + (data.notes || 'none') + '\n\n' +
-      modeStr + '\n\n' +
-      'IMPORTANT REQUIREMENTS:\n' +
-      '- courses array: include EXACTLY ' + numCourses + ' different golf courses (one per day of golf). Each must be a real, named course at the destination. Vary the difficulty and price.\n' +
-      '- hotels array: include EXACTLY ' + numHotels + ' different hotel or accommodation options at different price points.\n' +
-      '- restaurants array: include EXACTLY ' + numRestaurants + ' different restaurants or bars — mix fine dining, casual and a bar/nightlife option.\n' +
-      '- itinerary array: include EXACTLY 5 days with realistic morning, afternoon and evening activities.\n' +
-      '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n' +
-      '- EVERY course, hotel and restaurant must include a lat (latitude) and lng (longitude) as decimal numbers for their real location. These are used to plot a map. Be accurate — use the real GPS coordinates for each venue.\n\n' +
-      'Return EXACTLY 3 panels (Budget, Mid-Range, Luxury) as JSON. No markdown. Start with {.' +
-      'Each panel needs: label, destination, description, weather, best_time, flight_time, total_cost, costs(flights/accommodation/golf/food/club_hire), ' +
-      'courses(EXACTLY ' + numCourses + ' items each with name/location/description/par/yardage/slope_rating/course_rating/green_fee/designer/difficulty/why_recommended/club_hire/lat/lng), ' +
-      'hotels(EXACTLY 2 items each with name/area/description/why_recommended/lat/lng), ' +
-      'restaurants(EXACTLY 3 items each with name/type/description/lat/lng), ' +
-      'itinerary(EXACTLY 5 days each with day/title/activities array of time+description objects).' +
-      'Use real venue names with accurate GPS coordinates. Vary difficulty and price across tiers.' +
-      'JSON structure: {"panels":[{"label":"Budget",...},{"label":"Mid-Range",...},{"label":"Luxury",...}]}';
-    var res = await fetch('/.netlify/functions/generate-trip', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt })
-    });
-    if (!res.ok) {
-      var errData = await res.json().catch(function() { return {}; });
-      console.error('Generate trip error:', errData);
-      throw new Error('Server error ' + res.status + ': ' + (errData.error || 'unknown'));
+    var tiers = ['Budget', 'Mid-Range', 'Luxury'];
+
+    function makePanelPrompt(tier) {
+      return tripContext + ' Generate the ' + tier + ' option.' +
+        ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
+        ' costs{flights,accommodation,golf,food},' +
+        ' courses(EXACTLY ' + numCourses + ': name,location,par,green_fee,difficulty,why_recommended,lat,lng),' +
+        ' hotels(EXACTLY 2: name,area,description,why_recommended,lat,lng),' +
+        ' restaurants(EXACTLY 3: name,type,description,lat,lng).' +
+        ' All costs GBP. Real venues, accurate GPS coords.';
     }
-    var json = await res.json();
-    console.log('Raw response type:', typeof json.result);
-    // Function returns { result: "json string" } — parse the inner string
-    var parsed;
-    try {
-      parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
-    } catch(parseErr) {
-      console.error('JSON parse error:', parseErr.message);
-      console.error('Raw result:', json.result ? json.result.slice(0, 300) : 'undefined');
-      throw new Error('Failed to parse AI response: ' + parseErr.message);
+
+    function fetchPanel(tier) {
+      return fetch('/.netlify/functions/generate-trip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: makePanelPrompt(tier), tier: tier })
+      }).then(function(res) {
+        if (!res.ok) return res.json().catch(function() { return {}; }).then(function(e) {
+          throw new Error('Server error ' + res.status + ': ' + (e.error || 'unknown'));
+        });
+        return res.json();
+      }).then(function(json) {
+        var panel = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
+        panel.label = panel.label || tier;
+        return panel;
+      });
     }
-    console.log('Parsed OK, panels:', parsed && parsed.panels ? parsed.panels.length : 'NO PANELS', 'keys:', parsed && parsed.panels && parsed.panels[0] ? Object.keys(parsed.panels[0]).join(',') : 'none');
+
+    console.log('Firing 3 parallel panel requests...');
+    var panels = await Promise.all(tiers.map(fetchPanel));
+    console.log('All panels received:', panels.map(function(p) { return p.label; }).join(', '));
+
+    var parsed = { panels: panels };
     currentTripData = parsed;
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
