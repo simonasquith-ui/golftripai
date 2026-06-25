@@ -19,8 +19,10 @@ exports.handler = async (event) => {
       body: JSON.stringify({ error: 'No query provided' })
     }
 
+    // Try standard search first
     const url = 'https://nominatim.openstreetmap.org/search?q=' +
-      encodeURIComponent(query) + '&format=json&limit=1'
+      encodeURIComponent(query) +
+      '&format=json&limit=3&addressdetails=1'
 
     const response = await fetch(url, {
       headers: {
