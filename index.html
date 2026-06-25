@@ -1035,7 +1035,13 @@ function updateNav(user) {
 sbClient.auth.onAuthStateChange(function(event, session) {
   currentUser = session ? session.user : null;
   updateNav(currentUser);
-  if (currentUser) closeAuthModal();
+  if (currentUser) {
+    closeAuthModal();
+    // Process a pending invite join now that we have a user
+    if (pendingJoinId) {
+      processJoin(pendingJoinId, currentUser);
+    }
+  }
 });
 
 /* === AIRPORT GROUP BUILDER === */
@@ -1514,26 +1520,43 @@ async function loadSavedTrips() {
   var listEl = document.getElementById('saved-trips-list');
   listEl.innerHTML = '<div class="text-muted text-center" style="padding:20px">Loading...</div>';
   try {
-    var r = await sbClient.from('trip_requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    if (r.error) throw r.error;
-    var trips = r.data || [];
+    // Own trips
+    var ownR = await sbClient.from('trip_requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    if (ownR.error) throw ownR.error;
+    var ownTrips = ownR.data || [];
+    var ownIds = ownTrips.map(function(t) { return t.id; });
+
+    // Trips invited to via trip_members
+    var memR = await sbClient.from('trip_members').select('trip_request_id').or('user_id.eq.' + currentUser.id + ',email.eq.' + currentUser.email);
+    var memberTripIds = (memR.data || []).map(function(m) { return m.trip_request_id; });
+    var sharedIds = memberTripIds.filter(function(id) { return ownIds.indexOf(id) === -1; });
+
+    var sharedTrips = [];
+    if (sharedIds.length) {
+      var sharedR = await sbClient.from('trip_requests').select('*').in('id', sharedIds).order('created_at', { ascending: false });
+      if (!sharedR.error) sharedTrips = sharedR.data || [];
+    }
+
+    var trips = ownTrips.concat(sharedTrips);
     listEl.innerHTML = '';
     if (!trips.length) {
-      listEl.innerHTML = '<div class="empty-state"><div class="es-icon">&#127948;</div><h3>No Saved Trips Yet</h3><p>Generate a trip and save it to see it here.</p><button class="btn btn-primary mt-16" onclick="showPage(\'questionnaire\')">Plan a Trip</button></div>';
+      listEl.innerHTML = "<div class=\"empty-state\"><div class=\"es-icon\">&#127948;</div><h3>No Saved Trips Yet</h3><p>Generate a trip or accept an invite to see it here.</p><button class=\"btn btn-primary mt-16\" onclick=\"showPage('questionnaire')\">Plan a Trip</button></div>";
       return;
     }
     trips.forEach(function(trip) {
+      var isShared = ownIds.indexOf(trip.id) === -1;
       var card = document.createElement('div');
       card.className = 'trip-card';
 
       var info = document.createElement('div');
       info.className = 'trip-card-info';
       var h4 = document.createElement('h4');
-      h4.textContent = trip.destination_type || 'Golf Trip';
+      h4.textContent = (trip.destination_type || 'Golf Trip') + (isShared ? ' — Invited' : '');
+      if (isShared) h4.style.color = 'var(--gold)';
       var meta = document.createElement('div');
       meta.className = 'trip-card-meta';
       var dateStr = trip.created_at ? new Date(trip.created_at).toLocaleDateString('en-GB') : '';
-      meta.textContent = (trip.budget || '') + (trip.group_size ? ' \u2022 ' + trip.group_size + ' golfers' : '') + (dateStr ? ' \u2022 ' + dateStr : '');
+      meta.textContent = (trip.budget || '') + (trip.group_size ? ' • ' + trip.group_size + ' golfers' : '') + (dateStr ? ' • ' + dateStr : '');
       info.appendChild(h4);
       info.appendChild(meta);
 
@@ -1544,23 +1567,25 @@ async function loadSavedTrips() {
       openBtn.className = 'btn btn-primary btn-sm';
       openBtn.textContent = 'Open';
       openBtn.addEventListener('click', function() { openTripDetail(trip.id, trip); });
-
-      var delBtn = document.createElement('button');
-      delBtn.className = 'btn btn-danger btn-sm';
-      delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', function() { deleteTripCard(trip.id, card); });
-
       actions.appendChild(openBtn);
-      actions.appendChild(delBtn);
+
+      if (!isShared) {
+        var delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger btn-sm';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', function() { deleteTripCard(trip.id, card); });
+        actions.appendChild(delBtn);
+      }
+
       card.appendChild(info);
       card.appendChild(actions);
       listEl.appendChild(card);
     });
   } catch(e) {
     listEl.innerHTML = '<div class="text-muted text-center" style="padding:20px">Could not load trips.</div>';
+    console.error(e);
   }
 }
-
 async function deleteTripCard(id, cardEl) {
   try {
     await sbClient.from('trip_requests').delete().eq('id', id);
@@ -1928,17 +1953,71 @@ async function loadAdminStats() {
   });
 }
 
-/* === URL PARAMS === */
+/* === URL PARAMS & JOIN FLOW === */
+var pendingJoinId = null;
+
+async function processJoin(tripId, user) {
+  if (!tripId || !user) return;
+  try {
+    // Check if already a member
+    var check = await sbClient.from('trip_members').select('id').eq('trip_request_id', tripId).eq('user_id', user.id);
+    if (check.data && check.data.length) {
+      // Already joined — just open the trip
+      var tr = await sbClient.from('trip_requests').select('*').eq('id', tripId).single();
+      if (tr.data) { showToast('Welcome back to the trip!'); openTripDetail(tripId, tr.data); }
+      return;
+    }
+    // Add as member, matching on email too in case they were pre-invited
+    await sbClient.from('trip_members').upsert({
+      trip_request_id: tripId,
+      user_id: user.id,
+      role: 'member',
+      status: 'Going',
+      email: user.email
+    }, { onConflict: 'trip_request_id,email' });
+    // Post join message to chat
+    await sbClient.from('trip_messages').insert({
+      trip_request_id: tripId,
+      user_id: user.id,
+      message: (user.email || 'Someone') + ' joined the trip'
+    });
+    var tr = await sbClient.from('trip_requests').select('*').eq('id', tripId).single();
+    if (tr.data) {
+      showToast('You have joined the trip!');
+      openTripDetail(tripId, tr.data);
+    }
+    pendingJoinId = null;
+    // Clean the URL
+    window.history.replaceState({}, '', window.location.pathname);
+  } catch(e) {
+    showToast('Could not join trip. Please try again.', true);
+    console.error('Join error:', e);
+  }
+}
+
 (function handleUrlParams() {
   var params = new URLSearchParams(window.location.search);
-  if (params.get('join')) { openAuthModal('signup'); showToast('Sign in to join this golf trip!'); }
-  if (params.get('trip')) currentTripRequestId = params.get('trip');
+  var joinId = params.get('join');
+  var tripId = params.get('trip');
+  if (joinId) {
+    pendingJoinId = joinId;
+    // Will be processed after auth state resolves
+  }
+  if (tripId) currentTripRequestId = tripId;
 })();
 
 /* === INIT === */
 sbClient.auth.getSession().then(function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
+  // If arriving via invite link and already logged in, process join immediately
+  if (currentUser && pendingJoinId) {
+    processJoin(pendingJoinId, currentUser);
+  } else if (pendingJoinId) {
+    // Not logged in — show auth modal, join will happen after sign in
+    showToast('Sign in or sign up to join this golf trip!');
+    openAuthModal('signup');
+  }
 });
 </script>
 </body>
