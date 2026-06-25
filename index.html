@@ -292,6 +292,38 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   .profile-grid,.trip-grid{grid-template-columns:1fr}
   .admin-tables,.stats-grid{grid-template-columns:1fr 1fr}
 }
+/* === BOOK THIS TRIP === */
+.book-this-trip{background:linear-gradient(135deg,#0f2318 0%,#1a3a2a 100%);border-radius:var(--rl);padding:32px;margin:32px 0;border:2px solid var(--gold);position:relative;overflow:hidden}
+.book-this-trip::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 70%);pointer-events:none}
+.book-this-trip h3{color:var(--gold);font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:6px}
+.book-this-trip .btt-sub{color:rgba(255,255,255,.65);font-size:.9rem;margin-bottom:24px}
+.btt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.btt-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:var(--rl);padding:16px 18px;text-decoration:none;transition:all var(--tr);cursor:pointer}
+.btt-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold);transform:translateY(-2px)}
+.btt-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.btt-flights .btt-icon{background:rgba(59,130,246,.2)}
+.btt-hotels .btt-icon{background:rgba(16,185,129,.2)}
+.btt-teetimes .btt-icon{background:rgba(201,168,76,.2)}
+.btt-villas .btt-icon{background:rgba(139,92,246,.2)}
+.btt-label{color:rgba(255,255,255,.5);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.btt-action{color:var(--white);font-weight:600;font-size:.9rem}
+.btt-total{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);padding:14px 18px;margin-top:16px;display:flex;align-items:center;justify-content:space-between}
+.btt-total-label{color:rgba(255,255,255,.6);font-size:.85rem}
+.btt-total-price{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);font-weight:700}
+/* PDF Export */
+.pdf-export-bar{background:var(--sand);border-radius:var(--rl);padding:20px 24px;margin:24px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pdf-export-bar h4{color:var(--green);font-family:'Playfair Display',serif;margin-bottom:4px}
+.pdf-export-bar p{color:var(--text-muted);font-size:.85rem;margin:0}
+/* Print styles */
+@media print{
+  #nav,.sticky-compare,.results-toolbar,.pdf-export-bar,.booking-links-section,.btt-btn,button{display:none!important}
+  .result-panel{display:block!important}
+  .page{padding-top:0}
+  body{background:#fff}
+  .book-this-trip{border:1px solid #ccc;background:#f9f9f9;color:#000}
+  .book-this-trip h3,.btt-total-price{color:#1a3a2a}
+  .dest-card{background:#1a3a2a}
+}
 @media(max-width:640px){
   .hero-stats{flex-direction:column;gap:20px}
   .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid{grid-template-columns:1fr}
@@ -1436,11 +1468,36 @@ function buildPanel(panel, idx, qData) {
   if (panel.flight_time) html += '<span class="dest-chip">' + panel.flight_time + '</span>';
   html += '</div></div>';
 
-  html += '<div class="booking-links-section"><h3>Book Your Trip</h3><div class="booking-btns">' +
-    '<a href="https://www.skyscanner.net/transport/flights/" target="_blank" class="booking-btn">&#9992; Flights (Skyscanner)</a>' +
-    '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="booking-btn">&#127968; Hotels (Booking.com)</a>' +
-    '<a href="https://www.vrbo.com/search?destination=' + destEnc + '" target="_blank" class="booking-btn">&#127968; Villas (Vrbo)</a>' +
-    '</div></div>';
+  // Book This Trip panel
+  html += '<div class="book-this-trip">' +
+    '<h3>Book This Trip</h3>' +
+    '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
+    '<div class="btt-grid">' +
+      '<a href="https://www.skyscanner.net/transport/flights/" target="_blank" class="btt-btn btt-flights">' +
+        '<div class="btt-icon">&#9992;</div>' +
+        '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
+      '</a>' +
+      '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
+        '<div class="btt-icon">&#127968;</div>' +
+        '<div><div class="btt-label">Hotels &amp; Resorts</div><div class="btt-action">Search on Booking.com</div></div>' +
+      '</a>' +
+      '<a href="https://www.golfnow.com/tee-times/search#' + destEnc + '" target="_blank" class="btt-btn btt-teetimes">' +
+        '<div class="btt-icon">&#9971;</div>' +
+        '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
+      '</a>' +
+      '<a href="https://www.vrbo.com/search?destination=' + destEnc + '" target="_blank" class="btt-btn btt-villas">' +
+        '<div class="btt-icon">&#127968;</div>' +
+        '<div><div class="btt-label">Villas</div><div class="btt-action">Search on Vrbo</div></div>' +
+      '</a>' +
+    '</div>' +
+    '<div class="btt-total">' +
+      '<div>' +
+        '<div class="btt-total-label">Estimated total per person</div>' +
+        '<div class="btt-total-price" id="btt-total-' + idx + '">' + fmtPrice(panel.total_cost || 0) + '</div>' +
+      '</div>' +
+      '<a href="https://www.skyscanner.net/transport/flights/" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+    '</div>' +
+  '</div>';
 
   html += '<div class="section-heading" data-icon="&#9971;">Golf Courses</div><div class="courses-grid">';
   if (panel.courses && panel.courses.length) {
@@ -1540,8 +1597,109 @@ function buildPanel(panel, idx, qData) {
     '<div class="cost-row"><div>Total Estimate</div><span class="cost-total">' + fmtPrice(panel.total_cost || 0) + '</span></div>' +
   '</div>';
 
+  // PDF Export bar
+  html += '<div class="pdf-export-bar">' +
+    '<div>' +
+      '<h4>&#128196; Society Trip Pack</h4>' +
+      '<p>Export this full itinerary as a PDF to share with your group.</p>' +
+    '</div>' +
+    '<button class="btn btn-primary" onclick="exportPDF(' + idx + ', ' + JSON.stringify(panel).replace(/</g,'\u003c').replace(/>/g,'\u003e') + ')">Download PDF &#8594;</button>' +
+  '</div>';
+
   el.innerHTML = html;
   return el;
+}
+
+/* === PDF EXPORT === */
+function exportPDF(panelIdx, panel) {
+  // Open print dialog with a clean formatted page
+  var dest = panel.destination || 'Golf Trip';
+  var costs = panel.costs || {};
+  var sym = SYMS[activeCurrency] || '£';
+  var rate = RATES[activeCurrency] || 1;
+  function p(v) { return v ? sym + Math.round(parseFloat(v) * rate).toLocaleString('en-GB') : sym + '0'; }
+
+  var coursesHtml = '';
+  if (panel.courses && panel.courses.length) {
+    panel.courses.forEach(function(c) {
+      coursesHtml += '<tr><td><strong>' + (c.name||'') + '</strong><br><span style="color:#666;font-size:12px">' + (c.location||'') + '</span></td>' +
+        '<td>Par ' + (c.par||'72') + (c.yardage ? ' &bull; ' + c.yardage + ' yds' : '') + '</td>' +
+        '<td>' + p(c.green_fee) + '</td>' +
+        '<td>' + (c.difficulty||'') + '</td></tr>';
+    });
+  }
+
+  var hotelsHtml = '';
+  if (panel.hotels && panel.hotels.length) {
+    panel.hotels.forEach(function(h) {
+      hotelsHtml += '<tr><td><strong>' + (h.name||'') + '</strong></td><td>' + (h.area||'') + '</td><td>' + (h.description||'').substring(0,80) + '...</td></tr>';
+    });
+  }
+
+  var itinHtml = '';
+  if (panel.itinerary && panel.itinerary.length) {
+    panel.itinerary.forEach(function(day) {
+      itinHtml += '<div style="margin-bottom:12px"><strong style="color:#1a3a2a">Day ' + day.day + ': ' + (day.title||'') + '</strong><ul style="margin:4px 0 0 16px;padding:0">';
+      if (day.activities) day.activities.forEach(function(a) {
+        itinHtml += '<li style="font-size:12px;color:#444;margin-bottom:3px"><span style="color:#c9a84c;font-weight:600">' + (a.time||'') + '</span> ' + (a.description||'') + '</li>';
+      });
+      itinHtml += '</ul></div>';
+    });
+  }
+
+  var printWin = window.open('', '_blank', 'width=900,height=700');
+  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GolfTrip — ' + dest + ' ' + (panel.label||'') + '</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff;padding:0}' +
+    '.header{background:#1a3a2a;color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:center}' +
+    '.header h1{font-family:Georgia,serif;font-size:22px;color:#c9a84c}.header .sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}' +
+    '.logo{font-family:Georgia,serif;font-size:20px;color:#c9a84c}' +
+    '.body{padding:28px 32px}' +
+    '.section{margin-bottom:28px}' +
+    '.section-title{font-family:Georgia,serif;font-size:16px;color:#1a3a2a;border-bottom:2px solid #c9a84c;padding-bottom:6px;margin-bottom:14px}' +
+    'table{width:100%;border-collapse:collapse;font-size:12px}' +
+    'th{background:#e8d5b0;color:#1a3a2a;padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase}' +
+    'td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:top}' +
+    '.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
+    '.cost-item{background:#f7f4ee;border-radius:6px;padding:12px;display:flex;justify-content:space-between}' +
+    '.cost-item .lbl{font-size:12px;color:#666}.cost-item .val{font-weight:700;color:#1a3a2a}' +
+    '.total-box{background:#1a3a2a;color:#fff;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px}' +
+    '.total-box .lbl{font-size:13px;color:rgba(255,255,255,.7)}.total-box .val{font-family:Georgia,serif;font-size:22px;color:#c9a84c;font-weight:700}' +
+    '.badge{display:inline-block;background:#c9a84c;color:#0f2318;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;margin-left:8px}' +
+    '.disclaimer{font-size:10px;color:#999;margin-top:28px;padding-top:12px;border-top:1px solid #eee}' +
+    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
+    '</style></head><body>' +
+    '<div class="header"><div><div class="logo">GolfTrip</div><h1>' + dest + ' <span style="font-size:16px;color:rgba(255,255,255,.7)">&mdash; ' + (panel.label||'') + '</span></h1>' +
+    '<div class="sub">AI-generated golf holiday plan &bull; Prices are estimates only &bull; Generated ' + new Date().toLocaleDateString('en-GB') + '</div></div></div>' +
+    '<div class="body">' +
+
+    '<div class="section"><div class="section-title">Overview</div>' +
+    '<p style="font-size:13px;color:#555;line-height:1.6">' + (panel.description||'') + '</p>' +
+    '<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">' +
+    (panel.weather ? '<span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.weather + '</span>' : '') +
+    (panel.best_time ? '<span style="background:#e3f2fd;color:#1565c0;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.best_time + '</span>' : '') +
+    (panel.flight_time ? '<span style="background:#fff3e0;color:#e65100;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">Flight: ' + panel.flight_time + '</span>' : '') +
+    '</div></div>' +
+
+    (coursesHtml ? '<div class="section"><div class="section-title">&#9971; Golf Courses</div><table><thead><tr><th>Course</th><th>Details</th><th>Green Fee</th><th>Level</th></tr></thead><tbody>' + coursesHtml + '</tbody></table></div>' : '') +
+    (hotelsHtml ? '<div class="section"><div class="section-title">&#127968; Recommended Hotels</div><table><thead><tr><th>Hotel</th><th>Area</th><th>Notes</th></tr></thead><tbody>' + hotelsHtml + '</tbody></table></div>' : '') +
+    (itinHtml ? '<div class="section"><div class="section-title">&#128197; 5-Day Itinerary</div>' + itinHtml + '</div>' : '') +
+
+    '<div class="section"><div class="section-title">&#128176; Cost Breakdown — Per Person</div>' +
+    '<div class="cost-grid">' +
+    '<div class="cost-item"><span class="lbl">Flights</span><span class="val">' + p(costs.flights||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Accommodation</span><span class="val">' + p(costs.accommodation||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Golf (green fees)</span><span class="val">' + p(costs.golf||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Food &amp; Drink</span><span class="val">' + p(costs.food||0) + '</span></div>' +
+    (costs.club_hire ? '<div class="cost-item"><span class="lbl">Club Hire</span><span class="val">' + p(costs.club_hire) + '</span></div>' : '') +
+    '</div>' +
+    '<div class="total-box"><span class="lbl">Total Estimate Per Person</span><span class="val">' + p(panel.total_cost||0) + '</span></div>' +
+    '</div>' +
+
+    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Skyscanner, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
+    '</div></body></html>');
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(function() { printWin.print(); }, 500);
 }
 
 function makeFallbackPanels(qData) {
