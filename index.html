@@ -935,7 +935,7 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   var el = document.getElementById('page-' + name);
   if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  if (name === 'profile' && currentUser) loadSavedTrips();
+  if (name === 'profile' && currentUser) { loadSavedTrips(); loadProfile(); }
   if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
 }
@@ -1249,7 +1249,16 @@ async function generateTrip() {
         weather_preference: data.weather,
         notes: data.notes
       }).select().single();
-      if (ins.data) currentTripRequestId = ins.data.id;
+      if (ins.data) {
+        currentTripRequestId = ins.data.id;
+        // Add the creator as the first member (owner)
+        await sbClient.from('trip_members').insert({
+          trip_request_id: ins.data.id,
+          user_id: currentUser.id,
+          role: 'owner',
+          status: 'Going'
+        });
+      }
     } catch(e) { console.warn('DB insert error:', e); }
   }
 
@@ -1594,9 +1603,43 @@ async function deleteTripCard(id, cardEl) {
   } catch(e) { showToast('Could not delete trip.', true); }
 }
 
-function saveProfile() {
+async function saveProfile() {
   if (!currentUser) { openAuthModal('signin'); return; }
-  showToast('Profile saved!');
+  var name = document.getElementById('profile-name').value.trim();
+  var airport = document.getElementById('profile-airport').value;
+  var handicap = document.getElementById('profile-handicap').value;
+  var budget = document.getElementById('profile-budget').value;
+  try {
+    var res = await sbClient.from('users').update({
+      name: name,
+      home_airport: airport,
+      handicap: handicap,
+      typical_budget: budget
+    }).eq('id', currentUser.id);
+    if (res.error) throw res.error;
+    // Store name in memory so member list can use it
+    currentUser.display_name = name || null;
+    showToast('Profile saved!');
+  } catch(e) {
+    // Columns may not exist yet — show instructions
+    showToast('Could not save profile. See console for details.', true);
+    console.error('saveProfile error:', e);
+  }
+}
+
+async function loadProfile() {
+  if (!currentUser) return;
+  try {
+    var r = await sbClient.from('users').select('*').eq('id', currentUser.id).single();
+    if (r.error || !r.data) return;
+    var u = r.data;
+    if (u.name) document.getElementById('profile-name').value = u.name;
+    if (u.home_airport) document.getElementById('profile-airport').value = u.home_airport;
+    if (u.handicap) document.getElementById('profile-handicap').value = u.handicap;
+    if (u.typical_budget) document.getElementById('profile-budget').value = u.typical_budget;
+    // Cache display name
+    currentUser.display_name = u.name || null;
+  } catch(e) { console.warn('loadProfile error:', e); }
 }
 
 /* === TRIP DETAIL === */
@@ -1727,21 +1770,29 @@ async function loadTripMembers(tripId) {
     el.innerHTML = '';
     if (!members.length) { el.innerHTML = '<div class="text-muted fs-sm" style="padding:8px 0">No members yet. Invite your group!</div>'; return; }
 
-    // Fetch emails for all member user_ids in one query
+    // Fetch emails and names for all member user_ids in one query
     var userIds = members.map(function(m) { return m.user_id; }).filter(Boolean);
     var emailMap = {};
+    var nameMap = {};
     if (userIds.length) {
-      var ur = await sbClient.from('users').select('id, email').in('id', userIds);
+      var ur = await sbClient.from('users').select('id, email, name').in('id', userIds);
       if (ur.data) {
-        ur.data.forEach(function(u) { emailMap[u.id] = u.email; });
+        ur.data.forEach(function(u) {
+          emailMap[u.id] = u.email;
+          if (u.name) nameMap[u.id] = u.name;
+        });
       }
     }
     // Always include current user in the map
-    if (currentUser) emailMap[currentUser.id] = currentUser.email;
+    if (currentUser) {
+      emailMap[currentUser.id] = currentUser.email;
+      if (currentUser.display_name) nameMap[currentUser.id] = currentUser.display_name;
+    }
 
     members.forEach(function(m) {
       var userEmail = emailMap[m.user_id] || null;
-      var displayName = userEmail ? userEmail.split('@')[0] : 'Member';
+      var userName = nameMap[m.user_id] || null;
+      var displayName = userName || (userEmail ? userEmail.split('@')[0] : 'Member');
       var initial = displayName.charAt(0).toUpperCase();
 
       var row = document.createElement('div');
