@@ -1841,14 +1841,19 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 async function searchGooglePlace(name, type, destination) {
-  // Search via our Netlify function which calls Google Places API
   var queries = [];
   if (type === 'course') {
-    queries = [name + ' golf course ' + destination, name + ' golf ' + destination, name + ' ' + destination];
+    // Golf courses need very specific queries for Google Places to find them
+    queries = [
+      name + ' Golf Club ' + destination,
+      name + ' Golf Course ' + destination,
+      name + ' golf ' + destination,
+      name + ' ' + destination
+    ];
   } else if (type === 'hotel') {
-    queries = [name + ' hotel ' + destination, name + ' ' + destination];
+    queries = [name + ' ' + destination, name];
   } else {
-    queries = [name + ' restaurant ' + destination, name + ' ' + destination];
+    queries = [name + ' ' + destination, name];
   }
 
   for (var i = 0; i < queries.length; i++) {
@@ -1860,13 +1865,13 @@ async function searchGooglePlace(name, type, destination) {
       });
       var data = await r.json();
       if (data && data.lat && data.lng) {
-        console.log('Found:', name, '->', data.lat, data.lng, '(query:', queries[i] + ')');
+        console.log('Found [' + type + ']:', name, '->', data.lat, data.lng);
         return data;
       }
     } catch(e) { console.warn('Search failed:', name, e); }
-    if (i < queries.length - 1) await new Promise(function(res) { setTimeout(res, 200); });
+    if (i < queries.length - 1) await new Promise(function(res) { setTimeout(res, 150); });
   }
-  console.warn('Could not find:', name);
+  console.warn('Could not find [' + type + ']:', name);
   return null;
 }
 
@@ -1881,7 +1886,7 @@ async function initMap(idx) {
   var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
   var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
 
-  // Build items to search
+  // Build items to search — use AI coords first, fall back to Google Places
   var toSearch = [];
   (panel.hotels || []).forEach(function(h) {
     toSearch.push({ type: 'hotel', name: h.name, area: h.area,
@@ -1902,19 +1907,37 @@ async function initMap(idx) {
       aiLat: r.lat, aiLng: r.lng });
   });
 
-  // Get coordinates for each venue
-  var locations = [];
+  // Get coordinates — prefer AI coords if they look valid
+  var rawLocations = [];
   for (var i = 0; i < toSearch.length; i++) {
     var item = toSearch[i];
-    var result = null;
-    // Try Google Places search via our function
-    result = await searchGooglePlace(item.name, item.type, dest);
-    if (result) {
-      locations.push({ type: item.type, name: item.name, area: item.area,
-        lat: result.lat, lng: result.lng,
-        rating: result.rating, address: result.address,
-        detail: item.detail, link: item.link });
+    var lat = null, lng = null;
+    // Use AI coords if they look plausible (non-zero, non-default)
+    if (item.aiLat && item.aiLng && Math.abs(item.aiLat) > 0.5 && Math.abs(item.aiLng) > 0.5) {
+      lat = item.aiLat; lng = item.aiLng;
+    } else {
+      // Fall back to Google Places
+      var result = await searchGooglePlace(item.name, item.type, dest);
+      if (result) { lat = result.lat; lng = result.lng; }
     }
+    if (lat && lng) {
+      rawLocations.push({ type: item.type, name: item.name, area: item.area,
+        lat: lat, lng: lng, detail: item.detail, link: item.link });
+    }
+  }
+
+  // Filter out outliers — remove any pin more than 150km from the median centre
+  // This prevents one bad AI coordinate zooming the map out to show a whole country
+  var locations = rawLocations;
+  if (rawLocations.length > 2) {
+    var medLat = rawLocations.map(function(l) { return l.lat; }).sort(function(a,b){return a-b;})[Math.floor(rawLocations.length/2)];
+    var medLng = rawLocations.map(function(l) { return l.lng; }).sort(function(a,b){return a-b;})[Math.floor(rawLocations.length/2)];
+    locations = rawLocations.filter(function(loc) {
+      var km = haversineKm(medLat, medLng, loc.lat, loc.lng);
+      if (km > 150) { console.warn('Dropping outlier pin:', loc.name, '(' + km.toFixed(0) + 'km from centre)'); return false; }
+      return true;
+    });
+    if (!locations.length) locations = rawLocations; // fallback if all got filtered
   }
 
   if (!locations.length) {
@@ -1938,22 +1961,19 @@ async function initMap(idx) {
     });
   }
 
-  // Wait for Google Maps to be ready
   await waitForGoogleMaps();
 
   if (loadEl) loadEl.style.display = 'none';
   mapEl.style.display = 'block';
 
-  // Centre on all locations
   var avgLat = locations.reduce(function(s, l) { return s + l.lat; }, 0) / locations.length;
   var avgLng = locations.reduce(function(s, l) { return s + l.lng; }, 0) / locations.length;
 
   var map = new google.maps.Map(mapEl, {
     center: { lat: avgLat, lng: avgLng },
-    zoom: 11,
+    zoom: 12,
     mapTypeId: 'roadmap',
     styles: [
-      { featureType: 'golf_course', elementType: 'geometry.fill', stylers: [{ color: '#c8e6c9' }] },
       { featureType: 'poi.sports_complex', elementType: 'labels', stylers: [{ visibility: 'on' }] }
     ],
     mapTypeControl: true,
@@ -1973,11 +1993,11 @@ async function initMap(idx) {
       title: loc.name,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 10,
+        scale: 11,
         fillColor: pinColor,
         fillOpacity: 1,
         strokeColor: '#ffffff',
-        strokeWeight: 2.5
+        strokeWeight: 3
       },
       label: {
         text: loc.type === 'hotel' ? 'H' : loc.type === 'course' ? 'G' : 'R',
@@ -2006,8 +2026,15 @@ async function initMap(idx) {
     bounds.extend({ lat: loc.lat, lng: loc.lng });
   });
 
+  // Fit bounds but cap zoom at 14 so it doesn't zoom in too far on a single pin
   if (locations.length > 1) {
-    map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+    map.fitBounds(bounds, 60);
+    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+      if (map.getZoom() > 14) map.setZoom(14);
+    });
+  } else {
+    map.setView && map.setView({ lat: avgLat, lng: avgLng }, 13);
+    map.setZoom(13);
   }
 }
 
