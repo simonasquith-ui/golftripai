@@ -1852,7 +1852,7 @@ async function generateTrip() {
         ' courses(EXACTLY 5: name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
         ' hotels(EXACTLY 3: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
         ' restaurants(EXACTLY 5: name,type,description,rating,opentable_available,lat,lng),' +
-        ' car_hire{needed,recommended_provider,pickup_location,est_cost_per_day,booking_tip}.' +
+        ' car_hire{needed,options(EXACTLY 3: provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location}.' +
         ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night". rating is a decimal like 4.3.' +
         ' opentable_available is true/false based on whether this restaurant is likely bookable on OpenTable.' +
         ' car_hire.needed is ' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
@@ -2125,7 +2125,11 @@ function buildPanel(panel, idx, qData) {
     html += '<div class="section-heading" data-icon="&#127952;">Club Hire</div>' +
       '<div class="card" style="padding:20px;margin-bottom:24px">' +
         '<p>Club hire is available at most courses in ' + dest + '. Typical cost: ' + fmtPrice(panel.club_hire_cost || 45) + ' per set per round.</p>' +
-        '<a href="https://www.google.com/search?q=golf+club+hire+' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:12px">Search Club Hire</a>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">' +
+          '<a href="https://www.golfclubhireworld.com/search?destination=' + destEnc + '" target="_blank" class="btn btn-primary btn-sm">&#127952; Golf Club Hire World</a>' +
+          '<a href="https://www.golfbreaks.com/en-gb/golf-holidays/?destination=' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">Golf Breaks</a>' +
+          '<a href="https://www.google.com/search?q=golf+club+hire+' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">Search Google</a>' +
+        '</div>' +
       '</div>';
   }
 
@@ -2140,17 +2144,22 @@ function buildPanel(panel, idx, qData) {
       '&puHour=10&puMinute=0&doHour=10&doMinute=0&driverAge=30';
     var kayakCarUrl = 'https://www.kayak.co.uk/cars/' + destEnc +
       (checkin && checkout ? '/' + checkin + '/' + checkout : '') + '/';
+    var carOptions = (ch.options && ch.options.length) ? ch.options : [];
+    var carHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px">';
+    carOptions.forEach(function(opt) {
+      carHtml += '<div class="card" style="padding:14px">' +
+        '<div class="fw-600" style="color:var(--green);font-size:.9rem">' + (opt.provider || '') + '</div>' +
+        '<div class="fs-sm text-muted">' + (opt.vehicle_type || '') + '</div>' +
+        (opt.est_cost_per_day ? '<div style="color:var(--gold);font-weight:600;margin-top:4px">Est. ' + fmtPrice(opt.est_cost_per_day) + '/day</div>' : '') +
+        (opt.booking_tip ? '<div class="fs-sm text-muted" style="margin-top:6px">' + opt.booking_tip + '</div>' : '') +
+        '</div>';
+    });
+    carHtml += '</div>';
     html += '<div class="section-heading" data-icon="&#128663;">Car Hire</div>' +
       '<div class="card" style="padding:20px;margin-bottom:24px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">' +
-          '<div>' +
-            (ch.recommended_provider ? '<p class="fw-600" style="color:var(--green);margin-bottom:4px">Recommended: ' + ch.recommended_provider + '</p>' : '') +
-            (ch.pickup_location ? '<p class="fs-sm text-muted">Pickup: ' + ch.pickup_location + '</p>' : '') +
-            (ch.est_cost_per_day ? '<p class="fs-sm" style="color:var(--gold);font-weight:600;margin-top:4px">Est. ' + fmtPrice(ch.est_cost_per_day) + '/day</p>' : '') +
-            (ch.booking_tip ? '<p class="fs-sm text-muted" style="margin-top:8px">' + ch.booking_tip + '</p>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
+        (ch.pickup_location ? '<p class="fs-sm text-muted" style="margin-bottom:12px">&#128205; Pickup: ' + ch.pickup_location + '</p>' : '') +
+        carHtml +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">' +
           '<a href="' + rentalcarsUrl + '" target="_blank" class="btn btn-primary btn-sm">&#128663; Search Rentalcars.com</a>' +
           '<a href="' + kayakCarUrl + '" target="_blank" class="btn btn-ghost btn-sm">Compare on Kayak</a>' +
         '</div>' +
@@ -2322,8 +2331,8 @@ function waitForGoogleMaps() {
       attempts++;
       if (window.google && window.google.maps && window.google.maps.Map) {
         clearInterval(check); resolve();
-      } else if (attempts > 100) {
-        clearInterval(check); reject(new Error('Google Maps did not load'));
+      } else if (attempts > 80) { // 8 second timeout
+        clearInterval(check); reject(new Error('Google Maps did not load in time'));
       }
     }, 100);
   });
@@ -2387,19 +2396,21 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 async function searchGooglePlace(name, type, destination) {
+  // Sanitise — remove chars that can break geocode API queries
+  function clean(s) { return (s || '').replace(/[&#+%]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  var n = clean(name), d = clean(destination);
   var queries = [];
   if (type === 'course') {
-    // Golf courses need very specific queries for Google Places to find them
     queries = [
-      name + ' Golf Club ' + destination,
-      name + ' Golf Course ' + destination,
-      name + ' golf ' + destination,
-      name + ' ' + destination
+      n + ' Golf Club ' + d,
+      n + ' Golf Course ' + d,
+      n + ' golf ' + d,
+      n + ' ' + d
     ];
   } else if (type === 'hotel') {
-    queries = [name + ' ' + destination, name];
+    queries = [n + ' hotel ' + d, n + ' ' + d];
   } else {
-    queries = [name + ' ' + destination, name];
+    queries = [n + ' ' + d, n];
   }
 
   for (var i = 0; i < queries.length; i++) {
@@ -2437,6 +2448,12 @@ async function initMap(idx) {
   var dest = panel.destination || '';
   var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
   var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
+
+  // Kick off Google Maps load in parallel with coordinate work
+  var mapsReadyPromise = waitForGoogleMaps().catch(function(e) {
+    console.warn('Maps load warning:', e.message);
+    return null; // don't block — handle failure below
+  });
 
   // Build items to search — use AI coords first, fall back to Google Places
   var toSearch = [];
@@ -2526,9 +2543,9 @@ async function initMap(idx) {
     });
   }
 
-  try {
-    await waitForGoogleMaps();
-  } catch(e) {
+  await mapsReadyPromise;
+
+  if (!window.google || !window.google.maps || !window.google.maps.Map) {
     if (loadEl) loadEl.innerHTML = '<div style="padding:20px;text-align:center"><p style="color:var(--text-muted);font-size:.85rem">Map unavailable — Google Maps failed to load.</p>' +
       '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Open in Google Maps</a></div>';
     return;
