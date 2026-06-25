@@ -1723,31 +1723,61 @@ async function loadTripMembers(tripId) {
   try {
     var r = await sbClient.from('trip_members').select('*').eq('trip_request_id', tripId);
     if (r.error) throw r.error;
-    el.innerHTML = '';
     var members = r.data || [];
+    el.innerHTML = '';
     if (!members.length) { el.innerHTML = '<div class="text-muted fs-sm" style="padding:8px 0">No members yet. Invite your group!</div>'; return; }
+
+    // Fetch emails for all member user_ids in one query
+    var userIds = members.map(function(m) { return m.user_id; }).filter(Boolean);
+    var emailMap = {};
+    if (userIds.length) {
+      var ur = await sbClient.from('users').select('id, email').in('id', userIds);
+      if (ur.data) {
+        ur.data.forEach(function(u) { emailMap[u.id] = u.email; });
+      }
+    }
+    // Always include current user in the map
+    if (currentUser) emailMap[currentUser.id] = currentUser.email;
+
     members.forEach(function(m) {
+      var userEmail = emailMap[m.user_id] || null;
+      var displayName = userEmail ? userEmail.split('@')[0] : 'Member';
+      var initial = displayName.charAt(0).toUpperCase();
+
       var row = document.createElement('div');
       row.className = 'member-row';
+
       var av = document.createElement('div');
       av.className = 'member-avatar';
-      av.textContent = (m.email || '?').charAt(0).toUpperCase();
+      av.textContent = initial;
+
       var info = document.createElement('div');
       info.className = 'member-info';
-      var name = document.createElement('div');
-      name.className = 'member-name';
-      name.textContent = m.email || 'Member';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'member-name';
+      nameEl.textContent = displayName;
+
+      var emailEl = document.createElement('div');
+      emailEl.className = 'text-muted fs-sm';
+      emailEl.textContent = userEmail || '';
+
       var sc = { 'Going': 'status-going', 'Maybe': 'status-maybe', 'Cannot go': 'status-no' };
       var badge = document.createElement('span');
       badge.className = 'member-status-badge ' + (sc[m.status] || 'status-pending');
       badge.textContent = m.status || 'Invited';
-      info.appendChild(name);
+
+      info.appendChild(nameEl);
+      if (userEmail) info.appendChild(emailEl);
       info.appendChild(badge);
       row.appendChild(av);
       row.appendChild(info);
       el.appendChild(row);
     });
-  } catch(e) { el.innerHTML = '<div class="text-muted fs-sm">Could not load members.</div>'; }
+  } catch(e) {
+    el.innerHTML = '<div class="text-muted fs-sm">Could not load members.</div>';
+    console.error('loadTripMembers error:', e);
+  }
 }
 
 async function loadTripVotes(tripId) {
