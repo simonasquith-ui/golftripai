@@ -1664,7 +1664,21 @@ async function openTripDetail(tripId, tripData) {
     document.getElementById('td-dates').textContent = td.month || td.depart || '—';
   } catch(e) { document.getElementById('td-dates').textContent = '—'; }
   document.getElementById('invite-link').value = window.location.origin + '?join=' + tripId;
-  loadTripMembers(tripId);
+  // Ensure the current user appears as a member (handles existing trips and the owner)
+  if (currentUser) {
+    sbClient.from('trip_members').select('id').eq('trip_request_id', tripId).eq('user_id', currentUser.id).then(function(check) {
+      if (!check.data || !check.data.length) {
+        var role = (tripData.user_id === currentUser.id) ? 'owner' : 'member';
+        sbClient.from('trip_members').insert({ trip_request_id: tripId, user_id: currentUser.id, role: role, status: 'Going' }).then(function() {
+          loadTripMembers(tripId);
+        });
+      } else {
+        loadTripMembers(tripId);
+      }
+    });
+  } else {
+    loadTripMembers(tripId);
+  }
   loadTripVotes(tripId);
   loadChatMessages(tripId);
   if (chatPollInterval) clearInterval(chatPollInterval);
@@ -1807,7 +1821,17 @@ async function loadTripMembers(tripId) {
 
       var nameEl = document.createElement('div');
       nameEl.className = 'member-name';
-      nameEl.textContent = displayName;
+      nameEl.style.display = 'flex';
+      nameEl.style.alignItems = 'center';
+      nameEl.style.gap = '6px';
+      var nameText = document.createTextNode(displayName);
+      nameEl.appendChild(nameText);
+      if (currentUser && m.user_id === currentUser.id) {
+        var youBadge = document.createElement('span');
+        youBadge.textContent = 'You';
+        youBadge.style.cssText = 'background:var(--gold);color:var(--green-dark);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:.05em;';
+        nameEl.appendChild(youBadge);
+      }
 
       var emailEl = document.createElement('div');
       emailEl.className = 'text-muted fs-sm';
