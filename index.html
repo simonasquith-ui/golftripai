@@ -6,7 +6,20 @@
 <title>GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"GOOGLE_MAPS_KEY_PLACEHOLDER",v:"weekly"});</script>
+<script>
+(async function() {
+  try {
+    var r = await fetch('/.netlify/functions/maps-config');
+    var data = await r.json();
+    if (!data.key) { console.warn('Maps key not available'); return; }
+    window.__googleMapsReady = function() { window.__googleMapsLoaded = true; };
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
+    s.onerror = function() { console.warn('Google Maps failed to load'); };
+    document.head.appendChild(s);
+  } catch(e) { console.warn('Could not load maps config:', e); }
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1774,13 +1787,13 @@ var googleMapsLoaded = false;
 
 function waitForGoogleMaps() {
   return new Promise(function(resolve) {
-    if (window.google && window.google.maps && window.google.maps.Map) { resolve(); return; }
+    if (window.__googleMapsLoaded || (window.google && window.google.maps && window.google.maps.Map)) { resolve(); return; }
     var check = setInterval(function() {
-      if (window.google && window.google.maps && window.google.maps.Map) {
+      if (window.__googleMapsLoaded || (window.google && window.google.maps && window.google.maps.Map)) {
         clearInterval(check); resolve();
       }
     }, 100);
-    setTimeout(function() { clearInterval(check); resolve(); }, 8000);
+    setTimeout(function() { clearInterval(check); resolve(); }, 10000);
   });
 }
 
