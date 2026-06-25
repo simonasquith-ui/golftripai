@@ -1979,14 +1979,9 @@ async function inviteMember() {
   if (inviteBtn) { inviteBtn.disabled = true; inviteBtn.textContent = 'Sending...'; }
 
   try {
-    // 1. Save to trip_members in database
-    var dbRes = await sbClient.from('trip_members').insert({
-      trip_request_id: activeTripId,
-      user_id: currentUser.id,
-      role: 'member',
-      status: 'Invited'
-    });
-    if (dbRes.error) throw dbRes.error;
+    // 1. Check not already invited
+    // (We don't insert a row here — the invitee gets added when they click the link and sign in via processJoin)
+    // Just proceed to send the email
 
     // 2. Get trip details for the email
     var tripRes = await sbClient.from('trip_requests').select('destination_type').eq('id', activeTripId).single();
