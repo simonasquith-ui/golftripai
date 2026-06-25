@@ -1739,10 +1739,22 @@ async function generateTrip() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: prompt })
     });
-    if (!res.ok) throw new Error('Server error ' + res.status);
+    if (!res.ok) {
+      var errData = await res.json().catch(function() { return {}; });
+      console.error('Generate trip error:', errData);
+      throw new Error('Server error ' + res.status + ': ' + (errData.error || 'unknown'));
+    }
     var json = await res.json();
+    console.log('Raw response type:', typeof json.result);
     // Function returns { result: "json string" } — parse the inner string
-    var parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
+    var parsed;
+    try {
+      parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
+    } catch(parseErr) {
+      console.error('JSON parse error:', parseErr.message);
+      console.error('Raw result:', json.result ? json.result.slice(0, 300) : 'undefined');
+      throw new Error('Failed to parse AI response: ' + parseErr.message);
+    }
     currentTripData = parsed;
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
