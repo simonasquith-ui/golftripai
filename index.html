@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds</title>
+<meta name="description" content="Plan the perfect golf holiday in 60 seconds. AI-powered itineraries with courses, hotels and flights compared across Budget, Mid-Range and Luxury. Built for UK golf societies.">
+<meta name="keywords" content="golf holiday, golf trip planner, golf society trips, UK golf holidays, golf travel, golf breaks">
+<meta name="author" content="GolfTrip">
+<meta name="theme-color" content="#1a3a2a">
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://golftrip.app/">
+<meta property="og:title" content="GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds">
+<meta property="og:description" content="AI-powered golf holiday planning for UK golfers and societies. Compare Budget, Mid-Range and Luxury options. Multi-airport support. Free to try.">
+<meta property="og:image" content="https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1200&q=80">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds">
+<meta name="twitter:description" content="AI-powered golf holiday planning for UK golfers and societies. Free to try.">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1200&q=80">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -300,6 +315,36 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 .footer-col a:hover{color:var(--gold)}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center}
 .footer-bottom p{color:rgba(255,255,255,.35);font-size:.8rem}
+/* === SEASONAL === */
+.season-intro{background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:28px;margin-bottom:40px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.season-intro-text h3{color:var(--green);font-family:'Playfair Display',serif;margin-bottom:8px}
+.season-intro-text p{font-size:.9rem;margin:0}
+.season-intro-badge{background:var(--green);color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem;padding:16px 24px;border-radius:var(--rl);white-space:nowrap;text-align:center}
+.season-intro-badge .badge-season{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.6);display:block;margin-bottom:4px}
+.dest-recommendation{background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;margin-bottom:32px;transition:box-shadow var(--tr)}
+.dest-recommendation:hover{box-shadow:var(--shl)}
+.dest-rec-header{background:var(--green);padding:28px 32px;position:relative;overflow:hidden}
+.dest-rec-header::after{content:'\26F3';position:absolute;right:24px;bottom:8px;font-size:5rem;opacity:.1}
+.dest-rec-header h2{color:var(--white);font-family:'Playfair Display',serif;font-style:italic;margin-bottom:8px}
+.dest-rec-header p{color:rgba(255,255,255,.75);font-size:.95rem;margin:0;max-width:600px}
+.dest-rec-meta{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.dest-rec-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:4px 12px;border-radius:20px;font-size:.8rem}
+.dest-rec-body{padding:28px 32px}
+.dest-rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.dest-rec-section h4{color:var(--green);font-family:'Playfair Display',serif;margin-bottom:12px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.dest-rec-course{background:var(--off-white);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.dest-rec-course-name{font-weight:600;color:var(--green);font-size:.9rem}
+.dest-rec-course-detail{font-size:.8rem;color:var(--text-muted);margin-top:3px}
+.dest-rec-hotel{background:var(--off-white);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.dest-rec-hotel-name{font-weight:600;color:var(--green);font-size:.9rem}
+.dest-rec-hotel-detail{font-size:.8rem;color:var(--text-muted);margin-top:3px}
+.dest-rec-footer{border-top:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--off-white)}
+.dest-rec-price{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green)}
+.dest-rec-price span{font-size:.8rem;color:var(--text-muted);font-family:'Inter',sans-serif;font-weight:400}
+.dest-rec-actions{display:flex;gap:10px;flex-wrap:wrap}
+.seasonal-refresh{background:none;border:none;color:var(--text-muted);font-size:.8rem;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;padding:8px 0;transition:color var(--tr)}
+.seasonal-refresh:hover{color:var(--green)}
+@media(max-width:640px){.dest-rec-grid{grid-template-columns:1fr}.dest-rec-body{padding:20px}.dest-rec-header{padding:20px}.dest-rec-footer{padding:16px 20px}}
 @media(max-width:900px){
   .pricing-grid,.features-grid,.testimonials-grid{grid-template-columns:1fr 1fr}
   .footer-inner{grid-template-columns:1fr 1fr}
@@ -370,6 +415,29 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   .nav-links .nav-link{display:none}.nav-links .nav-link.always{display:flex}
   .hero-cta{flex-direction:column}
   .airport-group-row{grid-template-columns:1fr 80px auto}
+  .btt-grid{grid-template-columns:1fr}
+  .stat-boxes{grid-template-columns:1fr 1fr}
+  .trip-grid{grid-template-columns:1fr}
+  .profile-grid{grid-template-columns:1fr}
+  .book-this-trip{padding:20px}
+  .book-this-trip h3{font-size:1.1rem}
+  .btt-total{flex-direction:column;gap:12px;text-align:center}
+  .results-toolbar{flex-direction:column;align-items:flex-start}
+  .sticky-compare{position:relative;top:0}
+  .compare-item .ci-price{font-size:1rem}
+  .hero-content{padding:80px 20px 60px}
+  .page-header{padding:32px 0 24px}
+  .q-section{padding:20px}
+  .cost-breakdown{padding:16px}
+  .pdf-export-bar{flex-direction:column;text-align:center}
+  .map-container{height:320px}
+  .chat-messages{height:240px}
+}
+@media(max-width:380px){
+  .nav-logo{font-size:1.1rem}
+  h1{font-size:1.8rem}
+  .btn-lg{padding:14px 20px;font-size:.9rem}
+  .chip{padding:6px 12px;font-size:.8rem}
 }
 </style>
 </head>
@@ -379,6 +447,8 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <a href="#" class="nav-logo" onclick="showPage('landing');return false;">Golf<span>Trip</span></a>
     <div class="nav-links">
       <a href="#" class="nav-link always" onclick="showPage('landing');return false;">Home</a>
+      <a href="#" class="nav-link always" onclick="showPage('about');return false;">About</a>
+      <a href="#" class="nav-link always" onclick="showPage('seasonal');return false;">Destinations</a>
       <a href="#" class="nav-link always" onclick="showPage('questionnaire');return false;">Plan a Trip</a>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
@@ -400,7 +470,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="hero-bg"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <div class="hero-eyebrow">&#9971; AI-Powered Golf Holiday Planner</div>
+      <div class="hero-eyebrow">&#9971; Plan Less. Play More.</div>
       <h1>Build Your Perfect<br><em>Golf Holiday</em><br>in 60 Seconds</h1>
       <div class="hero-sub"><p>Tell us your airport, budget and handicap — our AI crafts a tailored itinerary comparing courses, hotels and flights. No travel agent required.</p></div>
       <div class="hero-cta">
@@ -438,7 +508,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
       <h2 style="color:var(--white);margin-bottom:16px">Be One of the First</h2>
       <p style="color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px;margin:0 auto 40px">
-        GolfTrip is in early access. We are building this with our first users — your feedback shapes the product directly.
+        GolfTrip is in early access. We are building this with our first users - your feedback shapes the product directly.
       </p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:800px;margin:0 auto">
         <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:24px">
@@ -563,8 +633,9 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           <p>AI-powered golf holiday planning for individuals, groups and societies across the UK.</p>
         </div>
         <div class="footer-col"><h4>Product</h4><ul><li><a href="#" onclick="showPage('questionnaire');return false;">Plan a Trip</a></li><li><a href="#pricing-section">Pricing</a></li><li><a href="#">How It Works</a></li></ul></div>
-        <div class="footer-col"><h4>Destinations</h4><ul><li><a href="#">Spain</a></li><li><a href="#">Portugal</a></li><li><a href="#">Ireland</a></li><li><a href="#">Scotland</a></li></ul></div>
-        <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Contact</a></li></ul></div>
+        <div class="footer-col"><h4>Destinations</h4><ul><li><a href="#" onclick="showPage('seasonal');return false;">Seasonal Guide</a></li>
+        <li><a href="#">Spain</a></li><li><a href="#">Portugal</a></li><li><a href="#">Ireland</a></li><li><a href="#">Scotland</a></li></ul></div>
+        <div class="footer-col"><h4>Company</h4><ul><li><a href="#" onclick="showPage('about');return false;">About</a></li><li><a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a></li><li><a href="#" onclick="showPage('terms');return false;">Terms of Service</a></li><li><a href="#">Contact</a></li></ul></div>
       </div>
       <div class="footer-bottom"><p>&#169; 2025 GolfTrip Ltd. All rights reserved.</p><p>Made for golfers everywhere</p></div>
     </div>
@@ -684,6 +755,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="chip" data-single="accomm" data-val="Hotel">Hotel</div>
         <div class="chip" data-single="accomm" data-val="Golf resort">Golf Resort</div>
         <div class="chip" data-single="accomm" data-val="Villa">Villa</div>
+        <div class="chip" data-single="accomm" data-val="Apartment">Apartment</div>
       </div>
     </div>
     <div class="q-section">
@@ -901,6 +973,190 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   </div></div>
 </div>
 
+<!-- ABOUT -->
+<div id="page-about" class="page">
+  <div class="page-header">
+    <div class="container">
+      <div class="section-label">Our Story</div>
+      <h1>Why I Built GolfTrip</h1>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:780px">
+
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px;margin-bottom:32px">
+        <p style="font-size:1.15rem;color:var(--text);line-height:1.8;margin-bottom:24px;font-style:italic;color:var(--green)">
+          "Every year, twice a year, I'd find myself doing the same thing."
+        </p>
+        <p style="line-height:1.9;margin-bottom:20px">
+          Someone in the group chat would say "right, where are we going this year?" and somehow - without anyone officially deciding - it would become my problem.
+        </p>
+        <p style="line-height:1.9;margin-bottom:20px">
+          Sixteen guys. Four different cities. Four different airports. Different budgets, different handicaps, different opinions on whether we wanted championship courses or hidden gems. Some flying Tuesday, some Thursday. Half of them needing club hire. All of them with very strong views on the hotel.
+        </p>
+        <p style="line-height:1.9;margin-bottom:20px">
+          I'd spend weeks buried in browser tabs. Skyscanner in one window, Booking.com in another, a golf course directory in a third, a spreadsheet trying to make sense of it all. Cross-referencing flight times with tee time availability. Checking whether the hotel was actually near the courses or just near the airport. Working out whether the Budget option was actually worse than the Mid-Range or just on a different part of the coast.
+        </p>
+        <p style="line-height:1.9;margin-bottom:20px">
+          It was, as I used to tell people, like herding sheep. Except the sheep all had opinions about green fees.
+        </p>
+        <p style="line-height:1.9;margin-bottom:20px">
+          After the fifth or sixth time of doing this, I started thinking: why doesn't a tool exist that just does this for you? You tell it where you're flying from, roughly what you want to spend, how many of you there are - and it builds the plan.
+        </p>
+        <p style="line-height:1.9;margin-bottom:0;font-weight:600;color:var(--green)">
+          So I built it.
+        </p>
+      </div>
+
+      <div style="background:var(--green);border-radius:var(--rl);padding:40px;margin-bottom:32px">
+        <h2 style="color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:20px;font-size:1.5rem">What GolfTrip does</h2>
+        <p style="color:rgba(255,255,255,.85);line-height:1.9;margin-bottom:16px">
+          GolfTrip takes everything I used to spend three weeks doing manually and turns it into a 60-second AI-generated itinerary. Courses matched to your handicap. Hotels near the fairways, not the motorway. Budget, mid-range and luxury options compared side by side. Booking links for everything.
+        </p>
+        <p style="color:rgba(255,255,255,.85);line-height:1.9;margin-bottom:0">
+          And if your group is spread across the country, you can add every departure airport and it accounts for all of them. It won't replace the group chat arguments about where to go. But it'll give everyone the information they need to actually make a decision.
+        </p>
+      </div>
+
+      <div style="background:var(--sand);border-radius:var(--rl);padding:40px;margin-bottom:32px">
+        <h2 style="color:var(--green);font-family:'Playfair Display',serif;margin-bottom:16px;font-size:1.3rem">The honest bit</h2>
+        <p style="line-height:1.9;margin-bottom:16px">
+          GolfTrip was built by one person who got fed up planning golf trips for his society every year. It's in early access, which means it's genuinely being shaped by the people using it.
+        </p>
+        <p style="line-height:1.9;margin-bottom:0">
+          If something's missing, annoying, or broken - there's a real person on the other end who wants to know about it.
+        </p>
+      </div>
+
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:40px">
+        <h2 style="color:var(--green);font-family:'Playfair Display',serif;margin-bottom:20px;font-size:1.3rem">Get in touch</h2>
+        <p style="line-height:1.9;margin-bottom:24px">
+          Have feedback, a feature request, or just want to say hello? We'd love to hear from you.
+        </p>
+        <a href="mailto:hello@golftrip.com" class="btn btn-primary">Email Us</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SEASONAL RECOMMENDATIONS -->
+<div id="page-seasonal" class="page">
+  <div class="page-header" style="background:var(--green)">
+    <div class="container">
+      <div class="section-label" id="seasonal-label">Our Favourites</div>
+      <h1 id="seasonal-heading">Best Golf Destinations Right Now</h1>
+      <p id="seasonal-subheading">AI-curated picks updated each season — courses, hotels and booking links included.</p>
+    </div>
+  </div>
+  <div style="padding:40px 0 80px">
+    <div class="container">
+
+      <!-- Season tabs -->
+      <div class="results-tabs" style="margin-bottom:40px;max-width:600px">
+        <button class="results-tab" id="stab-spring" onclick="loadSeason('spring')">&#127800; Spring</button>
+        <button class="results-tab" id="stab-summer" onclick="loadSeason('summer')">&#9728; Summer</button>
+        <button class="results-tab" id="stab-autumn" onclick="loadSeason('autumn')">&#127810; Autumn</button>
+        <button class="results-tab" id="stab-winter" onclick="loadSeason('winter')">&#10052; Winter</button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="seasonal-loading" style="text-align:center;padding:60px 0;display:none">
+        <div class="loading-spinner"></div>
+        <h3 style="color:var(--green);margin-top:16px">Curating your seasonal picks...</h3>
+        <p class="text-muted mt-8">Our AI is finding the best destinations for this season. This takes about 20 seconds.</p>
+      </div>
+
+      <!-- Content -->
+      <div id="seasonal-content"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY -->
+<div id="page-privacy" class="page">
+  <div class="page-header">
+    <div class="container">
+      <div class="section-label">Legal</div>
+      <h1>Privacy Policy</h1>
+      <p>Last updated: June 2025</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px"><div class="container" style="max-width:780px">
+    <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+      <h3 style="color:var(--green);margin-bottom:12px">Who we are</h3>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip is operated by GolfTrip Ltd. We are committed to protecting your personal data and complying with the UK General Data Protection Regulation (UK GDPR).</p>
+      <h3 style="color:var(--green);margin-bottom:12px">What data we collect</h3>
+      <p style="line-height:1.9;margin-bottom:8px">When you use GolfTrip we may collect:</p>
+      <ul style="margin:0 0 24px 20px;line-height:2;color:var(--text-muted)">
+        <li>Your email address when you create an account</li>
+        <li>Trip preferences you enter (airports, budget, destination, group size)</li>
+        <li>AI-generated trip results associated with your account</li>
+        <li>Group planning data including messages and member information</li>
+      </ul>
+      <h3 style="color:var(--green);margin-bottom:12px">How we use your data</h3>
+      <p style="line-height:1.9;margin-bottom:8px">We use your data to:</p>
+      <ul style="margin:0 0 24px 20px;line-height:2;color:var(--text-muted)">
+        <li>Provide the GolfTrip service and save your trips</li>
+        <li>Send you account-related emails (password reset, invite notifications)</li>
+        <li>Improve the product based on usage patterns</li>
+      </ul>
+      <p style="line-height:1.9;margin-bottom:24px">We do not sell your data to third parties. We do not use your data for advertising.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Third party services</h3>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip uses Supabase for database and authentication, Groq for AI processing, and Resend for transactional email. Each has their own privacy policy and processes data on our behalf under data processing agreements.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Cookies</h3>
+      <p style="line-height:1.9;margin-bottom:24px">We use only essential cookies required for authentication and session management. We do not use advertising or tracking cookies.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Your rights</h3>
+      <p style="line-height:1.9;margin-bottom:8px">Under UK GDPR you have the right to:</p>
+      <ul style="margin:0 0 24px 20px;line-height:2;color:var(--text-muted)">
+        <li>Access the personal data we hold about you</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of your account and associated data</li>
+        <li>Object to processing of your data</li>
+      </ul>
+      <p style="line-height:1.9;margin-bottom:24px">To exercise any of these rights, email us at <a href="mailto:privacy@golftrip.com" style="color:var(--gold)">privacy@golftrip.com</a>.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Data retention</h3>
+      <p style="line-height:1.9;margin-bottom:24px">We retain your account data for as long as your account is active. You can delete your account at any time from your profile page. Trip data is deleted when you delete it or close your account.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Changes to this policy</h3>
+      <p style="line-height:1.9;margin-bottom:0">We may update this policy from time to time. We will notify you of significant changes by email.</p>
+    </div>
+  </div></div>
+</div>
+
+<!-- TERMS OF SERVICE -->
+<div id="page-terms" class="page">
+  <div class="page-header">
+    <div class="container">
+      <div class="section-label">Legal</div>
+      <h1>Terms of Service</h1>
+      <p>Last updated: June 2025</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px"><div class="container" style="max-width:780px">
+    <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+      <h3 style="color:var(--green);margin-bottom:12px">Acceptance of terms</h3>
+      <p style="line-height:1.9;margin-bottom:24px">By using GolfTrip you agree to these Terms of Service. If you do not agree, please do not use the service.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">The service</h3>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip provides AI-generated golf holiday itineraries for planning purposes. All prices, course details, hotel recommendations and availability shown are estimates only and should be verified directly with the relevant providers before booking.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Accuracy of information</h3>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip uses AI to generate trip plans. While we aim for accuracy, we cannot guarantee that all information is correct, current or complete. Green fees, hotel prices, flight costs and availability change frequently. Always check directly with Skyscanner, Booking.com, GolfNow and course operators before making any booking or financial commitment.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Limitation of liability</h3>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip is not a travel agent and does not make bookings on your behalf. We accept no liability for any loss, cost or inconvenience arising from decisions made based on information provided by GolfTrip.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">User accounts</h3>
+      <p style="line-height:1.9;margin-bottom:24px">You are responsible for maintaining the security of your account. You must not share your account credentials or use GolfTrip for any unlawful purpose.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Subscriptions and payments</h3>
+      <p style="line-height:1.9;margin-bottom:24px">Paid plans are billed in advance. You may cancel at any time and will retain access until the end of your billing period. We do not offer refunds for partial periods except where required by law.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Intellectual property</h3>
+      <p style="line-height:1.9;margin-bottom:24px">All content, design and code on GolfTrip is owned by GolfTrip Ltd and protected by copyright. You may not copy, reproduce or redistribute any part of the service without written permission.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Changes to the service</h3>
+      <p style="line-height:1.9;margin-bottom:24px">We reserve the right to modify or discontinue the service at any time. We will give reasonable notice of significant changes.</p>
+      <h3 style="color:var(--green);margin-bottom:12px">Governing law</h3>
+      <p style="line-height:1.9;margin-bottom:0">These terms are governed by the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
+    </div>
+  </div></div>
+</div>
+
 <!-- ADMIN -->
 <div id="page-admin" class="page">
   <div class="page-header" style="background:var(--green-dark)">
@@ -1043,6 +1299,10 @@ function showPage(name) {
   var el = document.getElementById('page-' + name);
   if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   if (name === 'profile' && currentUser) { loadSavedTrips(); loadProfile(); }
+  if (name === 'seasonal') {
+    var season = getCurrentSeason();
+    loadSeason(season);
+  }
   if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
 }
@@ -1432,29 +1692,47 @@ async function generateTrip() {
       '- itinerary array: include EXACTLY 5 days with realistic morning, afternoon and evening activities.\n' +
       '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n' +
       '- EVERY course, hotel and restaurant must include a lat (latitude) and lng (longitude) as decimal numbers for their real location. These are used to plot a map. Be accurate — use the real GPS coordinates for each venue.\n\n' +
-      'YOU MUST RETURN EXACTLY 3 PANELS in the panels array: Budget, Mid-Range, and Luxury. All three are required — do not stop after one panel.\n\n' +
-      'Respond with valid JSON only (no markdown, no backticks). The JSON must have this exact structure with all 3 panels fully populated:\n' +
+      'YOU MUST return exactly 3 complete panels: Budget, Mid-Range, and Luxury. All three are required.\n' +
+      'Respond with valid JSON only. No markdown. No explanation. Start with { and end with }.\n' +
+      'Use this exact structure, replacing all bracketed values with real data:\n' +
       '{"panels":[' +
-        '{"label":"Budget","destination":"[real destination name]","description":"[2-3 sentence overview]","weather":"[weather]","best_time":"[best months]","flight_time":"[flight duration]","total_cost":[number],' +
-        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
-        '"courses":[{"name":"[real course name]","location":"[town]","description":"[sentence]","par":[number],"yardage":[number],"slope_rating":[number],"course_rating":[number],"green_fee":[number],"designer":"[name]","difficulty":"[Beginner/Intermediate/Advanced]","why_recommended":"[sentence]","club_hire":[true/false],"lat":[decimal],"lng":[decimal]}],' +
-        '"hotels":[{"name":"[real hotel name]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"restaurants":[{"name":"[real restaurant name]","type":"[Fine Dining/Casual/Bar]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"itinerary":[{"day":1,"title":"[title]","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
-        '{"label":"Mid-Range","destination":"[same destination, different hotels/courses]","description":"[overview]","weather":"[weather]","best_time":"[months]","flight_time":"[duration]","total_cost":[higher number],' +
-        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
-        '"courses":[SAME STRUCTURE AS BUDGET — fill in real course names and numbers],' +
-        '"hotels":[SAME STRUCTURE AS BUDGET — fill in real hotel names],' +
-        '"restaurants":[SAME STRUCTURE AS BUDGET — fill in real restaurant names],' +
-        '"itinerary":[SAME STRUCTURE AS BUDGET — fill in activities]},' +
-        '{"label":"Luxury","destination":"[same destination, premium venues]","description":"[overview]","weather":"[weather]","best_time":"[months]","flight_time":"[duration]","total_cost":[highest number],' +
-        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
-        '"courses":[SAME STRUCTURE — premium courses],' +
-        '"hotels":[SAME STRUCTURE — luxury hotels],' +
-        '"restaurants":[SAME STRUCTURE — upscale restaurants],' +
-        '"itinerary":[SAME STRUCTURE — premium activities]}' +
+        '{"label":"Budget",' +
+        '"destination":"[real place name, country]",' +
+        '"description":"[2 sentence overview]",' +
+        '"weather":"[weather summary]",' +
+        '"best_time":"[best months]",' +
+        '"flight_time":"[e.g. 2.5 hrs]",' +
+        '"total_cost":[number],' +
+        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
+        '"courses":[{"name":"[real course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
+        '"hotels":[{"name":"[real hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"restaurants":[{"name":"[real venue]","type":"[Fine Dining|Casual|Bar]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
+        '{"label":"Mid-Range",' +
+        '"destination":"[same region, different specific area or venues]",' +
+        '"description":"[overview]",' +
+        '"weather":"[weather]",' +
+        '"best_time":"[months]",' +
+        '"flight_time":"[duration]",' +
+        '"total_cost":[higher number than Budget],' +
+        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
+        '"courses":[{"name":"[real course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
+        '"hotels":[{"name":"[real hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"restaurants":[{"name":"[real venue]","type":"[type]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
+        '{"label":"Luxury",' +
+        '"destination":"[premium area of same destination]",' +
+        '"description":"[overview]",' +
+        '"weather":"[weather]",' +
+        '"best_time":"[months]",' +
+        '"flight_time":"[duration]",' +
+        '"total_cost":[highest number],' +
+        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
+        '"courses":[{"name":"[real premium course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
+        '"hotels":[{"name":"[real luxury hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"restaurants":[{"name":"[real upscale venue]","type":"[type]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]}' +
       ']}';
-
     var res = await fetch('/.netlify/functions/generate-trip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1504,6 +1782,14 @@ function renderResults(aiData, qData) {
   panelsEl.innerHTML = '';
 
   storedPanels = panels; // store for PDF export
+
+  // Warm up Netlify functions and preload Google Maps in background
+  // so the map is fast when the user clicks it
+  setTimeout(function() {
+    fetch('/.netlify/functions/maps-config').catch(function() {});
+    fetch('/.netlify/functions/geocode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: 'warmup', type: 'hotel' }) }).catch(function() {});
+  }, 500);
+
   panels.forEach(function(panel, i) {
     var ci = document.createElement('div');
     ci.className = 'compare-item' + (i === 0 ? ' active-tab' : '');
@@ -1614,7 +1900,7 @@ function buildPanel(panel, idx, qData) {
   html += '<div class="section-heading" data-icon="&#127968;">Recommended Hotels</div><div class="hotels-grid">';
   if (panel.hotels && panel.hotels.length) {
     panel.hotels.forEach(function(h) {
-      var isVilla = qData && qData.accommodation === 'Villa';
+      var isVilla = qData && (qData.accommodation === 'Villa' || qData.accommodation === 'Apartment');
       var bookUrl = isVilla
         ? 'https://www.vrbo.com/search?destination=' + encodeURIComponent(h.name || dest)
         : 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name || dest);
@@ -1908,22 +2194,35 @@ async function initMap(idx) {
   });
 
   // Get coordinates — prefer AI coords if they look valid
+  // Split into: items with good AI coords (instant) vs items needing geocoding (parallel fetch)
   var rawLocations = [];
-  for (var i = 0; i < toSearch.length; i++) {
-    var item = toSearch[i];
-    var lat = null, lng = null;
-    // Use AI coords if they look plausible (non-zero, non-default)
+  var needsGeocode = [];
+
+  toSearch.forEach(function(item) {
     if (item.aiLat && item.aiLng && Math.abs(item.aiLat) > 0.5 && Math.abs(item.aiLng) > 0.5) {
-      lat = item.aiLat; lng = item.aiLng;
-    } else {
-      // Fall back to Google Places
-      var result = await searchGooglePlace(item.name, item.type, dest);
-      if (result) { lat = result.lat; lng = result.lng; }
-    }
-    if (lat && lng) {
+      // AI gave plausible coords — use them immediately, no API call needed
       rawLocations.push({ type: item.type, name: item.name, area: item.area,
-        lat: lat, lng: lng, detail: item.detail, link: item.link });
+        lat: item.aiLat, lng: item.aiLng, detail: item.detail, link: item.link });
+    } else {
+      // No AI coords — queue for parallel geocoding
+      needsGeocode.push(item);
     }
+  });
+
+  // Geocode all missing venues in parallel (Promise.all not sequential)
+  if (needsGeocode.length) {
+    var geocodeResults = await Promise.all(needsGeocode.map(function(item) {
+      return searchGooglePlace(item.name, item.type, dest).then(function(result) {
+        if (result) {
+          return { type: item.type, name: item.name, area: item.area,
+            lat: result.lat, lng: result.lng,
+            rating: result.rating, address: result.address,
+            detail: item.detail, link: item.link };
+        }
+        return null;
+      });
+    }));
+    geocodeResults.forEach(function(r) { if (r) rawLocations.push(r); });
   }
 
   // Filter out outliers — remove any pin more than 150km from the median centre
@@ -1973,6 +2272,7 @@ async function initMap(idx) {
     center: { lat: avgLat, lng: avgLng },
     zoom: 12,
     mapTypeId: 'roadmap',
+    mapId: 'golftrip_map',
     styles: [
       { featureType: 'poi.sports_complex', elementType: 'labels', stylers: [{ visibility: 'on' }] }
     ],
@@ -1987,25 +2287,38 @@ async function initMap(idx) {
 
   locations.forEach(function(loc) {
     var pinColor = colors[loc.type] || '#666';
-    var marker = new google.maps.Marker({
-      position: { lat: loc.lat, lng: loc.lng },
-      map: map,
-      title: loc.name,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 11,
-        fillColor: pinColor,
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 3
-      },
-      label: {
-        text: loc.type === 'hotel' ? 'H' : loc.type === 'course' ? 'G' : 'R',
-        color: loc.type === 'course' ? '#1a3a2a' : '#ffffff',
-        fontSize: '11px',
-        fontWeight: '700'
-      }
-    });
+    // Build custom pin element
+    var pinEl = document.createElement('div');
+    var pinLetter = loc.type === 'hotel' ? 'H' : loc.type === 'course' ? 'G' : 'R';
+    var pinTextColor = loc.type === 'course' ? '#1a3a2a' : '#ffffff';
+    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50%;background:' + pinColor + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:' + pinTextColor + ';font-family:Arial,sans-serif;cursor:pointer';
+    pinEl.textContent = pinLetter;
+
+    var marker;
+    if (window.google.maps.marker && window.google.maps.marker.AdvancedMarkerElement) {
+      marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: loc.lat, lng: loc.lng },
+        map: map,
+        title: loc.name,
+        content: pinEl
+      });
+    } else {
+      // Fallback to legacy Marker if AdvancedMarkerElement not available
+      marker = new google.maps.Marker({
+        position: { lat: loc.lat, lng: loc.lng },
+        map: map,
+        title: loc.name,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 11,
+          fillColor: pinColor,
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3
+        },
+        label: { text: pinLetter, color: pinTextColor, fontSize: '11px', fontWeight: '700' }
+      });
+    }
 
     var popupContent = '<div class="gmap-popup">' +
       '<div class="gmap-popup-title">' + (loc.name||'') + '</div>' +
@@ -2018,10 +2331,17 @@ async function initMap(idx) {
       '<a href="https://www.google.com/maps/dir/?api=1&destination=' + loc.lat + ',' + loc.lng + '" target="_blank" class="gmap-popup-link" style="background:#1a3a2a;color:#fff;margin-left:4px">Directions</a>' +
       '</div>';
 
-    marker.addListener('click', function() {
+    var clickHandler = function() {
       infoWindow.setContent(popupContent);
       infoWindow.open(map, marker);
-    });
+    };
+    if (marker.addListener) {
+      marker.addListener('click', clickHandler);
+    } else if (marker.element) {
+      marker.element.addEventListener('click', clickHandler);
+    } else {
+      pinEl.addEventListener('click', clickHandler);
+    }
 
     bounds.extend({ lat: loc.lat, lng: loc.lng });
   });
@@ -2749,40 +3069,230 @@ async function loadAdminStats() {
   });
 }
 
+/* === SEASONAL RECOMMENDATIONS === */
+var currentSeason = null;
+
+function getCurrentSeason() {
+  var month = new Date().getMonth(); // 0-11
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'autumn';
+  return 'winter';
+}
+
+var SEASON_META = {
+  spring: { label: 'Spring', emoji: '&#127800;', months: 'March - May', desc: 'Perfect conditions returning across Europe — courses in their best shape before summer crowds.' },
+  summer: { label: 'Summer', emoji: '&#9728;', months: 'June - August', desc: 'Long days, warm evenings and peak season at the finest courses. Book early.' },
+  autumn: { label: 'Autumn', emoji: '&#127810;', months: 'September - November', desc: 'Often the best value of the year. Courses empty out, prices drop, conditions stay excellent.' },
+  winter: { label: 'Winter', emoji: '&#10052;', months: 'December - February', desc: 'Head south or east for year-round golf. Dubai, Morocco and the Algarve in perfect condition.' }
+};
+
+async function loadSeason(season) {
+  currentSeason = season;
+
+  // Update tabs
+  ['spring','summer','autumn','winter'].forEach(function(s) {
+    var tab = document.getElementById('stab-' + s);
+    if (tab) tab.classList.toggle('active', s === season);
+  });
+
+  // Update header
+  var meta = SEASON_META[season];
+  document.getElementById('seasonal-label').textContent = 'Our Favourites This ' + meta.label;
+  document.getElementById('seasonal-heading').textContent = 'Best Golf Destinations This ' + meta.label;
+  document.getElementById('seasonal-subheading').textContent = meta.months + ' - ' + meta.desc;
+
+  var loadEl = document.getElementById('seasonal-loading');
+  var contentEl = document.getElementById('seasonal-content');
+  contentEl.innerHTML = '';
+  loadEl.style.display = 'block';
+
+  try {
+    // Check cache in Supabase first
+    var cached = await sbClient.from('seasonal_recommendations').select('*').eq('season', season).single();
+
+    if (cached.data && cached.data.content) {
+      loadEl.style.display = 'none';
+      renderSeasonalContent(cached.data.content, season, cached.data.generated_at);
+      return;
+    }
+  } catch(e) {
+    console.log('No cached seasonal data, generating...');
+  }
+
+  // Generate fresh content
+  await generateSeasonalContent(season);
+}
+
+async function generateSeasonalContent(season) {
+  var loadEl = document.getElementById('seasonal-loading');
+  var contentEl = document.getElementById('seasonal-content');
+  var meta = SEASON_META[season];
+
+  var destinations = {
+    spring: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'Morocco', 'Ireland', 'Scotland'],
+    summer: ['Scotland', 'Ireland', 'France', 'Spain (Costa del Sol)', 'Portugal (Algarve)'],
+    autumn: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'Turkey (Antalya)', 'Morocco', 'Ireland'],
+    winter: ['Dubai', 'Morocco', 'Portugal (Algarve)', 'Spain (Costa del Sol)', 'Turkey (Antalya)']
+  };
+
+  var dests = destinations[season].slice(0, 5).join(', ');
+
+  var prompt = 'Generate seasonal golf destination recommendations for UK golfers travelling in ' + meta.label + ' (' + meta.months + '). Create recommendations for these 5 destinations: ' + dests + '. For each destination provide: why it is great this season specifically; 2 real golf courses with green fee estimates in GBP; 1 recommended hotel; typical budget per person for 5 nights from London; one seasonal insider tip. Respond with valid JSON only: ' +
+    '{"season":"' + season + '","destinations":[' +
+    '{"name":"Portugal (Algarve)","tagline":"[one line why great this season]","weather":"[temp]","flight_time":"2h 30m","best_for":"[golfer type]","insider_tip":"[tip]","budget_from":850,"budget_to":1400,' +
+    '"courses":[{"name":"[real course]","green_fee":120,"why":"[sentence]"},{"name":"[real course]","green_fee":85,"why":"[sentence]"}],' +
+    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=Algarve"}},' +
+    '{"name":"Spain (Costa del Sol)","tagline":"[tagline]","weather":"[temp]","flight_time":"2h 30m","best_for":"[type]","insider_tip":"[tip]","budget_from":750,"budget_to":1200,' +
+    '"courses":[{"name":"[real course]","green_fee":95,"why":"[sentence]"},{"name":"[real course]","green_fee":65,"why":"[sentence]"}],' +
+    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=Costa+del+Sol"}},' +
+    '{"name":"[dest 3]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":700,"budget_to":1100,' +
+    '"courses":[{"name":"[real course]","green_fee":80,"why":"[sentence]"},{"name":"[real course]","green_fee":60,"why":"[sentence]"}],' +
+    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[2] || '') + '"}},' +
+    '{"name":"[dest 4]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":900,"budget_to":1500,' +
+    '"courses":[{"name":"[real course]","green_fee":100,"why":"[sentence]"},{"name":"[real course]","green_fee":70,"why":"[sentence]"}],' +
+    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[3] || '') + '"}},' +
+    '{"name":"[dest 5]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":1200,"budget_to":2000,' +
+    '"courses":[{"name":"[real course]","green_fee":150,"why":"[sentence]"},{"name":"[real course]","green_fee":110,"why":"[sentence]"}],' +
+    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[4] || '') + '"}}' +
+    ']}';
+  try {
+    var res = await fetch('/.netlify/functions/generate-trip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt })
+    });
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    var json = await res.json();
+    var parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
+
+    // Cache in Supabase
+    try {
+      await sbClient.from('seasonal_recommendations').upsert({
+        season: season,
+        content: parsed,
+        generated_at: new Date().toISOString()
+      }, { onConflict: 'season' });
+    } catch(e) { console.warn('Could not cache seasonal data:', e); }
+
+    loadEl.style.display = 'none';
+    renderSeasonalContent(parsed, season, new Date().toISOString());
+
+  } catch(e) {
+    loadEl.style.display = 'none';
+    contentEl.innerHTML = '<div class="empty-state"><div class="es-icon">&#9971;</div><h3>Could not load recommendations</h3><p>Please try again in a moment.</p><button class="btn btn-primary mt-16" onclick="generateSeasonalContent(\'' + season + '\')">Try Again</button></div>';
+    console.error('Seasonal generation error:', e);
+  }
+}
+
+function renderSeasonalContent(data, season, generatedAt) {
+  var contentEl = document.getElementById('seasonal-content');
+  var meta = SEASON_META[season];
+  var destinations = data.destinations || [];
+  var dateStr = generatedAt ? new Date(generatedAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : '';
+
+  var html = '<div class="season-intro">' +
+    '<div class="season-intro-text">' +
+      '<h3>' + meta.emoji + ' ' + destinations.length + ' Destinations for ' + meta.label + '</h3>' +
+      '<p>Hand-picked by our AI for UK golfers travelling ' + meta.months + '. Click "Plan This Trip" on any destination to build your full itinerary.</p>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">' +
+      '<div class="season-intro-badge"><span class="badge-season">Current Season</span>' + meta.label + ' ' + new Date().getFullYear() + '</div>' +
+      (dateStr ? '<button class="seasonal-refresh" onclick="refreshSeason(\'' + season + '\')">&#8635; Last updated ' + dateStr + ' &mdash; Refresh</button>' : '') +
+    '</div>' +
+  '</div>';
+
+  destinations.forEach(function(dest) {
+    var destEnc = encodeURIComponent(dest.name || '');
+    var flightsUrl = dest.booking && dest.booking.flights ? dest.booking.flights : 'https://www.skyscanner.net';
+    var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
+    var golfnowUrl = 'https://www.golfnow.com/tee-times/search#' + destEnc;
+    var destNameSafe = (dest.name||'').replace(/'/g, '');
+
+    html += '<div class="dest-recommendation">' +
+      '<div class="dest-rec-header">' +
+        '<h2>' + (dest.name || '') + '</h2>' +
+        '<p>' + (dest.tagline || '') + '</p>' +
+        '<div class="dest-rec-meta">' +
+          (dest.weather ? '<span class="dest-rec-chip">' + dest.weather + '</span>' : '') +
+          (dest.flight_time ? '<span class="dest-rec-chip">&#9992; ' + dest.flight_time + '</span>' : '') +
+          (dest.best_for ? '<span class="dest-rec-chip">Best for: ' + dest.best_for + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="dest-rec-body">' +
+        '<div class="dest-rec-grid">' +
+          '<div class="dest-rec-section">' +
+            '<h4>&#9971; Courses to Play</h4>' +
+            (dest.courses || []).map(function(c) {
+              return '<div class="dest-rec-course"><div class="dest-rec-course-name">' + (c.name||'') + '</div><div class="dest-rec-course-detail">Green fee approx. £' + (c.green_fee||'') + ' • ' + (c.why||'') + '</div></div>';
+            }).join('') +
+          '</div>' +
+          '<div class="dest-rec-section">' +
+            '<h4>&#127968; Where to Stay</h4>' +
+            (dest.hotel ? '<div class="dest-rec-hotel"><div class="dest-rec-hotel-name">' + dest.hotel.name + '</div><div class="dest-rec-hotel-detail">' + (dest.hotel.area||'') + (dest.hotel.why ? ' • ' + dest.hotel.why : '') + '</div></div>' : '') +
+            (dest.insider_tip ? '<div style="background:rgba(201,168,76,.1);border-left:3px solid var(--gold);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-top:12px"><div style="font-size:.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Insider Tip</div><div style="font-size:.85rem;color:var(--text)">' + dest.insider_tip + '</div></div>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dest-rec-footer">' +
+        '<div class="dest-rec-price">From £' + (dest.budget_from||'') + '<span> — £' + (dest.budget_to||'') + ' per person / 5 nights</span></div>' +
+        '<div class="dest-rec-actions">' +
+          '<a href="' + flightsUrl + '" target="_blank" class="btn btn-ghost btn-sm">&#9992; Flights</a>' +
+          '<a href="' + hotelsUrl + '" target="_blank" class="btn btn-ghost btn-sm">&#127968; Hotels</a>' +
+          '<a href="' + golfnowUrl + '" target="_blank" class="btn btn-ghost btn-sm">&#9971; Tee Times</a>' +
+          '<button class="btn btn-primary btn-sm" onclick="planSeasonalTrip(\'' + destNameSafe + '\')">Plan This Trip &#8594;</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  contentEl.innerHTML = html;
+}
+
+async function refreshSeason(season) {
+  try { await sbClient.from('seasonal_recommendations').delete().eq('season', season); } catch(e) {}
+  document.getElementById('seasonal-content').innerHTML = '';
+  document.getElementById('seasonal-loading').style.display = 'block';
+  await generateSeasonalContent(season);
+}
+
+function planSeasonalTrip(destName) {
+  showPage('questionnaire');
+  compareMode = 'tiers';
+  selectedDests = [];
+  document.querySelectorAll('#dest-chips .chip').forEach(function(chip) {
+    chip.classList.remove('active');
+    var d = chip.getAttribute('data-dest');
+    if (destName.toLowerCase().indexOf(d.toLowerCase()) !== -1 || d.toLowerCase().indexOf(destName.split(' ')[0].toLowerCase()) !== -1) {
+      chip.classList.add('active');
+      chipSelections.dest = d;
+    }
+  });
+  showToast('Destination pre-filled - complete the rest of your preferences!');
+}
+
 /* === URL PARAMS & JOIN FLOW === */
 var pendingJoinId = null;
 
 async function processJoin(tripId, user) {
   if (!tripId || !user) return;
   try {
-    // Check if already a member
     var check = await sbClient.from('trip_members').select('id').eq('trip_request_id', tripId).eq('user_id', user.id);
     if (check.data && check.data.length) {
-      // Already joined — just open the trip
       var tr = await sbClient.from('trip_requests').select('*').eq('id', tripId).single();
       if (tr.data) { showToast('Welcome back to the trip!'); openTripDetail(tripId, tr.data); }
       return;
     }
-    // Add as member
-    await sbClient.from('trip_members').insert({
-      trip_request_id: tripId,
-      user_id: user.id,
-      role: 'member',
-      status: 'Going'
-    });
-    // Post join message to chat
-    await sbClient.from('trip_messages').insert({
-      trip_request_id: tripId,
-      user_id: user.id,
-      message: (user.email || 'Someone') + ' joined the trip'
-    });
+    await sbClient.from('trip_members').insert({ trip_request_id: tripId, user_id: user.id, role: 'member', status: 'Going' });
+    await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: user.id, message: (user.email || 'Someone') + ' joined the trip' });
     var tr = await sbClient.from('trip_requests').select('*').eq('id', tripId).single();
-    if (tr.data) {
-      showToast('You have joined the trip!');
-      openTripDetail(tripId, tr.data);
-    }
+    if (tr.data) { showToast('You have joined the trip!'); openTripDetail(tripId, tr.data); }
     pendingJoinId = null;
-    // Clean the URL
     window.history.replaceState({}, '', window.location.pathname);
   } catch(e) {
     showToast('Could not join trip. Please try again.', true);
@@ -2794,10 +3304,7 @@ async function processJoin(tripId, user) {
   var params = new URLSearchParams(window.location.search);
   var joinId = params.get('join');
   var tripId = params.get('trip');
-  if (joinId) {
-    pendingJoinId = joinId;
-    // Will be processed after auth state resolves
-  }
+  if (joinId) pendingJoinId = joinId;
   if (tripId) currentTripRequestId = tripId;
 })();
 
@@ -2805,11 +3312,9 @@ async function processJoin(tripId, user) {
 sbClient.auth.getSession().then(function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
-  // If arriving via invite link and already logged in, process join immediately
   if (currentUser && pendingJoinId) {
     processJoin(pendingJoinId, currentUser);
   } else if (pendingJoinId) {
-    // Not logged in — show auth modal, join will happen after sign in
     showToast('Sign in or sign up to join this golf trip!');
     openAuthModal('signup');
   }
