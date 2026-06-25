@@ -19,6 +19,7 @@ exports.handler = async (event) => {
     const apiKey = process.env.GROQ_API_KEY
 
     if (!apiKey) {
+      console.log('ERROR: GROQ_API_KEY not set')
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -26,7 +27,21 @@ exports.handler = async (event) => {
       }
     }
 
-    const { prompt } = JSON.parse(event.body)
+    const body = JSON.parse(event.body)
+    const { prompt } = body
+
+    console.log('Prompt received:', prompt ? 'yes' : 'no')
+    console.log('Prompt length (chars):', prompt ? prompt.length : 'undefined')
+
+    if (!prompt) {
+      return {
+        statusCode: 400,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'No prompt provided' })
+      }
+    }
+
+    console.log('Calling Groq API...')
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',
@@ -54,9 +69,12 @@ exports.handler = async (event) => {
       }
     )
 
+    console.log('Groq response status:', response.status)
+
     const data = await response.json()
 
     if (!response.ok) {
+      console.log('Groq error response:', JSON.stringify(data))
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -67,6 +85,7 @@ exports.handler = async (event) => {
     }
 
     if (!data.choices || !data.choices[0]) {
+      console.log('No choices in response:', JSON.stringify(data))
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -76,32 +95,33 @@ exports.handler = async (event) => {
       }
     }
 
+    console.log('Groq response received, finish_reason:', data.choices[0].finish_reason)
+    console.log('Response length (chars):', data.choices[0].message.content.length)
+
     let result = data.choices[0].message.content
 
     // Strip markdown code fences if present
     result = result.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
 
-    // Fix common JSON issues the AI produces:
-
-    // 1. Replace smart/curly quotes with standard quotes
+    // Fix common JSON issues
     result = result
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
 
-    // 2. Remove trailing commas before } or ] (common AI mistake)
+    // Remove trailing commas before } or ]
     result = result.replace(/,\s*([}\]])/g, '$1')
 
-    // 3. If the JSON is truncated (max_tokens hit), try to close it gracefully
-    // Find the last complete field and close the structure
+    // Validate JSON
     try {
       JSON.parse(result)
+      console.log('JSON validation passed')
     } catch(parseErr) {
-      // Try to find and extract valid JSON
+      console.log('JSON parse error:', parseErr.message)
+      console.log('Raw result start:', result.slice(0, 300))
+
       const firstBrace = result.indexOf('{')
       if (firstBrace > -1) {
         let cleaned = result.slice(firstBrace)
-        
-        // Count open/close braces and brackets to find where it breaks
         let depth = 0
         let lastValid = 0
         for (let i = 0; i < cleaned.length; i++) {
@@ -109,57 +129,38 @@ exports.handler = async (event) => {
           if (cleaned[i] === '}' || cleaned[i] === ']') depth--
           if (depth === 0) { lastValid = i; break }
         }
-
         if (lastValid > 0) {
           result = cleaned.slice(0, lastValid + 1)
         } else {
-          // JSON was truncated - close all open structures
-          cleaned = cleaned.replace(/,\s*$/, '') // remove trailing comma
-          // Count unclosed braces
+          cleaned = cleaned.replace(/,\s*$/, '')
           let opens = (cleaned.match(/\{/g) || []).length
           let closes = (cleaned.match(/\}/g) || []).length
           let arrOpens = (cleaned.match(/\[/g) || []).length
           let arrCloses = (cleaned.match(/\]/g) || []).length
-          
-          // Close any open string first
-          const lastQuote = cleaned.lastIndexOf('"')
-          const secondLastQuote = cleaned.lastIndexOf('"', lastQuote - 1)
-          if (lastQuote > -1) {
-            const between = cleaned.slice(secondLastQuote + 1, lastQuote)
-            if (between.length > 0 && !between.includes('"')) {
-              cleaned = cleaned.slice(0, secondLastQuote) + '"truncated"'
-              opens = (cleaned.match(/\{/g) || []).length
-              closes = (cleaned.match(/\}/g) || []).length
-              arrOpens = (cleaned.match(/\[/g) || []).length
-              arrCloses = (cleaned.match(/\]/g) || []).length
-            }
-          }
-
-          // Remove trailing comma
-          cleaned = cleaned.replace(/,\s*$/, '')
-          
-          // Close open arrays then objects
           for (let i = 0; i < arrOpens - arrCloses; i++) cleaned += ']'
           for (let i = 0; i < opens - closes; i++) cleaned += '}'
-          
           result = cleaned
+        }
+      }
+
+      // Final validation
+      try {
+        JSON.parse(result)
+        console.log('JSON repair succeeded')
+      } catch(e) {
+        console.log('JSON repair failed:', e.message)
+        return {
+          statusCode: 500,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({
+            error: 'AI returned invalid JSON that could not be repaired. Please try again.',
+            raw: result.slice(0, 200)
+          })
         }
       }
     }
 
-    // Final validation - if still invalid, return a helpful error
-    try {
-      JSON.parse(result)
-    } catch(e) {
-      return {
-        statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ 
-          error: 'AI returned invalid JSON that could not be repaired. Please try again.',
-          raw: result.slice(0, 200)
-        })
-      }
-    }
+    console.log('Returning successful result')
 
     return {
       statusCode: 200,
@@ -171,6 +172,7 @@ exports.handler = async (event) => {
     }
 
   } catch (err) {
+    console.log('Caught exception:', err.message)
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
