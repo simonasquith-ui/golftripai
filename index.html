@@ -1821,76 +1821,97 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function makeIcon(color, emoji) {
+function makeIcon(color, letter) {
   return L.divIcon({
-    html: '<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;background:' + color + ';border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:13px;transform:rotate(-45deg)">' +
-      '<span style="transform:rotate(45deg);line-height:1">' + emoji + '</span></div>',
+    html: '<div style="width:30px;height:30px;border-radius:50%;background:' + color + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:Arial,sans-serif">' + letter + '</div>',
     className: '',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -34]
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -18]
   });
 }
 
-function initMap(idx) {
+async function geocodePlace(name, location, destination) {
+  var query = name + ', ' + (location || destination || '');
+  var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(query) + '&format=json&limit=1';
+  try {
+    var r = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'GolfTrip/1.0' } });
+    var data = await r.json();
+    if (data && data[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } catch(e) { console.warn('Geocode failed for', name, e); }
+  return null;
+}
+
+async function initMap(idx) {
   var panel = storedPanels[idx];
   if (!panel) return;
   var loadEl = document.getElementById('map-loading-' + idx);
   var mapEl = document.getElementById('trip-map-' + idx);
   if (!mapEl) return;
 
-  // Collect all locations with coords
-  var locations = [];
-  var hotelLat = null, hotelLng = null;
+  var dest = panel.destination || '';
+  var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
+  var letters = { hotel: 'H', course: 'G', restaurant: 'R' };
+  var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
 
-  if (panel.hotels) {
-    panel.hotels.forEach(function(h, i) {
-      if (h.lat && h.lng) {
-        if (i === 0) { hotelLat = h.lat; hotelLng = h.lng; }
-        locations.push({ type: 'hotel', name: h.name, area: h.area, lat: h.lat, lng: h.lng,
-          detail: h.description ? h.description.substring(0,80) + '...' : '',
-          link: 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name || '') });
-      }
-    });
-  }
-  if (panel.courses) {
-    panel.courses.forEach(function(c) {
-      if (c.lat && c.lng) {
-        var dist = (hotelLat && hotelLng) ? haversineKm(hotelLat, hotelLng, c.lat, c.lng).toFixed(1) + ' km from hotel' : '';
-        locations.push({ type: 'course', name: c.name, area: c.location, lat: c.lat, lng: c.lng,
-          detail: 'Par ' + (c.par||72) + ' &bull; ' + (c.yardage||'') + ' yds &bull; Green fee: ' + (c.green_fee ? '£' + c.green_fee : '') + (dist ? '<br><span style="color:#c9a84c">' + dist + '</span>' : ''),
-          link: 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name || '') });
-      }
-    });
-  }
-  if (panel.restaurants) {
-    panel.restaurants.forEach(function(r) {
-      if (r.lat && r.lng) {
-        var dist = (hotelLat && hotelLng) ? haversineKm(hotelLat, hotelLng, r.lat, r.lng).toFixed(1) + ' km from hotel' : '';
-        locations.push({ type: 'restaurant', name: r.name, area: r.type, lat: r.lat, lng: r.lng,
-          detail: (r.description || '').substring(0,80) + (dist ? '<br><span style="color:#e85d26">' + dist + '</span>' : ''),
-          link: 'https://www.google.com/search?q=' + encodeURIComponent(r.name || '') });
-      }
-    });
+  var toGeocode = [];
+  (panel.hotels || []).forEach(function(h) {
+    toGeocode.push({ type: 'hotel', name: h.name, area: h.area || dest,
+      detail: (h.description||'').substring(0,100),
+      link: 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||''),
+      aiLat: h.lat, aiLng: h.lng });
+  });
+  (panel.courses || []).forEach(function(c) {
+    toGeocode.push({ type: 'course', name: c.name, area: c.location || dest,
+      detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage||'') + ' yds • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
+      link: 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name||''),
+      aiLat: c.lat, aiLng: c.lng });
+  });
+  (panel.restaurants || []).forEach(function(r) {
+    toGeocode.push({ type: 'restaurant', name: r.name, area: r.type || dest,
+      detail: (r.description||'').substring(0,100),
+      link: 'https://www.google.com/maps/search/' + encodeURIComponent((r.name||'') + ' ' + dest),
+      aiLat: r.lat, aiLng: r.lng });
+  });
+
+  var locations = [];
+  for (var i = 0; i < toGeocode.length; i++) {
+    var item = toGeocode[i];
+    var lat = null, lng = null;
+    if (item.aiLat && item.aiLng && Math.abs(item.aiLat) > 0.5 && Math.abs(item.aiLng) > 0.5) {
+      lat = item.aiLat; lng = item.aiLng;
+    } else {
+      if (i > 0) await new Promise(function(res) { setTimeout(res, 400); });
+      var coords = await geocodePlace(item.name, item.area, dest);
+      if (coords) { lat = coords.lat; lng = coords.lng; }
+    }
+    if (lat && lng) {
+      locations.push({ type: item.type, name: item.name, area: item.area,
+        lat: lat, lng: lng, detail: item.detail, link: item.link });
+    }
   }
 
   if (!locations.length) {
-    // No coords returned by AI — show helpful fallback with Google Maps search link
     if (loadEl) loadEl.style.display = 'none';
     mapEl.style.display = 'none';
     var errEl = document.createElement('div');
     errEl.className = 'map-error';
-    errEl.innerHTML = '<p style="font-size:1.2rem">&#128205;</p>' +
-      '<p>Map coordinates not available for this trip.</p>' +
-      '<p style="font-size:.8rem;margin-top:4px">Regenerate the trip to get the interactive map, or search the destination manually:</p>' +
-      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(panel.destination || '') + '+golf" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:12px">Open in Google Maps</a>';
+    errEl.innerHTML = '<p>Could not load map locations for this trip.</p>' +
+      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Search in Google Maps</a>';
     mapEl.parentNode.insertBefore(errEl, mapEl);
     return;
   }
 
-  // Calculate centre point
-  var avgLat = locations.reduce(function(s, l) { return s + l.lat; }, 0) / locations.length;
-  var avgLng = locations.reduce(function(s, l) { return s + l.lng; }, 0) / locations.length;
+  var hotelLoc = locations.find(function(l) { return l.type === 'hotel'; });
+  if (hotelLoc) {
+    locations.forEach(function(loc) {
+      if (loc.type !== 'hotel') {
+        var km = haversineKm(hotelLoc.lat, hotelLoc.lng, loc.lat, loc.lng);
+        var distLabel = km < 1 ? Math.round(km * 1000) + 'm from hotel' : km.toFixed(1) + ' km from hotel';
+        loc.detail += '<br><strong style="color:' + colors[loc.type] + '">' + distLabel + '</strong>';
+      }
+    });
+  }
 
   if (loadEl) loadEl.style.display = 'none';
   mapEl.style.display = 'block';
@@ -1899,40 +1920,32 @@ function initMap(idx) {
   mapInstances[idx] = map;
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18
   }).addTo(map);
 
   var bounds = [];
-  var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
-  var emojis = { hotel: '&#127968;', course: '&#9971;', restaurant: '&#127374;' };
-  var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
-
   locations.forEach(function(loc) {
-    var icon = makeIcon(colors[loc.type] || '#666', emojis[loc.type] || '&#128205;');
+    var icon = makeIcon(colors[loc.type] || '#666', letters[loc.type] || '?');
     var marker = L.marker([loc.lat, loc.lng], { icon: icon }).addTo(map);
-    var popupHtml = '<div style="min-width:180px">' +
-      '<div class="map-popup-title">' + (loc.name || '') + '</div>' +
-      '<div class="map-popup-type" style="color:' + (colors[loc.type]||'#666') + '">' + (typeLabels[loc.type]||'') + (loc.area ? ' &bull; ' + loc.area : '') + '</div>' +
-      '<div class="map-popup-detail">' + (loc.detail || '') + '</div>' +
-      (loc.link ? '<a href="' + loc.link + '" target="_blank" class="map-popup-link">View &rarr;</a>' : '') +
+    var popupHtml = '<div style="min-width:190px;font-family:Arial,sans-serif">' +
+      '<div style="font-weight:700;color:' + (colors[loc.type]||'#333') + ';font-size:.9rem;margin-bottom:3px">' + (loc.name||'') + '</div>' +
+      '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:6px">' + (typeLabels[loc.type]||'') + (loc.area ? ' • ' + loc.area : '') + '</div>' +
+      '<div style="font-size:.8rem;color:#555;margin-bottom:8px;line-height:1.5">' + (loc.detail||'') + '</div>' +
+      '<a href="' + (loc.link||'#') + '" target="_blank" style="display:inline-block;background:#c9a84c;color:#0f2318;padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:700;text-decoration:none">View →</a>' +
       '</div>';
-    marker.bindPopup(popupHtml, { maxWidth: 240 });
+    marker.bindPopup(popupHtml, { maxWidth: 260 });
     bounds.push([loc.lat, loc.lng]);
   });
 
   if (bounds.length > 1) {
-    map.fitBounds(bounds, { padding: [40, 40] });
+    map.fitBounds(bounds, { padding: [48, 48] });
   } else if (bounds.length === 1) {
-    map.setView(bounds[0], 13);
-  } else {
-    map.setView([avgLat, avgLng], 11);
+    map.setView(bounds[0], 14);
   }
 
-  // Fix Leaflet tile rendering after container becomes visible
-  setTimeout(function() { map.invalidateSize(); }, 200);
+  setTimeout(function() { map.invalidateSize(); }, 250);
 }
-
 function makeFallbackPanels(qData) {
   var mode = qData ? qData.compare_mode : 'tiers';
   var labels = mode === 'tiers' ? ['Budget', 'Mid-Range', 'Luxury'] : (qData && qData.destinations && qData.destinations.length ? qData.destinations : ['Destination 1', 'Destination 2', 'Destination 3']);
