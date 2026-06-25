@@ -1831,17 +1831,38 @@ function makeIcon(color, letter) {
   });
 }
 
-async function geocodePlace(name, location, destination) {
-  var query = name + ', ' + (location || destination || '');
-  try {
-    var r = await fetch('/.netlify/functions/geocode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: query })
-    });
-    var data = await r.json();
-    if (data && data[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-  } catch(e) { console.warn('Geocode failed for', name, e); }
+async function geocodePlace(name, location, destination, type) {
+  // Build progressively looser queries — try specific first, fall back to broader
+  var queries = [];
+  if (type === 'course') {
+    queries = [
+      name + ' golf course, ' + (location || destination || ''),
+      name + ' golf, ' + (destination || ''),
+      name + ', ' + (destination || '')
+    ];
+  } else {
+    queries = [
+      name + ', ' + (location || destination || ''),
+      name + ', ' + (destination || '')
+    ];
+  }
+
+  for (var i = 0; i < queries.length; i++) {
+    try {
+      var r = await fetch('/.netlify/functions/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queries[i] })
+      });
+      var data = await r.json();
+      if (data && data[0]) {
+        console.log('Geocoded', name, 'with query:', queries[i], '->', data[0].lat, data[0].lon);
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }
+    } catch(e) { console.warn('Geocode attempt failed for', name, e); }
+    if (i < queries.length - 1) await new Promise(function(res) { setTimeout(res, 300); });
+  }
+  console.warn('Could not geocode:', name);
   return null;
 }
 
@@ -1885,7 +1906,7 @@ async function initMap(idx) {
       lat = item.aiLat; lng = item.aiLng;
     } else {
       if (i > 0) await new Promise(function(res) { setTimeout(res, 400); });
-      var coords = await geocodePlace(item.name, item.area, dest);
+      var coords = await geocodePlace(item.name, item.area, dest, item.type);
       if (coords) { lat = coords.lat; lng = coords.lng; }
     }
     if (lat && lng) {
