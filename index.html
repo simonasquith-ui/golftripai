@@ -952,6 +952,7 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentTripRequestId = null;
 let currentTripData = null;
+let storedPanels = []; // panels stored for PDF export
 let activeTripId = null;
 let chatPollInterval = null;
 let activeCurrency = 'GBP';
@@ -1430,6 +1431,7 @@ function renderResults(aiData, qData) {
   var panelsEl = document.getElementById('results-panels');
   panelsEl.innerHTML = '';
 
+  storedPanels = panels; // store for PDF export
   panels.forEach(function(panel, i) {
     var ci = document.createElement('div');
     ci.className = 'compare-item' + (i === 0 ? ' active-tab' : '');
@@ -1473,7 +1475,7 @@ function buildPanel(panel, idx, qData) {
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
     '<div class="btt-grid">' +
-      '<a href="https://www.skyscanner.net/transport/flights/" target="_blank" class="btt-btn btt-flights">' +
+      '<a href="https://www.skyscanner.net" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon">&#9992;</div>' +
         '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
       '</a>' +
@@ -1495,7 +1497,7 @@ function buildPanel(panel, idx, qData) {
         '<div class="btt-total-label">Estimated total per person</div>' +
         '<div class="btt-total-price" id="btt-total-' + idx + '">' + fmtPrice(panel.total_cost || 0) + '</div>' +
       '</div>' +
-      '<a href="https://www.skyscanner.net/transport/flights/" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+      '<a href="https://www.skyscanner.net" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
     '</div>' +
   '</div>';
 
@@ -1603,7 +1605,7 @@ function buildPanel(panel, idx, qData) {
       '<h4>&#128196; Society Trip Pack</h4>' +
       '<p>Export this full itinerary as a PDF to share with your group.</p>' +
     '</div>' +
-    '<button class="btn btn-primary" onclick="exportPDF(' + idx + ', ' + JSON.stringify(panel).replace(/</g,'\u003c').replace(/>/g,'\u003e') + ')">Download PDF &#8594;</button>' +
+    '<button class="btn btn-primary" onclick="exportPDF(' + idx + ')">Download PDF &#8594;</button>' +
   '</div>';
 
   el.innerHTML = html;
@@ -1611,7 +1613,9 @@ function buildPanel(panel, idx, qData) {
 }
 
 /* === PDF EXPORT === */
-function exportPDF(panelIdx, panel) {
+function exportPDF(panelIdx) {
+  var panel = storedPanels[panelIdx];
+  if (!panel) { showToast('Could not find trip data. Please regenerate.', true); return; }
   // Open print dialog with a clean formatted page
   var dest = panel.destination || 'Golf Trip';
   var costs = panel.costs || {};
