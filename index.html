@@ -1527,7 +1527,7 @@ async function loadSavedTrips() {
     var ownIds = ownTrips.map(function(t) { return t.id; });
 
     // Trips invited to via trip_members
-    var memR = await sbClient.from('trip_members').select('trip_request_id').or('user_id.eq.' + currentUser.id + ',email.eq.' + currentUser.email);
+    var memR = await sbClient.from('trip_members').select('trip_request_id').eq('user_id', currentUser.id);
     var memberTripIds = (memR.data || []).map(function(m) { return m.trip_request_id; });
     var sharedIds = memberTripIds.filter(function(id) { return ownIds.indexOf(id) === -1; });
 
@@ -1866,7 +1866,7 @@ async function inviteMember() {
   var email = emailEl.value.trim();
   if (!email || !activeTripId) { showToast('Please enter an email address.', true); return; }
   try {
-    await sbClient.from('trip_members').insert({ trip_request_id: activeTripId, user_id: currentUser.id, role: 'member', status: 'Invited', email: email });
+    await sbClient.from('trip_members').insert({ trip_request_id: activeTripId, user_id: currentUser.id, role: 'member', status: 'Invited' });
     emailEl.value = '';
     loadTripMembers(activeTripId);
     showToast('Invitation sent to ' + email + '!');
@@ -1881,7 +1881,7 @@ async function updateMyStatus() {
     if (existing.data && existing.data.length) {
       await sbClient.from('trip_members').update({ status: status }).eq('trip_request_id', activeTripId).eq('user_id', currentUser.id);
     } else {
-      await sbClient.from('trip_members').insert({ trip_request_id: activeTripId, user_id: currentUser.id, role: 'member', status: status, email: currentUser.email });
+      await sbClient.from('trip_members').insert({ trip_request_id: activeTripId, user_id: currentUser.id, role: 'member', status: status });
     }
     loadTripMembers(activeTripId);
     showToast('Status updated to ' + status + '!');
@@ -1967,14 +1967,13 @@ async function processJoin(tripId, user) {
       if (tr.data) { showToast('Welcome back to the trip!'); openTripDetail(tripId, tr.data); }
       return;
     }
-    // Add as member, matching on email too in case they were pre-invited
-    await sbClient.from('trip_members').upsert({
+    // Add as member
+    await sbClient.from('trip_members').insert({
       trip_request_id: tripId,
       user_id: user.id,
       role: 'member',
-      status: 'Going',
-      email: user.email
-    }, { onConflict: 'trip_request_id,email' });
+      status: 'Going'
+    });
     // Post join message to chat
     await sbClient.from('trip_messages').insert({
       trip_request_id: tripId,
