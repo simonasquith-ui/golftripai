@@ -714,60 +714,84 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     </div>
   </div>
   <div class="trip-body"><div class="container">
-    <div class="trip-grid">
-      <div>
-        <div class="stat-boxes">
-          <div class="stat-box"><div class="sb-val" id="td-dest">&#8212;</div><div class="sb-lbl">Destination</div></div>
-          <div class="stat-box"><div class="sb-val" id="td-dates">&#8212;</div><div class="sb-lbl">Dates</div></div>
-          <div class="stat-box"><div class="sb-val" id="td-golfers">&#8212;</div><div class="sb-lbl">Golfers</div></div>
-          <div class="stat-box"><div class="sb-val" id="td-budget">&#8212;</div><div class="sb-lbl">Budget p/p</div></div>
-        </div>
-        <div class="vote-panel">
-          <h3>Group Vote</h3>
-          <div class="vote-options" id="vote-options"></div>
-          <div class="vote-winner hidden" id="vote-winner"></div>
-        </div>
-        <div class="chat-panel">
-          <div class="chat-header">Group Chat</div>
-          <div class="chat-messages" id="chat-messages"></div>
-          <div class="chat-input-row">
-            <input type="text" id="chat-input" placeholder="Type a message...">
-            <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
+
+    <div class="stat-boxes" style="margin-bottom:24px">
+      <div class="stat-box"><div class="sb-val" id="td-dest">&#8212;</div><div class="sb-lbl">Destination</div></div>
+      <div class="stat-box"><div class="sb-val" id="td-dates">&#8212;</div><div class="sb-lbl">Dates</div></div>
+      <div class="stat-box"><div class="sb-val" id="td-golfers">&#8212;</div><div class="sb-lbl">Golfers</div></div>
+      <div class="stat-box"><div class="sb-val" id="td-budget">&#8212;</div><div class="sb-lbl">Budget p/p</div></div>
+    </div>
+
+    <div class="results-tabs" style="margin-bottom:28px">
+      <button class="results-tab active" id="td-tab-itinerary" onclick="switchTripTab('itinerary')">&#9971; Trip Itinerary</button>
+      <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')">&#128101; Group Planning</button>
+    </div>
+
+    <div id="td-panel-itinerary">
+      <div id="td-itinerary-loading" style="text-align:center;padding:40px 0;display:none">
+        <div class="loading-spinner"></div>
+        <p class="text-muted mt-8">Loading your trip details...</p>
+      </div>
+      <div id="td-itinerary-content"></div>
+      <div id="td-itinerary-empty" class="empty-state" style="display:none">
+        <div class="es-icon">&#128197;</div>
+        <h3>No Itinerary Saved</h3>
+        <p>The full AI itinerary for this trip was not saved. Generate a new trip to see full details.</p>
+        <button class="btn btn-primary mt-16" onclick="showPage('questionnaire')">Generate New Trip</button>
+      </div>
+    </div>
+
+    <div id="td-panel-group" style="display:none">
+      <div class="trip-grid">
+        <div>
+          <div class="vote-panel">
+            <h3>Group Vote</h3>
+            <div class="vote-options" id="vote-options"></div>
+            <div class="vote-winner hidden" id="vote-winner"></div>
+          </div>
+          <div class="chat-panel">
+            <div class="chat-header">Group Chat</div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-row">
+              <input type="text" id="chat-input" placeholder="Type a message...">
+              <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        <div class="members-panel">
-          <h3>Group Members</h3>
-          <div id="members-list"></div>
-          <div class="invite-section">
-            <label>Invite by Email</label>
-            <div style="display:flex;gap:8px;margin-top:6px">
-              <input type="email" id="invite-email" placeholder="email@example.com">
-              <button class="btn btn-primary btn-sm" onclick="inviteMember()">Invite</button>
-            </div>
-            <div class="mt-16">
-              <label>Shareable Invite Link</label>
-              <div class="invite-link-box">
-                <input type="text" id="invite-link" readonly>
-                <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
+        <div>
+          <div class="members-panel">
+            <h3>Group Members</h3>
+            <div id="members-list"></div>
+            <div class="invite-section">
+              <label>Invite by Email</label>
+              <div style="display:flex;gap:8px;margin-top:6px">
+                <input type="email" id="invite-email" placeholder="email@example.com">
+                <button class="btn btn-primary btn-sm" onclick="inviteMember()">Invite</button>
+              </div>
+              <div class="mt-16">
+                <label>Shareable Invite Link</label>
+                <div class="invite-link-box">
+                  <input type="text" id="invite-link" readonly>
+                  <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="card" style="padding:20px">
-          <h4 style="color:var(--green);font-family:'Playfair Display',serif;margin-bottom:12px">Your Status</h4>
-          <select id="my-status-select" style="width:100%;margin-bottom:12px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.9rem;background:var(--white)">
-            <option value="Going">Going</option>
-            <option value="Maybe">Maybe</option>
-            <option value="Cannot go">Cannot go</option>
-          </select>
-          <button class="btn btn-primary" style="width:100%" onclick="updateMyStatus()">Update Status</button>
-          <hr class="divider">
-          <button class="btn btn-ghost" style="width:100%" onclick="showPage('profile')">Back to My Trips</button>
+          <div class="card" style="padding:20px">
+            <h4 style="color:var(--green);font-family:'Playfair Display',serif;margin-bottom:12px">Your Status</h4>
+            <select id="my-status-select" style="width:100%;margin-bottom:12px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.9rem;background:var(--white)">
+              <option value="Going">Going</option>
+              <option value="Maybe">Maybe</option>
+              <option value="Cannot go">Cannot go</option>
+            </select>
+            <button class="btn btn-primary" style="width:100%" onclick="updateMyStatus()">Update Status</button>
+            <hr class="divider">
+            <button class="btn btn-ghost" style="width:100%" onclick="showPage('profile')">Back to My Trips</button>
+          </div>
         </div>
       </div>
     </div>
+
   </div></div>
 </div>
 
@@ -1551,24 +1575,121 @@ function saveProfile() {
 }
 
 /* === TRIP DETAIL === */
+function switchTripTab(tab) {
+  document.getElementById('td-panel-itinerary').style.display = tab === 'itinerary' ? 'block' : 'none';
+  document.getElementById('td-panel-group').style.display = tab === 'group' ? 'block' : 'none';
+  document.getElementById('td-tab-itinerary').classList.toggle('active', tab === 'itinerary');
+  document.getElementById('td-tab-group').classList.toggle('active', tab === 'group');
+}
+
 async function openTripDetail(tripId, tripData) {
   activeTripId = tripId;
   showPage('trip');
+  switchTripTab('itinerary');
   document.getElementById('trip-detail-heading').textContent = tripData.destination_type || 'Golf Trip';
-  document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers \u2022 ' + (tripData.budget || '');
-  document.getElementById('td-dest').textContent = tripData.destination_type || '\u2014';
-  document.getElementById('td-golfers').textContent = tripData.group_size || '\u2014';
-  document.getElementById('td-budget').textContent = tripData.budget || '\u2014';
+  document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers • ' + (tripData.budget || '');
+  document.getElementById('td-dest').textContent = tripData.destination_type || '—';
+  document.getElementById('td-golfers').textContent = tripData.group_size || '—';
+  document.getElementById('td-budget').textContent = tripData.budget || '—';
   try {
     var td = JSON.parse(tripData.travel_dates || '{}');
-    document.getElementById('td-dates').textContent = td.month || td.depart || '\u2014';
-  } catch(e) { document.getElementById('td-dates').textContent = '\u2014'; }
+    document.getElementById('td-dates').textContent = td.month || td.depart || '—';
+  } catch(e) { document.getElementById('td-dates').textContent = '—'; }
   document.getElementById('invite-link').value = window.location.origin + '?join=' + tripId;
   loadTripMembers(tripId);
   loadTripVotes(tripId);
   loadChatMessages(tripId);
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function() { loadChatMessages(tripId); }, 8000);
+  loadTripItinerary(tripId, tripData);
+}
+
+async function loadTripItinerary(tripId, tripData) {
+  var loadEl = document.getElementById('td-itinerary-loading');
+  var contentEl = document.getElementById('td-itinerary-content');
+  var emptyEl = document.getElementById('td-itinerary-empty');
+  loadEl.style.display = 'block';
+  contentEl.innerHTML = '';
+  emptyEl.style.display = 'none';
+  try {
+    var r = await sbClient.from('trip_results').select('ai_response').eq('trip_request_id', tripId).order('created_at', { ascending: false }).limit(1).single();
+    loadEl.style.display = 'none';
+    if (r.error || !r.data || !r.data.ai_response) { emptyEl.style.display = 'block'; return; }
+    var aiData = r.data.ai_response;
+    if (typeof aiData === 'string') { try { aiData = JSON.parse(aiData); } catch(e) { emptyEl.style.display = 'block'; return; } }
+    var panels = aiData.panels || [];
+    if (!panels.length) { emptyEl.style.display = 'block'; return; }
+
+    var toolbar = document.createElement('div');
+    toolbar.className = 'results-toolbar';
+    toolbar.style.marginBottom = '16px';
+    toolbar.innerHTML = '<div class="currency-toggle" id="td-currency-toggle">' +
+      '<button class="currency-btn active" data-currency="GBP">£ GBP</button>' +
+      '<button class="currency-btn" data-currency="EUR">€ EUR</button>' +
+      '<button class="currency-btn" data-currency="USD">$ USD</button></div>';
+    contentEl.appendChild(toolbar);
+    toolbar.querySelectorAll('.currency-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        toolbar.querySelectorAll('.currency-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeCurrency = btn.getAttribute('data-currency');
+        renderSavedItinerary(panels, tripData, contentEl);
+      });
+    });
+
+    var compareBar = document.createElement('div');
+    compareBar.className = 'sticky-compare';
+    compareBar.innerHTML = '<div class="container"><div class="compare-bar" id="td-compare-bar"></div></div>';
+    contentEl.appendChild(compareBar);
+
+    var tabsEl = document.createElement('div');
+    tabsEl.className = 'results-tabs';
+    tabsEl.id = 'td-result-tabs';
+    tabsEl.style.marginBottom = '24px';
+    contentEl.appendChild(tabsEl);
+
+    var panelsEl = document.createElement('div');
+    panelsEl.id = 'td-result-panels';
+    contentEl.appendChild(panelsEl);
+
+    renderSavedItinerary(panels, tripData, contentEl);
+  } catch(e) {
+    document.getElementById('td-itinerary-loading').style.display = 'none';
+    document.getElementById('td-itinerary-empty').style.display = 'block';
+    console.error('Load itinerary error:', e);
+  }
+}
+
+function renderSavedItinerary(panels, tripData, contentEl) {
+  var bar = document.getElementById('td-compare-bar');
+  var tabsEl = document.getElementById('td-result-tabs');
+  var panelsEl = document.getElementById('td-result-panels');
+  if (!bar || !tabsEl || !panelsEl) return;
+  bar.innerHTML = ''; tabsEl.innerHTML = ''; panelsEl.innerHTML = '';
+  var qData = { accommodation: tripData.accommodation_type, clubs: tripData.clubs, compare_mode: 'tiers' };
+  panels.forEach(function(panel, i) {
+    var ci = document.createElement('div');
+    ci.className = 'compare-item' + (i === 0 ? ' active-tab' : '');
+    ci.innerHTML = '<div class="ci-label">' + (panel.label || '') + '</div>' +
+      '<div class="ci-price">' + fmtPrice(panel.total_cost) + '</div>' +
+      '<div class="ci-note">per person</div>';
+    ci.addEventListener('click', function() { activateSavedPanel(i); });
+    bar.appendChild(ci);
+    var tab = document.createElement('button');
+    tab.className = 'results-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = panel.label || ('Option ' + (i + 1));
+    tab.addEventListener('click', function() { activateSavedPanel(i); });
+    tabsEl.appendChild(tab);
+    var panelEl = buildPanel(panel, i, qData);
+    panelEl.classList.add('td-saved-panel');
+    panelsEl.appendChild(panelEl);
+  });
+}
+
+function activateSavedPanel(idx) {
+  document.querySelectorAll('#td-result-tabs .results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
+  document.querySelectorAll('.td-saved-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
+  document.querySelectorAll('#td-compare-bar .compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
 }
 
 async function loadTripMembers(tripId) {
