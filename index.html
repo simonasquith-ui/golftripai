@@ -338,9 +338,9 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <button class="btn btn-secondary btn-lg" onclick="document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'})">See Pricing</button>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><div class="num">12,400+</div><div class="lbl">Trips Generated</div></div>
-        <div class="hero-stat"><div class="num">38</div><div class="lbl">Destinations</div></div>
-        <div class="hero-stat"><div class="num">4.9&#9733;</div><div class="lbl">Average Rating</div></div>
+        <div class="hero-stat"><div class="num">&#127358;</div><div class="lbl">Early Access Beta</div></div>
+        <div class="hero-stat"><div class="num">9</div><div class="lbl">Destinations</div></div>
+        <div class="hero-stat"><div class="num">60s</div><div class="lbl">To Generate a Plan</div></div>
         <div class="hero-stat"><div class="num">&#163;0</div><div class="lbl">To Get Started</div></div>
       </div>
     </div>
@@ -361,24 +361,30 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
     </div>
   </section>
-  <section class="testimonials">
-    <div class="container">
-      <h2>Trusted by Golf Societies Across the UK</h2>
-      <div class="testimonials-grid">
-        <div class="testimonial">
-          <div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          <div class="t-text"><p>"Saved us hours of planning. We had 16 guys flying from 4 different airports and GolfTrip sorted the whole thing in minutes."</p></div>
-          <div class="t-author"><div class="t-avatar">JH</div><div><div class="t-name">James Hartley</div><div class="t-detail">Captain, Belfry Golf Society</div></div></div>
+  <section style="padding:64px 0;background:var(--green)">
+    <div class="container text-center">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px">
+        &#127358; Early Access Beta
+      </div>
+      <h2 style="color:var(--white);margin-bottom:16px">Be One of the First</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px;margin:0 auto 40px">
+        GolfTrip is in early access. We are building this with our first users — your feedback shapes the product directly.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:800px;margin:0 auto">
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:24px">
+          <div style="font-size:2rem;margin-bottom:12px">&#9971;</div>
+          <div style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;margin-bottom:8px">Free to Try</div>
+          <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin:0">Generate your first trip plan with no credit card required.</p>
         </div>
-        <div class="testimonial">
-          <div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          <div class="t-text"><p>"The budget comparison feature is brilliant. We could see exactly what we would get at each price point before committing."</p></div>
-          <div class="t-author"><div class="t-avatar">SR</div><div><div class="t-name">Sarah Redmond</div><div class="t-detail">Organiser, Ladies Golf Society Essex</div></div></div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:24px">
+          <div style="font-size:2rem;margin-bottom:12px">&#128172;</div>
+          <div style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;margin-bottom:8px">Shape the Product</div>
+          <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin:0">Early users get direct input into what we build next.</p>
         </div>
-        <div class="testimonial">
-          <div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          <div class="t-text"><p>"Best golf trip planning tool I have used. The AI actually understands golf — course ratings, slope ratings, all the details that matter."</p></div>
-          <div class="t-author"><div class="t-avatar">MP</div><div><div class="t-name">Mike Patterson</div><div class="t-detail">4 handicap, Manchester</div></div></div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:24px">
+          <div style="font-size:2rem;margin-bottom:12px">&#128176;</div>
+          <div style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;margin-bottom:8px">Early Access Pricing</div>
+          <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin:0">Lock in the lowest price before we launch publicly.</p>
         </div>
       </div>
     </div>
@@ -386,48 +392,78 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   <section class="pricing" id="pricing-section">
     <div class="container">
       <h2>Simple, Transparent Pricing</h2>
-      <p class="pricing-sub">Start free. Upgrade when your society needs more.</p>
-      <div class="pricing-grid">
+      <p class="pricing-sub">Most golfers plan one or two trips a year. We priced accordingly.</p>
+
+      <!-- Annual toggle -->
+      <div style="display:flex;justify-content:center;margin-bottom:40px">
+        <div class="toggle-group" style="max-width:280px">
+          <button class="toggle-btn" id="price-monthly-btn" onclick="setPricingPeriod('monthly')">Monthly</button>
+          <button class="toggle-btn active" id="price-annual-btn" onclick="setPricingPeriod('annual')">Annual <span style="background:var(--gold);color:var(--green-dark);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px">BEST VALUE</span></button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <!-- FREE -->
         <div class="pricing-card">
           <div class="pricing-name">Free</div>
           <div class="pricing-price">&#163;0<span>/forever</span></div>
-          <div class="pricing-price-alt">&nbsp;</div>
+          <div class="pricing-price-alt">No credit card required</div>
           <ul class="pricing-features">
-            <li>1 trip generation</li><li>Basic results view</li><li>Shareable link</li>
-            <li class="no">Save trips</li><li class="no">Seasonal advice</li><li class="no">Group planning</li>
+            <li>1 trip generation</li>
+            <li>Basic itinerary view</li>
+            <li>Budget vs Mid vs Luxury comparison</li>
+            <li>Direct booking links</li>
+            <li class="no">Save trips</li>
+            <li class="no">Trip comparison</li>
+            <li class="no">Seasonal recommendations</li>
+            <li class="no">Group planning</li>
+            <li class="no">PDF trip pack</li>
           </ul>
-          <button class="btn btn-ghost" onclick="showPage('questionnaire')">Get Started Free</button>
+          <button class="btn btn-ghost" onclick="showPage('questionnaire')">Try for Free</button>
         </div>
+
+        <!-- PRO -->
         <div class="pricing-card featured">
           <div class="pricing-badge">Most Popular</div>
           <div class="pricing-name">Pro</div>
-          <div class="pricing-price">&#163;9.99<span>/month</span></div>
-          <div class="pricing-price-alt">or &#163;49/year &mdash; save 59%</div>
+          <div class="pricing-price" id="pro-price">&#163;49<span>/year</span></div>
+          <div class="pricing-price-alt" id="pro-price-alt">Just &#163;4.08/month &mdash; billed annually</div>
           <ul class="pricing-features">
-            <li>Unlimited trip generations</li><li>Save &amp; manage trips</li><li>Seasonal recommendations</li><li>Full results comparison</li>
-            <li class="no">Group planning tools</li><li class="no">Society trip pack</li>
+            <li>Unlimited trip generations</li>
+            <li>Save &amp; manage trips</li>
+            <li>Full trip comparison</li>
+            <li>Seasonal recommendations</li>
+            <li>Destination guides</li>
+            <li>PDF trip pack export</li>
+            <li>Affiliate booking links</li>
+            <li class="no">Group planning &amp; chat</li>
+            <li class="no">Member voting</li>
           </ul>
-          <button class="btn btn-primary" onclick="openAuthModal('signup')">Start Pro Free</button>
+          <button class="btn btn-primary" onclick="openAuthModal('signup')">Get Pro Access</button>
         </div>
+
+        <!-- SOCIETY -->
         <div class="pricing-card">
           <div class="pricing-name">Society</div>
-          <div class="pricing-price">&#163;24<span>/month</span></div>
-          <div class="pricing-price-alt">or &#163;99/year &mdash; save 66%</div>
+          <div class="pricing-price" id="society-price">&#163;99<span>/year</span></div>
+          <div class="pricing-price-alt" id="society-price-alt">Just &#163;8.25/month &mdash; billed annually</div>
           <ul class="pricing-features">
-            <li>Everything in Pro</li><li>Group planning &amp; chat</li><li>Member voting system</li><li>Shared itinerary</li><li>Society trip pack PDF</li><li>Priority support</li>
+            <li>Everything in Pro</li>
+            <li>Group planning &amp; chat</li>
+            <li>Member voting system</li>
+            <li>Shareable invite links</li>
+            <li>Society trip pack PDF</li>
+            <li>Multi-airport group planning</li>
+            <li>Priority support</li>
+            <li>Early access to new features</li>
           </ul>
-          <button class="btn btn-primary" onclick="openAuthModal('signup')">Start Society Free</button>
-        </div>
-        <div class="pricing-card" style="opacity:.7">
-          <div class="pricing-name">Concierge</div>
-          <div class="pricing-price" style="font-size:1.2rem;color:var(--text-muted)">Coming<br>Soon</div>
-          <div class="pricing-price-alt">&nbsp;</div>
-          <ul class="pricing-features">
-            <li>Dedicated trip planner</li><li>Custom tee time bookings</li><li>Hotel rate negotiation</li><li>24/7 on-trip support</li><li>White glove service</li><li>Fully managed booking</li>
-          </ul>
-          <button class="btn btn-ghost" disabled style="opacity:.5;cursor:not-allowed">Notify Me</button>
+          <button class="btn btn-primary" onclick="openAuthModal('signup')">Get Society Access</button>
         </div>
       </div>
+
+      <p style="text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:24px">
+        All plans include a free trial generation. No contracts. Cancel any time.
+      </p>
     </div>
   </section>
   <section class="faq">
@@ -445,7 +481,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   <section class="landing-cta">
     <div class="container">
       <h2>Ready to Plan Your Next Golf Break?</h2>
-      <p>Join over 12,000 golfers who have planned their perfect trip with GolfTrip.</p>
+      <p>Generate your first AI golf trip plan free. No credit card required.</p>
       <button class="btn btn-primary btn-lg" onclick="showPage('questionnaire')">Plan My Trip Free &#9971;</button>
     </div>
   </section>
@@ -1183,6 +1219,29 @@ document.querySelectorAll('.chip[data-multi]').forEach(function(chip) {
     }
   });
 });
+
+/* === PRICING TOGGLE === */
+function setPricingPeriod(period) {
+  var isAnnual = period === 'annual';
+  document.getElementById('price-monthly-btn').classList.toggle('active', !isAnnual);
+  document.getElementById('price-annual-btn').classList.toggle('active', isAnnual);
+  var proPrice = document.getElementById('pro-price');
+  var proAlt = document.getElementById('pro-price-alt');
+  var socPrice = document.getElementById('society-price');
+  var socAlt = document.getElementById('society-price-alt');
+  if (!proPrice) return;
+  if (isAnnual) {
+    proPrice.innerHTML = '&#163;49<span>/year</span>';
+    proAlt.innerHTML = 'Just &#163;4.08/month &mdash; billed annually';
+    socPrice.innerHTML = '&#163;99<span>/year</span>';
+    socAlt.innerHTML = 'Just &#163;8.25/month &mdash; billed annually';
+  } else {
+    proPrice.innerHTML = '&#163;5.99<span>/month</span>';
+    proAlt.innerHTML = 'or &#163;49/year &mdash; save 32%';
+    socPrice.innerHTML = '&#163;12.99<span>/month</span>';
+    socAlt.innerHTML = 'or &#163;99/year &mdash; save 37%';
+  }
+}
 
 /* === FAQ === */
 document.querySelectorAll('.faq-q').forEach(function(btn) {
