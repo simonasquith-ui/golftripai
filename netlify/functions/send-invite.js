@@ -42,7 +42,7 @@ exports.handler = async (event) => {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        from: 'GolfTrip <invites@yourdomain.com>',
+        from: 'GolfTrip <onboarding@resend.dev>',
         to: [toEmail],
         subject: `${inviterName || 'Someone'} invited you to a golf trip!`,
         html: `
