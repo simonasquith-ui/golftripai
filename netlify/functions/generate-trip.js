@@ -10,11 +10,9 @@ exports.handler = async (event) => {
       body: ''
     }
   }
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' }
   }
-
   try {
     const openaiKey = process.env.OPENAI_API_KEY
     if (!openaiKey) {
@@ -24,7 +22,6 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'OPENAI_API_KEY not configured' })
       }
     }
-
     const { prompt } = JSON.parse(event.body)
     if (!prompt) {
       return {
@@ -33,9 +30,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'No prompt provided' })
       }
     }
-
     console.log('Prompt length:', prompt.length)
-
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -55,14 +50,12 @@ exports.handler = async (event) => {
           }
         ],
         temperature: 0.5,
-        max_tokens: 4000,
+        max_tokens: 6000,
         response_format: { type: 'json_object' }
       })
     })
-
     console.log('OpenAI status:', response.status)
     const data = await response.json()
-
     if (!response.ok) {
       console.log('OpenAI error:', JSON.stringify(data))
       return {
@@ -71,28 +64,38 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: data.error?.message || 'OpenAI error ' + response.status })
       }
     }
+    const choice = data.choices[0]
+    const result = choice.message.content.trim()
+    const finishReason = choice.finish_reason
+    console.log('Response length:', result.length, 'finish_reason:', finishReason)
 
-    const result = data.choices[0].message.content.trim()
-    console.log('Response length:', result.length, 'finish_reason:', data.choices[0].finish_reason)
+    // If OpenAI hit the token limit the JSON will be truncated — catch it explicitly
+    if (finishReason === 'length') {
+      console.log('Token limit hit — response truncated. Increase max_tokens or shorten prompt.')
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Response was too long and got cut off. Try a shorter trip or fewer options.' })
+      }
+    }
 
     // Validate JSON
     try {
       JSON.parse(result)
     } catch(e) {
       console.log('JSON invalid:', e.message)
+      console.log('First 500 chars:', result.slice(0, 500))
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'AI returned invalid JSON. Please try again.' })
       }
     }
-
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
       body: JSON.stringify({ result })
     }
-
   } catch (err) {
     console.log('Exception:', err.message)
     return {
