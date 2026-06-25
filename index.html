@@ -1694,7 +1694,6 @@ async function generateTrip() {
       '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n' +
       '- EVERY course, hotel and restaurant must include a lat (latitude) and lng (longitude) as decimal numbers for their real location. These are used to plot a map. Be accurate — use the real GPS coordinates for each venue.\n\n' +
       'Return EXACTLY 3 panels (Budget, Mid-Range, Luxury) as JSON. No markdown. Start with {.' +
-      'Trip details: airports=' + airportList + ', dates=' + dateStr + ', budget=' + data.budget + ', golfers=' + data.group_size + ', handicap=' + (data.handicap||'mixed') + ', destination=' + destStr + ', style=' + (data.trip_style||'any') + ', accommodation=' + (data.accommodation||'any') + ', weather=' + (data.weather||'any') + ', clubs=' + (data.clubs||'own') + ', notes=' + (data.notes||'none') + '.' +
       'Each panel needs: label, destination, description, weather, best_time, flight_time, total_cost, costs(flights/accommodation/golf/food/club_hire), ' +
       'courses(EXACTLY ' + numCourses + ' items each with name/location/description/par/yardage/slope_rating/course_rating/green_fee/designer/difficulty/why_recommended/club_hire/lat/lng), ' +
       'hotels(EXACTLY 2 items each with name/area/description/why_recommended/lat/lng), ' +
@@ -1723,13 +1722,14 @@ async function generateTrip() {
       console.error('Raw result:', json.result ? json.result.slice(0, 300) : 'undefined');
       throw new Error('Failed to parse AI response: ' + parseErr.message);
     }
+    console.log('Parsed OK, panels:', parsed && parsed.panels ? parsed.panels.length : 'NO PANELS', 'keys:', parsed && parsed.panels && parsed.panels[0] ? Object.keys(parsed.panels[0]).join(',') : 'none');
     currentTripData = parsed;
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
     }
     renderResults(parsed, data);
   } catch(e) {
-    console.error(e);
+    console.error('generateTrip caught error:', e.message, e.stack);
     showToast('Failed to generate trip. Showing example layout.', true);
     renderResults(null, data);
   } finally {
