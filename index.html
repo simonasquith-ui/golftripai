@@ -1693,47 +1693,15 @@ async function generateTrip() {
       '- itinerary array: include EXACTLY 5 days with realistic morning, afternoon and evening activities.\n' +
       '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n' +
       '- EVERY course, hotel and restaurant must include a lat (latitude) and lng (longitude) as decimal numbers for their real location. These are used to plot a map. Be accurate — use the real GPS coordinates for each venue.\n\n' +
-      'YOU MUST return exactly 3 complete panels: Budget, Mid-Range, and Luxury. All three are required.\n' +
-      'Respond with valid JSON only. No markdown. No explanation. Start with { and end with }.\n' +
-      'Use this exact structure, replacing all bracketed values with real data:\n' +
-      '{"panels":[' +
-        '{"label":"Budget",' +
-        '"destination":"[real place name, country]",' +
-        '"description":"[2 sentence overview]",' +
-        '"weather":"[weather summary]",' +
-        '"best_time":"[best months]",' +
-        '"flight_time":"[e.g. 2.5 hrs]",' +
-        '"total_cost":[number],' +
-        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
-        '"courses":[{"name":"[real course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
-        '"hotels":[{"name":"[real hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"restaurants":[{"name":"[real venue]","type":"[Fine Dining|Casual|Bar]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
-        '{"label":"Mid-Range",' +
-        '"destination":"[same region, different specific area or venues]",' +
-        '"description":"[overview]",' +
-        '"weather":"[weather]",' +
-        '"best_time":"[months]",' +
-        '"flight_time":"[duration]",' +
-        '"total_cost":[higher number than Budget],' +
-        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
-        '"courses":[{"name":"[real course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
-        '"hotels":[{"name":"[real hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"restaurants":[{"name":"[real venue]","type":"[type]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
-        '{"label":"Luxury",' +
-        '"destination":"[premium area of same destination]",' +
-        '"description":"[overview]",' +
-        '"weather":"[weather]",' +
-        '"best_time":"[months]",' +
-        '"flight_time":"[duration]",' +
-        '"total_cost":[highest number],' +
-        '"costs":{"flights":[n],"accommodation":[n],"golf":[n],"food":[n],"club_hire":[n]},' +
-        '"courses":[{"name":"[real premium course]","location":"[town]","description":"[sentence]","par":[n],"yardage":[n],"slope_rating":[n],"course_rating":[n],"green_fee":[n],"designer":"[name]","difficulty":"[level]","why_recommended":"[sentence]","club_hire":false,"lat":[decimal],"lng":[decimal]}],' +
-        '"hotels":[{"name":"[real luxury hotel]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"restaurants":[{"name":"[real upscale venue]","type":"[type]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
-        '"itinerary":[{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:30","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]}' +
-      ']}';
+      'Return EXACTLY 3 panels (Budget, Mid-Range, Luxury) as JSON. No markdown. Start with {.' +
+      'Trip details: airports=' + airportList + ', dates=' + dateStr + ', budget=' + data.budget + ', golfers=' + data.group_size + ', handicap=' + (data.handicap||'mixed') + ', destination=' + destStr + ', style=' + (data.trip_style||'any') + ', accommodation=' + (data.accommodation||'any') + ', weather=' + (data.weather||'any') + ', clubs=' + (data.clubs||'own') + ', notes=' + (data.notes||'none') + '.' +
+      'Each panel needs: label, destination, description, weather, best_time, flight_time, total_cost, costs(flights/accommodation/golf/food/club_hire), ' +
+      'courses(EXACTLY ' + numCourses + ' items each with name/location/description/par/yardage/slope_rating/course_rating/green_fee/designer/difficulty/why_recommended/club_hire/lat/lng), ' +
+      'hotels(EXACTLY 2 items each with name/area/description/why_recommended/lat/lng), ' +
+      'restaurants(EXACTLY 3 items each with name/type/description/lat/lng), ' +
+      'itinerary(EXACTLY 5 days each with day/title/activities array of time+description objects).' +
+      'Use real venue names with accurate GPS coordinates. Vary difficulty and price across tiers.' +
+      'JSON structure: {"panels":[{"label":"Budget",...},{"label":"Mid-Range",...},{"label":"Luxury",...}]}';
     var res = await fetch('/.netlify/functions/generate-trip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
