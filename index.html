@@ -846,6 +846,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="q-section">
       <div class="q-section-title" data-num="8">Accommodation Type</div>
       <div class="chip-group" id="accomm-chips">
+        <div class="chip active" data-single="accomm" data-val="Any">Any</div>
         <div class="chip" data-single="accomm" data-val="Hotel">Hotel</div>
         <div class="chip" data-single="accomm" data-val="Golf resort">Golf Resort</div>
         <div class="chip" data-single="accomm" data-val="Villa">Villa</div>
@@ -1346,7 +1347,7 @@ let chatPollInterval = null;
 let activeCurrency = 'GBP';
 let compareMode = 'tiers';
 let selectedDests = [];
-let chipSelections = { style: null, accomm: null, weather: null, clubs: null, budget: null, dest: null };
+let chipSelections = { style: null, accomm: 'Any', weather: null, clubs: null, budget: null, dest: null };
 let multiChipSelections = { flight: [] };
 
 const RATES = { GBP: 1, EUR: 1.17, USD: 1.27 };
@@ -1809,19 +1810,38 @@ async function generateTrip() {
       ? (data.dates.month || 'any month') + ', ' + (data.dates.duration || 'flexible duration')
       : data.dates.depart + ' to ' + data.dates.returnDate;
     var durationNum = parseInt(data.dates.duration || '5') || 5;
-    var numCourses = Math.max(2, Math.min(3, Math.floor(durationNum * 0.6)));
+    var numCourses = 5;
+
+    // Map selected budget range to per-tier GBP anchors
+    var BUDGET_MAP = {
+      'up-to-300':  { Budget: '£200-300',    'Mid-Range': '£250-400',    Luxury: '£400-600' },
+      '300-500':    { Budget: '£300-500',    'Mid-Range': '£450-700',    Luxury: '£700-1000' },
+      '500-750':    { Budget: '£500-750',    'Mid-Range': '£700-1000',   Luxury: '£1000-1400' },
+      '750-1000':   { Budget: '£750-1000',   'Mid-Range': '£900-1300',   Luxury: '£1300-1800' },
+      '1000-1500':  { Budget: '£1000-1300',  'Mid-Range': '£1300-1800',  Luxury: '£1800-2500' },
+      '1500-2000':  { Budget: '£1300-1700',  'Mid-Range': '£1700-2200',  Luxury: '£2200-3000' },
+      '2000-2500':  { Budget: '£1800-2200',  'Mid-Range': '£2200-2800',  Luxury: '£2800-3500' },
+      '2500-3500':  { Budget: '£2200-2800',  'Mid-Range': '£2800-3500',  Luxury: '£3500-5000' },
+      '3500-5000':  { Budget: '£3000-4000',  'Mid-Range': '£4000-5500',  Luxury: '£5500-7000' },
+      '5000+':      { Budget: '£4500-6000',  'Mid-Range': '£6000-8000',  Luxury: '£8000+' }
+    };
+    var budgetKey = data.budget || '1000-1500';
+    var tierRanges = BUDGET_MAP[budgetKey] || BUDGET_MAP['1000-1500'];
 
     function makePrompt(label, destination, tier) {
+      var budgetForTier = tierRanges[tier] || tierRanges['Mid-Range'];
       return 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
         ', dates: ' + dateStr + ', destination: ' + destination +
         ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
         ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
-        ' Generate the ' + tier + ' option.' +
+        ' Generate the ' + tier + ' option. IMPORTANT: total_cost per person MUST be within ' + budgetForTier + ' GBP.' +
+        ' Budget tier is always cheapest, Mid-Range is middle, Luxury is highest — costs must increase in that order.' +
         ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
         ' costs{flights,accommodation,golf,food},' +
-        ' courses(EXACTLY ' + numCourses + ': name,location,par,green_fee,difficulty,why_recommended,lat,lng),' +
-        ' hotels(EXACTLY 2: name,area,description,why_recommended,lat,lng),' +
-        ' restaurants(EXACTLY 3: name,type,description,lat,lng).' +
+        ' courses(EXACTLY 5: name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
+        ' hotels(EXACTLY 2: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
+        ' restaurants(EXACTLY 3: name,type,description,website_search,lat,lng).' +
+        ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night".' +
         ' All costs GBP. Real venues, accurate GPS coords.';
     }
 
@@ -1935,6 +1955,30 @@ function activatePanel(idx) {
   document.querySelectorAll('.compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
 }
 
+function buildSkyscannerUrl(panel, qData) {
+  // Build best possible Skyscanner URL with airport + destination + dates
+  var origin = (qData && qData.airports && qData.airports[0]) ? qData.airports[0].airport : '';
+  var dest = (panel.destination || '').split(',')[0].trim();
+  var checkin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart.replace(/-/g, '') : '';
+  var checkout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate.replace(/-/g, '') : '';
+  var adults = (qData && qData.group_size) ? qData.group_size : '2';
+  // Airport code lookup for common UK airports
+  var AIRPORT_CODES = {
+    'LHR': 'LHR', 'LGW': 'LGW', 'MAN': 'MAN', 'EDI': 'EDI', 'BHX': 'BHX',
+    'BRS': 'BRS', 'GLA': 'GLA', 'NCL': 'NCL', 'LPL': 'LPL', 'STN': 'STN',
+    'LTN': 'LTN', 'EMA': 'EMA', 'Heathrow': 'LHR', 'Gatwick': 'LGW',
+    'Manchester': 'MAN', 'Edinburgh': 'EDI', 'Birmingham': 'BHX', 'Bristol': 'BRS'
+  };
+  var originCode = AIRPORT_CODES[origin] || origin.substring(0, 3).toUpperCase();
+  if (checkin && checkout && originCode) {
+    return 'https://www.skyscanner.net/transport/flights/' + originCode + '/' +
+      encodeURIComponent(dest) + '/' + checkin + '/' + checkout +
+      '/?adults=' + adults + '&cabinclass=economy';
+  }
+  return 'https://www.skyscanner.net/flights/' + encodeURIComponent(origin) +
+    '/' + encodeURIComponent(dest) + '/';
+}
+
 function buildPanel(panel, idx, qData) {
   var el = document.createElement('div');
   el.className = 'result-panel' + (idx === 0 ? ' active' : '');
@@ -1956,7 +2000,7 @@ function buildPanel(panel, idx, qData) {
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
     '<div class="btt-grid">' +
-      '<a href="https://www.skyscanner.net" target="_blank" class="btt-btn btt-flights">' +
+      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon">&#9992;</div>' +
         '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
       '</a>' +
@@ -2001,7 +2045,10 @@ function buildPanel(panel, idx, qData) {
         '</div>' +
         '<p style="font-size:.85rem">' + (c.description || '') + '</p>' +
         '<div style="display:flex;justify-content:space-between;align-items:center">' +
-          '<span class="green-fee">' + fmtPrice(c.green_fee) + ' green fee</span>' +
+          '<div>' +
+            '<span class="green-fee">' + fmtPrice(c.green_fee) + ' green fee</span>' +
+            (c.green_fee_range ? '<div class="fs-sm text-muted" style="margin-top:2px">Typical range: ' + c.green_fee_range + '</div>' : '') +
+          '</div>' +
           (c.designer ? '<span class="fs-sm text-muted">by ' + c.designer + '</span>' : '') +
         '</div>' +
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (c.why_recommended || '') + '</p>' +
@@ -2021,15 +2068,38 @@ function buildPanel(panel, idx, qData) {
   if (panel.hotels && panel.hotels.length) {
     panel.hotels.forEach(function(h) {
       var isVilla = qData && (qData.accommodation === 'Villa' || qData.accommodation === 'Apartment');
-      var bookUrl = isVilla
-        ? 'https://www.vrbo.com/search?destination=' + encodeURIComponent(h.name || dest)
-        : 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name || dest);
+      var checkin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+      var checkout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+      var hotelEnc = encodeURIComponent(h.name || dest);
+      var destEncH = encodeURIComponent(dest);
+      var bookUrl, altUrl;
+      if (isVilla) {
+        bookUrl = 'https://www.vrbo.com/search?destination=' + hotelEnc +
+          (checkin ? '&startDate=' + checkin : '') +
+          (checkout ? '&endDate=' + checkout : '');
+        altUrl = 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
+          (checkin ? '&checkin=' + checkin : '') +
+          (checkout ? '&checkout=' + checkout : '');
+      } else {
+        bookUrl = 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
+          '&dest_type=property' +
+          (checkin ? '&checkin=' + checkin : '') +
+          (checkout ? '&checkout=' + checkout : '') +
+          '&group_adults=' + (qData && qData.group_size ? qData.group_size : '2');
+        altUrl = 'https://www.vrbo.com/search?destination=' + hotelEnc +
+          (checkin ? '&startDate=' + checkin : '') +
+          (checkout ? '&endDate=' + checkout : '');
+      }
       html += '<div class="hotel-card">' +
         '<h4>' + (h.name || '') + '</h4>' +
         '<div class="text-muted fs-sm">' + (h.area || '') + '</div>' +
         '<p style="font-size:.85rem">' + (h.description || '') + '</p>' +
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (h.why_recommended || '') + '</p>' +
-        '<div class="card-links"><a href="' + bookUrl + '" target="_blank" class="card-link">Check Availability</a></div>' +
+        (h.price_per_night ? '<p class="fs-sm" style="color:var(--gold);font-weight:600">Est. ' + fmtPrice(h.price_per_night) + '/night' + (h.price_range ? ' · typical range ' + h.price_range : '') + '</p>' : '') +
+        '<div class="card-links">' +
+          '<a href="' + bookUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Search Vrbo' : 'Check on Booking.com') + '</a>' +
+          '<a href="' + altUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Try Booking.com' : 'Try Vrbo') + '</a>' +
+        '</div>' +
       '</div>';
     });
   } else {
@@ -2048,10 +2118,15 @@ function buildPanel(panel, idx, qData) {
   if (panel.restaurants && panel.restaurants.length) {
     html += '<div class="section-heading" data-icon="&#127373;">Restaurants &amp; Bars</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
     panel.restaurants.forEach(function(r) {
+      var restSearch = r.website_search
+        ? r.website_search
+        : 'https://www.google.com/search?q=' + encodeURIComponent((r.name || '') + ' restaurant ' + dest);
       html += '<div class="card" style="padding:16px">' +
         '<h4 style="color:var(--green);font-size:.95rem">' + (r.name || '') + '</h4>' +
         '<span class="tag tag-gold">' + (r.type || '') + '</span>' +
-        '<p style="font-size:.85rem;margin-top:8px">' + (r.description || '') + '</p></div>';
+        '<p style="font-size:.85rem;margin-top:8px">' + (r.description || '') + '</p>' +
+        '<a href="' + restSearch + '" target="_blank" class="card-link" style="margin-top:8px;display:inline-block">Find &amp; Book</a>' +
+        '</div>';
     });
     html += '</div>';
   }
@@ -2071,13 +2146,13 @@ function buildPanel(panel, idx, qData) {
   }
 
   var costs = panel.costs || {};
-  html += '<div class="cost-breakdown"><h3>Cost Breakdown — Per Person</h3>' +
-    '<div class="cost-row"><div>Flights</div><div style="text-align:right"><div class="fw-600">' + fmtPrice(costs.flights || 0) + '</div><div class="cost-note">Club luggage approx. &#163;30&#8211;60 each way extra</div></div></div>' +
-    '<div class="cost-row"><div>Accommodation</div><span class="fw-600">' + fmtPrice(costs.accommodation || 0) + '</span></div>' +
-    '<div class="cost-row"><div>Golf (green fees)</div><span class="fw-600">' + fmtPrice(costs.golf || 0) + '</span></div>' +
-    '<div class="cost-row"><div>Food &amp; Drink</div><span class="fw-600">' + fmtPrice(costs.food || 0) + '</span></div>' +
-    (costs.club_hire ? '<div class="cost-row"><div>Club Hire</div><span class="fw-600">' + fmtPrice(costs.club_hire) + '</span></div>' : '') +
-    '<div class="cost-row"><div>Total Estimate</div><span class="cost-total">' + fmtPrice(panel.total_cost || 0) + '</span></div>' +
+  html += '<div class="cost-breakdown"><h3>Cost Breakdown — Per Person (Estimates)</h3>' +
+    '<div class="cost-row"><div>Flights <span class="cost-note">estimate</span></div><div style="text-align:right"><div class="fw-600">' + fmtPrice(costs.flights || 0) + '</div><div class="cost-note">Club luggage approx. &#163;30&#8211;60 each way extra</div></div></div>' +
+    '<div class="cost-row"><div>Accommodation <span class="cost-note">estimate</span></div><span class="fw-600">' + fmtPrice(costs.accommodation || 0) + '</span></div>' +
+    '<div class="cost-row"><div>Golf — green fees <span class="cost-note">estimate</span></div><span class="fw-600">' + fmtPrice(costs.golf || 0) + '</span></div>' +
+    '<div class="cost-row"><div>Food &amp; Drink <span class="cost-note">estimate — not included in total</span></div><span class="fw-600">' + fmtPrice(costs.food || 0) + '</span></div>' +
+    (costs.club_hire ? '<div class="cost-row"><div>Club Hire <span class="cost-note">estimate</span></div><span class="fw-600">' + fmtPrice(costs.club_hire) + '</span></div>' : '') +
+    '<div class="cost-row"><div>Total Estimate <span class="cost-note">excl. food &amp; drink</span></div><span class="cost-total">' + fmtPrice(panel.total_cost || 0) + '</span></div>' +
   '</div>';
 
   // PDF Export bar
@@ -2192,14 +2267,17 @@ var mapInstances = {};
 var googleMapsLoaded = false;
 
 function waitForGoogleMaps() {
-  return new Promise(function(resolve) {
-    if (window.__googleMapsLoaded || (window.google && window.google.maps && window.google.maps.Map)) { resolve(); return; }
+  return new Promise(function(resolve, reject) {
+    if (window.google && window.google.maps && window.google.maps.Map) { resolve(); return; }
+    var attempts = 0;
     var check = setInterval(function() {
-      if (window.__googleMapsLoaded || (window.google && window.google.maps && window.google.maps.Map)) {
+      attempts++;
+      if (window.google && window.google.maps && window.google.maps.Map) {
         clearInterval(check); resolve();
+      } else if (attempts > 100) {
+        clearInterval(check); reject(new Error('Google Maps did not load'));
       }
     }, 100);
-    setTimeout(function() { clearInterval(check); resolve(); }, 10000);
   });
 }
 
@@ -2232,7 +2310,15 @@ function toggleMap(idx) {
   body.classList.toggle('open', !isOpen);
   toggle.classList.toggle('open', !isOpen);
   if (!isOpen && !mapInstances[idx]) {
-    setTimeout(function() { initMap(idx); }, 100);
+    // Wait two animation frames so CSS display:block has painted before Maps init
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { initMap(idx); });
+    });
+  } else if (!isOpen && mapInstances[idx]) {
+    // Map already initialised — just trigger a resize so it fills the container
+    requestAnimationFrame(function() {
+      google.maps.event.trigger(mapInstances[idx], 'resize');
+    });
   }
 }
 
@@ -2380,7 +2466,13 @@ async function initMap(idx) {
     });
   }
 
-  await waitForGoogleMaps();
+  try {
+    await waitForGoogleMaps();
+  } catch(e) {
+    if (loadEl) loadEl.innerHTML = '<div style="padding:20px;text-align:center"><p style="color:var(--text-muted);font-size:.85rem">Map unavailable — Google Maps failed to load.</p>' +
+      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Open in Google Maps</a></div>';
+    return;
+  }
 
   if (loadEl) loadEl.style.display = 'none';
   mapEl.style.display = 'block';
@@ -2453,12 +2545,17 @@ async function initMap(idx) {
 
     var clickHandler = function() {
       infoWindow.setContent(popupContent);
-      infoWindow.open(map, marker);
+      // AdvancedMarkerElement requires passing the marker itself (not element) to open()
+      if (window.google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        infoWindow.open({ map: map, anchor: marker });
+      } else {
+        infoWindow.open(map, marker);
+      }
     };
-    if (marker.addListener) {
+    if (window.google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement) {
+      marker.addListener('gmp-click', clickHandler);
+    } else if (marker.addListener) {
       marker.addListener('click', clickHandler);
-    } else if (marker.element) {
-      marker.element.addEventListener('click', clickHandler);
     } else {
       pinEl.addEventListener('click', clickHandler);
     }
@@ -2473,7 +2570,6 @@ async function initMap(idx) {
       if (map.getZoom() > 14) map.setZoom(14);
     });
   } else {
-    map.setView && map.setView({ lat: avgLat, lng: avgLng }, 13);
     map.setZoom(13);
   }
 }
@@ -2832,6 +2928,7 @@ async function loadTripItinerary(tripId, tripData) {
 
 function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
+  mapInstances = {}; // reset map instances for this trip
   var bar = document.getElementById('td-compare-bar');
   var tabsEl = document.getElementById('td-result-tabs');
   var panelsEl = document.getElementById('td-result-panels');
