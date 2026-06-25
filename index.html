@@ -1366,6 +1366,13 @@ async function generateTrip() {
       ? 'Compare Budget, Mid-Range and Luxury tiers for the same destination.'
       : 'Compare these specific destinations at mid-range level: ' + data.destinations.join(', ') + '.';
 
+    // Work out how many rounds of golf to recommend based on trip duration
+    var durationStr = data.dates.duration || '5 nights';
+    var durationNum = parseInt(durationStr) || 5;
+    var numCourses = Math.max(2, Math.min(4, Math.floor(durationNum * 0.6)));
+    var numHotels = 2;
+    var numRestaurants = 3;
+
     var prompt = 'Generate a golf holiday plan for UK golfers with these details:\n' +
       '- Departure airports: ' + airportList + '\n' +
       '- Dates: ' + dateStr + '\n' +
@@ -1380,8 +1387,40 @@ async function generateTrip() {
       '- Club hire: ' + (data.clubs || 'bringing own') + '\n' +
       '- Notes: ' + (data.notes || 'none') + '\n\n' +
       modeStr + '\n\n' +
+      'IMPORTANT REQUIREMENTS:\n' +
+      '- courses array: include EXACTLY ' + numCourses + ' different golf courses (one per day of golf). Each must be a real, named course at the destination. Vary the difficulty and price.\n' +
+      '- hotels array: include EXACTLY ' + numHotels + ' different hotel or accommodation options at different price points.\n' +
+      '- restaurants array: include EXACTLY ' + numRestaurants + ' different restaurants or bars — mix fine dining, casual and a bar/nightlife option.\n' +
+      '- itinerary array: include EXACTLY 5 days with realistic morning, afternoon and evening activities.\n' +
+      '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n\n' +
       'Respond with a JSON object in exactly this structure (no markdown, no backticks):\n' +
-      '{"panels":[{"label":"Budget","destination":"Costa del Sol, Spain","description":"...","weather":"Sunny 25C","best_time":"April-October","flight_time":"2.5 hrs","total_cost":850,"costs":{"flights":180,"accommodation":280,"golf":250,"food":120,"club_hire":0},"courses":[{"name":"","location":"","description":"","par":72,"yardage":6800,"slope_rating":128,"course_rating":71.2,"green_fee":65,"designer":"","difficulty":"Intermediate","why_recommended":"","club_hire":false}],"hotels":[{"name":"","area":"","description":"","why_recommended":""}],"restaurants":[{"name":"","type":"","description":""}],"itinerary":[{"day":1,"title":"","activities":[{"time":"09:00","description":""}]}]},{"label":"Mid-Range",...},{"label":"Luxury",...}]}';
+      '{"panels":[' +
+        '{"label":"Budget","destination":"Costa del Sol, Spain","description":"...","weather":"Sunny 25C","best_time":"April-October","flight_time":"2.5 hrs","total_cost":850,' +
+        '"costs":{"flights":180,"accommodation":280,"golf":250,"food":120,"club_hire":0},' +
+        '"courses":[' +
+          '{"name":"La Cala America","location":"Mijas","description":"...","par":71,"yardage":6250,"slope_rating":124,"course_rating":70.1,"green_fee":55,"designer":"Cabell Robinson","difficulty":"Beginner","why_recommended":"...","club_hire":true},' +
+          '{"name":"Mijas Golf Los Lagos","location":"Mijas","description":"...","par":71,"yardage":6100,"slope_rating":120,"course_rating":69.5,"green_fee":45,"designer":"Robert Trent Jones","difficulty":"Intermediate","why_recommended":"...","club_hire":false},' +
+          '{"name":"Lauro Golf","location":"Alaurin de la Torre","description":"...","par":71,"yardage":5900,"slope_rating":118,"course_rating":68.8,"green_fee":40,"designer":"Manuel Pinero","difficulty":"Beginner","why_recommended":"...","club_hire":false}' +
+        '],' +
+        '"hotels":[' +
+          '{"name":"Hotel Mac Puerto Marina","area":"Benalmadena","description":"...","why_recommended":"..."},' +
+          '{"name":"Sunset Beach Club","area":"Benalmadena","description":"...","why_recommended":"..."}' +
+        '],' +
+        '"restaurants":[' +
+          '{"name":"El Cabra","type":"Fine Dining","description":"..."},' +
+          '{"name":"Bodega El Patio","type":"Casual","description":"..."},' +
+          '{"name":"La Taberna del Alabardero","type":"Bar","description":"..."}' +
+        '],' +
+        '"itinerary":[' +
+          '{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"..."},{"time":"19:30","description":"..."}]},' +
+          '{"day":2,"title":"First Round","activities":[{"time":"08:30","description":"..."},{"time":"10:00","description":"..."},{"time":"19:00","description":"..."}]},' +
+          '{"day":3,"title":"Second Round","activities":[{"time":"09:00","description":"..."},{"time":"10:30","description":"..."},{"time":"18:00","description":"..."}]},' +
+          '{"day":4,"title":"Free Day","activities":[{"time":"09:00","description":"..."},{"time":"14:00","description":"..."},{"time":"20:00","description":"..."}]},' +
+          '{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"..."},{"time":"12:00","description":"..."}]}' +
+        ']},' +
+        '{"label":"Mid-Range","destination":"...","description":"...","weather":"...","best_time":"...","flight_time":"...","total_cost":1400,"costs":{"flights":200,"accommodation":450,"golf":550,"food":180,"club_hire":0},"courses":[{...},{...},{...}],"hotels":[{...},{...}],"restaurants":[{...},{...},{...}],"itinerary":[{...},{...},{...},{...},{...}]},' +
+        '{"label":"Luxury","destination":"...","description":"...","weather":"...","best_time":"...","flight_time":"...","total_cost":2400,"costs":{"flights":250,"accommodation":950,"golf":950,"food":250,"club_hire":0},"courses":[{...},{...},{...}],"hotels":[{...},{...}],"restaurants":[{...},{...},{...}],"itinerary":[{...},{...},{...},{...},{...}]}' +
+      ']}';
 
     var res = await fetch('/.netlify/functions/generate-trip', {
       method: 'POST',
@@ -1964,6 +2003,7 @@ async function loadTripItinerary(tripId, tripData) {
 }
 
 function renderSavedItinerary(panels, tripData, contentEl) {
+  storedPanels = panels; // store for PDF export
   var bar = document.getElementById('td-compare-bar');
   var tabsEl = document.getElementById('td-result-tabs');
   var panelsEl = document.getElementById('td-result-panels');
