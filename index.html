@@ -883,7 +883,17 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
     </div>
     <div class="q-section">
-      <div class="q-section-title" data-num="12">Additional Notes</div>
+      <div class="q-section-title" data-num="12">Car Hire</div>
+      <p class="fs-sm text-muted mt-8">Will your group need a hire car at the destination?</p>
+      <div class="chip-group mt-8" id="carhire-chips">
+        <div class="chip active" data-single="carhire" data-val="No thanks">No Thanks</div>
+        <div class="chip" data-single="carhire" data-val="Yes - small car">Yes — Small Car</div>
+        <div class="chip" data-single="carhire" data-val="Yes - large car or MPV">Yes — Large / MPV</div>
+        <div class="chip" data-single="carhire" data-val="Yes - multiple cars">Yes — Multiple Cars</div>
+      </div>
+    </div>
+    <div class="q-section">
+      <div class="q-section-title" data-num="13">Additional Notes</div>
       <div class="form-group">
         <label>Anything else we should know?</label>
         <textarea id="additional-notes" placeholder="e.g. wheelchair accessible, celebratory trip, prefer links courses, specific course requests..."></textarea>
@@ -1347,7 +1357,7 @@ let chatPollInterval = null;
 let activeCurrency = 'GBP';
 let compareMode = 'tiers';
 let selectedDests = [];
-let chipSelections = { style: null, accomm: 'Any', weather: null, clubs: null, budget: null, dest: null };
+let chipSelections = { style: null, accomm: 'Any', weather: null, clubs: null, budget: null, dest: null, carhire: 'No thanks' };
 let multiChipSelections = { flight: [] };
 
 const RATES = { GBP: 1, EUR: 1.17, USD: 1.27 };
@@ -1761,6 +1771,7 @@ function getFormData() {
     weather: chipSelections.weather || '',
     flights: multiChipSelections.flight || [],
     clubs: chipSelections.clubs || '',
+    car_hire: chipSelections.carhire || 'No thanks',
     notes: document.getElementById('additional-notes').value
   };
 }
@@ -1839,9 +1850,12 @@ async function generateTrip() {
         ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
         ' costs{flights,accommodation,golf,food},' +
         ' courses(EXACTLY 5: name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
-        ' hotels(EXACTLY 2: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
-        ' restaurants(EXACTLY 3: name,type,description,website_search,lat,lng).' +
-        ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night".' +
+        ' hotels(EXACTLY 3: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
+        ' restaurants(EXACTLY 5: name,type,description,rating,opentable_available,lat,lng),' +
+        ' car_hire{needed,recommended_provider,pickup_location,est_cost_per_day,booking_tip}.' +
+        ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night". rating is a decimal like 4.3.' +
+        ' opentable_available is true/false based on whether this restaurant is likely bookable on OpenTable.' +
+        ' car_hire.needed is ' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
         ' All costs GBP. Real venues, accurate GPS coords.';
     }
 
@@ -2115,17 +2129,51 @@ function buildPanel(panel, idx, qData) {
       '</div>';
   }
 
+  if (qData && qData.car_hire && qData.car_hire !== 'No thanks' && panel.car_hire) {
+    var ch = panel.car_hire;
+    var checkin = (qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+    var checkout = (qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+    var rentalcarsUrl = 'https://www.rentalcars.com/search?' +
+      'cor=gb&pickup=' + destEnc +
+      (checkin ? '&puDay=' + checkin.split('-')[2] + '&puMonth=' + checkin.split('-')[1] + '&puYear=' + checkin.split('-')[0] : '') +
+      (checkout ? '&doDay=' + checkout.split('-')[2] + '&doMonth=' + checkout.split('-')[1] + '&doYear=' + checkout.split('-')[0] : '') +
+      '&puHour=10&puMinute=0&doHour=10&doMinute=0&driverAge=30';
+    var kayakCarUrl = 'https://www.kayak.co.uk/cars/' + destEnc +
+      (checkin && checkout ? '/' + checkin + '/' + checkout : '') + '/';
+    html += '<div class="section-heading" data-icon="&#128663;">Car Hire</div>' +
+      '<div class="card" style="padding:20px;margin-bottom:24px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">' +
+          '<div>' +
+            (ch.recommended_provider ? '<p class="fw-600" style="color:var(--green);margin-bottom:4px">Recommended: ' + ch.recommended_provider + '</p>' : '') +
+            (ch.pickup_location ? '<p class="fs-sm text-muted">Pickup: ' + ch.pickup_location + '</p>' : '') +
+            (ch.est_cost_per_day ? '<p class="fs-sm" style="color:var(--gold);font-weight:600;margin-top:4px">Est. ' + fmtPrice(ch.est_cost_per_day) + '/day</p>' : '') +
+            (ch.booking_tip ? '<p class="fs-sm text-muted" style="margin-top:8px">' + ch.booking_tip + '</p>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
+          '<a href="' + rentalcarsUrl + '" target="_blank" class="btn btn-primary btn-sm">&#128663; Search Rentalcars.com</a>' +
+          '<a href="' + kayakCarUrl + '" target="_blank" class="btn btn-ghost btn-sm">Compare on Kayak</a>' +
+        '</div>' +
+      '</div>';
+  }
+
   if (panel.restaurants && panel.restaurants.length) {
     html += '<div class="section-heading" data-icon="&#127373;">Restaurants &amp; Bars</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
     panel.restaurants.forEach(function(r) {
-      var restSearch = r.website_search
-        ? r.website_search
-        : 'https://www.google.com/search?q=' + encodeURIComponent((r.name || '') + ' restaurant ' + dest);
+      var mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent((r.name || '') + ' ' + dest);
+      var rating = r.rating ? r.rating : null;
+      var openTableUrl = 'https://www.opentable.com/s?covers=2&term=' + encodeURIComponent(r.name || '') + '&metroName=' + encodeURIComponent(dest);
       html += '<div class="card" style="padding:16px">' +
-        '<h4 style="color:var(--green);font-size:.95rem">' + (r.name || '') + '</h4>' +
-        '<span class="tag tag-gold">' + (r.type || '') + '</span>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+          '<h4 style="color:var(--green);font-size:.95rem;margin:0">' + (r.name || '') + '</h4>' +
+          (rating ? '<span style="color:#f59e0b;font-size:.8rem;white-space:nowrap;font-weight:600">&#9733; ' + rating + '</span>' : '') +
+        '</div>' +
+        '<span class="tag tag-gold" style="margin-top:6px">' + (r.type || '') + '</span>' +
         '<p style="font-size:.85rem;margin-top:8px">' + (r.description || '') + '</p>' +
-        '<a href="' + restSearch + '" target="_blank" class="card-link" style="margin-top:8px;display:inline-block">Find &amp; Book</a>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">' +
+          '<a href="' + mapsUrl + '" target="_blank" class="card-link" style="display:inline-flex;align-items:center;gap:5px">&#128205; Google Maps</a>' +
+          (r.opentable_available ? '<a href="' + openTableUrl + '" target="_blank" class="card-link" style="display:inline-flex;align-items:center;gap:5px;background:var(--sand)">&#128197; Reserve on OpenTable</a>' : '') +
+        '</div>' +
         '</div>';
     });
     html += '</div>';
@@ -2304,21 +2352,27 @@ function buildMapSection(panel, idx) {
 }
 
 function toggleMap(idx) {
+  var mapId = 'trip-map-' + idx;
   var toggle = document.getElementById('map-toggle-' + idx);
   var body = document.getElementById('map-body-' + idx);
+  if (!toggle || !body) return;
   var isOpen = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   toggle.classList.toggle('open', !isOpen);
-  if (!isOpen && !mapInstances[idx]) {
-    // Wait two animation frames so CSS display:block has painted before Maps init
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() { initMap(idx); });
-    });
-  } else if (!isOpen && mapInstances[idx]) {
-    // Map already initialised — just trigger a resize so it fills the container
-    requestAnimationFrame(function() {
-      google.maps.event.trigger(mapInstances[idx], 'resize');
-    });
+  if (!isOpen) {
+    if (!mapInstances[mapId]) {
+      // Not yet initialised — wait for container to paint then init
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { initMap(idx); });
+      });
+    } else {
+      // Already initialised — trigger resize in case container size changed
+      requestAnimationFrame(function() {
+        if (window.google && window.google.maps) {
+          google.maps.event.trigger(mapInstances[mapId], 'resize');
+        }
+      });
+    }
   }
 }
 
@@ -2368,11 +2422,17 @@ async function searchGooglePlace(name, type, destination) {
 }
 
 async function initMap(idx) {
+  var mapId = 'trip-map-' + idx;
   var panel = storedPanels[idx];
-  if (!panel) return;
+  if (!panel) { console.warn('initMap: no panel at idx', idx, '— storedPanels length:', storedPanels.length); return; }
   var loadEl = document.getElementById('map-loading-' + idx);
-  var mapEl = document.getElementById('trip-map-' + idx);
-  if (!mapEl) return;
+  var mapEl = document.getElementById(mapId);
+  if (!mapEl) { console.warn('initMap: no map element', mapId); return; }
+  // Ensure map container has a measurable height before Google Maps init
+  if (mapEl.offsetHeight === 0) {
+    mapEl.style.display = 'block';
+    mapEl.closest('.trip-map-body') && (mapEl.closest('.trip-map-body').style.display = 'block');
+  }
 
   var dest = panel.destination || '';
   var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
@@ -2492,7 +2552,7 @@ async function initMap(idx) {
     streetViewControl: false,
     fullscreenControl: true
   });
-  mapInstances[idx] = map;
+  mapInstances[mapId] = map;
 
   var bounds = new google.maps.LatLngBounds();
   var infoWindow = new google.maps.InfoWindow();
