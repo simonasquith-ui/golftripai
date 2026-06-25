@@ -1224,18 +1224,48 @@ async function generateTrip() {
   }
 
   try {
+    var airportList = data.airports.map(function(a) { return a.golfers + ' golfers from ' + a.airport; }).join(', ');
+    var dateStr = data.dates.type === 'flexible'
+      ? (data.dates.month || 'any month') + ', ' + (data.dates.duration || 'flexible duration')
+      : data.dates.depart + ' to ' + data.dates.returnDate;
+    var destStr = data.compare_mode === 'tiers'
+      ? (data.destinations[0] || 'Flexible')
+      : data.destinations.join(', ');
+    var modeStr = data.compare_mode === 'tiers'
+      ? 'Compare Budget, Mid-Range and Luxury tiers for the same destination.'
+      : 'Compare these specific destinations at mid-range level: ' + data.destinations.join(', ') + '.';
+
+    var prompt = 'Generate a golf holiday plan for UK golfers with these details:\n' +
+      '- Departure airports: ' + airportList + '\n' +
+      '- Dates: ' + dateStr + '\n' +
+      '- Budget per person: ' + data.budget + '\n' +
+      '- Total golfers: ' + data.group_size + '\n' +
+      '- Handicap: ' + (data.handicap || 'mixed') + '\n' +
+      '- Destination: ' + destStr + '\n' +
+      '- Trip style: ' + (data.trip_style || 'any') + '\n' +
+      '- Accommodation: ' + (data.accommodation || 'any') + '\n' +
+      '- Weather preference: ' + (data.weather || 'any') + '\n' +
+      '- Flight preferences: ' + (data.flights.join(', ') || 'none') + '\n' +
+      '- Club hire: ' + (data.clubs || 'bringing own') + '\n' +
+      '- Notes: ' + (data.notes || 'none') + '\n\n' +
+      modeStr + '\n\n' +
+      'Respond with a JSON object in exactly this structure (no markdown, no backticks):\n' +
+      '{"panels":[{"label":"Budget","destination":"Costa del Sol, Spain","description":"...","weather":"Sunny 25C","best_time":"April-October","flight_time":"2.5 hrs","total_cost":850,"costs":{"flights":180,"accommodation":280,"golf":250,"food":120,"club_hire":0},"courses":[{"name":"","location":"","description":"","par":72,"yardage":6800,"slope_rating":128,"course_rating":71.2,"green_fee":65,"designer":"","difficulty":"Intermediate","why_recommended":"","club_hire":false}],"hotels":[{"name":"","area":"","description":"","why_recommended":""}],"restaurants":[{"name":"","type":"","description":""}],"itinerary":[{"day":1,"title":"","activities":[{"time":"09:00","description":""}]}]},{"label":"Mid-Range",...},{"label":"Luxury",...}]}';
+
     var res = await fetch('/.netlify/functions/generate-trip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify({ prompt: prompt })
     });
     if (!res.ok) throw new Error('Server error ' + res.status);
     var json = await res.json();
-    currentTripData = json;
+    // Function returns { result: "json string" } — parse the inner string
+    var parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
+    currentTripData = parsed;
     if (currentUser && currentTripRequestId) {
-      try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: json }); } catch(e) {}
+      try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
     }
-    renderResults(json, data);
+    renderResults(parsed, data);
   } catch(e) {
     console.error(e);
     showToast('Failed to generate trip. Showing example layout.', true);
