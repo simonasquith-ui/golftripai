@@ -29,7 +29,7 @@
     if (!data.key) { console.warn('Maps key not available'); return; }
     window.__googleMapsReady = function() { window.__googleMapsLoaded = true; };
     var s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async&libraries=marker';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
     document.head.appendChild(s);
   } catch(e) { console.warn('Could not load maps config:', e); }
@@ -479,7 +479,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><div class="num">&#127358;</div><div class="lbl">Early Access Beta</div></div>
-        <div class="hero-stat"><div class="num">9</div><div class="lbl">Destinations</div></div>
+        <div class="hero-stat"><div class="num">10</div><div class="lbl">Destinations</div></div>
         <div class="hero-stat"><div class="num">60s</div><div class="lbl">To Generate a Plan</div></div>
         <div class="hero-stat"><div class="num">&#163;0</div><div class="lbl">To Get Started</div></div>
       </div>
@@ -614,7 +614,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="faq-item"><button class="faq-q">Can my group fly from different airports?</button><div class="faq-a"><div class="faq-a-inner">Yes. You can add multiple departure airports with the number of golfers for each. This is useful for UK golf societies where members are spread across different cities. The AI factors in all airports when recommending destinations and estimating flight costs.</div></div></div>
         <div class="faq-item"><button class="faq-q">Are the prices accurate?</button><div class="faq-a"><div class="faq-a-inner">Prices shown are AI-estimated based on typical costs for each destination and budget tier. They are a planning guide, not a live quote. Always check the actual booking platforms for current pricing before committing.</div></div></div>
         <div class="faq-item"><button class="faq-q">Is there a free trial for paid plans?</button><div class="faq-a"><div class="faq-a-inner">The Free plan lets you generate one trip with no credit card required. Pro and Society plans are pay-monthly with no long-term contract, so you can cancel at any time.</div></div></div>
-        <div class="faq-item"><button class="faq-q">What destinations are supported?</button><div class="faq-a"><div class="faq-a-inner">We currently support Spain, Portugal, Turkey, Morocco, Ireland, Scotland, France and Dubai, plus a Flexible option. More destinations are added regularly.</div></div></div>
+        <div class="faq-item"><button class="faq-q">What destinations are supported?</button><div class="faq-a"><div class="faq-a-inner">We currently support Spain, Portugal, Turkey, Morocco, Ireland, Scotland, England, France and Dubai, plus a Flexible option. More destinations are added regularly.</div></div></div>
       </div>
     </div>
   </section>
@@ -634,7 +634,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         </div>
         <div class="footer-col"><h4>Product</h4><ul><li><a href="#" onclick="showPage('questionnaire');return false;">Plan a Trip</a></li><li><a href="#pricing-section">Pricing</a></li><li><a href="#">How It Works</a></li></ul></div>
         <div class="footer-col"><h4>Destinations</h4><ul><li><a href="#" onclick="showPage('seasonal');return false;">Seasonal Guide</a></li>
-        <li><a href="#">Spain</a></li><li><a href="#">Portugal</a></li><li><a href="#">Ireland</a></li><li><a href="#">Scotland</a></li></ul></div>
+        <li><a href="#">Spain</a></li><li><a href="#">Portugal</a></li><li><a href="#">Ireland</a></li><li><a href="#">Scotland</a></li><li><a href="#">England</a></li></ul></div>
         <div class="footer-col"><h4>Company</h4><ul><li><a href="#" onclick="showPage('about');return false;">About</a></li><li><a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a></li><li><a href="#" onclick="showPage('terms');return false;">Terms of Service</a></li><li><a href="#">Contact</a></li></ul></div>
       </div>
       <div class="footer-bottom"><p>&#169; 2025 GolfTrip Ltd. All rights reserved.</p><p>Made for golfers everywhere</p></div>
@@ -733,6 +733,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="chip" data-dest="Morocco">Morocco</div>
         <div class="chip" data-dest="Ireland">Ireland</div>
         <div class="chip" data-dest="Scotland">Scotland</div>
+        <div class="chip" data-dest="England">England</div>
         <div class="chip" data-dest="France">France</div>
         <div class="chip" data-dest="Dubai">Dubai</div>
         <div class="chip" data-dest="Flexible">Flexible</div>
@@ -1301,7 +1302,7 @@ function showPage(name) {
   if (name === 'profile' && currentUser) { loadSavedTrips(); loadProfile(); }
   if (name === 'seasonal') {
     var season = getCurrentSeason();
-    loadSeason(season);
+    initSeasonalPage(season);
   }
   if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
@@ -3072,6 +3073,54 @@ async function loadAdminStats() {
 /* === SEASONAL RECOMMENDATIONS === */
 var currentSeason = null;
 
+function showSeasonalGenerateBtn(season) {
+  var meta = SEASON_META[season];
+  var contentEl = document.getElementById('seasonal-content');
+  var div = document.createElement('div');
+  div.className = 'empty-state';
+  div.style.padding = '60px 20px';
+  var icon = document.createElement('div');
+  icon.className = 'es-icon';
+  icon.textContent = '⛳';
+  var h3 = document.createElement('h3');
+  h3.textContent = meta.label + ' Golf Destinations';
+  var p = document.createElement('p');
+  p.style.marginBottom = '24px';
+  p.textContent = 'Generate AI-curated picks for the best golf destinations this ' + meta.label.toLowerCase() + '. Takes about 20 seconds.';
+  var btn = document.createElement('button');
+  btn.className = 'btn btn-primary btn-lg';
+  btn.textContent = 'Generate ' + meta.label + ' Picks →';
+  btn.addEventListener('click', function() { loadSeason(season); });
+  div.appendChild(icon);
+  div.appendChild(h3);
+  div.appendChild(p);
+  div.appendChild(btn);
+  contentEl.innerHTML = '';
+  contentEl.appendChild(div);
+}
+
+function initSeasonalPage(season) {
+  ['spring','summer','autumn','winter'].forEach(function(s) {
+    var tab = document.getElementById('stab-' + s);
+    if (tab) tab.classList.toggle('active', s === season);
+  });
+  var meta = SEASON_META[season];
+  document.getElementById('seasonal-label').textContent = 'Our Favourites This ' + meta.label;
+  document.getElementById('seasonal-heading').textContent = 'Best Golf Destinations This ' + meta.label;
+  document.getElementById('seasonal-subheading').textContent = meta.months + ' - ' + meta.desc;
+  document.getElementById('seasonal-content').innerHTML = '';
+
+  sbClient.from('seasonal_recommendations').select('*').eq('season', season).single().then(function(cached) {
+    if (cached.data && cached.data.content) {
+      renderSeasonalContent(cached.data.content, season, cached.data.generated_at);
+    } else {
+      showSeasonalGenerateBtn(season);
+    }
+  }).catch(function() {
+    showSeasonalGenerateBtn(season);
+  });
+}
+
 function getCurrentSeason() {
   var month = new Date().getMonth(); // 0-11
   if (month >= 2 && month <= 4) return 'spring';
@@ -3131,8 +3180,8 @@ async function generateSeasonalContent(season) {
 
   var destinations = {
     spring: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'Morocco', 'Ireland', 'Scotland'],
-    summer: ['Scotland', 'Ireland', 'France', 'Spain (Costa del Sol)', 'Portugal (Algarve)'],
-    autumn: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'Turkey (Antalya)', 'Morocco', 'Ireland'],
+    summer: ['England (Cornwall)', 'Scotland', 'Ireland', 'France', 'Spain (Costa del Sol)'],
+    autumn: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'England (Northumberland)', 'Turkey (Antalya)', 'Ireland'],
     winter: ['Dubai', 'Morocco', 'Portugal (Algarve)', 'Spain (Costa del Sol)', 'Turkey (Antalya)']
   };
 
