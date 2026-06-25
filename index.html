@@ -1968,14 +1968,61 @@ async function sendChatMessage() {
 async function inviteMember() {
   if (!currentUser) { openAuthModal('signin'); return; }
   var emailEl = document.getElementById('invite-email');
+  var inviteBtn = document.querySelector('.invite-section .btn-primary');
   var email = emailEl.value.trim();
   if (!email || !activeTripId) { showToast('Please enter an email address.', true); return; }
+
+  // Basic email format check
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email address.', true); return; }
+
+  // Disable button while sending
+  if (inviteBtn) { inviteBtn.disabled = true; inviteBtn.textContent = 'Sending...'; }
+
   try {
-    await sbClient.from('trip_members').insert({ trip_request_id: activeTripId, user_id: currentUser.id, role: 'member', status: 'Invited' });
+    // 1. Save to trip_members in database
+    var dbRes = await sbClient.from('trip_members').insert({
+      trip_request_id: activeTripId,
+      user_id: currentUser.id,
+      role: 'member',
+      status: 'Invited'
+    });
+    if (dbRes.error) throw dbRes.error;
+
+    // 2. Get trip details for the email
+    var tripRes = await sbClient.from('trip_requests').select('destination_type').eq('id', activeTripId).single();
+    var destination = tripRes.data ? tripRes.data.destination_type : '';
+
+    // 3. Get inviter display name
+    var inviterName = currentUser.display_name || (currentUser.email ? currentUser.email.split('@')[0] : 'A fellow golfer');
+
+    // 4. Build invite URL
+    var inviteUrl = window.location.origin + '?join=' + activeTripId;
+
+    // 5. Send email via Netlify function
+    var emailRes = await fetch('/.netlify/functions/send-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toEmail: email,
+        inviterName: inviterName,
+        destination: destination,
+        inviteUrl: inviteUrl
+      })
+    });
+
+    var emailData = await emailRes.json();
+    if (!emailRes.ok) throw new Error(emailData.error || 'Email send failed');
+
     emailEl.value = '';
     loadTripMembers(activeTripId);
-    showToast('Invitation sent to ' + email + '!');
-  } catch(e) { showToast('Could not send invitation.', true); }
+    showToast('Invitation emailed to ' + email + '!');
+
+  } catch(e) {
+    console.error('inviteMember error:', e);
+    showToast('Could not send invitation: ' + (e.message || 'unknown error'), true);
+  } finally {
+    if (inviteBtn) { inviteBtn.disabled = false; inviteBtn.textContent = 'Invite'; }
+  }
 }
 
 async function updateMyStatus() {
