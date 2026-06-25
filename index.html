@@ -1419,33 +1419,27 @@ async function generateTrip() {
       '- itinerary array: include EXACTLY 5 days with realistic morning, afternoon and evening activities.\n' +
       '- All green fees, hotel costs and total_cost must be realistic GBP amounts for the budget tier.\n' +
       '- EVERY course, hotel and restaurant must include a lat (latitude) and lng (longitude) as decimal numbers for their real location. These are used to plot a map. Be accurate — use the real GPS coordinates for each venue.\n\n' +
-      'Respond with a JSON object in exactly this structure (no markdown, no backticks):\n' +
+      'YOU MUST RETURN EXACTLY 3 PANELS in the panels array: Budget, Mid-Range, and Luxury. All three are required — do not stop after one panel.\n\n' +
+      'Respond with valid JSON only (no markdown, no backticks). The JSON must have this exact structure with all 3 panels fully populated:\n' +
       '{"panels":[' +
-        '{"label":"Budget","destination":"Costa del Sol, Spain","description":"...","weather":"Sunny 25C","best_time":"April-October","flight_time":"2.5 hrs","total_cost":850,' +
-        '"costs":{"flights":180,"accommodation":280,"golf":250,"food":120,"club_hire":0},' +
-        '"courses":[' +
-          '{"name":"La Cala America","location":"Mijas","description":"...","par":71,"yardage":6250,"slope_rating":124,"course_rating":70.1,"green_fee":55,"designer":"Cabell Robinson","difficulty":"Beginner","why_recommended":"...","club_hire":true},' +
-          '{"name":"Mijas Golf Los Lagos","location":"Mijas","description":"...","par":71,"yardage":6100,"slope_rating":120,"course_rating":69.5,"green_fee":45,"designer":"Robert Trent Jones","difficulty":"Intermediate","why_recommended":"...","club_hire":false},' +
-          '{"name":"Lauro Golf","location":"Alaurin de la Torre","description":"...","par":71,"yardage":5900,"slope_rating":118,"course_rating":68.8,"green_fee":40,"designer":"Manuel Pinero","difficulty":"Beginner","why_recommended":"...","club_hire":false}' +
-        '],' +
-        '"hotels":[' +
-          '{"name":"Hotel Mac Puerto Marina","area":"Benalmadena","description":"...","why_recommended":"..."},' +
-          '{"name":"Sunset Beach Club","area":"Benalmadena","description":"...","why_recommended":"..."}' +
-        '],' +
-        '"restaurants":[' +
-          '{"name":"El Cabra","type":"Fine Dining","description":"..."},' +
-          '{"name":"Bodega El Patio","type":"Casual","description":"..."},' +
-          '{"name":"La Taberna del Alabardero","type":"Bar","description":"...","lat":36.5195,"lng":-4.8830}' +
-        '],' +
-        '"itinerary":[' +
-          '{"day":1,"title":"Arrival","activities":[{"time":"14:00","description":"..."},{"time":"19:30","description":"..."}]},' +
-          '{"day":2,"title":"First Round","activities":[{"time":"08:30","description":"..."},{"time":"10:00","description":"..."},{"time":"19:00","description":"..."}]},' +
-          '{"day":3,"title":"Second Round","activities":[{"time":"09:00","description":"..."},{"time":"10:30","description":"..."},{"time":"18:00","description":"..."}]},' +
-          '{"day":4,"title":"Free Day","activities":[{"time":"09:00","description":"..."},{"time":"14:00","description":"..."},{"time":"20:00","description":"..."}]},' +
-          '{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"..."},{"time":"12:00","description":"..."}]}' +
-        ']},' +
-        '{"label":"Mid-Range","destination":"...","description":"...","weather":"...","best_time":"...","flight_time":"...","total_cost":1400,"costs":{"flights":200,"accommodation":450,"golf":550,"food":180,"club_hire":0},"courses":[{...},{...},{...}],"hotels":[{...},{...}],"restaurants":[{...},{...},{...}],"itinerary":[{...},{...},{...},{...},{...}]},' +
-        '{"label":"Luxury","destination":"...","description":"...","weather":"...","best_time":"...","flight_time":"...","total_cost":2400,"costs":{"flights":250,"accommodation":950,"golf":950,"food":250,"club_hire":0},"courses":[{...},{...},{...}],"hotels":[{...},{...}],"restaurants":[{...},{...},{...}],"itinerary":[{...},{...},{...},{...},{...}]}' +
+        '{"label":"Budget","destination":"[real destination name]","description":"[2-3 sentence overview]","weather":"[weather]","best_time":"[best months]","flight_time":"[flight duration]","total_cost":[number],' +
+        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
+        '"courses":[{"name":"[real course name]","location":"[town]","description":"[sentence]","par":[number],"yardage":[number],"slope_rating":[number],"course_rating":[number],"green_fee":[number],"designer":"[name]","difficulty":"[Beginner/Intermediate/Advanced]","why_recommended":"[sentence]","club_hire":[true/false],"lat":[decimal],"lng":[decimal]}],' +
+        '"hotels":[{"name":"[real hotel name]","area":"[area]","description":"[sentence]","why_recommended":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"restaurants":[{"name":"[real restaurant name]","type":"[Fine Dining/Casual/Bar]","description":"[sentence]","lat":[decimal],"lng":[decimal]}],' +
+        '"itinerary":[{"day":1,"title":"[title]","activities":[{"time":"14:00","description":"[activity]"},{"time":"19:30","description":"[activity]"}]},{"day":2,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":3,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"10:00","description":"[activity]"}]},{"day":4,"title":"[title]","activities":[{"time":"09:00","description":"[activity]"},{"time":"14:00","description":"[activity]"}]},{"day":5,"title":"Departure","activities":[{"time":"09:00","description":"Check out"},{"time":"12:00","description":"Transfer to airport"}]}]},' +
+        '{"label":"Mid-Range","destination":"[same destination, different hotels/courses]","description":"[overview]","weather":"[weather]","best_time":"[months]","flight_time":"[duration]","total_cost":[higher number],' +
+        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
+        '"courses":[SAME STRUCTURE AS BUDGET — fill in real course names and numbers],' +
+        '"hotels":[SAME STRUCTURE AS BUDGET — fill in real hotel names],' +
+        '"restaurants":[SAME STRUCTURE AS BUDGET — fill in real restaurant names],' +
+        '"itinerary":[SAME STRUCTURE AS BUDGET — fill in activities]},' +
+        '{"label":"Luxury","destination":"[same destination, premium venues]","description":"[overview]","weather":"[weather]","best_time":"[months]","flight_time":"[duration]","total_cost":[highest number],' +
+        '"costs":{"flights":[number],"accommodation":[number],"golf":[number],"food":[number],"club_hire":[number]},' +
+        '"courses":[SAME STRUCTURE — premium courses],' +
+        '"hotels":[SAME STRUCTURE — luxury hotels],' +
+        '"restaurants":[SAME STRUCTURE — upscale restaurants],' +
+        '"itinerary":[SAME STRUCTURE — premium activities]}' +
       ']}';
 
     var res = await fetch('/.netlify/functions/generate-trip', {
@@ -2098,203 +2092,7 @@ function exportPDF(panelIdx) {
   setTimeout(function() { printWin.print(); }, 500);
 }
 
-/* === MAP FUNCTIONS === */
-var mapInstances = {};
 
-function buildMapSection(panel, idx) {
-  var mapId = 'trip-map-' + idx;
-  return '<div class="trip-map-section">' +
-    '<button class="trip-map-toggle" id="map-toggle-' + idx + '" onclick="toggleMap(' + idx + ')">' +
-      '<span>&#128205; Interactive Map — Courses, Hotels &amp; Restaurants</span>' +
-      '<span class="toggle-arrow">&#9660;</span>' +
-    '</button>' +
-    '<div class="trip-map-body" id="map-body-' + idx + '">' +
-      '<div class="map-loading" id="map-loading-' + idx + '">' +
-        '<div class="loading-spinner"></div>' +
-        '<p>Loading map...</p>' +
-      '</div>' +
-      '<div class="map-container" id="' + mapId + '" style="display:none"></div>' +
-      '<div class="map-legend">' +
-        '<div class="legend-item"><div class="legend-dot" style="background:#1a3a2a"></div> Hotel</div>' +
-        '<div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div> Golf Course</div>' +
-        '<div class="legend-item"><div class="legend-dot" style="background:#e85d26"></div> Restaurant / Bar</div>' +
-        '<div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Airport Area</div>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-function toggleMap(idx) {
-  var toggle = document.getElementById('map-toggle-' + idx);
-  var body = document.getElementById('map-body-' + idx);
-  var isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  toggle.classList.toggle('open', !isOpen);
-  if (!isOpen && !mapInstances[idx]) {
-    // First open — initialise the map
-    setTimeout(function() { initMap(idx); }, 100);
-  }
-}
-
-function haversineKm(lat1, lng1, lat2, lng2) {
-  var R = 6371;
-  var dLat = (lat2 - lat1) * Math.PI / 180;
-  var dLng = (lng2 - lng1) * Math.PI / 180;
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-          Math.sin(dLng/2) * Math.sin(dLng/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function makeIcon(color, letter) {
-  return L.divIcon({
-    html: '<div style="width:30px;height:30px;border-radius:50%;background:' + color + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:Arial,sans-serif">' + letter + '</div>',
-    className: '',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -18]
-  });
-}
-
-async function geocodePlace(name, location, destination, type) {
-  // Build progressively looser queries — try specific first, fall back to broader
-  var queries = [];
-  if (type === 'course') {
-    queries = [
-      name + ' golf course, ' + (location || destination || ''),
-      name + ' golf, ' + (destination || ''),
-      name + ', ' + (destination || '')
-    ];
-  } else {
-    queries = [
-      name + ', ' + (location || destination || ''),
-      name + ', ' + (destination || '')
-    ];
-  }
-
-  for (var i = 0; i < queries.length; i++) {
-    try {
-      var r = await fetch('/.netlify/functions/geocode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: queries[i] })
-      });
-      var data = await r.json();
-      if (data && data[0]) {
-        console.log('Geocoded', name, 'with query:', queries[i], '->', data[0].lat, data[0].lon);
-        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      }
-    } catch(e) { console.warn('Geocode attempt failed for', name, e); }
-    if (i < queries.length - 1) await new Promise(function(res) { setTimeout(res, 300); });
-  }
-  console.warn('Could not geocode:', name);
-  return null;
-}
-
-async function initMap(idx) {
-  var panel = storedPanels[idx];
-  if (!panel) return;
-  var loadEl = document.getElementById('map-loading-' + idx);
-  var mapEl = document.getElementById('trip-map-' + idx);
-  if (!mapEl) return;
-
-  var dest = panel.destination || '';
-  var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
-  var letters = { hotel: 'H', course: 'G', restaurant: 'R' };
-  var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
-
-  var toGeocode = [];
-  (panel.hotels || []).forEach(function(h) {
-    toGeocode.push({ type: 'hotel', name: h.name, area: h.area || dest,
-      detail: (h.description||'').substring(0,100),
-      link: 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||''),
-      aiLat: h.lat, aiLng: h.lng });
-  });
-  (panel.courses || []).forEach(function(c) {
-    toGeocode.push({ type: 'course', name: c.name, area: c.location || dest,
-      detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage||'') + ' yds • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name||''),
-      aiLat: c.lat, aiLng: c.lng });
-  });
-  (panel.restaurants || []).forEach(function(r) {
-    toGeocode.push({ type: 'restaurant', name: r.name, area: r.type || dest,
-      detail: (r.description||'').substring(0,100),
-      link: 'https://www.google.com/maps/search/' + encodeURIComponent((r.name||'') + ' ' + dest),
-      aiLat: r.lat, aiLng: r.lng });
-  });
-
-  var locations = [];
-  for (var i = 0; i < toGeocode.length; i++) {
-    var item = toGeocode[i];
-    var lat = null, lng = null;
-    if (item.aiLat && item.aiLng && Math.abs(item.aiLat) > 0.5 && Math.abs(item.aiLng) > 0.5) {
-      lat = item.aiLat; lng = item.aiLng;
-    } else {
-      if (i > 0) await new Promise(function(res) { setTimeout(res, 400); });
-      var coords = await geocodePlace(item.name, item.area, dest, item.type);
-      if (coords) { lat = coords.lat; lng = coords.lng; }
-    }
-    if (lat && lng) {
-      locations.push({ type: item.type, name: item.name, area: item.area,
-        lat: lat, lng: lng, detail: item.detail, link: item.link });
-    }
-  }
-
-  if (!locations.length) {
-    if (loadEl) loadEl.style.display = 'none';
-    mapEl.style.display = 'none';
-    var errEl = document.createElement('div');
-    errEl.className = 'map-error';
-    errEl.innerHTML = '<p>Could not load map locations for this trip.</p>' +
-      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Search in Google Maps</a>';
-    mapEl.parentNode.insertBefore(errEl, mapEl);
-    return;
-  }
-
-  var hotelLoc = locations.find(function(l) { return l.type === 'hotel'; });
-  if (hotelLoc) {
-    locations.forEach(function(loc) {
-      if (loc.type !== 'hotel') {
-        var km = haversineKm(hotelLoc.lat, hotelLoc.lng, loc.lat, loc.lng);
-        var distLabel = km < 1 ? Math.round(km * 1000) + 'm from hotel' : km.toFixed(1) + ' km from hotel';
-        loc.detail += '<br><strong style="color:' + colors[loc.type] + '">' + distLabel + '</strong>';
-      }
-    });
-  }
-
-  if (loadEl) loadEl.style.display = 'none';
-  mapEl.style.display = 'block';
-
-  var map = L.map(mapEl, { zoomControl: true, scrollWheelZoom: false });
-  mapInstances[idx] = map;
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 18
-  }).addTo(map);
-
-  var bounds = [];
-  locations.forEach(function(loc) {
-    var icon = makeIcon(colors[loc.type] || '#666', letters[loc.type] || '?');
-    var marker = L.marker([loc.lat, loc.lng], { icon: icon }).addTo(map);
-    var popupHtml = '<div style="min-width:190px;font-family:Arial,sans-serif">' +
-      '<div style="font-weight:700;color:' + (colors[loc.type]||'#333') + ';font-size:.9rem;margin-bottom:3px">' + (loc.name||'') + '</div>' +
-      '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:6px">' + (typeLabels[loc.type]||'') + (loc.area ? ' • ' + loc.area : '') + '</div>' +
-      '<div style="font-size:.8rem;color:#555;margin-bottom:8px;line-height:1.5">' + (loc.detail||'') + '</div>' +
-      '<a href="' + (loc.link||'#') + '" target="_blank" style="display:inline-block;background:#c9a84c;color:#0f2318;padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:700;text-decoration:none">View →</a>' +
-      '</div>';
-    marker.bindPopup(popupHtml, { maxWidth: 260 });
-    bounds.push([loc.lat, loc.lng]);
-  });
-
-  if (bounds.length > 1) {
-    map.fitBounds(bounds, { padding: [48, 48] });
-  } else if (bounds.length === 1) {
-    map.setView(bounds[0], 14);
-  }
-
-  setTimeout(function() { map.invalidateSize(); }, 250);
-}
 function makeFallbackPanels(qData) {
   var mode = qData ? qData.compare_mode : 'tiers';
   var labels = mode === 'tiers' ? ['Budget', 'Mid-Range', 'Luxury'] : (qData && qData.destinations && qData.destinations.length ? qData.destinations : ['Destination 1', 'Destination 2', 'Destination 3']);
