@@ -1622,6 +1622,18 @@ document.getElementById('compare-tier-toggle').addEventListener('click', functio
 });
 
 /* === CHIP INTERACTIONS === */
+document.getElementById('specific-depart').addEventListener('change', function() {
+  var depart = this.value;
+  var returnInput = document.getElementById('specific-return');
+  if (depart) {
+    returnInput.min = depart;
+    // If return is before depart or empty, set it to depart date
+    if (!returnInput.value || returnInput.value < depart) {
+      returnInput.value = depart;
+    }
+  }
+});
+
 document.getElementById('budget-chips').addEventListener('click', function(e) {
   var chip = e.target.closest('.chip');
   if (!chip) return;
@@ -1856,7 +1868,9 @@ async function generateTrip() {
         ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night". rating is a decimal like 4.3.' +
         ' opentable_available is true/false based on whether this restaurant is likely bookable on OpenTable.' +
         ' car_hire.needed is ' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
-        ' All costs GBP. Real venues, accurate GPS coords.';
+        ' All costs GBP. Real venues, accurate GPS coords.' +
+        ' flights{airlines(array of 2-3 airline names that fly this route from UK),duration_hours,frequency(e.g. "3x daily"),departure_times(array of typical outbound departure times e.g. ["06:30","12:15","18:45"]),return_times(array of typical return departure times),price_range,baggage_note,airport_note}.' +
+        ' flights.price_range is a string like "£89-£180 per person return". flights.airport_note mentions any relevant terminal or connection info.';
     }
 
     function fetchPanel(label, destination, tier) {
@@ -2005,6 +2019,30 @@ function buildPanel(panel, idx, qData) {
   if (panel.best_time) html += '<span class="dest-chip">' + panel.best_time + '</span>';
   if (panel.flight_time) html += '<span class="dest-chip">' + panel.flight_time + '</span>';
   html += '</div></div>';
+
+  // Flight info section
+  if (panel.flights) {
+    var fl = panel.flights;
+    var skyUrl = buildSkyscannerUrl(panel, qData);
+    html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">' +
+        '<div>' +
+          '<div class="section-label" style="margin-bottom:6px">&#9992; Flight Overview</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">' +
+            (fl.duration_hours ? '<span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128336; ' + fl.duration_hours + 'h flight</span>' : '') +
+            (fl.frequency ? '<span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128197; ' + fl.frequency + '</span>' : '') +
+          '</div>' +
+          (fl.departure_times && fl.departure_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Outbound departures:</strong> ' + fl.departure_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+          (fl.return_times && fl.return_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Return departures:</strong> ' + fl.return_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+          (fl.price_range ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Est. price:</strong> ' + fl.price_range + '</div>' : '') +
+          (fl.airlines && fl.airlines.length ? '<div class="fs-sm text-muted" style="margin-bottom:6px"><strong>Airlines:</strong> ' + fl.airlines.join(', ') + '</div>' : '') +
+          (fl.baggage_note ? '<div class="fs-sm text-muted" style="margin-bottom:4px">&#129517; ' + fl.baggage_note + '</div>' : '') +
+          (fl.airport_note ? '<div class="fs-sm text-muted">&#128205; ' + fl.airport_note + '</div>' : '') +
+        '</div>' +
+        '<a href="' + skyUrl + '" target="_blank" class="btn btn-primary btn-sm" style="white-space:nowrap">Search Flights &#8594;</a>' +
+      '</div>' +
+    '</div>';
+  }
 
   // Trip Map section
   html += buildMapSection(panel, idx);
