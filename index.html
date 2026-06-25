@@ -1833,9 +1833,12 @@ function makeIcon(color, letter) {
 
 async function geocodePlace(name, location, destination) {
   var query = name + ', ' + (location || destination || '');
-  var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(query) + '&format=json&limit=1';
   try {
-    var r = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'GolfTrip/1.0' } });
+    var r = await fetch('/.netlify/functions/geocode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: query })
+    });
     var data = await r.json();
     if (data && data[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
   } catch(e) { console.warn('Geocode failed for', name, e); }
