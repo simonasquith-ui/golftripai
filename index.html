@@ -732,7 +732,15 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <button class="toggle-btn active" data-mode="tiers">Budget vs Mid vs Luxury</button>
         <button class="toggle-btn" data-mode="destinations">Compare Destinations</button>
       </div>
-      <div class="compare-notice" id="compare-notice">Select up to 3 destinations to compare side by side at mid-range level.</div>
+      <div class="compare-notice" id="compare-notice">Select up to 3 destinations to compare side by side.</div>
+      <div id="compare-tier-pick" style="display:none;margin-top:14px">
+        <label style="display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-bottom:8px">Compare at which level?</label>
+        <div class="toggle-group" style="max-width:380px" id="compare-tier-toggle">
+          <button class="toggle-btn" data-tier="Budget">Budget</button>
+          <button class="toggle-btn active" data-tier="Mid-Range">Mid-Range</button>
+          <button class="toggle-btn" data-tier="Luxury">Luxury</button>
+        </div>
+      </div>
     </div>
     <div class="q-section">
       <div class="q-section-title" data-num="6">Destination</div>
@@ -1564,6 +1572,8 @@ document.getElementById('date-mode-toggle').addEventListener('click', function(e
 });
 
 /* === COMPARE MODE TOGGLE === */
+var compareTier = 'Mid-Range';
+
 document.getElementById('compare-mode-toggle').addEventListener('click', function(e) {
   var btn = e.target.closest('.toggle-btn');
   if (!btn) return;
@@ -1572,8 +1582,10 @@ document.getElementById('compare-mode-toggle').addEventListener('click', functio
   compareMode = btn.getAttribute('data-mode');
   var notice = document.getElementById('compare-notice');
   var hint = document.getElementById('dest-hint');
+  var tierPick = document.getElementById('compare-tier-pick');
   if (compareMode === 'destinations') {
     notice.classList.add('visible');
+    tierPick.style.display = 'block';
     hint.textContent = 'Select up to 3 destinations to compare (multi-select).';
     selectedDests = [];
     chipSelections.dest = null;
@@ -1581,12 +1593,21 @@ document.getElementById('compare-mode-toggle').addEventListener('click', functio
     renderDestTags();
   } else {
     notice.classList.remove('visible');
+    tierPick.style.display = 'none';
     hint.textContent = 'Select your preferred destination (single select in tier mode).';
     selectedDests = [];
     chipSelections.dest = null;
     document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
     renderDestTags();
   }
+});
+
+document.getElementById('compare-tier-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('.toggle-btn');
+  if (!btn) return;
+  document.querySelectorAll('#compare-tier-toggle .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  compareTier = btn.getAttribute('data-tier');
 });
 
 /* === CHIP INTERACTIONS === */
@@ -1787,21 +1808,15 @@ async function generateTrip() {
     var dateStr = data.dates.type === 'flexible'
       ? (data.dates.month || 'any month') + ', ' + (data.dates.duration || 'flexible duration')
       : data.dates.depart + ' to ' + data.dates.returnDate;
-    var destStr = data.compare_mode === 'tiers'
-      ? (data.destinations[0] || 'Flexible')
-      : data.destinations.join(', ');
     var durationNum = parseInt(data.dates.duration || '5') || 5;
     var numCourses = Math.max(2, Math.min(3, Math.floor(durationNum * 0.6)));
 
-    var tripContext = 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
-      ', dates: ' + dateStr + ', destination: ' + destStr +
-      ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
-      ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.';
-
-    var tiers = ['Budget', 'Mid-Range', 'Luxury'];
-
-    function makePanelPrompt(tier) {
-      return tripContext + ' Generate the ' + tier + ' option.' +
+    function makePrompt(label, destination, tier) {
+      return 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
+        ', dates: ' + dateStr + ', destination: ' + destination +
+        ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
+        ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
+        ' Generate the ' + tier + ' option.' +
         ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
         ' costs{flights,accommodation,golf,food},' +
         ' courses(EXACTLY ' + numCourses + ': name,location,par,green_fee,difficulty,why_recommended,lat,lng),' +
@@ -1810,11 +1825,11 @@ async function generateTrip() {
         ' All costs GBP. Real venues, accurate GPS coords.';
     }
 
-    function fetchPanel(tier) {
+    function fetchPanel(label, destination, tier) {
       return fetch('/.netlify/functions/generate-trip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: makePanelPrompt(tier), tier: tier })
+        body: JSON.stringify({ prompt: makePrompt(label, destination, tier), tier: tier })
       }).then(function(res) {
         if (!res.ok) return res.json().catch(function() { return {}; }).then(function(e) {
           throw new Error('Server error ' + res.status + ': ' + (e.error || 'unknown'));
@@ -1822,13 +1837,28 @@ async function generateTrip() {
         return res.json();
       }).then(function(json) {
         var panel = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
-        panel.label = panel.label || tier;
+        panel.label = label;
         return panel;
       });
     }
 
-    console.log('Firing 3 parallel panel requests...');
-    var panels = await Promise.all(tiers.map(fetchPanel));
+    var panelJobs;
+    if (data.compare_mode === 'tiers') {
+      var dest = data.destinations[0] || 'Flexible';
+      panelJobs = [
+        fetchPanel('Budget', dest, 'Budget'),
+        fetchPanel('Mid-Range', dest, 'Mid-Range'),
+        fetchPanel('Luxury', dest, 'Luxury')
+      ];
+    } else {
+      var tier = compareTier || 'Mid-Range';
+      panelJobs = data.destinations.map(function(dest) {
+        return fetchPanel(dest, dest, tier);
+      });
+    }
+
+    console.log('Firing ' + panelJobs.length + ' parallel panel requests...');
+    var panels = await Promise.all(panelJobs);
     console.log('All panels received:', panels.map(function(p) { return p.label; }).join(', '));
 
     var parsed = { panels: panels };
@@ -1862,7 +1892,7 @@ function renderResults(aiData, qData) {
   document.getElementById('results-heading').textContent = mode === 'tiers' ? 'Your Golf Holiday Options' : 'Destination Comparison';
   document.getElementById('results-subheading').textContent = mode === 'tiers'
     ? 'Budget, Mid-Range and Luxury compared for ' + (panels[0] ? panels[0].destination || 'your destination' : 'your destination')
-    : 'Three destinations compared at mid-range level';
+    : (panels.length) + ' destinations compared at ' + (compareTier || 'Mid-Range') + ' level';
 
   var bar = document.getElementById('compare-bar');
   bar.innerHTML = '';
