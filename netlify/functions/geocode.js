@@ -12,35 +12,55 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { query } = JSON.parse(event.body)
-    if (!query) return {
-      statusCode: 400,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: 'No query provided' })
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'GOOGLE_PLACES_API_KEY not set' })
+      }
     }
 
-    // Try standard search first
-    const url = 'https://nominatim.openstreetmap.org/search?q=' +
-      encodeURIComponent(query) +
-      '&format=json&limit=3&addressdetails=1'
-
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'GolfTrip/1.0 (golftrip.app)',
-        'Accept-Language': 'en'
+    const { query, type } = JSON.parse(event.body)
+    if (!query) {
+      return {
+        statusCode: 400,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'No query provided' })
       }
-    })
+    }
 
+    // Use Google Places Text Search API
+    const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json' +
+      '?query=' + encodeURIComponent(query) +
+      '&key=' + apiKey +
+      (type === 'course' ? '&type=establishment' : '')
+
+    const response = await fetch(url)
     const data = await response.json()
 
+    if (data.status !== 'OK' || !data.results || !data.results.length) {
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'No results found', status: data.status })
+      }
+    }
+
+    const place = data.results[0]
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lat: place.geometry.location.lat,
+        lng: place.geometry.location.lng,
+        name: place.name,
+        address: place.formatted_address,
+        rating: place.rating || null,
+        place_id: place.place_id
+      })
     }
+
   } catch (err) {
     return {
       statusCode: 500,
