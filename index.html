@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"GOOGLE_MAPS_KEY_PLACEHOLDER",v:"weekly"});</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -310,11 +309,13 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 .map-loading p{color:var(--text-muted);font-size:.85rem}
 .map-error{height:200px;display:flex;align-items:center;justify-content:center;background:var(--sand);flex-direction:column;gap:8px;padding:20px;text-align:center}
 .map-error p{color:var(--text-muted);font-size:.85rem}
-.leaflet-popup-content-wrapper{border-radius:var(--r)!important;box-shadow:var(--sh)!important}
-.map-popup-title{font-weight:700;color:var(--green);margin-bottom:4px;font-size:.9rem}
-.map-popup-type{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.map-popup-detail{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
-.map-popup-link{display:inline-block;background:var(--gold);color:var(--green-dark);padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:700;text-decoration:none}
+.gmap-popup{font-family:'Inter',sans-serif;min-width:200px;max-width:260px}
+.gmap-popup-title{font-weight:700;color:var(--green);margin-bottom:3px;font-size:.9rem;line-height:1.3}
+.gmap-popup-type{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600}
+.gmap-popup-detail{font-size:.8rem;color:var(--text-muted);margin-bottom:8px;line-height:1.5}
+.gmap-popup-link{display:inline-block;background:var(--gold);color:var(--green-dark);padding:5px 12px;border-radius:4px;font-size:.75rem;font-weight:700;text-decoration:none}
+.gmap-popup-link:hover{background:var(--gold-light)}
+.gmap-popup-rating{color:#f59e0b;font-size:.8rem;margin-bottom:4px}
 @media print{.trip-map-section{display:none}}
 /* === BOOK THIS TRIP === */
 .book-this-trip{background:linear-gradient(135deg,#0f2318 0%,#1a3a2a 100%);border-radius:var(--rl);padding:32px;margin:32px 0;border:2px solid var(--gold);position:relative;overflow:hidden}
@@ -1677,6 +1678,330 @@ function buildPanel(panel, idx, qData) {
 
   el.innerHTML = html;
   return el;
+}
+
+/* === PDF EXPORT === */
+function exportPDF(panelIdx) {
+  var panel = storedPanels[panelIdx];
+  if (!panel) { showToast('Could not find trip data. Please regenerate.', true); return; }
+  // Open print dialog with a clean formatted page
+  var dest = panel.destination || 'Golf Trip';
+  var costs = panel.costs || {};
+  var sym = SYMS[activeCurrency] || '£';
+  var rate = RATES[activeCurrency] || 1;
+  function p(v) { return v ? sym + Math.round(parseFloat(v) * rate).toLocaleString('en-GB') : sym + '0'; }
+
+  var coursesHtml = '';
+  if (panel.courses && panel.courses.length) {
+    panel.courses.forEach(function(c) {
+      coursesHtml += '<tr><td><strong>' + (c.name||'') + '</strong><br><span style="color:#666;font-size:12px">' + (c.location||'') + '</span></td>' +
+        '<td>Par ' + (c.par||'72') + (c.yardage ? ' &bull; ' + c.yardage + ' yds' : '') + '</td>' +
+        '<td>' + p(c.green_fee) + '</td>' +
+        '<td>' + (c.difficulty||'') + '</td></tr>';
+    });
+  }
+
+  var hotelsHtml = '';
+  if (panel.hotels && panel.hotels.length) {
+    panel.hotels.forEach(function(h) {
+      hotelsHtml += '<tr><td><strong>' + (h.name||'') + '</strong></td><td>' + (h.area||'') + '</td><td>' + (h.description||'').substring(0,80) + '...</td></tr>';
+    });
+  }
+
+  var itinHtml = '';
+  if (panel.itinerary && panel.itinerary.length) {
+    panel.itinerary.forEach(function(day) {
+      itinHtml += '<div style="margin-bottom:12px"><strong style="color:#1a3a2a">Day ' + day.day + ': ' + (day.title||'') + '</strong><ul style="margin:4px 0 0 16px;padding:0">';
+      if (day.activities) day.activities.forEach(function(a) {
+        itinHtml += '<li style="font-size:12px;color:#444;margin-bottom:3px"><span style="color:#c9a84c;font-weight:600">' + (a.time||'') + '</span> ' + (a.description||'') + '</li>';
+      });
+      itinHtml += '</ul></div>';
+    });
+  }
+
+  var printWin = window.open('', '_blank', 'width=900,height=700');
+  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GolfTrip — ' + dest + ' ' + (panel.label||'') + '</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff;padding:0}' +
+    '.header{background:#1a3a2a;color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:center}' +
+    '.header h1{font-family:Georgia,serif;font-size:22px;color:#c9a84c}.header .sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}' +
+    '.logo{font-family:Georgia,serif;font-size:20px;color:#c9a84c}' +
+    '.body{padding:28px 32px}' +
+    '.section{margin-bottom:28px}' +
+    '.section-title{font-family:Georgia,serif;font-size:16px;color:#1a3a2a;border-bottom:2px solid #c9a84c;padding-bottom:6px;margin-bottom:14px}' +
+    'table{width:100%;border-collapse:collapse;font-size:12px}' +
+    'th{background:#e8d5b0;color:#1a3a2a;padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase}' +
+    'td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:top}' +
+    '.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
+    '.cost-item{background:#f7f4ee;border-radius:6px;padding:12px;display:flex;justify-content:space-between}' +
+    '.cost-item .lbl{font-size:12px;color:#666}.cost-item .val{font-weight:700;color:#1a3a2a}' +
+    '.total-box{background:#1a3a2a;color:#fff;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px}' +
+    '.total-box .lbl{font-size:13px;color:rgba(255,255,255,.7)}.total-box .val{font-family:Georgia,serif;font-size:22px;color:#c9a84c;font-weight:700}' +
+    '.badge{display:inline-block;background:#c9a84c;color:#0f2318;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;margin-left:8px}' +
+    '.disclaimer{font-size:10px;color:#999;margin-top:28px;padding-top:12px;border-top:1px solid #eee}' +
+    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
+    '</style></head><body>' +
+    '<div class="header"><div><div class="logo">GolfTrip</div><h1>' + dest + ' <span style="font-size:16px;color:rgba(255,255,255,.7)">&mdash; ' + (panel.label||'') + '</span></h1>' +
+    '<div class="sub">AI-generated golf holiday plan &bull; Prices are estimates only &bull; Generated ' + new Date().toLocaleDateString('en-GB') + '</div></div></div>' +
+    '<div class="body">' +
+
+    '<div class="section"><div class="section-title">Overview</div>' +
+    '<p style="font-size:13px;color:#555;line-height:1.6">' + (panel.description||'') + '</p>' +
+    '<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">' +
+    (panel.weather ? '<span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.weather + '</span>' : '') +
+    (panel.best_time ? '<span style="background:#e3f2fd;color:#1565c0;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.best_time + '</span>' : '') +
+    (panel.flight_time ? '<span style="background:#fff3e0;color:#e65100;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">Flight: ' + panel.flight_time + '</span>' : '') +
+    '</div></div>' +
+
+    (coursesHtml ? '<div class="section"><div class="section-title">&#9971; Golf Courses</div><table><thead><tr><th>Course</th><th>Details</th><th>Green Fee</th><th>Level</th></tr></thead><tbody>' + coursesHtml + '</tbody></table></div>' : '') +
+    (hotelsHtml ? '<div class="section"><div class="section-title">&#127968; Recommended Hotels</div><table><thead><tr><th>Hotel</th><th>Area</th><th>Notes</th></tr></thead><tbody>' + hotelsHtml + '</tbody></table></div>' : '') +
+    (itinHtml ? '<div class="section"><div class="section-title">&#128197; 5-Day Itinerary</div>' + itinHtml + '</div>' : '') +
+
+    '<div class="section"><div class="section-title">&#128176; Cost Breakdown — Per Person</div>' +
+    '<div class="cost-grid">' +
+    '<div class="cost-item"><span class="lbl">Flights</span><span class="val">' + p(costs.flights||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Accommodation</span><span class="val">' + p(costs.accommodation||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Golf (green fees)</span><span class="val">' + p(costs.golf||0) + '</span></div>' +
+    '<div class="cost-item"><span class="lbl">Food &amp; Drink</span><span class="val">' + p(costs.food||0) + '</span></div>' +
+    (costs.club_hire ? '<div class="cost-item"><span class="lbl">Club Hire</span><span class="val">' + p(costs.club_hire) + '</span></div>' : '') +
+    '</div>' +
+    '<div class="total-box"><span class="lbl">Total Estimate Per Person</span><span class="val">' + p(panel.total_cost||0) + '</span></div>' +
+    '</div>' +
+
+    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Skyscanner, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
+    '</div></body></html>');
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(function() { printWin.print(); }, 500);
+}
+
+/* === MAP FUNCTIONS === */
+var mapInstances = {};
+var googleMapsLoaded = false;
+
+function waitForGoogleMaps() {
+  return new Promise(function(resolve) {
+    if (window.google && window.google.maps && window.google.maps.Map) { resolve(); return; }
+    var check = setInterval(function() {
+      if (window.google && window.google.maps && window.google.maps.Map) {
+        clearInterval(check); resolve();
+      }
+    }, 100);
+    setTimeout(function() { clearInterval(check); resolve(); }, 8000);
+  });
+}
+
+function buildMapSection(panel, idx) {
+  var mapId = 'trip-map-' + idx;
+  return '<div class="trip-map-section">' +
+    '<button class="trip-map-toggle" id="map-toggle-' + idx + '" onclick="toggleMap(' + idx + ')">' +
+      '<span>&#128205; Interactive Map &mdash; Courses, Hotels &amp; Restaurants</span>' +
+      '<span class="toggle-arrow">&#9660;</span>' +
+    '</button>' +
+    '<div class="trip-map-body" id="map-body-' + idx + '">' +
+      '<div class="map-loading" id="map-loading-' + idx + '">' +
+        '<div class="loading-spinner"></div>' +
+        '<p>Finding locations on Google Maps...</p>' +
+      '</div>' +
+      '<div class="map-container" id="' + mapId + '" style="display:none"></div>' +
+      '<div class="map-legend">' +
+        '<div class="legend-item"><div class="legend-dot" style="background:#1a3a2a"></div> Hotel</div>' +
+        '<div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div> Golf Course</div>' +
+        '<div class="legend-item"><div class="legend-dot" style="background:#e85d26"></div> Restaurant / Bar</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleMap(idx) {
+  var toggle = document.getElementById('map-toggle-' + idx);
+  var body = document.getElementById('map-body-' + idx);
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+  if (!isOpen && !mapInstances[idx]) {
+    setTimeout(function() { initMap(idx); }, 100);
+  }
+}
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function searchGooglePlace(name, type, destination) {
+  // Search via our Netlify function which calls Google Places API
+  var queries = [];
+  if (type === 'course') {
+    queries = [name + ' golf course ' + destination, name + ' golf ' + destination, name + ' ' + destination];
+  } else if (type === 'hotel') {
+    queries = [name + ' hotel ' + destination, name + ' ' + destination];
+  } else {
+    queries = [name + ' restaurant ' + destination, name + ' ' + destination];
+  }
+
+  for (var i = 0; i < queries.length; i++) {
+    try {
+      var r = await fetch('/.netlify/functions/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queries[i], type: type })
+      });
+      var data = await r.json();
+      if (data && data.lat && data.lng) {
+        console.log('Found:', name, '->', data.lat, data.lng, '(query:', queries[i] + ')');
+        return data;
+      }
+    } catch(e) { console.warn('Search failed:', name, e); }
+    if (i < queries.length - 1) await new Promise(function(res) { setTimeout(res, 200); });
+  }
+  console.warn('Could not find:', name);
+  return null;
+}
+
+async function initMap(idx) {
+  var panel = storedPanels[idx];
+  if (!panel) return;
+  var loadEl = document.getElementById('map-loading-' + idx);
+  var mapEl = document.getElementById('trip-map-' + idx);
+  if (!mapEl) return;
+
+  var dest = panel.destination || '';
+  var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
+  var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
+
+  // Build items to search
+  var toSearch = [];
+  (panel.hotels || []).forEach(function(h) {
+    toSearch.push({ type: 'hotel', name: h.name, area: h.area,
+      detail: (h.description||'').substring(0,100),
+      link: 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||''),
+      aiLat: h.lat, aiLng: h.lng });
+  });
+  (panel.courses || []).forEach(function(c) {
+    toSearch.push({ type: 'course', name: c.name, area: c.location,
+      detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
+      link: 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name||''),
+      aiLat: c.lat, aiLng: c.lng });
+  });
+  (panel.restaurants || []).forEach(function(r) {
+    toSearch.push({ type: 'restaurant', name: r.name, area: r.type,
+      detail: (r.description||'').substring(0,100),
+      link: 'https://www.google.com/maps/search/' + encodeURIComponent((r.name||'')+' '+dest),
+      aiLat: r.lat, aiLng: r.lng });
+  });
+
+  // Get coordinates for each venue
+  var locations = [];
+  for (var i = 0; i < toSearch.length; i++) {
+    var item = toSearch[i];
+    var result = null;
+    // Try Google Places search via our function
+    result = await searchGooglePlace(item.name, item.type, dest);
+    if (result) {
+      locations.push({ type: item.type, name: item.name, area: item.area,
+        lat: result.lat, lng: result.lng,
+        rating: result.rating, address: result.address,
+        detail: item.detail, link: item.link });
+    }
+  }
+
+  if (!locations.length) {
+    if (loadEl) loadEl.style.display = 'none';
+    var errEl = document.createElement('div');
+    errEl.className = 'map-error';
+    errEl.innerHTML = '<p>Could not load map locations.</p>' +
+      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Search in Google Maps</a>';
+    mapEl.parentNode.insertBefore(errEl, mapEl);
+    return;
+  }
+
+  // Calculate distances from first hotel
+  var hotelLoc = locations.find(function(l) { return l.type === 'hotel'; });
+  if (hotelLoc) {
+    locations.forEach(function(loc) {
+      if (loc.type !== 'hotel') {
+        var km = haversineKm(hotelLoc.lat, hotelLoc.lng, loc.lat, loc.lng);
+        loc.distFromHotel = km < 1 ? Math.round(km * 1000) + 'm from hotel' : km.toFixed(1) + ' km from hotel';
+      }
+    });
+  }
+
+  // Wait for Google Maps to be ready
+  await waitForGoogleMaps();
+
+  if (loadEl) loadEl.style.display = 'none';
+  mapEl.style.display = 'block';
+
+  // Centre on all locations
+  var avgLat = locations.reduce(function(s, l) { return s + l.lat; }, 0) / locations.length;
+  var avgLng = locations.reduce(function(s, l) { return s + l.lng; }, 0) / locations.length;
+
+  var map = new google.maps.Map(mapEl, {
+    center: { lat: avgLat, lng: avgLng },
+    zoom: 11,
+    mapTypeId: 'roadmap',
+    styles: [
+      { featureType: 'golf_course', elementType: 'geometry.fill', stylers: [{ color: '#c8e6c9' }] },
+      { featureType: 'poi.sports_complex', elementType: 'labels', stylers: [{ visibility: 'on' }] }
+    ],
+    mapTypeControl: true,
+    streetViewControl: false,
+    fullscreenControl: true
+  });
+  mapInstances[idx] = map;
+
+  var bounds = new google.maps.LatLngBounds();
+  var infoWindow = new google.maps.InfoWindow();
+
+  locations.forEach(function(loc) {
+    var pinColor = colors[loc.type] || '#666';
+    var marker = new google.maps.Marker({
+      position: { lat: loc.lat, lng: loc.lng },
+      map: map,
+      title: loc.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: pinColor,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2.5
+      },
+      label: {
+        text: loc.type === 'hotel' ? 'H' : loc.type === 'course' ? 'G' : 'R',
+        color: loc.type === 'course' ? '#1a3a2a' : '#ffffff',
+        fontSize: '11px',
+        fontWeight: '700'
+      }
+    });
+
+    var popupContent = '<div class="gmap-popup">' +
+      '<div class="gmap-popup-title">' + (loc.name||'') + '</div>' +
+      '<div class="gmap-popup-type" style="color:' + pinColor + '">' + (typeLabels[loc.type]||'') + (loc.area ? ' • ' + loc.area : '') + '</div>' +
+      (loc.rating ? '<div class="gmap-popup-rating">★ ' + loc.rating + ' / 5</div>' : '') +
+      '<div class="gmap-popup-detail">' + (loc.detail||'') + '</div>' +
+      (loc.distFromHotel ? '<div style="font-size:.78rem;color:' + pinColor + ';font-weight:600;margin-bottom:8px">' + loc.distFromHotel + '</div>' : '') +
+      (loc.address ? '<div style="font-size:.75rem;color:#888;margin-bottom:8px">' + loc.address + '</div>' : '') +
+      '<a href="' + (loc.link||'#') + '" target="_blank" class="gmap-popup-link">View →</a> ' +
+      '<a href="https://www.google.com/maps/dir/?api=1&destination=' + loc.lat + ',' + loc.lng + '" target="_blank" class="gmap-popup-link" style="background:#1a3a2a;color:#fff;margin-left:4px">Directions</a>' +
+      '</div>';
+
+    marker.addListener('click', function() {
+      infoWindow.setContent(popupContent);
+      infoWindow.open(map, marker);
+    });
+
+    bounds.extend({ lat: loc.lat, lng: loc.lng });
+  });
+
+  if (locations.length > 1) {
+    map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+  }
 }
 
 /* === PDF EXPORT === */
