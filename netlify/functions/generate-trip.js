@@ -16,22 +16,16 @@ exports.handler = async (event) => {
   }
 
   try {
-    const apiKey = process.env.OPENAI_API_KEY
-
-    if (!apiKey) {
-      console.log('ERROR: OPENAI_API_KEY not set')
+    const openaiKey = process.env.OPENAI_API_KEY
+    if (!openaiKey) {
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'OPENAI_API_KEY environment variable is not set' })
+        body: JSON.stringify({ error: 'OPENAI_API_KEY not configured' })
       }
     }
 
-    const body = JSON.parse(event.body)
-    const { prompt } = body
-
-    console.log('Prompt received, length:', prompt ? prompt.length : 'undefined')
-
+    const { prompt } = JSON.parse(event.body)
     if (!prompt) {
       return {
         statusCode: 400,
@@ -40,20 +34,20 @@ exports.handler = async (event) => {
       }
     }
 
-    console.log('Calling OpenAI API...')
+    console.log('Prompt length:', prompt.length)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert golf travel consultant specialising in holidays for UK golfers. Always respond with valid JSON only. No markdown, no backticks, no explanation before or after the JSON. Never use smart quotes or apostrophes inside JSON string values — use standard ASCII only.'
+            content: 'You are an expert golf travel consultant for UK golfers. Respond with valid JSON only. No markdown, no backticks, no text before or after the JSON.'
           },
           {
             role: 'user',
@@ -66,8 +60,7 @@ exports.handler = async (event) => {
       })
     })
 
-    console.log('OpenAI response status:', response.status)
-
+    console.log('OpenAI status:', response.status)
     const data = await response.json()
 
     if (!response.ok) {
@@ -75,52 +68,28 @@ exports.handler = async (event) => {
       return {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({
-          error: 'OpenAI API error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data))
-        })
+        body: JSON.stringify({ error: data.error?.message || 'OpenAI error ' + response.status })
       }
     }
 
-    if (!data.choices || !data.choices[0]) {
-      console.log('No choices in response:', JSON.stringify(data))
-      return {
-        statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'No response from OpenAI' })
-      }
-    }
-
-    console.log('Response received, finish_reason:', data.choices[0].finish_reason)
-    console.log('Response length:', data.choices[0].message.content.length)
-
-    let result = data.choices[0].message.content.trim()
+    const result = data.choices[0].message.content.trim()
+    console.log('Response length:', result.length, 'finish_reason:', data.choices[0].finish_reason)
 
     // Validate JSON
     try {
       JSON.parse(result)
-      console.log('JSON validation passed')
-    } catch(parseErr) {
-      console.log('JSON parse error:', parseErr.message)
-      // Try to repair
-      result = result.replace(/,\s*([}\]])/g, '$1')
-      try {
-        JSON.parse(result)
-        console.log('JSON repair succeeded')
-      } catch(e) {
-        return {
-          statusCode: 500,
-          headers: { 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'AI returned invalid JSON. Please try again.' })
-        }
+    } catch(e) {
+      console.log('JSON invalid:', e.message)
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'AI returned invalid JSON. Please try again.' })
       }
     }
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
       body: JSON.stringify({ result })
     }
 
