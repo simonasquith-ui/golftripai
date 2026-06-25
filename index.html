@@ -58,6 +58,16 @@ p{color:var(--text-muted)}
 .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-sm{padding:8px 16px;font-size:.8rem}.btn-lg{padding:16px 32px;font-size:1rem}
 .hidden{display:none!important}
+.dest-country{border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.dest-country-header{padding:10px 14px;background:var(--off-white);display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);transition:background var(--tr)}
+.dest-country-header:hover{background:var(--sand)}
+.dest-caret{color:var(--gold);font-size:.75rem;transition:transform .2s ease}
+.dest-country.open .dest-caret{transform:rotate(180deg)}
+.dest-country-body{padding:10px 14px;background:var(--white);display:flex;flex-wrap:wrap;gap:8px}
+.dest-region-chip{font-size:.82rem;padding:6px 13px}
+#dest-selected-tags .dest-tag{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:var(--white);border-radius:20px;padding:5px 12px;font-size:.8rem;font-weight:500}
+#dest-selected-tags .dest-tag-x{cursor:pointer;opacity:.7;font-size:.7rem;line-height:1}
+#dest-selected-tags .dest-tag-x:hover{opacity:1}
 .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .tag-green{background:#dcfce7;color:#166534}.tag-gold{background:#fef9c3;color:#854d0e}
 .card{background:var(--white);border-radius:var(--rl);box-shadow:var(--sh);border:1px solid var(--border)}
@@ -727,17 +737,91 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="q-section">
       <div class="q-section-title" data-num="6">Destination</div>
       <p class="fs-sm text-muted mt-8" id="dest-hint">Select your preferred destination (single select in tier mode).</p>
-      <div class="chip-group mt-8" id="dest-chips">
-        <div class="chip" data-dest="Spain">Spain</div>
-        <div class="chip" data-dest="Portugal">Portugal</div>
-        <div class="chip" data-dest="Turkey">Turkey</div>
-        <div class="chip" data-dest="Morocco">Morocco</div>
-        <div class="chip" data-dest="Ireland">Ireland</div>
-        <div class="chip" data-dest="Scotland">Scotland</div>
-        <div class="chip" data-dest="England">England</div>
-        <div class="chip" data-dest="France">France</div>
-        <div class="chip" data-dest="Dubai">Dubai</div>
-        <div class="chip" data-dest="Flexible">Flexible</div>
+      <div id="dest-selected-tags" style="display:none;flex-wrap:wrap;gap:6px;margin:12px 0 4px"></div>
+      <div id="dest-accordion" style="margin-top:12px">
+        <div class="dest-country" data-country="Portugal">
+          <div class="dest-country-header"><span>&#127477;&#127481; Portugal</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Algarve, Portugal">Algarve</div>
+            <div class="chip dest-region-chip" data-dest="Lisbon Coast, Portugal">Lisbon Coast</div>
+            <div class="chip dest-region-chip" data-dest="Porto / North Portugal">Porto / North</div>
+            <div class="chip dest-region-chip" data-dest="Madeira, Portugal">Madeira</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Spain">
+          <div class="dest-country-header"><span>&#127466;&#127480; Spain</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Costa del Sol, Spain">Costa del Sol</div>
+            <div class="chip dest-region-chip" data-dest="Costa Brava, Spain">Costa Brava</div>
+            <div class="chip dest-region-chip" data-dest="Mallorca, Spain">Mallorca</div>
+            <div class="chip dest-region-chip" data-dest="Tenerife, Spain">Tenerife</div>
+            <div class="chip dest-region-chip" data-dest="Bilbao / North Spain">Bilbao / North</div>
+            <div class="chip dest-region-chip" data-dest="Madrid region, Spain">Madrid region</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="France">
+          <div class="dest-country-header"><span>&#127467;&#127479; France</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Brittany, France">Brittany</div>
+            <div class="chip dest-region-chip" data-dest="Cote d'Azur, France">C&ocirc;te d&apos;Azur</div>
+            <div class="chip dest-region-chip" data-dest="Paris region, France">Paris region</div>
+            <div class="chip dest-region-chip" data-dest="Loire Valley, France">Loire Valley</div>
+            <div class="chip dest-region-chip" data-dest="Bordeaux, France">Bordeaux</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Ireland">
+          <div class="dest-country-header"><span>&#127470;&#127466; Ireland</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="South West Ireland (Kerry)">South West (Kerry)</div>
+            <div class="chip dest-region-chip" data-dest="West Coast Ireland">West Coast</div>
+            <div class="chip dest-region-chip" data-dest="Dublin & East Ireland">Dublin &amp; East</div>
+            <div class="chip dest-region-chip" data-dest="Donegal, Ireland">Donegal</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Scotland">
+          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; Scotland</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="St Andrews & Fife, Scotland">St Andrews &amp; Fife</div>
+            <div class="chip dest-region-chip" data-dest="Scottish Highlands">Highlands</div>
+            <div class="chip dest-region-chip" data-dest="Ayrshire, Scotland">Ayrshire</div>
+            <div class="chip dest-region-chip" data-dest="East Lothian, Scotland">East Lothian</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Morocco">
+          <div class="dest-country-header"><span>&#127474;&#127462; Morocco</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Marrakech, Morocco">Marrakech</div>
+            <div class="chip dest-region-chip" data-dest="Agadir, Morocco">Agadir</div>
+            <div class="chip dest-region-chip" data-dest="Casablanca region, Morocco">Casablanca region</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Italy">
+          <div class="dest-country-header"><span>&#127470;&#127481; Italy</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Tuscany, Italy">Tuscany</div>
+            <div class="chip dest-region-chip" data-dest="Sicily, Italy">Sicily</div>
+            <div class="chip dest-region-chip" data-dest="Lake Como region, Italy">Lake Como</div>
+            <div class="chip dest-region-chip" data-dest="Rome region, Italy">Rome region</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Turkey">
+          <div class="dest-country-header"><span>&#127481;&#127479; Turkey</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Antalya / Belek, Turkey">Antalya / Belek</div>
+            <div class="chip dest-region-chip" data-dest="Istanbul, Turkey">Istanbul</div>
+            <div class="chip dest-region-chip" data-dest="Bodrum, Turkey">Bodrum</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="UAE">
+          <div class="dest-country-header"><span>&#127462;&#127466; UAE</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Dubai, UAE">Dubai</div>
+            <div class="chip dest-region-chip" data-dest="Abu Dhabi, UAE">Abu Dhabi</div>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="chip dest-region-chip" data-dest="Flexible" style="background:var(--sand);border-style:dashed">&#127279; Surprise me</div>
+        </div>
       </div>
     </div>
     <div class="q-section">
@@ -1492,12 +1576,16 @@ document.getElementById('compare-mode-toggle').addEventListener('click', functio
     notice.classList.add('visible');
     hint.textContent = 'Select up to 3 destinations to compare (multi-select).';
     selectedDests = [];
-    document.querySelectorAll('#dest-chips .chip').forEach(function(c) { c.classList.remove('active'); });
+    chipSelections.dest = null;
+    document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
+    renderDestTags();
   } else {
     notice.classList.remove('visible');
     hint.textContent = 'Select your preferred destination (single select in tier mode).';
     selectedDests = [];
-    document.querySelectorAll('#dest-chips .chip').forEach(function(c) { c.classList.remove('active'); });
+    chipSelections.dest = null;
+    document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
+    renderDestTags();
   }
 });
 
@@ -1510,24 +1598,64 @@ document.getElementById('budget-chips').addEventListener('click', function(e) {
   chipSelections.budget = chip.getAttribute('data-val');
 });
 
-document.getElementById('dest-chips').addEventListener('click', function(e) {
-  var chip = e.target.closest('.chip');
-  if (!chip) return;
-  var dest = chip.getAttribute('data-dest');
-  if (compareMode === 'tiers') {
-    document.querySelectorAll('#dest-chips .chip').forEach(function(c) { c.classList.remove('active'); });
-    chip.classList.add('active');
-    chipSelections.dest = dest;
-  } else {
-    if (chip.classList.contains('active')) {
-      chip.classList.remove('active');
-      selectedDests = selectedDests.filter(function(d) { return d !== dest; });
-    } else {
-      if (selectedDests.length >= 3) { showToast('Maximum 3 destinations in compare mode.', true); return; }
-      chip.classList.add('active');
-      selectedDests.push(dest);
-    }
+// Destination accordion — open/close countries
+document.getElementById('dest-accordion').addEventListener('click', function(e) {
+  var header = e.target.closest('.dest-country-header');
+  var chip = e.target.closest('.dest-region-chip');
+
+  if (header) {
+    var country = header.closest('.dest-country');
+    var body = country.querySelector('.dest-country-body');
+    var isOpen = country.classList.contains('open');
+    country.classList.toggle('open', !isOpen);
+    body.style.display = isOpen ? 'none' : 'flex';
+    return;
   }
+
+  if (chip) {
+    var dest = chip.getAttribute('data-dest');
+    if (compareMode === 'tiers') {
+      // Single select — clear all, select this one
+      document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      chipSelections.dest = dest;
+      selectedDests = [dest];
+    } else {
+      // Multi select up to 3
+      if (chip.classList.contains('active')) {
+        chip.classList.remove('active');
+        selectedDests = selectedDests.filter(function(d) { return d !== dest; });
+      } else {
+        if (selectedDests.length >= 3) { showToast('Maximum 3 destinations in compare mode.', true); return; }
+        chip.classList.add('active');
+        selectedDests.push(dest);
+      }
+      chipSelections.dest = selectedDests[0] || null;
+    }
+    renderDestTags();
+  }
+});
+
+function renderDestTags() {
+  var container = document.getElementById('dest-selected-tags');
+  if (!selectedDests.length && !chipSelections.dest) { container.style.display = 'none'; return; }
+  var dests = compareMode === 'tiers' ? (chipSelections.dest ? [chipSelections.dest] : []) : selectedDests;
+  container.style.display = dests.length ? 'flex' : 'none';
+  container.innerHTML = dests.map(function(d) {
+    return '<span class="dest-tag">' + d + '<span class="dest-tag-x" data-dest="' + d + '">&#10005;</span></span>';
+  }).join('');
+}
+
+document.getElementById('dest-selected-tags').addEventListener('click', function(e) {
+  var x = e.target.closest('.dest-tag-x');
+  if (!x) return;
+  var dest = x.getAttribute('data-dest');
+  selectedDests = selectedDests.filter(function(d) { return d !== dest; });
+  if (chipSelections.dest === dest) chipSelections.dest = selectedDests[0] || null;
+  document.querySelectorAll('.dest-region-chip').forEach(function(c) {
+    if (c.getAttribute('data-dest') === dest) c.classList.remove('active');
+  });
+  renderDestTags();
 });
 
 document.querySelectorAll('.chip[data-single]').forEach(function(chip) {
@@ -3275,14 +3403,16 @@ function planSeasonalTrip(destName) {
   showPage('questionnaire');
   compareMode = 'tiers';
   selectedDests = [];
-  document.querySelectorAll('#dest-chips .chip').forEach(function(chip) {
+  document.querySelectorAll('.dest-region-chip').forEach(function(chip) {
     chip.classList.remove('active');
-    var d = chip.getAttribute('data-dest');
-    if (destName.toLowerCase().indexOf(d.toLowerCase()) !== -1 || d.toLowerCase().indexOf(destName.split(' ')[0].toLowerCase()) !== -1) {
+    var d = chip.getAttribute('data-dest') || '';
+    if (d.toLowerCase().indexOf(destName.toLowerCase()) !== -1 || destName.toLowerCase().indexOf(d.split(',')[0].toLowerCase()) !== -1) {
       chip.classList.add('active');
       chipSelections.dest = d;
+      selectedDests = [d];
     }
   });
+  renderDestTags();
   showToast('Destination pre-filled - complete the rest of your preferences!');
 }
 
