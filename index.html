@@ -379,12 +379,8 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 }
 /* === TRIP MAP === */
 .trip-map-section{margin:28px 0}
-.trip-map-toggle{width:100%;background:var(--green);border:none;border-radius:var(--rl);padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);transition:all var(--tr)}
-.trip-map-toggle:hover{background:var(--green-light)}
-.trip-map-toggle .toggle-arrow{transition:transform .3s ease;font-style:normal;font-size:1rem;color:rgba(255,255,255,.6)}
-.trip-map-toggle.open .toggle-arrow{transform:rotate(180deg)}
-.trip-map-body{display:none;border:2px solid var(--green);border-top:none;border-radius:0 0 var(--rl) var(--rl);overflow:hidden}
-.trip-map-body.open{display:block}
+.trip-map-header{background:var(--green);border-radius:var(--rl) var(--rl) 0 0;padding:16px 20px;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold)}
+.trip-map-body{display:block;border:2px solid var(--green);border-top:none;border-radius:0 0 var(--rl) var(--rl);overflow:hidden}
 .map-container{height:440px;width:100%}
 .map-legend{background:var(--white);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text)}
@@ -2067,6 +2063,11 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
     updateVoteBtn(btnEl, tripVoteCache[key]);
     var action = already ? 'Removed vote for' : 'Voted for';
     showToast(action + ': ' + itemName);
+    // Post to group chat so members see activity
+    if (!already && tripId) {
+      var typeLabel = itemType === 'course' ? 'golf course' : itemType;
+      sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }).catch(function(){});
+    }
     refreshVotesSummary(tripId, panelLabel);
   } catch(e) { console.warn('castVote error:', e.message); showToast('Could not save vote. Try again.', true); }
 }
@@ -2074,15 +2075,10 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
 function updateVoteBtn(btn, voteData) {
   if (!btn) return;
   btn.classList.toggle('voted', voteData.userVoted);
-  // Force style repaint — some browsers cache the class state
   if (voteData.userVoted) {
-    btn.style.background = 'var(--gold)';
-    btn.style.borderColor = 'var(--gold)';
-    btn.style.color = '#fff';
+    btn.style.cssText = 'background:#c9a84c!important;border-color:#c9a84c!important;color:#fff!important;font-weight:600!important';
   } else {
-    btn.style.background = '';
-    btn.style.borderColor = '';
-    btn.style.color = '';
+    btn.style.cssText = '';
   }
   var countEl = btn.querySelector('.vote-count');
   if (countEl) countEl.textContent = voteData.count > 0 ? voteData.count : '';
@@ -2550,6 +2546,10 @@ function buildPanel(panel, idx, qData) {
   '</div>';
 
   el.innerHTML = html;
+  // Auto-init map now that panel is in the DOM
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(idx); });
+  });
   return el;
 }
 
@@ -2703,16 +2703,13 @@ function waitForGoogleMaps() {
 function buildMapSection(panel, idx) {
   var mapId = 'trip-map-' + idx;
   return '<div class="trip-map-section">' +
-    '<button class="trip-map-toggle" id="map-toggle-' + idx + '" onclick="toggleMap(' + idx + ')">' +
-      '<span>&#128205; Interactive Map &mdash; Courses, Hotels &amp; Restaurants</span>' +
-      '<span class="toggle-arrow">&#9660;</span>' +
-    '</button>' +
-    '<div class="trip-map-body" id="map-body-' + idx + '">' +
+    '<div class="trip-map-header">&#128205; Interactive Map &mdash; Courses, Hotels &amp; Restaurants</div>' +
+    '<div class="trip-map-body open" id="map-body-' + idx + '" style="display:block">' +
       '<div class="map-loading" id="map-loading-' + idx + '">' +
         '<div class="loading-spinner"></div>' +
         '<p>Finding locations on Google Maps...</p>' +
       '</div>' +
-      '<div class="map-container" id="' + mapId + '" style="display:none"></div>' +
+      '<div class="map-container" id="' + mapId + '" style="display:none;height:400px"></div>' +
       '<div class="map-legend">' +
         '<div class="legend-item"><div class="legend-dot" style="background:#1a3a2a"></div> Hotel</div>' +
         '<div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div> Golf Course</div>' +
@@ -2723,34 +2720,23 @@ function buildMapSection(panel, idx) {
 }
 
 function toggleMap(idx) {
+  // Kept for backwards compatibility — now just initialises if not already done
+  autoInitMap(idx);
+}
+
+function autoInitMap(idx) {
   var mapId = 'trip-map-' + idx;
-  var toggle = document.getElementById('map-toggle-' + idx);
-  var body = document.getElementById('map-body-' + idx);
-  if (!toggle || !body) return;
-  var isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  toggle.classList.toggle('open', !isOpen);
-  if (!isOpen) {
-    // Force the body visible immediately so offsetHeight is measurable
-    body.style.display = 'block';
-    if (!mapInstances[mapId]) {
-      // Wait for paint then init
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() { initMap(idx); });
-      });
-    } else {
-      // Already initialised — trigger resize
-      requestAnimationFrame(function() {
-        if (window.google && window.google.maps) {
-          google.maps.event.trigger(mapInstances[mapId], 'resize');
-          var mapEl = document.getElementById(mapId);
-          if (mapEl) mapEl.style.display = 'block';
-        }
-      });
-    }
-  } else {
-    body.style.display = '';
+  if (mapInstances[mapId]) {
+    requestAnimationFrame(function() {
+      if (window.google && window.google.maps) {
+        google.maps.event.trigger(mapInstances[mapId], 'resize');
+      }
+    });
+    return;
   }
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(idx); });
+  });
 }
 
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -3278,6 +3264,16 @@ async function loadProfile() {
 function switchTripTab(tab) {
   document.getElementById('td-panel-itinerary').style.display = tab === 'itinerary' ? 'block' : 'none';
   document.getElementById('td-panel-group').style.display = tab === 'group' ? 'block' : 'none';
+  if (tab === 'itinerary') {
+    // Trigger resize on any already-initialised maps when itinerary tab becomes visible
+    requestAnimationFrame(function() {
+      Object.keys(mapInstances).forEach(function(mapId) {
+        if (window.google && window.google.maps && mapInstances[mapId]) {
+          google.maps.event.trigger(mapInstances[mapId], 'resize');
+        }
+      });
+    });
+  }
   if (tab === 'group') {
     updateGroupVotesTally();
     // Inject BTT into group planning if we have a panel
@@ -3321,7 +3317,7 @@ async function openTripDetail(tripId, tripData) {
   } else {
     loadTripMembers(tripId);
   }
-  loadTripVotes(tripId);
+  loadVotesForTrip(tripId).then(updateGroupVotesTally);
   loadChatMessages(tripId);
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function() { loadChatMessages(tripId); }, 8000);
@@ -3389,7 +3385,10 @@ function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
   mapInstances = {}; // reset map instances for this trip
   tripVoteCache = {}; // reset vote cache for this trip
-  if (tripData && tripData.id) loadVotesForTrip(tripData.id);
+  if (tripData && tripData.id) {
+    currentTripRequestId = tripData.id; // keep in sync for makeVoteBtn
+    loadVotesForTrip(tripData.id);
+  }
   var bar = document.getElementById('td-compare-bar');
   var tabsEl = document.getElementById('td-result-tabs');
   var panelsEl = document.getElementById('td-result-panels');
@@ -3502,61 +3501,9 @@ async function loadTripMembers(tripId) {
   }
 }
 
-async function loadTripVotes(tripId) {
-  var el = document.getElementById('vote-options');
-  el.innerHTML = '';
-  try {
-    var r = await sbClient.from('trip_votes').select('*').eq('trip_request_id', tripId);
-    if (r.error) throw r.error;
-    var votes = r.data || [];
-    var tiers = ['Budget', 'Mid-Range', 'Luxury'];
-    var counts = {};
-    tiers.forEach(function(t) { counts[t] = 0; });
-    votes.forEach(function(v) { if (counts[v.tier] !== undefined) counts[v.tier]++; });
-    var total = votes.length || 1;
-    var userVote = currentUser ? votes.find(function(v) { return v.user_id === currentUser.id; }) : null;
-    tiers.forEach(function(tier) {
-      var pct = Math.round((counts[tier] / total) * 100);
-      var opt = document.createElement('div');
-      opt.className = 'vote-option' + (userVote && userVote.tier === tier ? ' voted' : '');
-      var bar = document.createElement('div');
-      bar.className = 'vote-option-bar';
-      bar.style.width = pct + '%';
-      var inner = document.createElement('div');
-      inner.className = 'vote-option-inner';
-      var nm = document.createElement('span');
-      nm.className = 'vote-option-name';
-      nm.textContent = tier;
-      var pc = document.createElement('span');
-      pc.className = 'vote-pct';
-      pc.textContent = pct + '% (' + counts[tier] + ')';
-      inner.appendChild(nm);
-      inner.appendChild(pc);
-      opt.appendChild(bar);
-      opt.appendChild(inner);
-      opt.addEventListener('click', function() { castVote(tripId, tier); });
-      el.appendChild(opt);
-    });
-    var winEl = document.getElementById('vote-winner');
-    if (votes.length > 0) {
-      var winner = tiers.reduce(function(a, b) { return counts[a] >= counts[b] ? a : b; });
-      winEl.textContent = 'Current winner: ' + winner + ' (' + counts[winner] + ' votes)';
-      winEl.classList.remove('hidden');
-    } else { winEl.classList.add('hidden'); }
-  } catch(e) { el.innerHTML = '<div class="text-muted fs-sm">Could not load votes.</div>'; }
-}
+// loadTripVotes replaced by loadVotesForTrip + updateGroupVotesTally
 
-async function castVote(tripId, tier) {
-  if (!currentUser) { openAuthModal('signin'); return; }
-  try {
-    await sbClient.from('trip_votes').delete().eq('trip_request_id', tripId).eq('user_id', currentUser.id);
-    await sbClient.from('trip_votes').insert({ trip_request_id: tripId, user_id: currentUser.id, tier: tier });
-    await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + tier });
-    loadTripVotes(tripId);
-    loadChatMessages(tripId);
-    showToast('Voted for ' + tier + '!');
-  } catch(e) { showToast('Could not cast vote.', true); }
-}
+// castVote moved to voting system above
 
 async function loadChatMessages(tripId) {
   var el = document.getElementById('chat-messages');
