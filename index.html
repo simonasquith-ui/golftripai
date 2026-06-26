@@ -30,7 +30,7 @@
     if (!data.key) { console.warn('Maps key not available'); return; }
     window.__googleMapsReady = function() { window.__googleMapsLoaded = true; };
     var s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async&libraries=marker';
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
     document.head.appendChild(s);
   } catch(e) { console.warn('Could not load maps config:', e); }
@@ -1517,6 +1517,13 @@ function updateNav(user) {
   }
 }
 
+// Start map observer as soon as DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startMapObserver);
+} else {
+  startMapObserver();
+}
+
 sbClient.auth.onAuthStateChange(function(event, session) {
   currentUser = session ? session.user : null;
   updateNav(currentUser);
@@ -1972,11 +1979,7 @@ async function generateTrip() {
           var newEl = buildPanel(merged, idx, data);
           existing.replaceWith(newEl);
           // Init map after element is in DOM — only for active (visible) panel
-          if (idx === 0) {
-            requestAnimationFrame(function() {
-              requestAnimationFrame(function() { initMap(idx); });
-            });
-          }
+          // Observer will detect the new element and init its map
         }
       }
       // Update compare bar price
@@ -2234,20 +2237,19 @@ function renderResults(aiData, qData) {
 
     panelsEl.appendChild(buildPanel(panel, i, qData));
   });
-  // Init map for first panel only — others init when activated
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(0); });
-  });
 }
 
 function activatePanel(idx) {
   document.querySelectorAll('.results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.result-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('.compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
-  // Init map for this panel if not already done
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(idx); });
-  });
+  // Trigger resize if map already inited for this panel
+  var mapId = 'trip-map-' + idx;
+  if (mapInstances[mapId] && window.google && window.google.maps) {
+    requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
+  } else if (!mapInstances[mapId]) {
+    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx); }); });
+  }
 }
 
 function buildSkyscannerUrl(panel, qData) {
@@ -2704,11 +2706,48 @@ function waitForGoogleMaps() {
       attempts++;
       if (window.google && window.google.maps && window.google.maps.Map) {
         clearInterval(check); resolve();
-      } else if (attempts > 80) { // 8 second timeout
+      } else if (attempts > 100) {
         clearInterval(check); reject(new Error('Google Maps did not load in time'));
       }
     }, 100);
   });
+}
+
+// Central map observer — watches for map containers to appear and inits them
+// This replaces all scattered requestAnimationFrame(initMap) calls
+var mapObserver = null;
+var pendingMapInits = {};
+
+function startMapObserver() {
+  if (mapObserver) return;
+  mapObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if (node.nodeType !== 1) return;
+        // Check if this node or its descendants contain map containers
+        var containers = node.querySelectorAll ? node.querySelectorAll('[id^="trip-map-"]') : [];
+        if (node.id && node.id.startsWith('trip-map-')) containers = [node];
+        containers.forEach(function(el) {
+          var idx = parseInt(el.id.replace('trip-map-', ''));
+          if (!isNaN(idx) && !pendingMapInits[idx]) {
+            pendingMapInits[idx] = true;
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                initMap(idx);
+                delete pendingMapInits[idx];
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+  mapObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function resetMapObserver() {
+  pendingMapInits = {};
+  // mapInstances reset separately
 }
 
 function buildMapSection(panel, idx) {
@@ -2957,31 +2996,21 @@ async function initMap(idx) {
     pinEl.style.cssText = 'width:32px;height:32px;border-radius:50%;background:' + pinColor + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:' + pinTextColor + ';font-family:Arial,sans-serif;cursor:pointer';
     pinEl.textContent = pinLetter;
 
-    var marker;
-    if (window.google.maps.marker && window.google.maps.marker.AdvancedMarkerElement) {
-      marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: loc.lat, lng: loc.lng },
-        map: map,
-        title: loc.name,
-        content: pinEl
-      });
-    } else {
-      // Fallback to legacy Marker if AdvancedMarkerElement not available
-      marker = new google.maps.Marker({
-        position: { lat: loc.lat, lng: loc.lng },
-        map: map,
-        title: loc.name,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 11,
-          fillColor: pinColor,
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 3
-        },
-        label: { text: pinLetter, color: pinTextColor, fontSize: '11px', fontWeight: '700' }
-      });
-    }
+    // Use standard Marker — no Map ID required, works reliably everywhere
+    var marker = new google.maps.Marker({
+      position: { lat: loc.lat, lng: loc.lng },
+      map: map,
+      title: loc.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 11,
+        fillColor: pinColor,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3
+      },
+      label: { text: pinLetter, color: pinTextColor, fontSize: '11px', fontWeight: '700' }
+    });
 
     var popupContent = '<div class="gmap-popup">' +
       '<div class="gmap-popup-title">' + (loc.name||'') + '</div>' +
@@ -2994,22 +3023,10 @@ async function initMap(idx) {
       '<a href="https://www.google.com/maps/dir/?api=1&destination=' + loc.lat + ',' + loc.lng + '" target="_blank" class="gmap-popup-link" style="background:#1a3a2a;color:#fff;margin-left:4px">Directions</a>' +
       '</div>';
 
-    var clickHandler = function() {
+    marker.addListener('click', function() {
       infoWindow.setContent(popupContent);
-      // AdvancedMarkerElement requires passing the marker itself (not element) to open()
-      if (window.google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement) {
-        infoWindow.open({ map: map, anchor: marker });
-      } else {
-        infoWindow.open(map, marker);
-      }
-    };
-    if (window.google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement) {
-      marker.addListener('gmp-click', clickHandler);
-    } else if (marker.addListener) {
-      marker.addListener('click', clickHandler);
-    } else {
-      pinEl.addEventListener('click', clickHandler);
-    }
+      infoWindow.open(map, marker);
+    });
 
     bounds.extend({ lat: loc.lat, lng: loc.lng });
   });
@@ -3401,6 +3418,7 @@ async function loadTripItinerary(tripId, tripData) {
 function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
   mapInstances = {}; // reset map instances for this trip
+  resetMapObserver(); // reset pending inits
   tripVoteCache = {}; // reset vote cache for this trip
   if (tripData && tripData.id) {
     currentTripRequestId = tripData.id; // keep in sync for makeVoteBtn
@@ -3429,19 +3447,18 @@ function renderSavedItinerary(panels, tripData, contentEl) {
     panelEl.classList.add('td-saved-panel');
     panelsEl.appendChild(panelEl);
   });
-  // Init map for first panel after all are in DOM
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(0); });
-  });
 }
 
 function activateSavedPanel(idx) {
   document.querySelectorAll('#td-result-tabs .results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.td-saved-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('#td-compare-bar .compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(idx); });
-  });
+  var mapId = 'trip-map-' + idx;
+  if (mapInstances[mapId] && window.google && window.google.maps) {
+    requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
+  } else if (!mapInstances[mapId]) {
+    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx); }); });
+  }
 }
 
 async function loadTripMembers(tripId) {
