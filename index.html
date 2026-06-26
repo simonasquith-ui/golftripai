@@ -1988,10 +1988,12 @@ async function generateTrip() {
       if (panelsEl) {
         var existing = panelsEl.querySelectorAll('.result-panel')[idx];
         if (existing) {
-          var newEl = buildPanel(merged, idx, data);
+          var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
-          // Init map after element is in DOM — only for active (visible) panel
-          // Observer will detect the new element and init its map
+          var capturedIdx = idx;
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { initMap(capturedIdx, 'results'); });
+          });
         }
       }
       // Update compare bar price
@@ -2265,7 +2267,7 @@ function renderResults(aiData, qData) {
     tab.addEventListener('click', function() { activatePanel(i); });
     tabsEl.appendChild(tab);
 
-    panelsEl.appendChild(buildPanel(panel, i, qData));
+    panelsEl.appendChild(buildPanel(panel, i, qData, 'results'));
   });
 }
 
@@ -2274,11 +2276,11 @@ function activatePanel(idx) {
   document.querySelectorAll('.result-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('.compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
   // Trigger resize if map already inited for this panel
-  var mapId = 'trip-map-' + idx;
+  var mapId = 'results-trip-map-' + idx;
   if (mapInstances[mapId] && window.google && window.google.maps) {
     requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
-  } else if (!mapInstances[mapId]) {
-    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx); }); });
+  } else {
+    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx, 'results'); }); });
   }
 }
 
@@ -2337,7 +2339,8 @@ function buildSkyscannerUrl(panel, qData) {
   return 'https://www.skyscanner.net/flights/?' + params.toString();
 }
 
-function buildPanel(panel, idx, qData) {
+function buildPanel(panel, idx, qData, mapPrefix) {
+  mapPrefix = mapPrefix || 'map';
   var el = document.createElement('div');
   el.className = 'result-panel' + (idx === 0 ? ' active' : '');
   var dest = panel.destination || 'Destination';
@@ -2391,7 +2394,7 @@ function buildPanel(panel, idx, qData) {
   }
 
   // Trip Map section
-  html += buildMapSection(panel, idx);
+  html += buildMapSection(panel, idx, mapPrefix);
 
   html += '<div class="section-heading" data-icon="&#9971;">Golf Courses</div><div class="courses-grid">';
   if (panel.courses && panel.courses.length) {
@@ -2758,9 +2761,11 @@ function onMapsReady() {
   // Fire any maps that were queued before Maps loaded
   var queue = mapsReadyQueue.slice();
   mapsReadyQueue = [];
-  queue.forEach(function(idx) {
+  queue.forEach(function(item) {
+    var idx = typeof item === 'object' ? item.idx : item;
+    var prefix = typeof item === 'object' ? item.prefix : 'map';
     requestAnimationFrame(function() {
-      requestAnimationFrame(function() { initMap(idx); });
+      requestAnimationFrame(function() { initMap(idx, prefix); });
     });
   });
 }
@@ -2768,20 +2773,23 @@ function onMapsReady() {
 // If Maps already fired its callback before onMapsReady was defined, catch up now
 if (window.__mapsReadyPending) { onMapsReady(); }
 
-function queueMapInit(idx) {
-  if (mapInstances['trip-map-' + idx]) return; // already inited
-  if (pendingMapInits[idx]) return; // already queued
-  pendingMapInits[idx] = true;
+function queueMapInit(idx, prefix) {
+  prefix = prefix || 'map';
+  var mapId = prefix + '-trip-map-' + idx;
+  var qKey = mapId;
+  if (mapInstances[mapId]) return; // already inited
+  if (pendingMapInits[qKey]) return; // already queued
+  pendingMapInits[qKey] = true;
+  function doInit() {
+    initMap(idx, prefix);
+    delete pendingMapInits[qKey];
+  }
   if (mapsIsReady) {
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        initMap(idx);
-        delete pendingMapInits[idx];
-      });
-    });
+    requestAnimationFrame(function() { requestAnimationFrame(doInit); });
   } else {
-    // Maps not ready yet — queue it, will fire when Maps loads
-    if (mapsReadyQueue.indexOf(idx) === -1) mapsReadyQueue.push(idx);
+    if (!mapsReadyQueue.find(function(q) { return q.idx === idx && q.prefix === prefix; })) {
+      mapsReadyQueue.push({ idx: idx, prefix: prefix });
+    }
   }
 }
 
@@ -2791,11 +2799,12 @@ function startMapObserver() {
     mutations.forEach(function(m) {
       m.addedNodes.forEach(function(node) {
         if (node.nodeType !== 1) return;
-        var containers = node.querySelectorAll ? node.querySelectorAll('[id^="trip-map-"]') : [];
-        if (node.id && node.id.startsWith('trip-map-')) containers = [node];
+        var containers = node.querySelectorAll ? node.querySelectorAll('.map-container[data-map-idx]') : [];
+        if (node.classList && node.classList.contains('map-container') && node.getAttribute('data-map-idx')) containers = [node];
         containers.forEach(function(el) {
-          var idx = parseInt(el.id.replace('trip-map-', ''));
-          if (!isNaN(idx)) queueMapInit(idx);
+          var idx = parseInt(el.getAttribute('data-map-idx'));
+          var prefix = el.getAttribute('data-map-prefix') || 'map';
+          if (!isNaN(idx)) queueMapInit(idx, prefix);
         });
       });
     });
@@ -2808,16 +2817,17 @@ function resetMapObserver() {
   mapsReadyQueue = [];
 }
 
-function buildMapSection(panel, idx) {
-  var mapId = 'trip-map-' + idx;
-  return '<div class="trip-map-section">' +
+function buildMapSection(panel, idx, mapPrefix) {
+  mapPrefix = mapPrefix || 'map';
+  var mapId = mapPrefix + '-trip-map-' + idx;
+  return '<div class="trip-map-section" data-map-prefix="' + mapPrefix + '" data-map-idx="' + idx + '">' +
     '<div class="trip-map-header">&#128205; Interactive Map &mdash; Courses, Hotels &amp; Restaurants</div>' +
-    '<div class="trip-map-body open" id="map-body-' + idx + '" style="display:block">' +
-      '<div class="map-loading" id="map-loading-' + idx + '">' +
+    '<div class="trip-map-body open" id="' + mapPrefix + '-map-body-' + idx + '" style="display:block">' +
+      '<div class="map-loading" id="' + mapPrefix + '-map-loading-' + idx + '">' +
         '<div class="loading-spinner"></div>' +
         '<p>Finding locations on Google Maps...</p>' +
       '</div>' +
-      '<div class="map-container" id="' + mapId + '" style="display:none;height:400px"></div>' +
+      '<div class="map-container" id="' + mapId + '" style="display:none;height:400px" data-map-prefix="' + mapPrefix + '" data-map-idx="' + idx + '"></div>' +
       '<div class="map-legend">' +
         '<div class="legend-item"><div class="legend-dot" style="background:#1a3a2a"></div> Hotel</div>' +
         '<div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div> Golf Course</div>' +
@@ -2894,11 +2904,18 @@ async function searchGooglePlace(name, type, destination) {
   return null;
 }
 
-async function initMap(idx) {
-  var mapId = 'trip-map-' + idx;
+async function initMap(idx, mapPrefix) {
+  mapPrefix = mapPrefix || 'map';
+  var mapId = mapPrefix + '-trip-map-' + idx;
   var panel = storedPanels[idx];
-  if (!panel) { console.warn('initMap: no panel at idx', idx, '— storedPanels length:', storedPanels.length); return; }
-  var loadEl = document.getElementById('map-loading-' + idx);
+  if (!panel) { console.warn('initMap: no panel at idx', idx); return; }
+  if (panel._loading) { return; }
+  if (!panel.courses && !panel.hotels && !panel.restaurants) { return; }
+  if (mapInstances[mapId]) {
+    if (window.google && window.google.maps) google.maps.event.trigger(mapInstances[mapId], 'resize');
+    return;
+  }
+  var loadEl = document.getElementById(mapPrefix + '-map-loading-' + idx);
   var mapEl = document.getElementById(mapId);
   if (!mapEl) { console.warn('initMap: no map element', mapId); return; }
   // Ensure map container is visible and has measurable height before Google Maps init
@@ -3359,9 +3376,9 @@ function switchTripTab(tab) {
   if (tab === 'itinerary') {
     // Trigger resize on any already-initialised maps when itinerary tab becomes visible
     requestAnimationFrame(function() {
-      Object.keys(mapInstances).forEach(function(mapId) {
-        if (window.google && window.google.maps && mapInstances[mapId]) {
-          google.maps.event.trigger(mapInstances[mapId], 'resize');
+      Object.keys(mapInstances).forEach(function(mId) {
+        if (window.google && window.google.maps && mapInstances[mId]) {
+          google.maps.event.trigger(mapInstances[mId], 'resize');
         }
       });
     });
@@ -3501,7 +3518,7 @@ function renderSavedItinerary(panels, tripData, contentEl) {
     tab.textContent = panel.label || ('Option ' + (i + 1));
     tab.addEventListener('click', function() { activateSavedPanel(i); });
     tabsEl.appendChild(tab);
-    var panelEl = buildPanel(panel, i, qData);
+    var panelEl = buildPanel(panel, i, qData, 'saved');
     panelEl.classList.add('td-saved-panel');
     panelsEl.appendChild(panelEl);
   });
@@ -3511,11 +3528,11 @@ function activateSavedPanel(idx) {
   document.querySelectorAll('#td-result-tabs .results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.td-saved-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('#td-compare-bar .compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
-  var mapId = 'trip-map-' + idx;
+  var mapId = 'saved-trip-map-' + idx;
   if (mapInstances[mapId] && window.google && window.google.maps) {
     requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
-  } else if (!mapInstances[mapId]) {
-    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx); }); });
+  } else {
+    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx, 'saved'); }); });
   }
 }
 
