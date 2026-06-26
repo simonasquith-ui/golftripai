@@ -2228,6 +2228,11 @@ function buildVotesSummaryHtml(panelLabel) {
 // ── END VOTING SYSTEM ───────────────────────────────────────
 
 function renderResults(aiData, qData) {
+  // Clear stale map instances so initMap doesn't skip re-rendering on new searches
+  Object.keys(mapInstances).forEach(function(k) {
+    if (k.startsWith('results-')) delete mapInstances[k];
+  });
+  resetMapObserver();
   var mode = qData ? qData.compare_mode : compareMode;
   var panels = aiData && aiData.panels ? aiData.panels : makeFallbackPanels(qData);
 
