@@ -58,6 +58,18 @@ p{color:var(--text-muted)}
 .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-sm{padding:8px 16px;font-size:.8rem}.btn-lg{padding:16px 32px;font-size:1rem}
 .hidden{display:none!important}
+.vote-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem;cursor:pointer;color:var(--text-muted);transition:all var(--tr);font-family:inherit}
+.vote-btn:hover{border-color:var(--gold);color:var(--gold)}
+.vote-btn.voted{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.vote-btn .vote-count{font-weight:700;min-width:12px}
+.votes-summary{background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:24px}
+.votes-summary h3{color:var(--green);margin-bottom:16px;font-size:1rem}
+.vote-tally-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.vote-tally-item:last-child{border-bottom:none}
+.vote-tally-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.vote-tally-bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .4s ease}
+.vote-tally-name{font-size:.85rem;font-weight:500;color:var(--text);min-width:140px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vote-tally-count{font-size:.85rem;font-weight:700;color:var(--gold);min-width:32px;text-align:right}
 .dest-country{border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
 .dest-country-header{padding:10px 14px;background:var(--off-white);display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);transition:background var(--tr)}
 .dest-country-header:hover{background:var(--sand)}
@@ -1913,6 +1925,8 @@ async function generateTrip() {
     currentTripData = parsed;
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
+      tripVoteCache = {};
+      await loadVotesForTrip(currentTripRequestId);
     }
     renderResults(parsed, data);
   } catch(e) {
@@ -1932,6 +1946,105 @@ function fmtPrice(gbp) {
   var sym = SYMS[activeCurrency] || '\u00a3';
   return sym + Math.round(parseFloat(gbp) * rate).toLocaleString('en-GB');
 }
+
+// ── VOTING SYSTEM ──────────────────────────────────────────
+var tripVoteCache = {};
+
+async function loadVotesForTrip(tripId) {
+  if (!tripId) return;
+  try {
+    var r = await sbClient.from('trip_votes').select('item_name,item_type,panel_label,user_id').eq('trip_id', tripId);
+    if (r.error) throw r.error;
+    tripVoteCache = {};
+    (r.data || []).forEach(function(v) {
+      var key = v.panel_label + '|' + v.item_type + '|' + v.item_name;
+      if (!tripVoteCache[key]) tripVoteCache[key] = { count: 0, userVoted: false };
+      tripVoteCache[key].count++;
+      if (currentUser && v.user_id === currentUser.id) tripVoteCache[key].userVoted = true;
+    });
+  } catch(e) { console.warn('loadVotes error:', e.message); }
+}
+
+async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
+  if (!currentUser) { showAuthModal(); showToast('Sign in to vote for your favourites.', true); return; }
+  if (!tripId) { showToast('Save this trip first to vote on options.', true); return; }
+  var key = panelLabel + '|' + itemType + '|' + itemName;
+  var already = tripVoteCache[key] && tripVoteCache[key].userVoted;
+  try {
+    if (already) {
+      await sbClient.from('trip_votes').delete()
+        .eq('trip_id', tripId).eq('user_id', currentUser.id)
+        .eq('item_type', itemType).eq('item_name', itemName).eq('panel_label', panelLabel);
+      if (tripVoteCache[key]) { tripVoteCache[key].count = Math.max(0, tripVoteCache[key].count - 1); tripVoteCache[key].userVoted = false; }
+    } else {
+      await sbClient.from('trip_votes').insert({ trip_id: tripId, user_id: currentUser.id, item_type: itemType, item_name: itemName, panel_label: panelLabel });
+      if (!tripVoteCache[key]) tripVoteCache[key] = { count: 0, userVoted: false };
+      tripVoteCache[key].count++; tripVoteCache[key].userVoted = true;
+    }
+    updateVoteBtn(btnEl, tripVoteCache[key]);
+    refreshVotesSummary(tripId, panelLabel);
+  } catch(e) { console.warn('castVote error:', e.message); showToast('Could not save vote. Try again.', true); }
+}
+
+function updateVoteBtn(btn, voteData) {
+  if (!btn) return;
+  btn.classList.toggle('voted', voteData.userVoted);
+  var countEl = btn.querySelector('.vote-count');
+  if (countEl) countEl.textContent = voteData.count > 0 ? voteData.count : '';
+}
+
+function makeVoteBtn(tripId, itemType, itemName, panelLabel) {
+  var key = panelLabel + '|' + itemType + '|' + itemName;
+  var voteData = tripVoteCache[key] || { count: 0, userVoted: false };
+  // Sanitise strings for inline onclick attribute — just strip quotes and backslashes
+  var safeName = (itemName || '').replace(/['"\\]/g, '');
+  var safePanel = (panelLabel || '').replace(/['"\\]/g, '');
+  var safeTripId = tripId ? "'" + tripId + "'" : 'null';
+  return '<button class="vote-btn' + (voteData.userVoted ? ' voted' : '') + '" ' +
+    'onclick="castVote(' + safeTripId + ',\''+itemType+'\',\''+safeName+'\',\''+safePanel+'\',this)">' +
+    '&#9733; <span class="vote-count">' + (voteData.count > 0 ? voteData.count : '') + '</span>' +
+    '</button>';
+}
+
+async function refreshVotesSummary(tripId, panelLabel) {
+  if (!tripId) return;
+  await loadVotesForTrip(tripId);
+  document.querySelectorAll('.votes-summary[data-panel="' + panelLabel + '"]').forEach(function(el) {
+    el.innerHTML = buildVotesSummaryHtml(panelLabel);
+  });
+}
+
+function buildVotesSummaryHtml(panelLabel) {
+  var items = Object.keys(tripVoteCache).filter(function(k) {
+    return k.startsWith(panelLabel + '|') && tripVoteCache[k].count > 0;
+  });
+  if (!items.length) return '<p class="fs-sm text-muted" style="margin:0">No votes yet — share this trip with your group!</p>';
+  var byType = {};
+  items.forEach(function(k) {
+    var parts = k.split('|'); var type = parts[1], name = parts[2];
+    if (!byType[type]) byType[type] = [];
+    byType[type].push({ name: name, count: tripVoteCache[k].count });
+  });
+  var html = '';
+  [['course','&#9971; Courses'],['hotel','&#127968; Hotels'],['restaurant','&#127869; Restaurants']].forEach(function(pair) {
+    var type = pair[0], label = pair[1];
+    if (!byType[type]) return;
+    var sorted = byType[type].sort(function(a,b) { return b.count - a.count; });
+    var max = sorted[0].count;
+    html += '<div style="margin-bottom:14px"><div class="fs-sm fw-600" style="color:var(--green);margin-bottom:8px">' + label + '</div>';
+    sorted.forEach(function(item) {
+      var pct = max > 0 ? Math.round((item.count / max) * 100) : 0;
+      html += '<div class="vote-tally-item">' +
+        '<div class="vote-tally-name" title="' + item.name + '">' + item.name + '</div>' +
+        '<div class="vote-tally-bar"><div class="vote-tally-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="vote-tally-count">' + item.count + (item.count === 1 ? ' vote' : ' votes') + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+// ── END VOTING SYSTEM ───────────────────────────────────────
 
 function renderResults(aiData, qData) {
   var mode = qData ? qData.compare_mode : compareMode;
@@ -2012,6 +2125,8 @@ function buildPanel(panel, idx, qData) {
   el.className = 'result-panel' + (idx === 0 ? ' active' : '');
   var dest = panel.destination || 'Destination';
   var destEnc = encodeURIComponent(dest);
+  var tripId = currentTripRequestId || null;
+  var panelLabel = panel.label || String(idx);
 
   var html = '<div class="dest-card"><h2>' + dest + '</h2><p>' + (panel.description || 'AI-generated trip plan for ' + dest + '.') + '</p>';
   html += '<div class="dest-meta">';
@@ -2084,9 +2199,12 @@ function buildPanel(panel, idx, qData) {
       var gn = 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name || '');
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
-          '<h4>' + (c.name || '') + '</h4>' +
-          '<span class="tag tag-green">' + (c.difficulty || '') + '</span>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+          '<h4 style="margin:0;flex:1">' + (c.name || '') + '</h4>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
+            makeVoteBtn(tripId, 'course', c.name || '', panelLabel) +
+            '<span class="tag tag-green">' + (c.difficulty || '') + '</span>' +
+          '</div>' +
         '</div>' +
         '<div class="text-muted fs-sm">' + (c.location || '') + '</div>' +
         '<div class="course-stats">' +
@@ -2143,8 +2261,11 @@ function buildPanel(panel, idx, qData) {
           (checkout ? '&endDate=' + checkout : '');
       }
       html += '<div class="hotel-card">' +
-        '<h4>' + (h.name || '') + '</h4>' +
-        '<div class="text-muted fs-sm">' + (h.area || '') + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+          '<h4 style="margin:0">' + (h.name || '') + '</h4>' +
+          makeVoteBtn(tripId, 'hotel', h.name || '', panelLabel) +
+        '</div>' +
+        '<div class="text-muted fs-sm" style="margin-top:4px">' + (h.area || '') + '</div>' +
         '<p style="font-size:.85rem">' + (h.description || '') + '</p>' +
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (h.why_recommended || '') + '</p>' +
         (h.price_per_night ? '<p class="fs-sm" style="color:var(--gold);font-weight:600">Est. ' + fmtPrice(h.price_per_night) + '/night' + (h.price_range ? ' · typical range ' + h.price_range : '') + '</p>' : '') +
@@ -2213,7 +2334,10 @@ function buildPanel(panel, idx, qData) {
       html += '<div class="card" style="padding:16px">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="color:var(--green);font-size:.95rem;margin:0">' + (r.name || '') + '</h4>' +
-          (rating ? '<span style="color:#f59e0b;font-size:.8rem;white-space:nowrap;font-weight:600">&#9733; ' + rating + '</span>' : '') +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            (rating ? '<span style="color:#f59e0b;font-size:.8rem;white-space:nowrap;font-weight:600">&#9733; ' + rating + '</span>' : '') +
+            makeVoteBtn(tripId, 'restaurant', r.name || '', panelLabel) +
+          '</div>' +
         '</div>' +
         '<span class="tag tag-gold" style="margin-top:6px">' + (r.type || '') + '</span>' +
         '<p style="font-size:.85rem;margin-top:8px">' + (r.description || '') + '</p>' +
@@ -2239,6 +2363,12 @@ function buildPanel(panel, idx, qData) {
     });
     html += '</div>';
   }
+
+  // Group Votes summary
+  html += '<div class="votes-summary" data-panel="' + panelLabel + '">' +
+    '<h3>&#9733; Group Votes</h3>' +
+    buildVotesSummaryHtml(panelLabel) +
+  '</div>';
 
   var costs = panel.costs || {};
   html += '<div class="cost-breakdown"><h3>Cost Breakdown — Per Person (Estimates)</h3>' +
@@ -3044,6 +3174,8 @@ async function loadTripItinerary(tripId, tripData) {
 function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
   mapInstances = {}; // reset map instances for this trip
+  tripVoteCache = {}; // reset vote cache for this trip
+  if (tripData && tripData.id) loadVotesForTrip(tripData.id);
   var bar = document.getElementById('td-compare-bar');
   var tabsEl = document.getElementById('td-result-tabs');
   var panelsEl = document.getElementById('td-result-panels');
