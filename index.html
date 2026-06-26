@@ -2936,11 +2936,13 @@ async function initMap(idx, mapPrefix) {
   var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
   var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
 
-  // Kick off Google Maps load in parallel with coordinate work
-  var mapsReadyPromise = waitForGoogleMaps().catch(function(e) {
-    console.warn('Maps load warning:', e.message);
-    return null; // don't block — handle failure below
-  });
+  // By the time initMap runs, Maps is guaranteed ready (gated by queueMapInit/onMapsReady)
+  // No need to wait again — just check directly
+  if (!window.google || !window.google.maps || !window.google.maps.Map) {
+    console.warn('initMap called but Maps not available — should not happen');
+    if (loadEl) loadEl.innerHTML = '<div style="padding:20px;text-align:center"><p style="color:var(--text-muted);font-size:.85rem">Map unavailable.</p></div>';
+    return;
+  }
 
   // Build items to search — use AI coords first, fall back to Google Places
   var toSearch = [];
@@ -3038,14 +3040,6 @@ async function initMap(idx, mapPrefix) {
         loc.distFromHotel = km < 1 ? Math.round(km * 1000) + 'm from hotel' : km.toFixed(1) + ' km from hotel';
       }
     });
-  }
-
-  await mapsReadyPromise;
-
-  if (!window.google || !window.google.maps || !window.google.maps.Map) {
-    if (loadEl) loadEl.innerHTML = '<div style="padding:20px;text-align:center"><p style="color:var(--text-muted);font-size:.85rem">Map unavailable — Google Maps failed to load.</p>' +
-      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Open in Google Maps</a></div>';
-    return;
   }
 
   if (loadEl) loadEl.style.display = 'none';
