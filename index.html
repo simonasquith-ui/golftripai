@@ -58,6 +58,9 @@ p{color:var(--text-muted)}
 .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-sm{padding:8px 16px;font-size:.8rem}.btn-lg{padding:16px 32px;font-size:1rem}
 .hidden{display:none!important}
+.result-panel.loading{min-height:200px;display:flex;align-items:center;justify-content:center}
+.panel-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+.compare-item.loading .ci-price{opacity:0.4}
 .vote-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem;cursor:pointer;color:var(--text-muted);transition:all var(--tr);font-family:inherit}
 .vote-btn:hover{border-color:var(--gold);color:var(--gold)}
 .vote-btn.voted{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
@@ -1875,72 +1878,140 @@ async function generateTrip() {
     }
     var seasonNote = travelMonth ? ' Travel month: ' + travelMonth + ' — use realistic seasonal pricing. Peak summer (Jun-Aug) Mediterranean flights from UK typically £150-350pp return. Shoulder season £80-180pp. Winter £60-130pp. Hotel rates similarly vary 2-3x between peak and off-peak.' : '';
 
-    function makePrompt(label, destination, tier) {
+    var tripCtx = 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
+      ', dates: ' + dateStr +
+      ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
+      ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
+      seasonNote;
+
+    function makePromptA(destination, tier) {
       var budgetForTier = tierRanges[tier] || tierRanges['Mid-Range'];
-      return 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
-        ', dates: ' + dateStr + ', destination: ' + destination +
-        ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
-        ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
-        seasonNote +
+      return tripCtx + ' Destination: ' + destination + '.' +
         ' Generate the ' + tier + ' option. IMPORTANT: total_cost per person MUST be within ' + budgetForTier + ' GBP.' +
-        ' Budget tier is always cheapest, Mid-Range is middle, Luxury is highest — costs must increase in that order.' +
-        ' price_per_night and price_range MUST reflect realistic ' + (travelMonth || 'typical') + ' rates for this destination and tier.' +
-        ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
-        ' costs{flights,accommodation,golf,food},' +
-        ' courses(EXACTLY 5: name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
-        ' hotels(EXACTLY 3: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
-        ' restaurants(EXACTLY 5: name,type,description,rating,opentable_available,lat,lng),' +
-        ' car_hire{needed,options(EXACTLY 3: provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location},' +
-        ' flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note,airport_note}.' +
-        ' green_fee/price_per_night=GBP numbers. green_fee_range/price_range=short strings e.g."£80-120/round".' +
-        ' rating=decimal e.g.4.3. opentable_available=true/false. car_hire.needed=' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
-        ' Real venues, accurate GPS, all costs GBP.';
+        ' Budget cheapest, Mid-Range middle, Luxury highest.' +
+        ' price_per_night MUST reflect realistic ' + (travelMonth || 'typical') + ' rates.' +
+        ' Return JSON: label,destination,description,weather,best_time,flight_time,total_cost,' +
+        'costs{flights,accommodation,golf,food},' +
+        'courses(EXACTLY 5:name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
+        'hotels(EXACTLY 3:name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
+        'flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note}.' +
+        ' green_fee/price_per_night=GBP numbers. Real venues, accurate GPS.';
     }
 
-    function fetchPanel(label, destination, tier) {
+    function makePromptB(destination, tier, label) {
+      return tripCtx + ' Destination: ' + destination + ', tier: ' + tier + '.' +
+        ' car_hire needed: ' + (data.car_hire !== 'No thanks' ? 'yes' : 'no') + '.' +
+        ' Return JSON: label,restaurants(EXACTLY 5:name,type,description,rating,opentable_available,lat,lng),' +
+        'car_hire{needed,options(EXACTLY 3:provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location}.' +
+        ' label="' + label + '". rating=decimal. opentable_available=true/false. Real venues, accurate GPS.';
+    }
+
+    function callAPI(prompt, tier, part) {
       return fetch('/.netlify/functions/generate-trip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: makePrompt(label, destination, tier), tier: tier })
+        body: JSON.stringify({ prompt: prompt, tier: tier, part: part })
       }).then(function(res) {
         if (!res.ok) return res.json().catch(function() { return {}; }).then(function(e) {
           throw new Error('Server error ' + res.status + ': ' + (e.error || 'unknown'));
         });
         return res.json();
       }).then(function(json) {
-        var panel = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
-        panel.label = label;
-        return panel;
+        return typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
       });
     }
 
-    var panelJobs;
+    // Build list of panel definitions
+    var panelDefs;
     if (data.compare_mode === 'tiers') {
-      var dest = data.destinations[0] || 'Flexible';
-      panelJobs = [
-        fetchPanel('Budget', dest, 'Budget'),
-        fetchPanel('Mid-Range', dest, 'Mid-Range'),
-        fetchPanel('Luxury', dest, 'Luxury')
+      var dest0 = data.destinations[0] || 'Flexible';
+      panelDefs = [
+        { label: 'Budget', destination: dest0, tier: 'Budget' },
+        { label: 'Mid-Range', destination: dest0, tier: 'Mid-Range' },
+        { label: 'Luxury', destination: dest0, tier: 'Luxury' }
       ];
     } else {
-      var tier = compareTier || 'Mid-Range';
-      panelJobs = data.destinations.map(function(dest) {
-        return fetchPanel(dest, dest, tier);
+      var cTier = compareTier || 'Mid-Range';
+      panelDefs = data.destinations.map(function(d) {
+        return { label: d, destination: d, tier: cTier };
       });
     }
 
-    console.log('Firing ' + panelJobs.length + ' parallel panel requests...');
-    var panels = await Promise.all(panelJobs);
-    console.log('All panels received:', panels.map(function(p) { return p.label; }).join(', '));
+    // Fire 2 calls per panel (A=courses/hotels/flights, B=restaurants/car hire) — all in parallel
+    var allCalls = [];
+    panelDefs.forEach(function(def) {
+      allCalls.push({ def: def, part: 'A', promise: callAPI(makePromptA(def.destination, def.tier), def.tier, 'A') });
+      allCalls.push({ def: def, part: 'B', promise: callAPI(makePromptB(def.destination, def.tier, def.label), def.tier, 'B') });
+    });
 
+    console.log('Firing ' + allCalls.length + ' parallel calls (' + panelDefs.length + ' panels × 2)...');
+
+    // Progressive rendering — show each panel as soon as both its calls complete
+    var panelData = {}; // keyed by label
+    panelDefs.forEach(function(def) { panelData[def.label] = { label: def.label, destination: def.destination }; });
+
+    var completedPanels = [];
+    var rendered = {};
+
+    // Show loading placeholders immediately
+    document.getElementById('results-loading').style.display = 'none';
+    document.getElementById('results-content').style.display = 'block';
+    renderResults({ panels: panelDefs.map(function(d) { return { label: d.label, destination: d.destination, _loading: true }; }) }, data);
+
+    function tryRenderPanel(label) {
+      if (rendered[label]) return;
+      var p = panelData[label];
+      if (!p._partA || !p._partB) return; // both parts not ready yet
+      rendered[label] = true;
+      // Merge A and B
+      var merged = Object.assign({}, p._partA, p._partB, { label: label, destination: p.destination });
+      completedPanels.push(merged);
+      // Update the panel in the DOM
+      var idx = panelDefs.findIndex(function(d) { return d.label === label; });
+      var panelsEl = document.getElementById('results-panels');
+      if (panelsEl) {
+        var existing = panelsEl.querySelectorAll('.result-panel')[idx];
+        if (existing) {
+          var newEl = buildPanel(merged, idx, data);
+          existing.replaceWith(newEl);
+        }
+      }
+      // Update compare bar price
+      var ci = document.querySelectorAll('.compare-item')[idx];
+      if (ci && merged.total_cost) {
+        var priceEl = ci.querySelector('.ci-price');
+        if (priceEl) priceEl.textContent = fmtPrice(merged.total_cost);
+        ci.classList.remove('loading');
+      }
+    }
+
+    // Resolve all calls — each updates its panel as it arrives
+    var allPromises = allCalls.map(function(call) {
+      return call.promise.then(function(result) {
+        var label = call.def.label;
+        if (call.part === 'A') panelData[label]._partA = result;
+        else panelData[label]._partB = result;
+        tryRenderPanel(label);
+      }).catch(function(e) {
+        console.error('Call failed for', call.def.label, call.part, e.message);
+      });
+    });
+
+    await Promise.all(allPromises);
+    console.log('All calls complete. Rendered:', Object.keys(rendered).join(', '));
+
+    // Save final merged panels
+    var panels = panelDefs.map(function(def) {
+      return Object.assign({}, panelData[def.label]._partA || {}, panelData[def.label]._partB || {}, { label: def.label, destination: def.destination });
+    });
     var parsed = { panels: panels };
     currentTripData = parsed;
+    storedPanels = panels;
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
       tripVoteCache = {};
       await loadVotesForTrip(currentTripRequestId);
     }
-    renderResults(parsed, data);
   } catch(e) {
     console.error('generateTrip caught error:', e.message, e.stack);
     showToast('Failed to generate trip. Showing example layout.', true);
@@ -2236,6 +2307,13 @@ function buildPanel(panel, idx, qData) {
     var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     if (qData.dates.depart) travelMonth = monthNames[new Date(qData.dates.depart).getMonth()] || '';
     else if (qData.dates.month) travelMonth = qData.dates.month;
+  }
+
+  // Loading placeholder
+  if (panel._loading) {
+    el.classList.add('loading');
+    el.innerHTML = '<div class="panel-spinner"></div>';
+    return el;
   }
 
   var html = '<div class="dest-card"><h2>' + dest + '</h2><p>' + (panel.description || 'AI-generated trip plan for ' + dest + '.') + '</p>';
