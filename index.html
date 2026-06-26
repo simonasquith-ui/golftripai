@@ -442,7 +442,8 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid{grid-template-columns:1fr}
   .results-tabs,.compare-bar{flex-direction:column}
   .footer-inner{grid-template-columns:1fr}
-  .nav-links .nav-link{display:none}.nav-links .nav-link.always{display:flex}  #nav-auth-btns{display:none!important}  #nav-user{display:none!important}  .nav-hamburger{display:flex!important}
+  #nav-links-desktop{display:none!important}
+  .nav-hamburger{display:flex!important}
   .hero-cta{flex-direction:column}
   .airport-group-row{grid-template-columns:1fr 80px auto}
   .btt-grid{grid-template-columns:1fr}
@@ -491,7 +492,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <span id="nav-username" style="color:rgba(255,255,255,.8);font-size:.85rem"></span>
       </div>
     </div>
-  <    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
@@ -1065,7 +1066,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
             <h3>&#9733; Group Votes</h3>
             <p class="fs-sm text-muted" style="margin-bottom:16px">Star your preferred courses, hotels and restaurants in the trip panels — votes tally up here.</p>
             <div id="group-votes-tally" style="margin-bottom:16px"><p class="fs-sm text-muted">No votes yet.</p></div>
-            <div class="vote-winner hidden" id="vote-winner"></div>
+
           </div>
           <div id="group-btt-wrap" style="margin-bottom:20px"></div>
           <div class="chat-panel">
