@@ -1040,10 +1040,12 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="trip-grid">
         <div>
           <div class="vote-panel">
-            <h3>Group Vote</h3>
-            <div class="vote-options" id="vote-options"></div>
+            <h3>&#9733; Group Votes</h3>
+            <p class="fs-sm text-muted" style="margin-bottom:16px">Star your preferred courses, hotels and restaurants in the trip panels — votes tally up here.</p>
+            <div id="group-votes-tally" style="margin-bottom:16px"><p class="fs-sm text-muted">No votes yet.</p></div>
             <div class="vote-winner hidden" id="vote-winner"></div>
           </div>
+          <div id="group-btt-wrap" style="margin-bottom:20px"></div>
           <div class="chat-panel">
             <div class="chat-header">Group Chat</div>
             <div class="chat-messages" id="chat-messages"></div>
@@ -1863,26 +1865,36 @@ async function generateTrip() {
     var budgetKey = data.budget || '1000-1500';
     var tierRanges = BUDGET_MAP[budgetKey] || BUDGET_MAP['1000-1500'];
 
+    // Extract travel month for season-aware pricing
+    var travelMonth = '';
+    if (data.dates.type === 'specific' && data.dates.depart) {
+      var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      travelMonth = monthNames[new Date(data.dates.depart).getMonth()] || '';
+    } else if (data.dates.month) {
+      travelMonth = data.dates.month;
+    }
+    var seasonNote = travelMonth ? ' Travel month: ' + travelMonth + ' — use realistic seasonal pricing. Peak summer (Jun-Aug) Mediterranean flights from UK typically £150-350pp return. Shoulder season £80-180pp. Winter £60-130pp. Hotel rates similarly vary 2-3x between peak and off-peak.' : '';
+
     function makePrompt(label, destination, tier) {
       var budgetForTier = tierRanges[tier] || tierRanges['Mid-Range'];
       return 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
         ', dates: ' + dateStr + ', destination: ' + destination +
         ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
         ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
+        seasonNote +
         ' Generate the ' + tier + ' option. IMPORTANT: total_cost per person MUST be within ' + budgetForTier + ' GBP.' +
         ' Budget tier is always cheapest, Mid-Range is middle, Luxury is highest — costs must increase in that order.' +
+        ' price_per_night and price_range MUST reflect realistic ' + (travelMonth || 'typical') + ' rates for this destination and tier.' +
         ' Return a single JSON object (no wrapper): label, destination, description, weather, best_time, flight_time, total_cost,' +
         ' costs{flights,accommodation,golf,food},' +
         ' courses(EXACTLY 5: name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
         ' hotels(EXACTLY 3: name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
         ' restaurants(EXACTLY 5: name,type,description,rating,opentable_available,lat,lng),' +
-        ' car_hire{needed,options(EXACTLY 3: provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location}.' +
-        ' green_fee and price_per_night are single GBP numbers. green_fee_range and price_range are short strings like "£80-120 per round" or "£120-200 per night". rating is a decimal like 4.3.' +
-        ' opentable_available is true/false based on whether this restaurant is likely bookable on OpenTable.' +
-        ' car_hire.needed is ' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
-        ' All costs GBP. Real venues, accurate GPS coords.' +
-        ' flights{airlines(array of 2-3 airline names that fly this route from UK),duration_hours,frequency(e.g. "3x daily"),departure_times(array of typical outbound departure times e.g. ["06:30","12:15","18:45"]),return_times(array of typical return departure times),price_range,baggage_note,airport_note}.' +
-        ' flights.price_range is a string like "£89-£180 per person return". flights.airport_note mentions any relevant terminal or connection info.';
+        ' car_hire{needed,options(EXACTLY 3: provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location},' +
+        ' flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note,airport_note}.' +
+        ' green_fee/price_per_night=GBP numbers. green_fee_range/price_range=short strings e.g."£80-120/round".' +
+        ' rating=decimal e.g.4.3. opentable_available=true/false. car_hire.needed=' + (data.car_hire !== 'No thanks' ? 'true' : 'false') + '.' +
+        ' Real venues, accurate GPS, all costs GBP.';
     }
 
     function fetchPanel(label, destination, tier) {
@@ -1982,6 +1994,8 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
       tripVoteCache[key].count++; tripVoteCache[key].userVoted = true;
     }
     updateVoteBtn(btnEl, tripVoteCache[key]);
+    var action = already ? 'Removed vote for' : 'Voted for';
+    showToast(action + ': ' + itemName);
     refreshVotesSummary(tripId, panelLabel);
   } catch(e) { console.warn('castVote error:', e.message); showToast('Could not save vote. Try again.', true); }
 }
@@ -1989,6 +2003,16 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
 function updateVoteBtn(btn, voteData) {
   if (!btn) return;
   btn.classList.toggle('voted', voteData.userVoted);
+  // Force style repaint — some browsers cache the class state
+  if (voteData.userVoted) {
+    btn.style.background = 'var(--gold)';
+    btn.style.borderColor = 'var(--gold)';
+    btn.style.color = '#fff';
+  } else {
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
   var countEl = btn.querySelector('.vote-count');
   if (countEl) countEl.textContent = voteData.count > 0 ? voteData.count : '';
 }
@@ -2009,9 +2033,57 @@ function makeVoteBtn(tripId, itemType, itemName, panelLabel) {
 async function refreshVotesSummary(tripId, panelLabel) {
   if (!tripId) return;
   await loadVotesForTrip(tripId);
+  // Update inline summary for this panel
   document.querySelectorAll('.votes-summary[data-panel="' + panelLabel + '"]').forEach(function(el) {
     el.innerHTML = buildVotesSummaryHtml(panelLabel);
   });
+  // Update group planning tally (all panels combined)
+  updateGroupVotesTally();
+}
+
+function updateGroupVotesTally() {
+  var tallyEl = document.getElementById('group-votes-tally');
+  if (!tallyEl) return;
+  // Collect all votes across all panels
+  var allItems = {};
+  Object.keys(tripVoteCache).forEach(function(k) {
+    var parts = k.split('|');
+    var type = parts[1], name = parts[2];
+    var count = tripVoteCache[k].count;
+    if (!count) return;
+    if (!allItems[type]) allItems[type] = {};
+    if (!allItems[type][name]) allItems[type][name] = 0;
+    allItems[type][name] += count;
+  });
+  var typeOrder = [['course','&#9971; Golf Courses'],['hotel','&#127968; Hotels'],['restaurant','&#127869; Restaurants']];
+  var hasAny = Object.keys(allItems).length > 0;
+  if (!hasAny) { tallyEl.innerHTML = '<p class="fs-sm text-muted">No votes yet — open a trip panel and star your favourites.</p>'; return; }
+  var html = '';
+  typeOrder.forEach(function(pair) {
+    var type = pair[0], label = pair[1];
+    if (!allItems[type]) return;
+    var sorted = Object.keys(allItems[type]).map(function(n) {
+      return { name: n, count: allItems[type][n] };
+    }).sort(function(a,b) { return b.count - a.count; });
+    var max = sorted[0].count;
+    var winner = sorted[0];
+    html += '<div style="margin-bottom:18px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+        '<div class="fs-sm fw-600" style="color:var(--green)">' + label + '</div>' +
+        '<div class="fs-sm" style="color:var(--gold);font-weight:600">&#127942; ' + winner.name + ' (' + winner.count + (winner.count === 1 ? ' vote' : ' votes') + ')</div>' +
+      '</div>';
+    sorted.forEach(function(item) {
+      var pct = max > 0 ? Math.round((item.count / max) * 100) : 0;
+      var isWinner = item.name === winner.name;
+      html += '<div class="vote-tally-item" style="' + (isWinner ? 'font-weight:600' : '') + '">' +
+        '<div class="vote-tally-name" title="' + item.name + '">' + (isWinner ? '&#127942; ' : '') + item.name + '</div>' +
+        '<div class="vote-tally-bar"><div class="vote-tally-bar-fill" style="width:' + pct + '%;' + (isWinner ? 'background:var(--gold)' : '') + '"></div></div>' +
+        '<div class="vote-tally-count">' + item.count + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+  tallyEl.innerHTML = html;
 }
 
 function buildVotesSummaryHtml(panelLabel) {
@@ -2097,27 +2169,58 @@ function activatePanel(idx) {
 }
 
 function buildSkyscannerUrl(panel, qData) {
-  // Build best possible Skyscanner URL with airport + destination + dates
   var origin = (qData && qData.airports && qData.airports[0]) ? qData.airports[0].airport : '';
   var dest = (panel.destination || '').split(',')[0].trim();
-  var checkin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart.replace(/-/g, '') : '';
-  var checkout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate.replace(/-/g, '') : '';
-  var adults = (qData && qData.group_size) ? qData.group_size : '2';
-  // Airport code lookup for common UK airports
+  var depart = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+  var ret = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+  var adults = (qData && qData.group_size) ? String(qData.group_size) : '2';
+
+  // Map common UK airport names/codes to IATA
   var AIRPORT_CODES = {
-    'LHR': 'LHR', 'LGW': 'LGW', 'MAN': 'MAN', 'EDI': 'EDI', 'BHX': 'BHX',
-    'BRS': 'BRS', 'GLA': 'GLA', 'NCL': 'NCL', 'LPL': 'LPL', 'STN': 'STN',
-    'LTN': 'LTN', 'EMA': 'EMA', 'Heathrow': 'LHR', 'Gatwick': 'LGW',
-    'Manchester': 'MAN', 'Edinburgh': 'EDI', 'Birmingham': 'BHX', 'Bristol': 'BRS'
+    'LHR':'LHR','LGW':'LGW','MAN':'MAN','EDI':'EDI','BHX':'BHX','BRS':'BRS',
+    'GLA':'GLA','NCL':'NCL','LPL':'LPL','STN':'STN','LTN':'LTN','EMA':'EMA',
+    'ABZ':'ABZ','BFS':'BFS','Heathrow':'LHR','Gatwick':'LGW','Stansted':'STN',
+    'Luton':'LTN','Manchester':'MAN','Edinburgh':'EDI','Birmingham':'BHX',
+    'Bristol':'BRS','Glasgow':'GLA','Newcastle':'NCL','Liverpool':'LPL',
+    'East Midlands':'EMA','Aberdeen':'ABZ','Belfast':'BFS'
   };
-  var originCode = AIRPORT_CODES[origin] || origin.substring(0, 3).toUpperCase();
-  if (checkin && checkout && originCode) {
-    return 'https://www.skyscanner.net/transport/flights/' + originCode + '/' +
-      encodeURIComponent(dest) + '/' + checkin + '/' + checkout +
-      '/?adults=' + adults + '&cabinclass=economy';
+  // Destination city → nearest airport IATA
+  var DEST_CODES = {
+    'Algarve':'FAO','Lisbon':'LIS','Porto':'OPO','Madeira':'FNC',
+    'Costa del Sol':'AGP','Malaga':'AGP','Mallorca':'PMI','Tenerife':'TFS',
+    'Bilbao':'BIO','Madrid':'MAD','Barcelona':'BCN','Costa Brava':'BCN',
+    'Marrakech':'RAK','Agadir':'AGA','Casablanca':'CMN',
+    'Dublin':'DUB','Cork':'ORK','Kerry':'KIR',
+    'Paris':'CDG','Nice':'NCE','Bordeaux':'BOD','Biarritz':'BIQ',
+    'Florence':'FLR','Tuscany':'FLR','Rome':'FCO','Sicily':'CTA','Milan':'MXP',
+    'Antalya':'AYT','Belek':'AYT','Istanbul':'IST','Bodrum':'BJV',
+    'Dubai':'DXB','Abu Dhabi':'AUH',
+    'Faro':'FAO','Seville':'SVQ','Valencia':'VLC','Ibiza':'IBZ'
+  };
+
+  var originCode = AIRPORT_CODES[origin] || (origin.length === 3 ? origin.toUpperCase() : '');
+  // Find dest airport code — check each key against dest string
+  var destCode = '';
+  Object.keys(DEST_CODES).forEach(function(k) {
+    if (!destCode && dest.toLowerCase().indexOf(k.toLowerCase()) !== -1) destCode = DEST_CODES[k];
+  });
+
+  // Build URL: use Skyscanner's working search format
+  var base = 'https://www.skyscanner.net/transport/flights/';
+  if (originCode && destCode && depart && ret) {
+    var d1 = depart.replace(/-/g,'').slice(2); // YYMMDD
+    var d2 = ret.replace(/-/g,'').slice(2);
+    return base + originCode.toLowerCase() + '/' + destCode.toLowerCase() + '/' + d1 + '/' + d2 +
+      '/?adults=' + adults + '&cabinclass=economy&rtn=1';
   }
-  return 'https://www.skyscanner.net/flights/' + encodeURIComponent(origin) +
-    '/' + encodeURIComponent(dest) + '/';
+  // Fallback: Skyscanner search with query string (always works)
+  var params = new URLSearchParams();
+  if (origin) params.set('origin', origin);
+  params.set('destination', dest);
+  if (depart) params.set('outboundDate', depart);
+  if (ret) params.set('inboundDate', ret);
+  params.set('adults', adults);
+  return 'https://www.skyscanner.net/flights/?' + params.toString();
 }
 
 function buildPanel(panel, idx, qData) {
@@ -2127,6 +2230,13 @@ function buildPanel(panel, idx, qData) {
   var destEnc = encodeURIComponent(dest);
   var tripId = currentTripRequestId || null;
   var panelLabel = panel.label || String(idx);
+  // Derive travel month for hotel price disclaimer
+  var travelMonth = '';
+  if (qData && qData.dates) {
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    if (qData.dates.depart) travelMonth = monthNames[new Date(qData.dates.depart).getMonth()] || '';
+    else if (qData.dates.month) travelMonth = qData.dates.month;
+  }
 
   var html = '<div class="dest-card"><h2>' + dest + '</h2><p>' + (panel.description || 'AI-generated trip plan for ' + dest + '.') + '</p>';
   html += '<div class="dest-meta">';
@@ -2149,7 +2259,7 @@ function buildPanel(panel, idx, qData) {
           '</div>' +
           (fl.departure_times && fl.departure_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Outbound departures:</strong> ' + fl.departure_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
           (fl.return_times && fl.return_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Return departures:</strong> ' + fl.return_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
-          (fl.price_range ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Est. price:</strong> ' + fl.price_range + '</div>' : '') +
+          (fl.price_range ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Est. price:</strong> ' + fl.price_range + '<span class="cost-note" style="display:inline-block;margin-left:6px">Estimate for ' + (travelMonth || 'your dates') + '</span></div>' : '') +
           (fl.airlines && fl.airlines.length ? '<div class="fs-sm text-muted" style="margin-bottom:6px"><strong>Airlines:</strong> ' + fl.airlines.join(', ') + '</div>' : '') +
           (fl.baggage_note ? '<div class="fs-sm text-muted" style="margin-bottom:4px">&#129517; ' + fl.baggage_note + '</div>' : '') +
           (fl.airport_note ? '<div class="fs-sm text-muted">&#128205; ' + fl.airport_note + '</div>' : '') +
@@ -2162,41 +2272,10 @@ function buildPanel(panel, idx, qData) {
   // Trip Map section
   html += buildMapSection(panel, idx);
 
-  // Book This Trip panel
-  html += '<div class="book-this-trip">' +
-    '<h3>Book This Trip</h3>' +
-    '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
-    '<div class="btt-grid">' +
-      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
-        '<div class="btt-icon">&#9992;</div>' +
-        '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
-      '</a>' +
-      '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
-        '<div class="btt-icon">&#127968;</div>' +
-        '<div><div class="btt-label">Hotels &amp; Resorts</div><div class="btt-action">Search on Booking.com</div></div>' +
-      '</a>' +
-      '<a href="https://www.golfnow.com/tee-times/search#' + destEnc + '" target="_blank" class="btt-btn btt-teetimes">' +
-        '<div class="btt-icon">&#9971;</div>' +
-        '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
-      '</a>' +
-      '<a href="https://www.vrbo.com/search?destination=' + destEnc + '" target="_blank" class="btt-btn btt-villas">' +
-        '<div class="btt-icon">&#127968;</div>' +
-        '<div><div class="btt-label">Villas</div><div class="btt-action">Search on Vrbo</div></div>' +
-      '</a>' +
-    '</div>' +
-    '<div class="btt-total">' +
-      '<div>' +
-        '<div class="btt-total-label">Estimated total per person</div>' +
-        '<div class="btt-total-price" id="btt-total-' + idx + '">' + fmtPrice(panel.total_cost || 0) + '</div>' +
-      '</div>' +
-      '<a href="https://www.skyscanner.net" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
-    '</div>' +
-  '</div>';
-
   html += '<div class="section-heading" data-icon="&#9971;">Golf Courses</div><div class="courses-grid">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
-      var gn = 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name || '');
+      var gn = 'https://www.golfnow.com/tee-times/search?searchText=' + encodeURIComponent((c.name || '') + ' ' + (c.location || dest));
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
@@ -2268,7 +2347,7 @@ function buildPanel(panel, idx, qData) {
         '<div class="text-muted fs-sm" style="margin-top:4px">' + (h.area || '') + '</div>' +
         '<p style="font-size:.85rem">' + (h.description || '') + '</p>' +
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (h.why_recommended || '') + '</p>' +
-        (h.price_per_night ? '<p class="fs-sm" style="color:var(--gold);font-weight:600">Est. ' + fmtPrice(h.price_per_night) + '/night' + (h.price_range ? ' · typical range ' + h.price_range : '') + '</p>' : '') +
+        (h.price_per_night ? '<p class="fs-sm" style="color:var(--gold);font-weight:600">Est. ' + fmtPrice(h.price_per_night) + '/night' + (h.price_range ? ' · ' + h.price_range : '') + '<span class="cost-note" style="display:block;margin-top:2px">Estimate for ' + (travelMonth || 'your travel dates') + ' — check Booking.com for live rates</span></p>' : '') +
         '<div class="card-links">' +
           '<a href="' + bookUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Search Vrbo' : 'Check on Booking.com') + '</a>' +
           '<a href="' + altUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Try Booking.com' : 'Try Vrbo') + '</a>' +
@@ -2380,7 +2459,10 @@ function buildPanel(panel, idx, qData) {
     '<div class="cost-row"><div>Total Estimate <span class="cost-note">excl. food &amp; drink</span></div><span class="cost-total">' + fmtPrice(panel.total_cost || 0) + '</span></div>' +
   '</div>';
 
-  // PDF Export bar
+  // Book This Trip — below cost breakdown
+  html += buildBTT(panel, idx, qData);
+
+  // PDF Export bar — bottom
   html += '<div class="pdf-export-bar">' +
     '<div>' +
       '<h4>&#128196; Society Trip Pack</h4>' +
@@ -2391,6 +2473,40 @@ function buildPanel(panel, idx, qData) {
 
   el.innerHTML = html;
   return el;
+}
+
+function buildBTT(panel, idx, qData) {
+  var dest = panel.destination || '';
+  var destEnc = encodeURIComponent(dest);
+  return '<div class="book-this-trip">' +
+    '<h3>Book This Trip</h3>' +
+    '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
+    '<div class="btt-grid">' +
+      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
+        '<div class="btt-icon">&#9992;</div>' +
+        '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
+      '</a>' +
+      '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
+        '<div class="btt-icon">&#127968;</div>' +
+        '<div><div class="btt-label">Hotels &amp; Resorts</div><div class="btt-action">Search on Booking.com</div></div>' +
+      '</a>' +
+      '<a href="https://www.golfnow.com/tee-times/search#' + destEnc + '" target="_blank" class="btt-btn btt-teetimes">' +
+        '<div class="btt-icon">&#9971;</div>' +
+        '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
+      '</a>' +
+      '<a href="https://www.vrbo.com/search?destination=' + destEnc + '" target="_blank" class="btt-btn btt-villas">' +
+        '<div class="btt-icon">&#127968;</div>' +
+        '<div><div class="btt-label">Villas</div><div class="btt-action">Search on Vrbo</div></div>' +
+      '</a>' +
+    '</div>' +
+    '<div class="btt-total">' +
+      '<div>' +
+        '<div class="btt-total-label">Estimated total per person</div>' +
+        '<div class="btt-total-price">' + fmtPrice(panel.total_cost || 0) + '</div>' +
+      '</div>' +
+      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+    '</div>' +
+  '</div>';
 }
 
 /* === PDF EXPORT === */
@@ -2537,19 +2653,25 @@ function toggleMap(idx) {
   body.classList.toggle('open', !isOpen);
   toggle.classList.toggle('open', !isOpen);
   if (!isOpen) {
+    // Force the body visible immediately so offsetHeight is measurable
+    body.style.display = 'block';
     if (!mapInstances[mapId]) {
-      // Not yet initialised — wait for container to paint then init
+      // Wait for paint then init
       requestAnimationFrame(function() {
         requestAnimationFrame(function() { initMap(idx); });
       });
     } else {
-      // Already initialised — trigger resize in case container size changed
+      // Already initialised — trigger resize
       requestAnimationFrame(function() {
         if (window.google && window.google.maps) {
           google.maps.event.trigger(mapInstances[mapId], 'resize');
+          var mapEl = document.getElementById(mapId);
+          if (mapEl) mapEl.style.display = 'block';
         }
       });
     }
+  } else {
+    body.style.display = '';
   }
 }
 
@@ -2607,10 +2729,13 @@ async function initMap(idx) {
   var loadEl = document.getElementById('map-loading-' + idx);
   var mapEl = document.getElementById(mapId);
   if (!mapEl) { console.warn('initMap: no map element', mapId); return; }
-  // Ensure map container has a measurable height before Google Maps init
-  if (mapEl.offsetHeight === 0) {
-    mapEl.style.display = 'block';
-    mapEl.closest('.trip-map-body') && (mapEl.closest('.trip-map-body').style.display = 'block');
+  // Ensure map container is visible and has measurable height before Google Maps init
+  mapEl.style.display = 'block';
+  var mapBody = mapEl.closest('.trip-map-body') || mapEl.parentElement;
+  if (mapBody) mapBody.style.display = 'block';
+  // If still zero height, give it an explicit height to bootstrap
+  if (mapEl.offsetHeight < 10) {
+    mapEl.style.height = '400px';
   }
 
   var dest = panel.destination || '';
@@ -2634,7 +2759,7 @@ async function initMap(idx) {
   (panel.courses || []).forEach(function(c) {
     toSearch.push({ type: 'course', name: c.name, area: c.location,
       detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: 'https://www.golfnow.com/tee-times/search#' + encodeURIComponent(c.name||''),
+      link: 'https://www.golfnow.com/tee-times/search?searchText=' + encodeURIComponent((c.name||'') + ' ' + dest),
       aiLat: c.lat, aiLng: c.lng });
   });
   (panel.restaurants || []).forEach(function(r) {
@@ -3075,6 +3200,16 @@ async function loadProfile() {
 function switchTripTab(tab) {
   document.getElementById('td-panel-itinerary').style.display = tab === 'itinerary' ? 'block' : 'none';
   document.getElementById('td-panel-group').style.display = tab === 'group' ? 'block' : 'none';
+  if (tab === 'group') {
+    updateGroupVotesTally();
+    // Inject BTT into group planning if we have a panel
+    var bttWrap = document.getElementById('group-btt-wrap');
+    if (bttWrap && storedPanels && storedPanels[0]) {
+      var activePanelIdx = 0;
+      document.querySelectorAll('.result-tab').forEach(function(t, i) { if (t.classList.contains('active')) activePanelIdx = i; });
+      bttWrap.innerHTML = buildBTT(storedPanels[activePanelIdx] || storedPanels[0], activePanelIdx, null);
+    }
+  }
   document.getElementById('td-tab-itinerary').classList.toggle('active', tab === 'itinerary');
   document.getElementById('td-tab-group').classList.toggle('active', tab === 'group');
 }
@@ -3163,6 +3298,7 @@ async function loadTripItinerary(tripId, tripData) {
     panelsEl.id = 'td-result-panels';
     contentEl.appendChild(panelsEl);
 
+    currentTripRequestId = tripId; // needed for toggleMap → initMap → storedPanels
     renderSavedItinerary(panels, tripData, contentEl);
   } catch(e) {
     document.getElementById('td-itinerary-loading').style.display = 'none';
@@ -3723,7 +3859,7 @@ function renderSeasonalContent(data, season, generatedAt) {
     var destEnc = encodeURIComponent(dest.name || '');
     var flightsUrl = dest.booking && dest.booking.flights ? dest.booking.flights : 'https://www.skyscanner.net';
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
-    var golfnowUrl = 'https://www.golfnow.com/tee-times/search#' + destEnc;
+    var golfnowUrl = 'https://www.golfnow.com/tee-times/search?searchText=' + destEnc;
     var destNameSafe = (dest.name||'').replace(/'/g, '');
 
     html += '<div class="dest-recommendation">' +
