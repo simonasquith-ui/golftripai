@@ -42,7 +42,7 @@ exports.handler = async (event) => {
         'Authorization': `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -54,7 +54,7 @@ exports.handler = async (event) => {
           }
         ],
         temperature: 0.5,
-        max_tokens: 2000,
+        max_tokens: 6000,
         response_format: { type: 'json_object' }
       })
     })
