@@ -1579,12 +1579,32 @@ function showPage(name) {
   var el = document.getElementById('page-' + name);
   if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   if (name === 'profile' && currentUser) { loadSavedTrips(); loadProfile(); }
-  if (name === 'seasonal') {
-    var season = getCurrentSeason();
-    initSeasonalPage(season);
-  }
+  if (name === 'seasonal') { initSeasonalPage(getCurrentSeason()); }
   if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+  // Update URL hash so refresh lands on the same page
+  var hash = (name === 'landing') ? '' : '#' + name;
+  history.replaceState(null, '', location.pathname + location.search + hash);
+}
+
+// Pages that can safely be restored from hash on refresh
+var _restorablePages = { landing:1, about:1, seasonal:1, questionnaire:1, privacy:1, terms:1, profile:1 };
+
+function restorePageFromHash() {
+  var hash = location.hash.replace('#', '');
+  if (!hash || hash === 'landing') return; // already on landing
+  if (hash.startsWith('trip/')) {
+    var tripId = hash.slice(5);
+    if (currentUser && tripId) {
+      openTripDetail(tripId);
+    } else if (!currentUser) {
+      showPage('landing');
+    }
+    return;
+  }
+  if (hash === 'results') return; // results are in-memory only — can't restore, stay on landing
+  if (hash === 'profile' && !currentUser) { showPage('landing'); return; }
+  if (_restorablePages[hash]) { showPage(hash); }
 }
 
 /* === TOAST === */
@@ -2437,51 +2457,72 @@ function fmtPrice(gbp) {
 }
 
 // ── TRIP CART ───────────────────────────────────────────────
-var tripCart = []; // { id, type, name, sub, price, priceNum, status, votes }
+var tripCart = []; // rows from trip_cart_items: { id, type, name, sub, price, price_num, link, status, votes_yes, votes_no }
 
-function addToCart(type, name, sub, price, priceNum, link) {
-  var existing = tripCart.find(function(i) { return i.id === type + '|' + name; });
-  if (existing) { showToast(name + ' already in cart', true); return; }
-  tripCart.push({ id: type + '|' + name, type: type, name: name, sub: sub, price: price, priceNum: priceNum || 0, link: link || '', status: 'pending', votes: { yes: 0, no: 0 } });
-  renderCart();
-  showToast(name + ' added to cart');
-  saveTripCart();
-}
-
-function removeFromCart(id) {
-  tripCart = tripCart.filter(function(i) { return i.id !== id; });
-  renderCart();
-  saveTripCart();
-}
-
-function voteCartItem(id, vote) {
-  var item = tripCart.find(function(i) { return i.id === id; });
-  if (!item) return;
-  item.votes[vote]++;
-  var total = item.votes.yes + item.votes.no;
-  if (item.votes.yes > total / 2) item.status = 'approved';
-  renderCart();
-  saveTripCart();
-}
-
-function markCartItemBooked(id) {
-  var item = tripCart.find(function(i) { return i.id === id; });
-  if (item) { item.status = 'booked'; renderCart(); saveTripCart(); }
-}
-
-function saveTripCart() {
-  if (currentTripRequestId) {
-    try { localStorage.setItem('cart_' + currentTripRequestId, JSON.stringify(tripCart)); } catch(e) {}
+async function addToCart(type, name, sub, price, priceNum, link) {
+  if (!currentUser) { showToast('Sign in to add items to the shared cart.', true); return; }
+  if (!currentTripRequestId) { showToast('Save your trip first to share the cart with your group.', true); return; }
+  var existing = tripCart.find(function(i) { return i.type === type && i.name === name; });
+  if (existing) { showToast(name + ' is already in the cart', true); return; }
+  try {
+    var r = await sbClient.from('trip_cart_items').insert({
+      trip_request_id: currentTripRequestId,
+      user_id: currentUser.id,
+      type: type, name: name, sub: sub || '',
+      price: price || '', price_num: priceNum || 0,
+      link: link || '', status: 'pending',
+      votes_yes: 0, votes_no: 0
+    }).select().single();
+    if (r.error) throw r.error;
+    tripCart.push(r.data);
+    renderCart();
+    showToast(name + ' added to cart');
+  } catch(e) {
+    if (e.code === '23505') { showToast(name + ' is already in the cart', true); }
+    else { console.error('addToCart error:', e); showToast('Could not add to cart. Try again.', true); }
   }
 }
 
-function loadTripCart() {
-  if (currentTripRequestId) {
-    try {
-      var saved = localStorage.getItem('cart_' + currentTripRequestId);
-      if (saved) tripCart = JSON.parse(saved);
-    } catch(e) { tripCart = []; }
-  } else { tripCart = []; }
+async function removeFromCart(id) {
+  try {
+    var r = await sbClient.from('trip_cart_items').delete().eq('id', id);
+    if (r.error) throw r.error;
+    tripCart = tripCart.filter(function(i) { return i.id !== id; });
+    renderCart();
+  } catch(e) { console.error('removeFromCart error:', e); showToast('Could not remove item.', true); }
+}
+
+async function voteCartItem(id, vote) {
+  var item = tripCart.find(function(i) { return i.id === id; });
+  if (!item) return;
+  var newYes = (item.votes_yes || 0) + (vote === 'yes' ? 1 : 0);
+  var newNo  = (item.votes_no  || 0) + (vote === 'no'  ? 1 : 0);
+  var newStatus = item.status;
+  if (newYes > (newYes + newNo) / 2) newStatus = 'approved';
+  try {
+    var r = await sbClient.from('trip_cart_items').update({ votes_yes: newYes, votes_no: newNo, status: newStatus }).eq('id', id);
+    if (r.error) throw r.error;
+    item.votes_yes = newYes; item.votes_no = newNo; item.status = newStatus;
+    renderCart();
+  } catch(e) { console.error('voteCartItem error:', e); }
+}
+
+async function markCartItemBooked(id) {
+  try {
+    var r = await sbClient.from('trip_cart_items').update({ status: 'booked' }).eq('id', id);
+    if (r.error) throw r.error;
+    var item = tripCart.find(function(i) { return i.id === id; });
+    if (item) { item.status = 'booked'; renderCart(); }
+  } catch(e) { console.error('markCartItemBooked error:', e); }
+}
+
+async function loadTripCart() {
+  if (!currentTripRequestId || !currentUser) { tripCart = []; renderCart(); return; }
+  try {
+    var r = await sbClient.from('trip_cart_items').select('*').eq('trip_request_id', currentTripRequestId).order('created_at');
+    if (r.error) throw r.error;
+    tripCart = r.data || [];
+  } catch(e) { console.error('loadTripCart error:', e); tripCart = []; }
   renderCart();
 }
 
@@ -2492,7 +2533,7 @@ function renderCart() {
   if (!list) return;
 
   if (!tripCart.length) {
-    list.innerHTML = '<p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Use "Add to cart" on hotels, courses and flights from the trip itinerary.</p>';
+    list.innerHTML = '<div class="gp-empty"><div class="gp-empty-icon">&#128663;</div><p>No items yet — add hotels, courses and flights from the trip panels using the cart button on each card.</p></div>';
     if (totalsEl) totalsEl.style.display = 'none';
     if (countEl) countEl.textContent = '0 items';
     return;
@@ -2502,16 +2543,17 @@ function renderCart() {
   var typeBg = { hotel: '#e1f5ee', course: '#faeeda', flight: '#e6f1fb', car: '#fbeaf0', restaurant: '#f0ece4' };
 
   var html = tripCart.map(function(item) {
-    var safeId = item.id.replace(/'/g, '');
+    var safeId = item.id;
+    var yes = item.votes_yes || 0, no = item.votes_no || 0;
     var statusBadge = item.status === 'booked'
       ? '<span class="cart-badge booked">&#10003; Booked</span>'
       : item.status === 'approved'
       ? '<span class="cart-badge booked">Approved</span>'
-      : '<span class="cart-badge ' + (item.votes.yes > 0 ? 'voting' : 'pending') + '">' + (item.votes.yes > 0 ? 'Voting' : 'Pending') + '</span>';
+      : '<span class="cart-badge ' + (yes > 0 ? 'voting' : 'pending') + '">' + (yes > 0 ? 'Voting' : 'Pending') + '</span>';
 
     var voteRow = item.status !== 'booked' ? '<div class="cart-vote-row">' +
-      '<button class="cart-vote-btn yes" onclick="voteCartItem(\'' + safeId + '\',\'yes\')">&#128077; ' + item.votes.yes + '</button>' +
-      '<button class="cart-vote-btn" onclick="voteCartItem(\'' + safeId + '\',\'no\')">&#128078; ' + item.votes.no + '</button>' +
+      '<button class="cart-vote-btn yes" onclick="voteCartItem(\'' + safeId + '\',\'yes\')">&#128077; ' + yes + '</button>' +
+      '<button class="cart-vote-btn" onclick="voteCartItem(\'' + safeId + '\',\'no\')">&#128078; ' + no + '</button>' +
       (item.status === 'approved' ? '<button class="btn btn-primary btn-sm" style="padding:2px 10px;font-size:.72rem" onclick="markCartItemBooked(\'' + safeId + '\')">Mark booked</button>' : '') +
       '<button class="cart-vote-btn" style="margin-left:auto;color:#a32d2d;border-color:#a32d2d" onclick="removeFromCart(\'' + safeId + '\')">Remove</button>' +
       '</div>' : '';
@@ -2535,7 +2577,7 @@ function renderCart() {
   list.innerHTML = html;
 
   // Totals
-  var total = tripCart.reduce(function(s, i) { return s + (i.priceNum || 0); }, 0);
+  var total = tripCart.reduce(function(s, i) { return s + (i.price_num || 0); }, 0);
   var unbookedCount = tripCart.filter(function(i) { return i.status !== 'booked'; }).length;
   if (totalsEl) {
     totalsEl.style.display = 'block';
@@ -3718,6 +3760,7 @@ function switchTripTab(tab) {
 
 async function openTripDetail(tripId, tripData) {
   activeTripId = tripId;
+  history.replaceState(null, '', location.pathname + location.search + '#trip/' + tripId);
   showPage('trip');
   switchTripTab('itinerary');
   document.getElementById('trip-detail-heading').textContent = tripData.destination_type || 'Golf Trip';
@@ -4431,6 +4474,8 @@ sbClient.auth.getSession().then(function(r) {
   } else if (pendingJoinId) {
     showToast('Sign in or sign up to join this golf trip!');
     openAuthModal('signup');
+  } else {
+    restorePageFromHash();
   }
 });
 </script>
