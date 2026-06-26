@@ -13,7 +13,6 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' }
   }
-
   try {
     const openaiKey = process.env.OPENAI_API_KEY
     if (!openaiKey) {
@@ -23,8 +22,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'OPENAI_API_KEY not configured' })
       }
     }
-
-    const { prompt, tier } = JSON.parse(event.body)
+    const { prompt, tier, part } = JSON.parse(event.body)
     if (!prompt) {
       return {
         statusCode: 400,
@@ -32,9 +30,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'No prompt provided' })
       }
     }
-
-    console.log('Tier:', tier, '| Prompt length:', prompt.length)
-
+    console.log('Tier:', tier, '| Part:', part, '| Prompt length:', prompt.length)
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -42,7 +38,7 @@ exports.handler = async (event) => {
         'Authorization': `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
@@ -54,13 +50,11 @@ exports.handler = async (event) => {
           }
         ],
         temperature: 0.5,
-        max_tokens: 4000,
+        max_tokens: 3000,
         response_format: { type: 'json_object' }
       })
     })
-
     const data = await response.json()
-
     if (!response.ok) {
       console.log('OpenAI error:', JSON.stringify(data))
       return {
@@ -69,11 +63,9 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: data.error?.message || 'OpenAI error ' + response.status })
       }
     }
-
     const choice = data.choices[0]
     const result = choice.message.content.trim()
     console.log('Response length:', result.length, '| finish_reason:', choice.finish_reason)
-
     if (choice.finish_reason === 'length') {
       console.log('Token limit hit — response truncated')
       return {
@@ -82,7 +74,6 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'Response truncated. Please try again.' })
       }
     }
-
     try {
       JSON.parse(result)
     } catch(e) {
@@ -93,13 +84,11 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'AI returned invalid JSON. Please try again.' })
       }
     }
-
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
       body: JSON.stringify({ result })
     }
-
   } catch (err) {
     console.log('Exception:', err.message)
     return {
