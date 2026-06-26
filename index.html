@@ -112,6 +112,31 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .nav-link{color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;font-weight:500;padding:8px 12px;border-radius:var(--r);transition:all var(--tr)}
 .nav-link:hover{color:var(--gold);background:rgba(201,168,76,.1)}
 .nav-user{display:flex;align-items:center;gap:10px}
+.nav-bell{position:relative;background:none;border:none;cursor:pointer;padding:6px;color:rgba(255,255,255,.7);transition:color .2s;display:flex;align-items:center}
+.nav-bell:hover{color:var(--gold)}
+.nav-bell i{font-size:20px}
+.notif-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;background:#e24b4a;border-radius:20px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #1a3a2a;display:none}
+.notif-panel{position:fixed;top:68px;right:16px;width:320px;max-height:420px;background:var(--white,#fff);border:1.5px solid var(--border,#e5e0d4);border-radius:var(--rl,12px);box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:200;display:none;flex-direction:column;overflow:hidden}
+.notif-panel.open{display:flex}
+.notif-header{padding:14px 16px;border-bottom:1px solid var(--border,#e5e0d4);display:flex;justify-content:space-between;align-items:center;background:var(--off-white,#faf8f3)}
+.notif-header h4{font-size:.9rem;font-weight:600;color:var(--green,#1a3a2a);margin:0}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border,#e5e0d4);cursor:pointer;transition:background .15s;display:flex;gap:10px;align-items:flex-start}
+.notif-item:hover{background:var(--sand,#f0ece4)}
+.notif-item.unread{background:rgba(201,168,76,.06)}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.notif-icon.vote{background:#faeeda;color:#854f0b}
+.notif-icon.chat{background:#e1f5ee;color:#0f6e56}
+.notif-icon.member{background:#e6f1fb;color:#185fa5}
+.notif-icon.booking{background:#eeedfe;color:#3c3489}
+.notif-body{flex:1;min-width:0}
+.notif-text{font-size:.82rem;color:var(--text,#1a1a1a);line-height:1.4;margin:0 0 2px}
+.notif-time{font-size:.72rem;color:var(--text-muted,#888);margin:0}
+.notif-empty{padding:32px 16px;text-align:center;color:var(--text-muted,#888);font-size:.85rem}
+.notif-footer{padding:10px 16px;border-top:1px solid var(--border,#e5e0d4);background:var(--off-white,#faf8f3)}
+.notif-footer button{width:100%;background:none;border:none;font-size:.8rem;color:var(--text-muted,#888);cursor:pointer;padding:4px}
+.notif-footer button:hover{color:var(--green,#1a3a2a)}
 .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;cursor:pointer}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
 .nav-hamburger span{display:block;width:22px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s}
@@ -272,12 +297,37 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .stat-box .sb-lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
 .vote-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:24px}
 .vote-panel h3{color:var(--green);margin-bottom:16px;font-family:'Playfair Display',serif}
-.vote-options{display:flex;flex-direction:column;gap:10px}
-.vote-option{border:1.5px solid var(--border);border-radius:var(--r);padding:12px 16px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
-.vote-option.voted{border-color:var(--gold);background:rgba(201,168,76,.06)}
-.vote-option-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(201,168,76,.1);transition:width .5s ease;pointer-events:none}
-.vote-option-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
-.vote-option-name{font-weight:600;font-size:.9rem;color:var(--green)}
+.gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:600px){.gp-grid{grid-template-columns:1fr}}
+.cart-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cart-item:last-child{border-bottom:none;padding-bottom:0}
+.cart-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.cart-body{flex:1;min-width:0}
+.cart-name{font-size:.88rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-sub{font-size:.78rem;color:var(--text-muted);margin-top:2px}
+.cart-price{font-size:.8rem;font-weight:600;color:var(--gold);margin-top:2px}
+.cart-badge{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap}
+.cart-badge.booked{background:#dcfce7;color:#166534}
+.cart-badge.voting{background:#fef3c7;color:#92400e}
+.cart-badge.pending{background:#ede9fe;color:#4c1d95}
+.cart-vote-row{display:flex;gap:5px;margin-top:5px}
+.cart-vote-btn{border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:.72rem;cursor:pointer;background:var(--white);color:var(--text-muted)}
+.cart-vote-btn.yes{border-color:var(--green);color:var(--green)}
+.cart-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:1px solid var(--border);margin-top:4px}
+.cart-cta{background:var(--green);color:var(--gold);border:none;border-radius:var(--r);padding:10px 16px;font-size:.88rem;font-weight:500;cursor:pointer;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px}
+.gp-section-head{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:0 0 10px;display:flex;align-items:center;gap:5px}
+.member-status-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.member-status-row:last-child{border-bottom:none}
+.prog-wrap{height:4px;flex:1;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green);border-radius:2px}
+.gp-chat-wrap{display:flex;flex-direction:column;height:100%;min-height:240px}
+.gp-chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:8px;min-height:160px;max-height:220px}
+.gp-chat-msg{padding:7px 11px;border-radius:var(--r);font-size:.82rem;max-width:88%}
+.gp-chat-msg.them{background:var(--sand);color:var(--text);align-self:flex-start}
+.gp-chat-msg.me{background:var(--green);color:rgba(255,255,255,.9);align-self:flex-end}
+.gp-chat-meta{font-size:.68rem;color:var(--text-muted);margin-top:2px}
+.gp-chat-input{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
 .vote-pct{font-size:.8rem;color:var(--gold);font-weight:700}
 .vote-winner{background:var(--sand);border-radius:var(--r);padding:10px 14px;font-size:.85rem;color:var(--green);font-weight:600;margin-top:12px;text-align:center}
 .chat-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
@@ -492,11 +542,27 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <span id="nav-username" style="color:rgba(255,255,255,.8);font-size:.85rem"></span>
       </div>
     </div>
+    <button class="nav-bell" id="nav-bell" onclick="toggleNotifPanel()" aria-label="Notifications" style="display:none">
+      <i class="ti ti-bell" aria-hidden="true"></i>
+      <span class="notif-badge" id="notif-badge"></span>
+    </button>
     <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <h4><i class="ti ti-bell" style="font-size:15px;margin-right:6px" aria-hidden="true"></i>Notifications</h4>
+    <button onclick="markAllRead()" style="background:none;border:none;font-size:.75rem;color:var(--gold,#c9a84c);cursor:pointer;font-weight:500">Mark all read</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty">No notifications yet</div>
+  </div>
+  <div class="notif-footer">
+    <button onclick="toggleNotifPanel()">Close</button>
+  </div>
+</div>
 <div class="nav-mobile-menu" id="nav-mobile-menu">
   <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
@@ -1060,55 +1126,84 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     </div>
 
     <div id="td-panel-group" style="display:none">
-      <div class="trip-grid">
-        <div>
-          <div class="vote-panel">
-            <h3>&#9733; Group Votes</h3>
-            <p class="fs-sm text-muted" style="margin-bottom:16px">Star your preferred courses, hotels and restaurants in the trip panels — votes tally up here.</p>
-            <div id="group-votes-tally" style="margin-bottom:16px"><p class="fs-sm text-muted">No votes yet.</p></div>
 
-          </div>
-          <div id="group-btt-wrap" style="margin-bottom:20px"></div>
-          <div class="chat-panel">
-            <div class="chat-header">Group Chat</div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-row">
-              <input type="text" id="chat-input" placeholder="Type a message...">
-              <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
-            </div>
-          </div>
+      <!-- CART + BOOKING PROGRESS — full width -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="color:var(--green);font-family:'Playfair Display',serif;font-size:1.1rem;margin:0">&#128663; Trip Cart</h3>
+          <span class="fs-sm text-muted" id="cart-item-count">0 items</span>
         </div>
+        <div id="cart-items-list">
+          <p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Star and add hotels, courses and flights from the trip itinerary.</p>
+        </div>
+        <div id="cart-totals" style="display:none">
+          <div class="cart-total">
+            <div>
+              <div class="fs-sm text-muted">Estimated total per person</div>
+              <div style="font-size:1.3rem;font-weight:600;color:var(--green)" id="cart-total-price">£0</div>
+            </div>
+            <div class="fs-sm text-muted" style="text-align:right" id="cart-golfer-count">excl. food &amp; drink</div>
+          </div>
+          <button class="cart-cta" id="cart-book-btn">&#128640; Book remaining items</button>
+        </div>
+      </div>
+
+      <!-- VOTES TALLY — full width -->
+      <div class="card" style="margin-bottom:20px">
+        <h3 style="color:var(--green);font-family:'Playfair Display',serif;font-size:1rem;margin:0 0 12px">&#9733; Group Votes</h3>
+        <p class="fs-sm text-muted" style="margin-bottom:14px">Star your preferred courses, hotels and restaurants in the trip panels.</p>
+        <div id="group-votes-tally"><p class="fs-sm text-muted">No votes yet.</p></div>
+      </div>
+
+      <!-- BTT wrap kept for compatibility -->
+      <div id="group-btt-wrap" style="margin-bottom:20px"></div>
+
+      <!-- BOTTOM GRID: members+status LEFT, chat RIGHT -->
+      <div class="gp-grid">
+
+        <!-- LEFT: members + status -->
         <div>
-          <div class="members-panel">
-            <h3>Group Members</h3>
+          <div class="card" style="margin-bottom:12px">
+            <div class="gp-section-head">&#128101; Group Members</div>
             <div id="members-list"></div>
-            <div class="invite-section">
-              <label>Invite by Email</label>
-              <div style="display:flex;gap:8px;margin-top:6px">
-                <input type="email" id="invite-email" placeholder="email@example.com">
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div class="gp-section-head">&#128279; Invite</div>
+              <div style="display:flex;gap:6px;margin-bottom:10px">
+                <input type="email" id="invite-email" placeholder="email@example.com" style="flex:1">
                 <button class="btn btn-primary btn-sm" onclick="inviteMember()">Invite</button>
               </div>
-              <div class="mt-16">
-                <label>Shareable Invite Link</label>
-                <div class="invite-link-box">
-                  <input type="text" id="invite-link" readonly>
-                  <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
-                </div>
+              <div class="invite-link-box">
+                <input type="text" id="invite-link" readonly>
+                <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
               </div>
             </div>
           </div>
-          <div class="card" style="padding:20px">
-            <h4 style="color:var(--green);font-family:'Playfair Display',serif;margin-bottom:12px">Your Status</h4>
-            <select id="my-status-select" style="width:100%;margin-bottom:12px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.9rem;background:var(--white)">
+          <div class="card">
+            <div class="gp-section-head">&#9989; Your Status</div>
+            <select id="my-status-select" style="width:100%;margin-bottom:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;background:var(--white)">
               <option value="Going">Going</option>
               <option value="Maybe">Maybe</option>
               <option value="Cannot go">Cannot go</option>
             </select>
-            <button class="btn btn-primary" style="width:100%" onclick="updateMyStatus()">Update Status</button>
-            <hr class="divider">
+            <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="updateMyStatus()">Update Status</button>
             <button class="btn btn-ghost" style="width:100%" onclick="showPage('profile')">Back to My Trips</button>
           </div>
         </div>
+
+        <!-- RIGHT: group chat -->
+        <div>
+          <div class="card" style="height:100%">
+            <div class="gp-section-head">&#128172; Group Chat</div>
+            <div class="gp-chat-wrap">
+              <div class="gp-chat-messages" id="chat-messages"></div>
+              <div class="gp-chat-input">
+                <input type="text" id="chat-input" placeholder="Type a message..." style="flex:1">
+                <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1575,6 +1670,18 @@ if (document.readyState === 'loading') {
   startMapObserver();
 }
 
+// Cart button delegation
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.add-to-cart-btn');
+  if (!btn) return;
+  var type = btn.getAttribute('data-cart-type');
+  var name = btn.getAttribute('data-cart-name');
+  var sub = btn.getAttribute('data-cart-sub');
+  var price = btn.getAttribute('data-cart-price');
+  var priceNum = parseFloat(btn.getAttribute('data-cart-pricenum')) || 0;
+  addToCart(type, name, sub, price, priceNum);
+});
+
 // Vote button delegation — handles all current and future vote buttons
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.vote-btn');
@@ -1587,9 +1694,217 @@ document.addEventListener('click', function(e) {
   castVote(tripId || currentTripRequestId, itemType, itemName, panelLabel, btn);
 });
 
+// ── NOTIFICATION SYSTEM ────────────────────────────────────
+var notifPanelOpen = false;
+var notifUnreadCount = 0;
+var notifData = [];
+var notifPollInterval = null;
+var notifLastFetch = null;
+
+function toggleNotifPanel() {
+  notifPanelOpen = !notifPanelOpen;
+  var panel = document.getElementById('notif-panel');
+  panel.classList.toggle('open', notifPanelOpen);
+  if (notifPanelOpen) {
+    markAllRead();
+  }
+}
+
+// Close notif panel on outside click
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('notif-panel');
+  var bell = document.getElementById('nav-bell');
+  if (notifPanelOpen && panel && bell && !panel.contains(e.target) && !bell.contains(e.target)) {
+    notifPanelOpen = false;
+    panel.classList.remove('open');
+  }
+});
+
+async function fetchNotifications() {
+  if (!currentUser) return;
+  try {
+    // Get all trips the user is part of
+    var ownR = await sbClient.from('trip_requests').select('id,destination_type').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+    var memR = await sbClient.from('trip_members').select('trip_request_id').eq('user_id', currentUser.id);
+    var tripIds = new Set();
+    (ownR.data || []).forEach(function(t) { tripIds.add(t.id); });
+    (memR.data || []).forEach(function(m) { tripIds.add(m.trip_request_id); });
+    if (!tripIds.size) return;
+
+    var ids = Array.from(tripIds);
+    // Fetch recent messages (last 50 across all trips)
+    var msgR = await sbClient.from('trip_messages')
+      .select('id,trip_request_id,user_id,message,created_at')
+      .in('trip_request_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    // Fetch recent votes
+    var voteR = await sbClient.from('trip_votes')
+      .select('id,trip_request_id,user_id,item_type,item_name,created_at')
+      .in('trip_request_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    // Fetch recent members
+    var newMemR = await sbClient.from('trip_members')
+      .select('id,trip_request_id,user_id,created_at')
+      .in('trip_request_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    // Build trip name map
+    var tripNames = {};
+    (ownR.data || []).forEach(function(t) { tripNames[t.id] = t.destination_type || 'Trip'; });
+
+    // Combine and sort all notifications
+    var all = [];
+
+    (msgR.data || []).forEach(function(m) {
+      if (m.user_id === currentUser.id) return; // skip own messages
+      var isSystem = m.message && (m.message.indexOf(' joined') !== -1 || m.message.indexOf(' voted for ') !== -1);
+      if (isSystem) return; // handled separately
+      all.push({
+        id: 'msg-' + m.id,
+        type: 'chat',
+        text: (m.message || '').substring(0, 80),
+        trip: tripNames[m.trip_request_id] || 'a trip',
+        tripId: m.trip_request_id,
+        time: m.created_at
+      });
+    });
+
+    (voteR.data || []).forEach(function(v) {
+      if (v.user_id === currentUser.id) return;
+      all.push({
+        id: 'vote-' + v.id,
+        type: 'vote',
+        text: 'Someone voted for ' + (v.item_type || 'an item') + ': ' + (v.item_name || ''),
+        trip: tripNames[v.trip_request_id] || 'a trip',
+        tripId: v.trip_request_id,
+        time: v.created_at
+      });
+    });
+
+    (newMemR.data || []).forEach(function(m) {
+      if (m.user_id === currentUser.id) return;
+      all.push({
+        id: 'mem-' + m.id,
+        type: 'member',
+        text: 'Someone joined your trip',
+        trip: tripNames[m.trip_request_id] || 'a trip',
+        tripId: m.trip_request_id,
+        time: m.created_at
+      });
+    });
+
+    // Sort by time descending
+    all.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
+    all = all.slice(0, 30);
+
+    // Work out which are new since last fetch
+    var readKey = 'notif_read_' + currentUser.id;
+    var lastRead = localStorage.getItem(readKey) ? new Date(localStorage.getItem(readKey)) : new Date(0);
+    var unread = all.filter(function(n) { return new Date(n.time) > lastRead; }).length;
+
+    notifData = all;
+    notifUnreadCount = unread;
+    updateNotifBadge();
+    if (notifPanelOpen) renderNotifList();
+  } catch(e) { console.warn('Notifications error:', e.message); }
+}
+
+function updateNotifBadge() {
+  var badge = document.getElementById('notif-badge');
+  var bell = document.getElementById('nav-bell');
+  if (!badge || !bell) return;
+  if (notifUnreadCount > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = notifUnreadCount > 9 ? '9+' : String(notifUnreadCount);
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifList() {
+  var list = document.getElementById('notif-list');
+  if (!list) return;
+  var readKey = 'notif_read_' + (currentUser ? currentUser.id : 'anon');
+  var lastRead = localStorage.getItem(readKey) ? new Date(localStorage.getItem(readKey)) : new Date(0);
+
+  if (!notifData.length) {
+    list.innerHTML = '<div class="notif-empty">No notifications yet.<br>Votes, messages and group activity will appear here.</div>';
+    return;
+  }
+
+  var iconMap = { chat: 'ti-message', vote: 'ti-star', member: 'ti-user-plus', booking: 'ti-circle-check' };
+  var html = notifData.map(function(n) {
+    var isUnread = new Date(n.time) > lastRead;
+    var icon = iconMap[n.type] || 'ti-bell';
+    var timeAgo = formatTimeAgo(n.time);
+    var onclk = 'handleNotifClick(\'' + (n.tripId || '') + '\')';
+    return '<div class="notif-item' + (isUnread ? ' unread' : '') + '" onclick="' + onclk + '">' +
+      '<div class="notif-icon ' + n.type + '"><i class="ti ' + icon + '" aria-hidden="true"></i></div>' +
+      '<div class="notif-body">' +
+        '<p class="notif-text">' + escapeHtml(n.text) + ' <span style="color:#c9a84c">in ' + escapeHtml(n.trip) + '</span></p>' +
+        '<p class="notif-time">' + timeAgo + '</p>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  list.innerHTML = html;
+}
+
+function markAllRead() {
+  if (!currentUser) return;
+  var readKey = 'notif_read_' + currentUser.id;
+  localStorage.setItem(readKey, new Date().toISOString());
+  notifUnreadCount = 0;
+  updateNotifBadge();
+  renderNotifList();
+}
+
+function handleNotifClick(tripId) {
+  toggleNotifPanel();
+  if (tripId) {
+    // Find and open the trip
+    openTripDetail && openTripDetail(tripId);
+  }
+}
+
+function formatTimeAgo(isoString) {
+  var diff = Math.floor((Date.now() - new Date(isoString)) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+  return new Date(isoString).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function startNotifPolling() {
+  if (!currentUser) return;
+  document.getElementById('nav-bell').style.display = 'flex';
+  fetchNotifications();
+  if (notifPollInterval) clearInterval(notifPollInterval);
+  notifPollInterval = setInterval(fetchNotifications, 30000); // poll every 30s
+}
+
+function stopNotifPolling() {
+  document.getElementById('nav-bell').style.display = 'none';
+  if (notifPollInterval) { clearInterval(notifPollInterval); notifPollInterval = null; }
+  notifData = [];
+  notifUnreadCount = 0;
+  updateNotifBadge();
+}
+// ── END NOTIFICATION SYSTEM ─────────────────────────────────
+
 sbClient.auth.onAuthStateChange(function(event, session) {
   currentUser = session ? session.user : null;
   updateNav(currentUser);
+  if (currentUser) { startNotifPolling(); } else { stopNotifPolling(); }
   if (currentUser) {
     closeAuthModal();
     // Process a pending invite join now that we have a user
@@ -2100,6 +2415,114 @@ function fmtPrice(gbp) {
   return sym + Math.round(parseFloat(gbp) * rate).toLocaleString('en-GB');
 }
 
+// ── TRIP CART ───────────────────────────────────────────────
+var tripCart = []; // { id, type, name, sub, price, priceNum, status, votes }
+
+function addToCart(type, name, sub, price, priceNum) {
+  var existing = tripCart.find(function(i) { return i.id === type + '|' + name; });
+  if (existing) { showToast(name + ' already in cart', true); return; }
+  tripCart.push({ id: type + '|' + name, type: type, name: name, sub: sub, price: price, priceNum: priceNum || 0, status: 'pending', votes: { yes: 0, no: 0 } });
+  renderCart();
+  showToast(name + ' added to cart');
+  saveTripCart();
+}
+
+function removeFromCart(id) {
+  tripCart = tripCart.filter(function(i) { return i.id !== id; });
+  renderCart();
+  saveTripCart();
+}
+
+function voteCartItem(id, vote) {
+  var item = tripCart.find(function(i) { return i.id === id; });
+  if (!item) return;
+  item.votes[vote]++;
+  var total = item.votes.yes + item.votes.no;
+  if (item.votes.yes > total / 2) item.status = 'approved';
+  renderCart();
+  saveTripCart();
+}
+
+function markCartItemBooked(id) {
+  var item = tripCart.find(function(i) { return i.id === id; });
+  if (item) { item.status = 'booked'; renderCart(); saveTripCart(); }
+}
+
+function saveTripCart() {
+  if (currentTripRequestId) {
+    try { localStorage.setItem('cart_' + currentTripRequestId, JSON.stringify(tripCart)); } catch(e) {}
+  }
+}
+
+function loadTripCart() {
+  if (currentTripRequestId) {
+    try {
+      var saved = localStorage.getItem('cart_' + currentTripRequestId);
+      if (saved) tripCart = JSON.parse(saved);
+    } catch(e) { tripCart = []; }
+  } else { tripCart = []; }
+  renderCart();
+}
+
+function renderCart() {
+  var list = document.getElementById('cart-items-list');
+  var totalsEl = document.getElementById('cart-totals');
+  var countEl = document.getElementById('cart-item-count');
+  if (!list) return;
+
+  if (!tripCart.length) {
+    list.innerHTML = '<p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Use "Add to cart" on hotels, courses and flights from the trip itinerary.</p>';
+    if (totalsEl) totalsEl.style.display = 'none';
+    if (countEl) countEl.textContent = '0 items';
+    return;
+  }
+
+  var typeIcons = { hotel: '&#127968;', course: '&#9971;', flight: '&#9992;', car: '&#128663;', restaurant: '&#127869;' };
+  var typeBg = { hotel: '#e1f5ee', course: '#faeeda', flight: '#e6f1fb', car: '#fbeaf0', restaurant: '#f0ece4' };
+
+  var html = tripCart.map(function(item) {
+    var safeId = item.id.replace(/'/g, '');
+    var statusBadge = item.status === 'booked'
+      ? '<span class="cart-badge booked">&#10003; Booked</span>'
+      : item.status === 'approved'
+      ? '<span class="cart-badge booked">Approved</span>'
+      : '<span class="cart-badge ' + (item.votes.yes > 0 ? 'voting' : 'pending') + '">' + (item.votes.yes > 0 ? 'Voting' : 'Pending') + '</span>';
+
+    var voteRow = item.status !== 'booked' ? '<div class="cart-vote-row">' +
+      '<button class="cart-vote-btn yes" onclick="voteCartItem(\'' + safeId + '\',\'yes\')">&#128077; ' + item.votes.yes + '</button>' +
+      '<button class="cart-vote-btn" onclick="voteCartItem(\'' + safeId + '\',\'no\')">&#128078; ' + item.votes.no + '</button>' +
+      (item.status === 'approved' ? '<button class="btn btn-primary btn-sm" style="padding:2px 10px;font-size:.72rem" onclick="markCartItemBooked(\'' + safeId + '\')">Mark booked</button>' : '') +
+      '<button class="cart-vote-btn" style="margin-left:auto;color:#a32d2d;border-color:#a32d2d" onclick="removeFromCart(\'' + safeId + '\')">Remove</button>' +
+      '</div>' : '';
+
+    return '<div class="cart-item">' +
+      '<div class="cart-icon" style="background:' + (typeBg[item.type] || '#f0ece4') + '">' + (typeIcons[item.type] || '&#128205;') + '</div>' +
+      '<div class="cart-body">' +
+        '<div class="cart-name">' + item.name + '</div>' +
+        (item.sub ? '<div class="cart-sub">' + item.sub + '</div>' : '') +
+        (item.price ? '<div class="cart-price">' + item.price + '</div>' : '') +
+        voteRow +
+      '</div>' +
+      statusBadge +
+    '</div>';
+  }).join('');
+
+  list.innerHTML = html;
+
+  // Totals
+  var total = tripCart.reduce(function(s, i) { return s + (i.priceNum || 0); }, 0);
+  var unbookedCount = tripCart.filter(function(i) { return i.status !== 'booked'; }).length;
+  if (totalsEl) {
+    totalsEl.style.display = 'block';
+    var tp = document.getElementById('cart-total-price');
+    if (tp) tp.textContent = fmtPrice(total);
+    var bookBtn = document.getElementById('cart-book-btn');
+    if (bookBtn) bookBtn.textContent = unbookedCount > 0 ? '&#128640; Book ' + unbookedCount + ' remaining item' + (unbookedCount === 1 ? '' : 's') : '&#10003; All items booked!';
+  }
+  if (countEl) countEl.textContent = tripCart.length + ' item' + (tripCart.length === 1 ? '' : 's');
+}
+// ── END TRIP CART ────────────────────────────────────────────
+
 // ── VOTING SYSTEM ──────────────────────────────────────────
 var tripVoteCache = {};
 
@@ -2185,11 +2608,6 @@ function makeVoteBtn(tripId, itemType, itemName, panelLabel) {
 async function refreshVotesSummary(tripId, panelLabel) {
   if (!tripId) return;
   await loadVotesForTrip(tripId);
-  // Update inline votes-summary for ALL panels (not just the one voted on)
-  document.querySelectorAll('.votes-summary').forEach(function(el) {
-    var pl = el.getAttribute('data-panel');
-    if (pl) el.innerHTML = buildVotesSummaryHtml(pl);
-  });
   // Update all vote button states on the page
   document.querySelectorAll('.vote-btn[data-vote-name]').forEach(function(btn) {
     var key = (btn.getAttribute('data-vote-panel') || '') + '|' + (btn.getAttribute('data-vote-type') || '') + '|' + (btn.getAttribute('data-vote-name') || '');
@@ -2198,6 +2616,7 @@ async function refreshVotesSummary(tripId, panelLabel) {
   });
   // Update group planning tally
   updateGroupVotesTally();
+  fetchNotifications();
 }
 
 function updateGroupVotesTally() {
@@ -2483,6 +2902,12 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         (c.club_hire ? '<p class="fs-sm" style="color:var(--gold)">Club hire available</p>' : '') +
         '<div class="card-links">' +
           '<a href="' + gn + '" target="_blank" class="card-link">Book Tee Time</a>' +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
+            'data-cart-type="course" ' +
+            'data-cart-name="' + (c.name||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-sub="' + (c.location||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-price="Est. ' + fmtPrice(c.green_fee||0) + '/round" ' +
+            'data-cart-pricenum="' + (c.green_fee||0) + '">&#43; Cart</button>' +
           (c.club_hire ? '<a href="' + hire + '" target="_blank" class="card-link">Club Hire</a>' : '') +
         '</div>' +
       '</div>';
@@ -2530,6 +2955,12 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '<div class="card-links">' +
           '<a href="' + bookUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Search Vrbo' : 'Check on Booking.com') + '</a>' +
           '<a href="' + altUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Try Booking.com' : 'Try Vrbo') + '</a>' +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
+            'data-cart-type="hotel" ' +
+            'data-cart-name="' + (h.name||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-sub="' + (h.area||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-price="Est. ' + fmtPrice(h.price_per_night||0) + '/night" ' +
+            'data-cart-pricenum="' + (h.price_per_night||0) + '">&#43; Cart</button>' +
         '</div>' +
       '</div>';
     });
@@ -2621,12 +3052,6 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     });
     html += '</div>';
   }
-
-  // Group Votes summary
-  html += '<div class="votes-summary" data-panel="' + panelLabel + '">' +
-    '<h3>&#9733; Group Votes</h3>' +
-    buildVotesSummaryHtml(panelLabel) +
-  '</div>';
 
   var costs = panel.costs || {};
   html += '<div class="cost-breakdown"><h3>Cost Breakdown — Per Person (Estimates)</h3>' +
@@ -3167,132 +3592,7 @@ async function initMap(idx, mapPrefix) {
 }
 
 /* === PDF EXPORT === */
-function exportPDF(panelIdx) {
-  var panel = storedPanels[panelIdx];
-  if (!panel) { showToast('Could not find trip data. Please regenerate.', true); return; }
-  // Open print dialog with a clean formatted page
-  var dest = panel.destination || 'Golf Trip';
-  var costs = panel.costs || {};
-  var sym = SYMS[activeCurrency] || '£';
-  var rate = RATES[activeCurrency] || 1;
-  function p(v) { return v ? sym + Math.round(parseFloat(v) * rate).toLocaleString('en-GB') : sym + '0'; }
 
-  var coursesHtml = '';
-  if (panel.courses && panel.courses.length) {
-    panel.courses.forEach(function(c) {
-      coursesHtml += '<tr><td><strong>' + (c.name||'') + '</strong><br><span style="color:#666;font-size:12px">' + (c.location||'') + '</span></td>' +
-        '<td>Par ' + (c.par||'72') + (c.yardage ? ' &bull; ' + c.yardage + ' yds' : '') + '</td>' +
-        '<td>' + p(c.green_fee) + '</td>' +
-        '<td>' + (c.difficulty||'') + '</td></tr>';
-    });
-  }
-
-  var hotelsHtml = '';
-  if (panel.hotels && panel.hotels.length) {
-    panel.hotels.forEach(function(h) {
-      hotelsHtml += '<tr><td><strong>' + (h.name||'') + '</strong></td><td>' + (h.area||'') + '</td><td>' + (h.description||'').substring(0,80) + '...</td></tr>';
-    });
-  }
-
-  var itinHtml = '';
-  if (panel.itinerary && panel.itinerary.length) {
-    panel.itinerary.forEach(function(day) {
-      itinHtml += '<div style="margin-bottom:12px"><strong style="color:#1a3a2a">Day ' + day.day + ': ' + (day.title||'') + '</strong><ul style="margin:4px 0 0 16px;padding:0">';
-      if (day.activities) day.activities.forEach(function(a) {
-        itinHtml += '<li style="font-size:12px;color:#444;margin-bottom:3px"><span style="color:#c9a84c;font-weight:600">' + (a.time||'') + '</span> ' + (a.description||'') + '</li>';
-      });
-      itinHtml += '</ul></div>';
-    });
-  }
-
-  var printWin = window.open('', '_blank', 'width=900,height=700');
-  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GolfTrip — ' + dest + ' ' + (panel.label||'') + '</title>' +
-    '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff;padding:0}' +
-    '.header{background:#1a3a2a;color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:center}' +
-    '.header h1{font-family:Georgia,serif;font-size:22px;color:#c9a84c}.header .sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}' +
-    '.logo{font-family:Georgia,serif;font-size:20px;color:#c9a84c}' +
-    '.body{padding:28px 32px}' +
-    '.section{margin-bottom:28px}' +
-    '.section-title{font-family:Georgia,serif;font-size:16px;color:#1a3a2a;border-bottom:2px solid #c9a84c;padding-bottom:6px;margin-bottom:14px}' +
-    'table{width:100%;border-collapse:collapse;font-size:12px}' +
-    'th{background:#e8d5b0;color:#1a3a2a;padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase}' +
-    'td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:top}' +
-    '.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
-    '.cost-item{background:#f7f4ee;border-radius:6px;padding:12px;display:flex;justify-content:space-between}' +
-    '.cost-item .lbl{font-size:12px;color:#666}.cost-item .val{font-weight:700;color:#1a3a2a}' +
-    '.total-box{background:#1a3a2a;color:#fff;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px}' +
-    '.total-box .lbl{font-size:13px;color:rgba(255,255,255,.7)}.total-box .val{font-family:Georgia,serif;font-size:22px;color:#c9a84c;font-weight:700}' +
-    '.badge{display:inline-block;background:#c9a84c;color:#0f2318;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;margin-left:8px}' +
-    '.disclaimer{font-size:10px;color:#999;margin-top:28px;padding-top:12px;border-top:1px solid #eee}' +
-    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
-    '</style></head><body>' +
-    '<div class="header"><div><div class="logo">GolfTrip</div><h1>' + dest + ' <span style="font-size:16px;color:rgba(255,255,255,.7)">&mdash; ' + (panel.label||'') + '</span></h1>' +
-    '<div class="sub">AI-generated golf holiday plan &bull; Prices are estimates only &bull; Generated ' + new Date().toLocaleDateString('en-GB') + '</div></div></div>' +
-    '<div class="body">' +
-
-    '<div class="section"><div class="section-title">Overview</div>' +
-    '<p style="font-size:13px;color:#555;line-height:1.6">' + (panel.description||'') + '</p>' +
-    '<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">' +
-    (panel.weather ? '<span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.weather + '</span>' : '') +
-    (panel.best_time ? '<span style="background:#e3f2fd;color:#1565c0;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">' + panel.best_time + '</span>' : '') +
-    (panel.flight_time ? '<span style="background:#fff3e0;color:#e65100;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">Flight: ' + panel.flight_time + '</span>' : '') +
-    '</div></div>' +
-
-    (coursesHtml ? '<div class="section"><div class="section-title">&#9971; Golf Courses</div><table><thead><tr><th>Course</th><th>Details</th><th>Green Fee</th><th>Level</th></tr></thead><tbody>' + coursesHtml + '</tbody></table></div>' : '') +
-    (hotelsHtml ? '<div class="section"><div class="section-title">&#127968; Recommended Hotels</div><table><thead><tr><th>Hotel</th><th>Area</th><th>Notes</th></tr></thead><tbody>' + hotelsHtml + '</tbody></table></div>' : '') +
-    (itinHtml ? '<div class="section"><div class="section-title">&#128197; 5-Day Itinerary</div>' + itinHtml + '</div>' : '') +
-
-    '<div class="section"><div class="section-title">&#128176; Cost Breakdown — Per Person</div>' +
-    '<div class="cost-grid">' +
-    '<div class="cost-item"><span class="lbl">Flights</span><span class="val">' + p(costs.flights||0) + '</span></div>' +
-    '<div class="cost-item"><span class="lbl">Accommodation</span><span class="val">' + p(costs.accommodation||0) + '</span></div>' +
-    '<div class="cost-item"><span class="lbl">Golf (green fees)</span><span class="val">' + p(costs.golf||0) + '</span></div>' +
-    '<div class="cost-item"><span class="lbl">Food &amp; Drink</span><span class="val">' + p(costs.food||0) + '</span></div>' +
-    (costs.club_hire ? '<div class="cost-item"><span class="lbl">Club Hire</span><span class="val">' + p(costs.club_hire) + '</span></div>' : '') +
-    '</div>' +
-    '<div class="total-box"><span class="lbl">Total Estimate Per Person</span><span class="val">' + p(panel.total_cost||0) + '</span></div>' +
-    '</div>' +
-
-    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Skyscanner, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
-    '</div></body></html>');
-  printWin.document.close();
-  printWin.focus();
-  setTimeout(function() { printWin.print(); }, 500);
-}
-
-
-function makeFallbackPanels(qData) {
-  var mode = qData ? qData.compare_mode : 'tiers';
-  var labels = mode === 'tiers' ? ['Budget', 'Mid-Range', 'Luxury'] : (qData && qData.destinations && qData.destinations.length ? qData.destinations : ['Destination 1', 'Destination 2', 'Destination 3']);
-  var baseCosts = [800, 1500, 2800];
-  return labels.map(function(label, i) {
-    return {
-      label: label,
-      destination: mode === 'tiers' ? (qData && qData.destinations ? qData.destinations[0] : 'Spain') : label,
-      total_cost: mode === 'tiers' ? baseCosts[i] : 1500,
-      description: 'Generate your trip to see full details for this option.',
-      courses: [], hotels: [], itinerary: [], restaurants: [],
-      costs: { flights: 200, accommodation: 350, golf: 250, food: 150 }
-    };
-  });
-}
-
-document.querySelectorAll('.currency-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.currency-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    activeCurrency = btn.getAttribute('data-currency');
-    if (currentTripData) {
-      var qData = getFormData();
-      renderResults(currentTripData, qData);
-    }
-  });
-});
-
-async function saveTripResults() {
-  if (!currentUser) { openAuthModal('signup'); showToast('Sign up to save your trip.'); return; }
-  showToast('Trip saved to your profile!');
-}
 
 function shareTrip() {
   var url = currentTripRequestId ? window.location.origin + '?trip=' + currentTripRequestId : window.location.href;
@@ -3433,6 +3733,7 @@ function switchTripTab(tab) {
     });
   }
   if (tab === 'group') {
+    loadTripCart();
     updateGroupVotesTally();
     // Inject BTT into group planning if we have a panel
     var bttWrap = document.getElementById('group-btt-wrap');
@@ -4152,6 +4453,7 @@ async function processJoin(tripId, user) {
 sbClient.auth.getSession().then(function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
+  if (currentUser) { startNotifPolling(); }
   if (currentUser && pendingJoinId) {
     processJoin(pendingJoinId, currentUser);
   } else if (pendingJoinId) {
