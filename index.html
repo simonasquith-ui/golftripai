@@ -113,6 +113,14 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .nav-link:hover{color:var(--gold);background:rgba(201,168,76,.1)}
 .nav-user{display:flex;align-items:center;gap:10px}
 .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;cursor:pointer}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s}
+.nav-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(26,58,42,.98);border-bottom:1px solid rgba(201,168,76,.2);padding:16px 20px;flex-direction:column;gap:4px;z-index:99}
+.nav-mobile-menu.open{display:flex}
+.nav-mobile-link{color:rgba(255,255,255,.85);text-decoration:none;font-size:.9rem;font-weight:500;padding:12px 16px;border-radius:var(--r);transition:all var(--tr)}
+.nav-mobile-link:hover{color:var(--gold);background:rgba(201,168,76,.1)}
+.nav-mobile-divider{height:1px;background:rgba(201,168,76,.2);margin:8px 0}
+.nav-mobile-auth{display:flex;gap:8px;padding:8px 0}
 .page{display:none;padding-top:64px;min-height:100vh}.page.active{display:block}
 #page-landing{padding-top:0}
 .hero{position:relative;min-height:100vh;background:var(--green-dark);display:flex;align-items:center;overflow:hidden}
@@ -434,7 +442,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid{grid-template-columns:1fr}
   .results-tabs,.compare-bar{flex-direction:column}
   .footer-inner{grid-template-columns:1fr}
-  .nav-links .nav-link{display:none}.nav-links .nav-link.always{display:flex}
+  .nav-links .nav-link{display:none}.nav-links .nav-link.always{display:flex}  #nav-auth-btns{display:none!important}  #nav-user{display:none!important}  .nav-hamburger{display:flex!important}
   .hero-cta{flex-direction:column}
   .airport-group-row{grid-template-columns:1fr 80px auto}
   .btt-grid{grid-template-columns:1fr}
@@ -467,7 +475,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 <nav id="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('landing');return false;">Golf<span>Trip</span></a>
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links-desktop">
       <a href="#" class="nav-link always" onclick="showPage('landing');return false;">Home</a>
       <a href="#" class="nav-link always" onclick="showPage('about');return false;">About</a>
       <a href="#" class="nav-link always" onclick="showPage('seasonal');return false;">Destinations</a>
@@ -483,8 +491,30 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <span id="nav-username" style="color:rgba(255,255,255,.8);font-size:.85rem"></span>
       </div>
     </div>
+  <    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('seasonal');closeMobileMenu();return false;">Destinations</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('questionnaire');closeMobileMenu();return false;">Plan a Trip</a>
+  <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
+  <div class="nav-mobile-divider"></div>
+  <div class="nav-mobile-auth" id="nav-mobile-auth">
+    <button class="btn btn-ghost btn-sm" onclick="openAuthModal('signin');closeMobileMenu()">Sign In</button>
+    <button class="btn btn-primary btn-sm" onclick="openAuthModal('signup');closeMobileMenu()">Sign Up Free</button>
+  </div>
+  <div id="nav-mobile-user" style="display:none;padding:8px 0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="nav-avatar" id="nav-mobile-avatar">?</div>
+      <span id="nav-mobile-username" style="color:rgba(255,255,255,.8);font-size:.9rem"></span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="handleSignOut();closeMobileMenu()">Sign Out</button>
+    </div>
+  </div>
+</div>
 
 <!-- LANDING -->
 <div id="page-landing" class="page active">
@@ -864,14 +894,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="chip" data-single="accomm" data-val="Apartment">Apartment</div>
       </div>
     </div>
-    <div class="q-section">
-      <div class="q-section-title" data-num="9">Weather Preference</div>
-      <div class="chip-group" id="weather-chips">
-        <div class="chip" data-single="weather" data-val="Warm">Warm (18-24C)</div>
-        <div class="chip" data-single="weather" data-val="Hot">Hot (25C+)</div>
-        <div class="chip" data-single="weather" data-val="No preference">No Preference</div>
-      </div>
-    </div>
+
     <div class="q-section">
       <div class="q-section-title" data-num="10">Flight Preferences</div>
       <div class="chip-group" id="flight-chips">
@@ -1360,6 +1383,22 @@ const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function toggleMobileMenu() {
+  var menu = document.getElementById('nav-mobile-menu');
+  menu.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('nav-mobile-menu').classList.remove('open');
+}
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('nav-mobile-menu');
+  var hamburger = document.getElementById('nav-hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
 /* === STATE === */
 let currentUser = null;
 let currentTripRequestId = null;
@@ -1370,7 +1409,7 @@ let chatPollInterval = null;
 let activeCurrency = 'GBP';
 let compareMode = 'tiers';
 let selectedDests = [];
-let chipSelections = { style: null, accomm: 'Any', weather: null, clubs: null, budget: null, dest: null, carhire: 'No thanks' };
+let chipSelections = { style: null, accomm: 'Any', clubs: null, budget: null, dest: null, carhire: 'No thanks' };
 let multiChipSelections = { flight: [] };
 
 const RATES = { GBP: 1, EUR: 1.17, USD: 1.27 };
@@ -1505,15 +1544,26 @@ function updateNav(user) {
   var navUser = document.getElementById('nav-user');
   var myTrips = document.getElementById('nav-my-trips');
   var adminLink = document.getElementById('nav-admin-link');
+  var mobileAuth = document.getElementById('nav-mobile-auth');
+  var mobileUser = document.getElementById('nav-mobile-user');
+  var mobileTrips = document.getElementById('nav-mobile-trips');
   if (user) {
     authBtns.style.display = 'none'; navUser.style.display = 'flex'; myTrips.style.display = 'flex';
     var init = (user.email || '?').charAt(0).toUpperCase();
     document.getElementById('nav-avatar').textContent = init;
     document.getElementById('nav-username').textContent = (user.email || '').split('@')[0];
+    if (document.getElementById('nav-mobile-avatar')) document.getElementById('nav-mobile-avatar').textContent = init;
+    if (document.getElementById('nav-mobile-username')) document.getElementById('nav-mobile-username').textContent = (user.email || '').split('@')[0];
+    if (mobileAuth) mobileAuth.style.display = 'none';
+    if (mobileUser) mobileUser.style.display = 'block';
+    if (mobileTrips) mobileTrips.style.display = 'block';
     if (user.email === 'admin@golftrip.com') adminLink.style.display = 'flex';
     else adminLink.style.display = 'none';
   } else {
     authBtns.style.display = 'flex'; navUser.style.display = 'none'; myTrips.style.display = 'none'; adminLink.style.display = 'none';
+    if (mobileAuth) mobileAuth.style.display = 'flex';
+    if (mobileUser) mobileUser.style.display = 'none';
+    if (mobileTrips) mobileTrips.style.display = 'none';
   }
 }
 
@@ -1812,7 +1862,6 @@ function getFormData() {
     destinations: compareMode === 'tiers' ? [chipSelections.dest || 'Flexible'] : selectedDests,
     trip_style: chipSelections.style || '',
     accommodation: chipSelections.accomm || '',
-    weather: chipSelections.weather || '',
     flights: multiChipSelections.flight || [],
     clubs: chipSelections.clubs || '',
     car_hire: chipSelections.carhire || 'No thanks',
