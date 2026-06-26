@@ -2036,7 +2036,7 @@ var tripVoteCache = {};
 async function loadVotesForTrip(tripId) {
   if (!tripId) return;
   try {
-    var r = await sbClient.from('trip_votes').select('item_name,item_type,panel_label,user_id').eq('trip_id', tripId);
+    var r = await sbClient.from('trip_votes').select('item_name,item_type,panel_label,user_id').eq('trip_request_id', tripId);
     if (r.error) throw r.error;
     tripVoteCache = {};
     (r.data || []).forEach(function(v) {
@@ -2056,11 +2056,11 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
   try {
     if (already) {
       await sbClient.from('trip_votes').delete()
-        .eq('trip_id', tripId).eq('user_id', currentUser.id)
+        .eq('trip_request_id', tripId).eq('user_id', currentUser.id)
         .eq('item_type', itemType).eq('item_name', itemName).eq('panel_label', panelLabel);
       if (tripVoteCache[key]) { tripVoteCache[key].count = Math.max(0, tripVoteCache[key].count - 1); tripVoteCache[key].userVoted = false; }
     } else {
-      await sbClient.from('trip_votes').insert({ trip_id: tripId, user_id: currentUser.id, item_type: itemType, item_name: itemName, panel_label: panelLabel });
+      await sbClient.from('trip_votes').insert({ trip_request_id: tripId, user_id: currentUser.id, item_type: itemType, item_name: itemName, panel_label: panelLabel });
       if (!tripVoteCache[key]) tripVoteCache[key] = { count: 0, userVoted: false };
       tripVoteCache[key].count++; tripVoteCache[key].userVoted = true;
     }
@@ -2335,10 +2335,10 @@ function buildPanel(panel, idx, qData) {
             (fl.duration_hours ? '<span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128336; ' + fl.duration_hours + 'h flight</span>' : '') +
             (fl.frequency ? '<span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128197; ' + fl.frequency + '</span>' : '') +
           '</div>' +
-          (fl.departure_times && fl.departure_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Outbound departures:</strong> ' + fl.departure_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
-          (fl.return_times && fl.return_times.length ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Return departures:</strong> ' + fl.return_times.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+          (fl.departure_times ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Outbound departures:</strong> ' + (Array.isArray(fl.departure_times) ? fl.departure_times.join(' &nbsp;·&nbsp; ') : fl.departure_times) + '</div>' : '') +
+          (fl.return_times ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Return departures:</strong> ' + (Array.isArray(fl.return_times) ? fl.return_times.join(' &nbsp;·&nbsp; ') : fl.return_times) + '</div>' : '') +
           (fl.price_range ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Est. price:</strong> ' + fl.price_range + '<span class="cost-note" style="display:inline-block;margin-left:6px">Estimate for ' + (travelMonth || 'your dates') + '</span></div>' : '') +
-          (fl.airlines && fl.airlines.length ? '<div class="fs-sm text-muted" style="margin-bottom:6px"><strong>Airlines:</strong> ' + fl.airlines.join(', ') + '</div>' : '') +
+          (fl.airlines ? '<div class="fs-sm text-muted" style="margin-bottom:6px"><strong>Airlines:</strong> ' + (Array.isArray(fl.airlines) ? fl.airlines.join(', ') : fl.airlines) + '</div>' : '') +
           (fl.baggage_note ? '<div class="fs-sm text-muted" style="margin-bottom:4px">&#129517; ' + fl.baggage_note + '</div>' : '') +
           (fl.airport_note ? '<div class="fs-sm text-muted">&#128205; ' + fl.airport_note + '</div>' : '') +
         '</div>' +
