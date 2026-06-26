@@ -28,7 +28,7 @@
     if (!r.ok) { console.warn('Maps config unavailable (' + r.status + ') — map disabled'); return; }
     var data = await r.json();
     if (!data.key) { console.warn('Maps key not available'); return; }
-    window.__googleMapsReady = function() { window.__googleMapsLoaded = true; onMapsReady(); };
+    window.__googleMapsReady = function() { window.__googleMapsLoaded = true; if (typeof onMapsReady === 'function') { onMapsReady(); } else { window.__mapsReadyPending = true; } };
     var s = document.createElement('script');
     s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
@@ -1524,6 +1524,18 @@ if (document.readyState === 'loading') {
   startMapObserver();
 }
 
+// Vote button delegation — handles all current and future vote buttons
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.vote-btn');
+  if (!btn) return;
+  var tripId = btn.getAttribute('data-vote-trip') || null;
+  var itemType = btn.getAttribute('data-vote-type');
+  var itemName = btn.getAttribute('data-vote-name');
+  var panelLabel = btn.getAttribute('data-vote-panel');
+  if (!itemType || !itemName) return;
+  castVote(tripId || currentTripRequestId, itemType, itemName, panelLabel, btn);
+});
+
 sbClient.auth.onAuthStateChange(function(event, session) {
   currentUser = session ? session.user : null;
   updateNav(currentUser);
@@ -2108,12 +2120,12 @@ function updateVoteBtn(btn, voteData) {
 function makeVoteBtn(tripId, itemType, itemName, panelLabel) {
   var key = panelLabel + '|' + itemType + '|' + itemName;
   var voteData = tripVoteCache[key] || { count: 0, userVoted: false };
-  // Sanitise strings for inline onclick attribute — just strip quotes and backslashes
-  var safeName = (itemName || '').replace(/['"\\]/g, '');
-  var safePanel = (panelLabel || '').replace(/['"\\]/g, '');
-  var safeTripId = tripId ? "'" + tripId + "'" : 'null';
+  // Use data attributes — avoids ALL escaping/quoting issues with venue names
   return '<button class="vote-btn' + (voteData.userVoted ? ' voted' : '') + '" ' +
-    'onclick="castVote(' + safeTripId + ',\''+itemType+'\',\''+safeName+'\',\''+safePanel+'\',this)">' +
+    'data-vote-trip="' + (tripId || '') + '" ' +
+    'data-vote-type="' + itemType + '" ' +
+    'data-vote-name="' + (itemName || '').replace(/"/g, '&quot;') + '" ' +
+    'data-vote-panel="' + (panelLabel || '').replace(/"/g, '&quot;') + '">' +
     '&#9733; <span class="vote-count">' + (voteData.count > 0 ? voteData.count : '') + '</span>' +
     '</button>';
 }
@@ -2121,11 +2133,18 @@ function makeVoteBtn(tripId, itemType, itemName, panelLabel) {
 async function refreshVotesSummary(tripId, panelLabel) {
   if (!tripId) return;
   await loadVotesForTrip(tripId);
-  // Update inline summary for this panel
-  document.querySelectorAll('.votes-summary[data-panel="' + panelLabel + '"]').forEach(function(el) {
-    el.innerHTML = buildVotesSummaryHtml(panelLabel);
+  // Update inline votes-summary for ALL panels (not just the one voted on)
+  document.querySelectorAll('.votes-summary').forEach(function(el) {
+    var pl = el.getAttribute('data-panel');
+    if (pl) el.innerHTML = buildVotesSummaryHtml(pl);
   });
-  // Update group planning tally (all panels combined)
+  // Update all vote button states on the page
+  document.querySelectorAll('.vote-btn[data-vote-name]').forEach(function(btn) {
+    var key = (btn.getAttribute('data-vote-panel') || '') + '|' + (btn.getAttribute('data-vote-type') || '') + '|' + (btn.getAttribute('data-vote-name') || '');
+    var voteData = tripVoteCache[key] || { count: 0, userVoted: false };
+    updateVoteBtn(btn, voteData);
+  });
+  // Update group planning tally
   updateGroupVotesTally();
 }
 
@@ -2735,6 +2754,7 @@ var mapsIsReady = false;
 
 function onMapsReady() {
   mapsIsReady = true;
+  window.__mapsReadyPending = false;
   // Fire any maps that were queued before Maps loaded
   var queue = mapsReadyQueue.slice();
   mapsReadyQueue = [];
@@ -2744,6 +2764,9 @@ function onMapsReady() {
     });
   });
 }
+
+// If Maps already fired its callback before onMapsReady was defined, catch up now
+if (window.__mapsReadyPending) { onMapsReady(); }
 
 function queueMapInit(idx) {
   if (mapInstances['trip-map-' + idx]) return; // already inited
