@@ -2839,15 +2839,18 @@ async function initMap(idx) {
   var needsGeocode = [];
 
   toSearch.forEach(function(item) {
-    if (item.aiLat && item.aiLng && Math.abs(item.aiLat) > 0.5 && Math.abs(item.aiLng) > 0.5) {
-      // AI gave plausible coords — use them immediately, no API call needed
+    var lat = parseFloat(item.aiLat);
+    var lng = parseFloat(item.aiLng);
+    if (!isNaN(lat) && !isNaN(lng) && Math.abs(lat) > 0.5 && Math.abs(lng) > 0.5) {
+      // AI gave plausible coords — use them immediately
       rawLocations.push({ type: item.type, name: item.name, area: item.area,
-        lat: item.aiLat, lng: item.aiLng, detail: item.detail, link: item.link });
+        lat: lat, lng: lng, detail: item.detail, link: item.link });
     } else {
-      // No AI coords — queue for parallel geocoding
+      console.log('Queuing for geocode:', item.name, '(aiLat:', item.aiLat, 'aiLng:', item.aiLng, ')');
       needsGeocode.push(item);
     }
   });
+  console.log('Map', idx, '— AI coords:', rawLocations.length, '| Needs geocode:', needsGeocode.length);
 
   // Geocode all missing venues in parallel (Promise.all not sequential)
   if (needsGeocode.length) {
@@ -2880,13 +2883,20 @@ async function initMap(idx) {
   }
 
   if (!locations.length) {
-    if (loadEl) loadEl.style.display = 'none';
-    var errEl = document.createElement('div');
-    errEl.className = 'map-error';
-    errEl.innerHTML = '<p>Could not load map locations.</p>' +
-      '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Search in Google Maps</a>';
-    mapEl.parentNode.insertBefore(errEl, mapEl);
-    return;
+    // Last resort — try geocoding just the destination name to centre the map
+    console.warn('No pin coords found for', dest, '— trying destination-level geocode');
+    var destGeo = await searchGooglePlace(dest, 'hotel', dest).catch(function() { return null; });
+    if (destGeo) {
+      locations = [{ type: 'hotel', name: dest, area: '', lat: destGeo.lat, lng: destGeo.lng, detail: '', link: '' }];
+    } else {
+      if (loadEl) loadEl.style.display = 'none';
+      var errEl = document.createElement('div');
+      errEl.className = 'map-error';
+      errEl.innerHTML = '<p>Could not load map locations.</p>' +
+        '<a href="https://maps.google.com/maps?q=' + encodeURIComponent(dest+' golf') + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px">Search in Google Maps</a>';
+      mapEl.parentNode.insertBefore(errEl, mapEl);
+      return;
+    }
   }
 
   // Calculate distances from first hotel
