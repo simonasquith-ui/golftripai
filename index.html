@@ -28,7 +28,7 @@
     if (!r.ok) { console.warn('Maps config unavailable (' + r.status + ') — map disabled'); return; }
     var data = await r.json();
     if (!data.key) { console.warn('Maps key not available'); return; }
-    window.__googleMapsReady = function() { window.__googleMapsLoaded = true; };
+    window.__googleMapsReady = function() { window.__googleMapsLoaded = true; onMapsReady(); };
     var s = document.createElement('script');
     s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
@@ -2051,7 +2051,10 @@ async function loadVotesForTrip(tripId) {
       tripVoteCache[key].count++;
       if (currentUser && v.user_id === currentUser.id) tripVoteCache[key].userVoted = true;
     });
-  } catch(e) { console.warn('loadVotes error:', e.message); }
+  } catch(e) {
+    console.error('loadVotes error:', e.message, e);
+    if (e && e.code) console.error('Supabase code:', e.code, 'details:', e.details, 'hint:', e.hint);
+  }
 }
 
 async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
@@ -2066,7 +2069,10 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
         .eq('item_type', itemType).eq('item_name', itemName).eq('panel_label', panelLabel);
       if (tripVoteCache[key]) { tripVoteCache[key].count = Math.max(0, tripVoteCache[key].count - 1); tripVoteCache[key].userVoted = false; }
     } else {
-      await sbClient.from('trip_votes').insert({ trip_request_id: tripId, user_id: currentUser.id, item_type: itemType, item_name: itemName, panel_label: panelLabel });
+      var voteRow = { trip_request_id: tripId, user_id: currentUser.id, item_type: itemType, item_name: itemName, panel_label: panelLabel };
+      console.log('Inserting vote:', voteRow);
+      var ins = await sbClient.from('trip_votes').insert(voteRow);
+      if (ins.error) throw ins.error;
       if (!tripVoteCache[key]) tripVoteCache[key] = { count: 0, userVoted: false };
       tripVoteCache[key].count++; tripVoteCache[key].userVoted = true;
     }
@@ -2079,7 +2085,12 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
       (async function() { try { await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }); } catch(e) {} })();
     }
     refreshVotesSummary(tripId, panelLabel);
-  } catch(e) { console.warn('castVote error:', e.message); showToast('Could not save vote. Try again.', true); }
+  } catch(e) {
+    console.error('castVote error:', e.message, e);
+    // Log the actual Supabase error if available
+    if (e && e.code) console.error('Supabase code:', e.code, 'details:', e.details);
+    showToast('Could not save vote. Try again.', true);
+  }
 }
 
 function updateVoteBtn(btn, voteData) {
@@ -2718,26 +2729,50 @@ function waitForGoogleMaps() {
 var mapObserver = null;
 var pendingMapInits = {};
 
+// Queue of map indices waiting to init once Maps is ready
+var mapsReadyQueue = [];
+var mapsIsReady = false;
+
+function onMapsReady() {
+  mapsIsReady = true;
+  // Fire any maps that were queued before Maps loaded
+  var queue = mapsReadyQueue.slice();
+  mapsReadyQueue = [];
+  queue.forEach(function(idx) {
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { initMap(idx); });
+    });
+  });
+}
+
+function queueMapInit(idx) {
+  if (mapInstances['trip-map-' + idx]) return; // already inited
+  if (pendingMapInits[idx]) return; // already queued
+  pendingMapInits[idx] = true;
+  if (mapsIsReady) {
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        initMap(idx);
+        delete pendingMapInits[idx];
+      });
+    });
+  } else {
+    // Maps not ready yet — queue it, will fire when Maps loads
+    if (mapsReadyQueue.indexOf(idx) === -1) mapsReadyQueue.push(idx);
+  }
+}
+
 function startMapObserver() {
   if (mapObserver) return;
   mapObserver = new MutationObserver(function(mutations) {
     mutations.forEach(function(m) {
       m.addedNodes.forEach(function(node) {
         if (node.nodeType !== 1) return;
-        // Check if this node or its descendants contain map containers
         var containers = node.querySelectorAll ? node.querySelectorAll('[id^="trip-map-"]') : [];
         if (node.id && node.id.startsWith('trip-map-')) containers = [node];
         containers.forEach(function(el) {
           var idx = parseInt(el.id.replace('trip-map-', ''));
-          if (!isNaN(idx) && !pendingMapInits[idx]) {
-            pendingMapInits[idx] = true;
-            requestAnimationFrame(function() {
-              requestAnimationFrame(function() {
-                initMap(idx);
-                delete pendingMapInits[idx];
-              });
-            });
-          }
+          if (!isNaN(idx)) queueMapInit(idx);
         });
       });
     });
@@ -2747,7 +2782,7 @@ function startMapObserver() {
 
 function resetMapObserver() {
   pendingMapInits = {};
-  // mapInstances reset separately
+  mapsReadyQueue = [];
 }
 
 function buildMapSection(panel, idx) {
