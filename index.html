@@ -291,17 +291,31 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .empty-state .es-icon{font-size:3rem;margin-bottom:16px}
 .empty-state h3{color:var(--green);margin-bottom:8px}
 .trip-grid{display:grid;grid-template-columns:2fr 1fr;gap:28px;align-items:start}
-.stat-boxes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.stat-boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:580px){.stat-boxes{grid-template-columns:repeat(2,1fr)}}
 .stat-box{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:16px;text-align:center}
 .stat-box .sb-val{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);font-weight:700}
 .stat-box .sb-lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
 .vote-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:24px}
 .vote-panel h3{color:var(--green);margin-bottom:16px;font-family:'Playfair Display',serif}
-.gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-@media(max-width:600px){.gp-grid{grid-template-columns:1fr}}
-.cart-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+/* === GROUP PLANNING CARDS === */
+.gp-card{background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;margin-bottom:20px;box-shadow:var(--sh)}
+.gp-card-header{background:var(--green);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gp-card-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;color:var(--gold);display:flex;align-items:center;gap:7px}
+.gp-card-badge{font-size:.7rem;font-weight:600;color:rgba(255,255,255,.6);background:rgba(255,255,255,.12);padding:2px 9px;border-radius:10px;white-space:nowrap}
+.gp-card-body{padding:20px}
+.gp-divider{height:1px;background:var(--border);margin:16px 0}
+.gp-subsection{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px}
+.gp-empty{text-align:center;padding:24px 0;color:var(--text-muted)}
+.gp-empty-icon{font-size:1.8rem;margin-bottom:8px;opacity:.45}
+.gp-empty p{font-size:.83rem;line-height:1.6;max-width:260px;margin:0 auto}
+.gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:680px){.gp-grid{grid-template-columns:1fr}}
+
+/* Cart internals */
+.cart-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
 .cart-item:last-child{border-bottom:none;padding-bottom:0}
-.cart-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.cart-icon{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;background:var(--off-white)}
 .cart-body{flex:1;min-width:0}
 .cart-name{font-size:.88rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cart-sub{font-size:.78rem;color:var(--text-muted);margin-top:2px}
@@ -313,46 +327,44 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .cart-vote-row{display:flex;gap:5px;margin-top:5px}
 .cart-vote-btn{border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:.72rem;cursor:pointer;background:var(--white);color:var(--text-muted)}
 .cart-vote-btn.yes{border-color:var(--green);color:var(--green)}
-.cart-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:1px solid var(--border);margin-top:4px}
-.cart-cta{background:var(--green);color:var(--gold);border:none;border-radius:var(--r);padding:10px 16px;font-size:.88rem;font-weight:500;cursor:pointer;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px}
-.gp-section-head{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:0 0 10px;display:flex;align-items:center;gap:5px}
+.cart-total{display:flex;justify-content:space-between;align-items:center;padding:12px 0 2px;border-top:1px solid var(--border);margin-top:4px}
+.cart-cta{background:var(--green);color:var(--gold);border:none;border-radius:var(--r);padding:11px 16px;font-size:.88rem;font-weight:600;cursor:pointer;width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.01em;transition:opacity var(--tr)}
+.cart-cta:hover{opacity:.88}
+.cart-book-link{font-size:.75rem;font-weight:600;color:var(--green);text-decoration:none;border:1px solid var(--green);border-radius:20px;padding:1px 8px;white-space:nowrap;transition:background var(--tr),color var(--tr)}
+.cart-book-link:hover{background:var(--green);color:var(--white)}
+
+/* Members */
 .member-status-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
 .member-status-row:last-child{border-bottom:none}
 .prog-wrap{height:4px;flex:1;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--green);border-radius:2px}
-.gp-chat-wrap{display:flex;flex-direction:column;height:100%;min-height:240px}
-.gp-chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:8px;min-height:160px;max-height:220px}
-.gp-chat-msg{padding:7px 11px;border-radius:var(--r);font-size:.82rem;max-width:88%}
-.gp-chat-msg.them{background:var(--sand);color:var(--text);align-self:flex-start}
-.gp-chat-msg.me{background:var(--green);color:rgba(255,255,255,.9);align-self:flex-end}
-.gp-chat-meta{font-size:.68rem;color:var(--text-muted);margin-top:2px}
-.gp-chat-input{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-
-.vote-pct{font-size:.8rem;color:var(--gold);font-weight:700}
-.vote-winner{background:var(--sand);border-radius:var(--r);padding:10px 14px;font-size:.85rem;color:var(--green);font-weight:600;margin-top:12px;text-align:center}
-.chat-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-.chat-header{background:var(--green);padding:16px 20px;color:var(--gold);font-family:'Playfair Display',serif;font-size:1rem;font-weight:600}
-.chat-messages{height:320px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-.chat-msg{padding:8px 12px;border-radius:8px;max-width:85%;font-size:.85rem;line-height:1.5}
-.chat-msg.mine{background:var(--green);color:var(--white);align-self:flex-end}
-.chat-msg.theirs{background:var(--sand);color:var(--text);align-self:flex-start}
-.chat-msg.system{background:transparent;color:var(--text-muted);font-style:italic;text-align:center;align-self:center;font-size:.8rem;max-width:100%}
-.chat-msg-meta{font-size:.7rem;opacity:.6;margin-top:3px}
-.chat-input-row{display:flex;border-top:1px solid var(--border);padding:12px;gap:8px}
-.chat-input-row input{flex:1}
-.members-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:24px}
-.members-panel h3{color:var(--green);margin-bottom:16px;font-family:'Playfair Display',serif}
 .member-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .member-row:last-child{border-bottom:none}
-.member-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.member-avatar{width:38px;height:38px;border-radius:50%;background:var(--green-light);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;border:2px solid rgba(255,255,255,.25)}
 .member-info{flex:1}
-.member-name{font-weight:600;font-size:.9rem;color:var(--green)}
-.member-status-badge{font-size:.75rem;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px}
-.status-going{background:#dcfce7;color:#166534}.status-maybe{background:#fef9c3;color:#854d0e}
-.status-no{background:#fee2e2;color:#991b1b}.status-pending{background:var(--sand);color:var(--text-muted)}
-.invite-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
-.invite-link-box{display:flex;gap:8px;margin-top:8px}
-.invite-link-box input{font-size:.8rem;background:var(--sand)}
+.member-name{font-weight:600;font-size:.88rem;color:var(--green)}
+.member-status-badge{font-size:.72rem;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px}
+.status-going{background:#dcfce7;color:#166534}
+.status-maybe{background:#fef9c3;color:#854d0e}
+.status-no{background:#fee2e2;color:#991b1b}
+.status-pending{background:var(--sand);color:var(--text-muted)}
+.invite-link-box{display:flex;gap:6px;margin-top:8px}
+.invite-link-box input{font-size:.8rem;background:var(--off-white)}
+
+/* Vote tally */
+.vote-pct{font-size:.8rem;color:var(--gold);font-weight:700}
+.vote-winner{background:var(--sand);border-radius:var(--r);padding:10px 14px;font-size:.85rem;color:var(--green);font-weight:600;margin-top:12px;text-align:center}
+
+/* Chat */
+.gp-chat-wrap{display:flex;flex-direction:column;min-height:300px}
+.gp-chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:8px;min-height:220px;max-height:340px}
+.gp-chat-msg{padding:8px 12px;border-radius:var(--r);font-size:.83rem;line-height:1.5;max-width:88%}
+.gp-chat-msg.them{background:var(--sand);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.gp-chat-msg.me{background:var(--green);color:rgba(255,255,255,.92);align-self:flex-end;border-bottom-right-radius:3px}
+.gp-chat-msg.system{background:transparent;color:var(--text-muted);font-style:italic;text-align:center;align-self:center;font-size:.78rem;max-width:100%}
+.gp-chat-meta{font-size:.68rem;color:var(--text-muted);margin-top:2px}
+.gp-chat-meta.right{text-align:right;color:rgba(255,255,255,.45)}
+.gp-chat-input{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .admin-login{max-width:400px;margin:80px auto;background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:40px}
 .admin-login h2{color:var(--green);margin-bottom:24px;font-family:'Playfair Display',serif;text-align:center}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:40px}
@@ -1127,78 +1139,93 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 
     <div id="td-panel-group" style="display:none">
 
-      <!-- CART + BOOKING PROGRESS — full width -->
-      <div class="card" style="margin-bottom:20px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h3 style="color:var(--green);font-family:'Playfair Display',serif;font-size:1.1rem;margin:0">&#128663; Trip Cart</h3>
-          <span class="fs-sm text-muted" id="cart-item-count">0 items</span>
+      <!-- TRIP CART -->
+      <div class="gp-card">
+        <div class="gp-card-header">
+          <div class="gp-card-title">&#128663; Trip Cart</div>
+          <span class="gp-card-badge" id="cart-item-count">0 items</span>
         </div>
-        <div id="cart-items-list">
-          <p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Star and add hotels, courses and flights from the trip itinerary.</p>
-        </div>
-        <div id="cart-totals" style="display:none">
-          <div class="cart-total">
-            <div>
-              <div class="fs-sm text-muted">Estimated total per person</div>
-              <div style="font-size:1.3rem;font-weight:600;color:var(--green)" id="cart-total-price">£0</div>
+        <div class="gp-card-body">
+          <div id="cart-items-list">
+            <div class="gp-empty">
+              <div class="gp-empty-icon">&#128663;</div>
+              <p>No items yet — add hotels, courses and flights from the trip panels using the cart button on each card.</p>
             </div>
-            <div class="fs-sm text-muted" style="text-align:right" id="cart-golfer-count">excl. food &amp; drink</div>
           </div>
-          <button class="cart-cta" id="cart-book-btn">&#128640; Book remaining items</button>
+          <div id="cart-totals" style="display:none">
+            <div class="cart-total">
+              <div>
+                <div class="fs-sm text-muted">Estimated total per person</div>
+                <div style="font-size:1.3rem;font-weight:700;color:var(--green);font-family:'Playfair Display',serif" id="cart-total-price">£0</div>
+              </div>
+              <div class="fs-sm text-muted" style="text-align:right" id="cart-golfer-count">excl. food &amp; drink</div>
+            </div>
+            <button class="cart-cta" id="cart-book-btn">&#128640; Book remaining items</button>
+          </div>
         </div>
       </div>
 
-      <!-- VOTES TALLY — full width -->
-      <div class="card" style="margin-bottom:20px">
-        <h3 style="color:var(--green);font-family:'Playfair Display',serif;font-size:1rem;margin:0 0 12px">&#9733; Group Votes</h3>
-        <p class="fs-sm text-muted" style="margin-bottom:14px">Star your preferred courses, hotels and restaurants in the trip panels.</p>
-        <div id="group-votes-tally"><p class="fs-sm text-muted">No votes yet.</p></div>
+      <!-- GROUP VOTES -->
+      <div class="gp-card">
+        <div class="gp-card-header">
+          <div class="gp-card-title">&#9733; Group Votes</div>
+        </div>
+        <div class="gp-card-body">
+          <p class="fs-sm text-muted" style="margin-bottom:14px">Star your preferred courses, hotels and restaurants in the trip panels to cast a vote.</p>
+          <div id="group-votes-tally"><div class="gp-empty"><div class="gp-empty-icon">&#9733;</div><p>No votes yet.</p></div></div>
+        </div>
       </div>
 
       <!-- BTT wrap kept for compatibility -->
       <div id="group-btt-wrap" style="margin-bottom:20px"></div>
 
-      <!-- BOTTOM GRID: members+status LEFT, chat RIGHT -->
+      <!-- GRID: members + status LEFT, chat RIGHT -->
       <div class="gp-grid">
 
-        <!-- LEFT: members + status -->
+        <!-- LEFT: members + invite + status -->
         <div>
-          <div class="card" style="margin-bottom:12px">
-            <div class="gp-section-head">&#128101; Group Members</div>
-            <div id="members-list"></div>
-            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-              <div class="gp-section-head">&#128279; Invite</div>
+          <div class="gp-card">
+            <div class="gp-card-header">
+              <div class="gp-card-title">&#128101; Group Members</div>
+            </div>
+            <div class="gp-card-body">
+              <div id="members-list"></div>
+              <div class="gp-divider"></div>
+              <div class="gp-subsection">&#128279; Invite a member</div>
               <div style="display:flex;gap:6px;margin-bottom:10px">
                 <input type="email" id="invite-email" placeholder="email@example.com" style="flex:1">
                 <button class="btn btn-primary btn-sm" onclick="inviteMember()">Invite</button>
               </div>
               <div class="invite-link-box">
                 <input type="text" id="invite-link" readonly>
-                <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
+                <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy link</button>
               </div>
+              <div class="gp-divider"></div>
+              <div class="gp-subsection">&#9989; Your Status</div>
+              <select id="my-status-select" style="width:100%;margin-bottom:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;background:var(--white)">
+                <option value="Going">Going</option>
+                <option value="Maybe">Maybe</option>
+                <option value="Cannot go">Cannot go</option>
+              </select>
+              <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="updateMyStatus()">Update Status</button>
+              <button class="btn btn-ghost" style="width:100%" onclick="showPage('profile')">Back to My Trips</button>
             </div>
-          </div>
-          <div class="card">
-            <div class="gp-section-head">&#9989; Your Status</div>
-            <select id="my-status-select" style="width:100%;margin-bottom:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;background:var(--white)">
-              <option value="Going">Going</option>
-              <option value="Maybe">Maybe</option>
-              <option value="Cannot go">Cannot go</option>
-            </select>
-            <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="updateMyStatus()">Update Status</button>
-            <button class="btn btn-ghost" style="width:100%" onclick="showPage('profile')">Back to My Trips</button>
           </div>
         </div>
 
         <!-- RIGHT: group chat -->
         <div>
-          <div class="card" style="height:100%">
-            <div class="gp-section-head">&#128172; Group Chat</div>
-            <div class="gp-chat-wrap">
-              <div class="gp-chat-messages" id="chat-messages"></div>
-              <div class="gp-chat-input">
-                <input type="text" id="chat-input" placeholder="Type a message..." style="flex:1">
-                <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
+          <div class="gp-card">
+            <div class="gp-card-header">
+              <div class="gp-card-title">&#128172; Group Chat</div>
+            </div>
+            <div class="gp-card-body">
+              <div class="gp-chat-wrap">
+                <div class="gp-chat-messages" id="chat-messages"></div>
+                <div class="gp-chat-input">
+                  <input type="text" id="chat-input" placeholder="Type a message..." style="flex:1">
+                  <button class="btn btn-primary btn-sm" id="chat-send-btn">Send</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1663,12 +1690,7 @@ function updateNav(user) {
   }
 }
 
-// Start map observer as soon as DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startMapObserver);
-} else {
-  startMapObserver();
-}
+// Maps are initialised explicitly via scheduleMapInit — no observer needed
 
 // Cart button delegation
 document.addEventListener('click', function(e) {
@@ -1679,7 +1701,8 @@ document.addEventListener('click', function(e) {
   var sub = btn.getAttribute('data-cart-sub');
   var price = btn.getAttribute('data-cart-price');
   var priceNum = parseFloat(btn.getAttribute('data-cart-pricenum')) || 0;
-  addToCart(type, name, sub, price, priceNum);
+  var link = btn.getAttribute('data-cart-link') || '';
+  addToCart(type, name, sub, price, priceNum, link);
 });
 
 // Vote button delegation — handles all current and future vote buttons
@@ -2356,9 +2379,7 @@ async function generateTrip() {
           var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
           var capturedIdx = idx;
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() { initMap(capturedIdx, 'results'); });
-          });
+          setTimeout(function() { scheduleMapInit(capturedIdx, 'results'); }, 50);
         }
       }
       // Update compare bar price
@@ -2418,10 +2439,10 @@ function fmtPrice(gbp) {
 // ── TRIP CART ───────────────────────────────────────────────
 var tripCart = []; // { id, type, name, sub, price, priceNum, status, votes }
 
-function addToCart(type, name, sub, price, priceNum) {
+function addToCart(type, name, sub, price, priceNum, link) {
   var existing = tripCart.find(function(i) { return i.id === type + '|' + name; });
   if (existing) { showToast(name + ' already in cart', true); return; }
-  tripCart.push({ id: type + '|' + name, type: type, name: name, sub: sub, price: price, priceNum: priceNum || 0, status: 'pending', votes: { yes: 0, no: 0 } });
+  tripCart.push({ id: type + '|' + name, type: type, name: name, sub: sub, price: price, priceNum: priceNum || 0, link: link || '', status: 'pending', votes: { yes: 0, no: 0 } });
   renderCart();
   showToast(name + ' added to cart');
   saveTripCart();
@@ -2495,12 +2516,16 @@ function renderCart() {
       '<button class="cart-vote-btn" style="margin-left:auto;color:#a32d2d;border-color:#a32d2d" onclick="removeFromCart(\'' + safeId + '\')">Remove</button>' +
       '</div>' : '';
 
+    var bookLink = item.link ? '<a href="' + item.link + '" target="_blank" class="cart-book-link">Book &#8599;</a>' : '';
     return '<div class="cart-item">' +
       '<div class="cart-icon" style="background:' + (typeBg[item.type] || '#f0ece4') + '">' + (typeIcons[item.type] || '&#128205;') + '</div>' +
       '<div class="cart-body">' +
         '<div class="cart-name">' + item.name + '</div>' +
         (item.sub ? '<div class="cart-sub">' + item.sub + '</div>' : '') +
-        (item.price ? '<div class="cart-price">' + item.price + '</div>' : '') +
+        '<div style="display:flex;align-items:center;gap:10px;margin-top:2px">' +
+          (item.price ? '<div class="cart-price">' + item.price + '</div>' : '') +
+          bookLink +
+        '</div>' +
         voteRow +
       '</div>' +
       statusBadge +
@@ -2569,7 +2594,7 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
     // Post to group chat so members see activity
     if (!already && tripId) {
       var typeLabel = itemType === 'course' ? 'golf course' : itemType;
-      (async function() { try { await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }); } catch(e) {} })();
+      (async function() { try { await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.display_name || currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }); } catch(e) {} })();
     }
     refreshVotesSummary(tripId, panelLabel);
   } catch(e) {
@@ -2701,7 +2726,7 @@ function renderResults(aiData, qData) {
   Object.keys(mapInstances).forEach(function(k) {
     if (k.startsWith('results-')) delete mapInstances[k];
   });
-  resetMapObserver();
+  resetMapState('results');
   var mode = qData ? qData.compare_mode : compareMode;
   var panels = aiData && aiData.panels ? aiData.panels : makeFallbackPanels(qData);
 
@@ -2754,7 +2779,7 @@ function activatePanel(idx) {
   if (mapInstances[mapId] && window.google && window.google.maps) {
     requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
   } else {
-    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx, 'results'); }); });
+    scheduleMapInit(idx, 'results');
   }
 }
 
@@ -2907,7 +2932,8 @@ function buildPanel(panel, idx, qData, mapPrefix) {
             'data-cart-name="' + (c.name||'').replace(/"/g,'&quot;') + '" ' +
             'data-cart-sub="' + (c.location||'').replace(/"/g,'&quot;') + '" ' +
             'data-cart-price="Est. ' + fmtPrice(c.green_fee||0) + '/round" ' +
-            'data-cart-pricenum="' + (c.green_fee||0) + '">&#43; Cart</button>' +
+            'data-cart-pricenum="' + (c.green_fee||0) + '" ' +
+            'data-cart-link="' + gn + '">&#43; Add to cart</button>' +
           (c.club_hire ? '<a href="' + hire + '" target="_blank" class="card-link">Club Hire</a>' : '') +
         '</div>' +
       '</div>';
@@ -2960,7 +2986,8 @@ function buildPanel(panel, idx, qData, mapPrefix) {
             'data-cart-name="' + (h.name||'').replace(/"/g,'&quot;') + '" ' +
             'data-cart-sub="' + (h.area||'').replace(/"/g,'&quot;') + '" ' +
             'data-cart-price="Est. ' + fmtPrice(h.price_per_night||0) + '/night" ' +
-            'data-cart-pricenum="' + (h.price_per_night||0) + '">&#43; Cart</button>' +
+            'data-cart-pricenum="' + (h.price_per_night||0) + '" ' +
+            'data-cart-link="' + bookUrl + '">&#43; Add to cart</button>' +
         '</div>' +
       '</div>';
     });
@@ -3033,6 +3060,12 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">' +
           '<a href="' + mapsUrl + '" target="_blank" class="card-link" style="display:inline-flex;align-items:center;gap:5px">&#128205; Google Maps</a>' +
           (r.opentable_available ? '<a href="' + openTableUrl + '" target="_blank" class="card-link" style="display:inline-flex;align-items:center;gap:5px;background:var(--sand)">&#128197; Reserve on OpenTable</a>' : '') +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
+            'data-cart-type="restaurant" ' +
+            'data-cart-name="' + (r.name||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-sub="' + (r.type||'').replace(/"/g,'&quot;') + '" ' +
+            'data-cart-price="" data-cart-pricenum="0" ' +
+            'data-cart-link="' + (r.opentable_available ? openTableUrl : mapsUrl) + '">&#43; Add to cart</button>' +
         '</div>' +
         '</div>';
     });
@@ -3209,91 +3242,44 @@ function exportPDF(panelIdx) {
 
 /* === MAP FUNCTIONS === */
 var mapInstances = {};
-var googleMapsLoaded = false;
 
-function waitForGoogleMaps() {
-  return new Promise(function(resolve, reject) {
-    if (window.google && window.google.maps && window.google.maps.Map) { resolve(); return; }
-    var attempts = 0;
-    var check = setInterval(function() {
-      attempts++;
-      if (window.google && window.google.maps && window.google.maps.Map) {
-        clearInterval(check); resolve();
-      } else if (attempts > 100) {
-        clearInterval(check); reject(new Error('Google Maps did not load in time'));
-      }
-    }, 100);
-  });
-}
-
-// Central map observer — watches for map containers to appear and inits them
-// This replaces all scattered requestAnimationFrame(initMap) calls
-var mapObserver = null;
-var pendingMapInits = {};
-
-// Queue of map indices waiting to init once Maps is ready
+// Tracks map IDs that have a pending setTimeout so we never double-fire
+var scheduledInits = {};
 var mapsReadyQueue = [];
 var mapsIsReady = false;
+
+function scheduleMapInit(idx, prefix) {
+  prefix = prefix || 'map';
+  var mapId = prefix + '-trip-map-' + idx;
+  if (mapInstances[mapId]) return; // already rendered
+  if (scheduledInits[mapId]) return; // already scheduled
+  scheduledInits[mapId] = true;
+  function doInit() {
+    delete scheduledInits[mapId];
+    initMap(idx, prefix);
+  }
+  if (mapsIsReady) {
+    setTimeout(doInit, 50);
+  } else {
+    mapsReadyQueue.push(doInit);
+  }
+}
 
 function onMapsReady() {
   mapsIsReady = true;
   window.__mapsReadyPending = false;
-  // Fire any maps that were queued before Maps loaded
-  var queue = mapsReadyQueue.slice();
-  mapsReadyQueue = [];
-  queue.forEach(function(item) {
-    var idx = typeof item === 'object' ? item.idx : item;
-    var prefix = typeof item === 'object' ? item.prefix : 'map';
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() { initMap(idx, prefix); });
-    });
-  });
+  var queue = mapsReadyQueue.splice(0);
+  queue.forEach(function(fn) { setTimeout(fn, 50); });
 }
 
 // If Maps already fired its callback before onMapsReady was defined, catch up now
 if (window.__mapsReadyPending) { onMapsReady(); }
 
-function queueMapInit(idx, prefix) {
-  prefix = prefix || 'map';
-  var mapId = prefix + '-trip-map-' + idx;
-  var qKey = mapId;
-  if (mapInstances[mapId]) return; // already inited
-  if (pendingMapInits[qKey]) return; // already queued
-  pendingMapInits[qKey] = true;
-  function doInit() {
-    initMap(idx, prefix);
-    delete pendingMapInits[qKey];
-  }
-  if (mapsIsReady) {
-    requestAnimationFrame(function() { requestAnimationFrame(doInit); });
-  } else {
-    if (!mapsReadyQueue.find(function(q) { return q.idx === idx && q.prefix === prefix; })) {
-      mapsReadyQueue.push({ idx: idx, prefix: prefix });
-    }
-  }
-}
-
-function startMapObserver() {
-  if (mapObserver) return;
-  mapObserver = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(node) {
-        if (node.nodeType !== 1) return;
-        var containers = node.querySelectorAll ? node.querySelectorAll('.map-container[data-map-idx]') : [];
-        if (node.classList && node.classList.contains('map-container') && node.getAttribute('data-map-idx')) containers = [node];
-        containers.forEach(function(el) {
-          var idx = parseInt(el.getAttribute('data-map-idx'));
-          var prefix = el.getAttribute('data-map-prefix') || 'map';
-          if (!isNaN(idx)) queueMapInit(idx, prefix);
-        });
-      });
-    });
+function resetMapState(prefix) {
+  // Clear any pending scheduled inits for the given prefix
+  Object.keys(scheduledInits).forEach(function(k) {
+    if (!prefix || k.startsWith(prefix + '-')) delete scheduledInits[k];
   });
-  mapObserver.observe(document.body, { childList: true, subtree: true });
-}
-
-function resetMapObserver() {
-  pendingMapInits = {};
   mapsReadyQueue = [];
 }
 
@@ -3318,23 +3304,7 @@ function buildMapSection(panel, idx, mapPrefix) {
 }
 
 function toggleMap(idx) {
-  // Kept for backwards compatibility — now just initialises if not already done
-  autoInitMap(idx);
-}
-
-function autoInitMap(idx) {
-  var mapId = 'trip-map-' + idx;
-  if (mapInstances[mapId]) {
-    requestAnimationFrame(function() {
-      if (window.google && window.google.maps) {
-        google.maps.event.trigger(mapInstances[mapId], 'resize');
-      }
-    });
-    return;
-  }
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(idx); });
-  });
+  scheduleMapInit(idx, 'results');
 }
 
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -3411,7 +3381,7 @@ async function initMap(idx, mapPrefix) {
   var colors = { hotel: '#1a3a2a', course: '#c9a84c', restaurant: '#e85d26' };
   var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
 
-  // By the time initMap runs, Maps is guaranteed ready (gated by queueMapInit/onMapsReady)
+  // By the time initMap runs, Maps is guaranteed ready (gated by scheduleMapInit/onMapsReady)
   // No need to wait again — just check directly
   if (!window.google || !window.google.maps || !window.google.maps.Map) {
     console.warn('initMap called but Maps not available — should not happen');
@@ -3540,10 +3510,9 @@ async function initMap(idx, mapPrefix) {
     var pinColor = colors[loc.type] || '#666';
     // Build custom pin element
     var pinEl = document.createElement('div');
-    var pinLetter = loc.type === 'hotel' ? 'H' : loc.type === 'course' ? 'G' : 'R';
-    var pinTextColor = loc.type === 'course' ? '#1a3a2a' : '#ffffff';
-    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50%;background:' + pinColor + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:' + pinTextColor + ';font-family:Arial,sans-serif;cursor:pointer';
-    pinEl.textContent = pinLetter;
+    var pinIcon = loc.type === 'hotel' ? '🛌' : loc.type === 'course' ? '⛳' : '🍴';
+    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50%;background:' + pinColor + ';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer';
+    pinEl.textContent = pinIcon;
 
     // Use standard Marker — no Map ID required, works reliably everywhere
     var marker = new google.maps.Marker({
@@ -3552,13 +3521,13 @@ async function initMap(idx, mapPrefix) {
       title: loc.name,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 11,
+        scale: 12,
         fillColor: pinColor,
         fillOpacity: 1,
         strokeColor: '#ffffff',
         strokeWeight: 3
       },
-      label: { text: pinLetter, color: pinTextColor, fontSize: '11px', fontWeight: '700' }
+      label: { text: pinIcon, fontSize: '13px', fontWeight: '400' }
     });
 
     var popupContent = '<div class="gmap-popup">' +
@@ -3843,7 +3812,7 @@ async function loadTripItinerary(tripId, tripData) {
 function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
   mapInstances = {}; // reset map instances for this trip
-  resetMapObserver(); // reset pending inits
+  resetMapState('saved'); // reset pending inits
   tripVoteCache = {}; // reset vote cache for this trip
   if (tripData && tripData.id) {
     currentTripRequestId = tripData.id; // keep in sync for makeVoteBtn
@@ -3871,6 +3840,9 @@ function renderSavedItinerary(panels, tripData, contentEl) {
     var panelEl = buildPanel(panel, i, qData, 'saved');
     panelEl.classList.add('td-saved-panel');
     panelsEl.appendChild(panelEl);
+    (function(capturedI) {
+      setTimeout(function() { scheduleMapInit(capturedI, 'saved'); }, 50);
+    })(i);
   });
 }
 
@@ -3882,7 +3854,7 @@ function activateSavedPanel(idx) {
   if (mapInstances[mapId] && window.google && window.google.maps) {
     requestAnimationFrame(function() { google.maps.event.trigger(mapInstances[mapId], 'resize'); });
   } else {
-    requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx, 'saved'); }); });
+    scheduleMapInit(idx, 'saved');
   }
 }
 
@@ -4028,7 +4000,7 @@ async function sendChatMessage() {
 async function inviteMember() {
   if (!currentUser) { openAuthModal('signin'); return; }
   var emailEl = document.getElementById('invite-email');
-  var inviteBtn = document.querySelector('.invite-section .btn-primary');
+  var inviteBtn = document.querySelector('#invite-email + button');
   var email = emailEl.value.trim();
   if (!email || !activeTripId) { showToast('Please enter an email address.', true); return; }
 
