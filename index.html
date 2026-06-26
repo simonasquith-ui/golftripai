@@ -1891,7 +1891,7 @@ async function generateTrip() {
         'courses(EXACTLY 5:name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
         'hotels(EXACTLY 3:name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
         'flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note}.' +
-        ' green_fee/price_per_night=GBP numbers. Real venues, accurate GPS.';
+        ' CRITICAL: every course and hotel MUST have lat and lng as decimal numbers (e.g. lat:37.123, lng:-8.456). These are plotted on a map — use precise real-world GPS coordinates.';
     }
 
     function makePromptB(destination, tier, label) {
@@ -1899,7 +1899,8 @@ async function generateTrip() {
         ' car_hire needed: ' + (data.car_hire !== 'No thanks' ? 'yes' : 'no') + '.' +
         ' Return JSON: label,restaurants(EXACTLY 5:name,type,description,rating,opentable_available,lat,lng),' +
         'car_hire{needed,options(EXACTLY 3:provider,vehicle_type,est_cost_per_day,booking_tip),pickup_location}.' +
-        ' label="' + label + '". rating=decimal. opentable_available=true/false. Real venues, accurate GPS.';
+        ' label="' + label + '". rating=decimal. opentable_available=true/false.' +
+        ' CRITICAL: every restaurant MUST have lat and lng as decimal numbers. Use precise real GPS coordinates.';
     }
 
     function callAPI(prompt, tier, part) {
@@ -1970,6 +1971,12 @@ async function generateTrip() {
         if (existing) {
           var newEl = buildPanel(merged, idx, data);
           existing.replaceWith(newEl);
+          // Init map after element is in DOM — only for active (visible) panel
+          if (idx === 0) {
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() { initMap(idx); });
+            });
+          }
         }
       }
       // Update compare bar price
@@ -2066,7 +2073,7 @@ async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
     // Post to group chat so members see activity
     if (!already && tripId) {
       var typeLabel = itemType === 'course' ? 'golf course' : itemType;
-      sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }).catch(function(){});
+      (async function() { try { await sbClient.from('trip_messages').insert({ trip_request_id: tripId, user_id: currentUser.id, message: (currentUser.email || 'Someone') + ' voted for ' + typeLabel + ': ' + itemName }); } catch(e) {} })();
     }
     refreshVotesSummary(tripId, panelLabel);
   } catch(e) { console.warn('castVote error:', e.message); showToast('Could not save vote. Try again.', true); }
@@ -2227,12 +2234,20 @@ function renderResults(aiData, qData) {
 
     panelsEl.appendChild(buildPanel(panel, i, qData));
   });
+  // Init map for first panel only — others init when activated
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(0); });
+  });
 }
 
 function activatePanel(idx) {
   document.querySelectorAll('.results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.result-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('.compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
+  // Init map for this panel if not already done
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(idx); });
+  });
 }
 
 function buildSkyscannerUrl(panel, qData) {
@@ -2546,10 +2561,6 @@ function buildPanel(panel, idx, qData) {
   '</div>';
 
   el.innerHTML = html;
-  // Auto-init map now that panel is in the DOM
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() { initMap(idx); });
-  });
   return el;
 }
 
@@ -2928,10 +2939,6 @@ async function initMap(idx) {
     center: { lat: avgLat, lng: avgLng },
     zoom: 12,
     mapTypeId: 'roadmap',
-    mapId: 'golftrip_map',
-    styles: [
-      { featureType: 'poi.sports_complex', elementType: 'labels', stylers: [{ visibility: 'on' }] }
-    ],
     mapTypeControl: true,
     streetViewControl: false,
     fullscreenControl: true
@@ -3422,12 +3429,19 @@ function renderSavedItinerary(panels, tripData, contentEl) {
     panelEl.classList.add('td-saved-panel');
     panelsEl.appendChild(panelEl);
   });
+  // Init map for first panel after all are in DOM
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(0); });
+  });
 }
 
 function activateSavedPanel(idx) {
   document.querySelectorAll('#td-result-tabs .results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.td-saved-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('#td-compare-bar .compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(idx); });
+  });
 }
 
 async function loadTripMembers(tripId) {
