@@ -736,7 +736,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="faq-item"><button class="faq-q">Can my group fly from different airports?</button><div class="faq-a"><div class="faq-a-inner">Yes. You can add multiple departure airports with the number of golfers for each. This is useful for UK golf societies where members are spread across different cities. The AI factors in all airports when recommending destinations and estimating flight costs.</div></div></div>
         <div class="faq-item"><button class="faq-q">Are the prices accurate?</button><div class="faq-a"><div class="faq-a-inner">Prices shown are AI-estimated based on typical costs for each destination and budget tier. They are a planning guide, not a live quote. Always check the actual booking platforms for current pricing before committing.</div></div></div>
         <div class="faq-item"><button class="faq-q">Is there a free trial for paid plans?</button><div class="faq-a"><div class="faq-a-inner">The Free plan lets you generate one trip with no credit card required. Pro and Society plans are pay-monthly with no long-term contract, so you can cancel at any time.</div></div></div>
-        <div class="faq-item"><button class="faq-q">What destinations are supported?</button><div class="faq-a"><div class="faq-a-inner">We currently support Spain, Portugal, Turkey, Morocco, Ireland, Scotland, England, France and Dubai, plus a Flexible option. More destinations are added regularly.</div></div></div>
+        <div class="faq-item"><button class="faq-q">What destinations are supported?</button><div class="faq-a"><div class="faq-a-inner">We currently support Spain, Portugal, Turkey, Morocco, Ireland, Scotland, Italy, France, UAE, Greece and Bulgaria, plus a Surprise Me option. More destinations are added regularly.</div></div></div>
       </div>
     </div>
   </section>
@@ -936,6 +936,22 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Dubai, UAE">Dubai</div>
             <div class="chip dest-region-chip" data-dest="Abu Dhabi, UAE">Abu Dhabi</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Greece">
+          <div class="dest-country-header"><span>&#127468;&#127479; Greece</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Costa Navarino, Greece">Costa Navarino</div>
+            <div class="chip dest-region-chip" data-dest="Rhodes, Greece">Rhodes</div>
+            <div class="chip dest-region-chip" data-dest="Crete, Greece">Crete</div>
+            <div class="chip dest-region-chip" data-dest="Athens region, Greece">Athens region</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="Bulgaria">
+          <div class="dest-country-header"><span>&#127463;&#127468; Bulgaria</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Black Sea Coast, Bulgaria">Black Sea Coast</div>
+            <div class="chip dest-region-chip" data-dest="Sofia region, Bulgaria">Sofia region</div>
           </div>
         </div>
         <div style="margin-top:8px">
@@ -2371,6 +2387,39 @@ document.getElementById('dest-accordion').addEventListener('click', function(e) 
 
   if (chip) {
     var dest = chip.getAttribute('data-dest');
+
+    // Special case: "Surprise me" — randomly pick destinations instead of selecting itself
+    if (dest === 'Flexible') {
+      var allDests = Array.from(document.querySelectorAll('.dest-region-chip'))
+        .map(function(c) { return c.getAttribute('data-dest'); })
+        .filter(function(d) { return d !== 'Flexible'; });
+      // Shuffle
+      for (var i = allDests.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = allDests[i]; allDests[i] = allDests[j]; allDests[j] = tmp;
+      }
+      document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
+      if (compareMode === 'tiers') {
+        var pick = allDests[0];
+        selectedDests = [pick];
+        chipSelections.dest = pick;
+        document.querySelectorAll('.dest-region-chip').forEach(function(c) {
+          if (c.getAttribute('data-dest') === pick) c.classList.add('active');
+        });
+        showToast('Surprised you with: ' + pick);
+      } else {
+        var picks = allDests.slice(0, 3);
+        selectedDests = picks;
+        chipSelections.dest = picks[0] || null;
+        document.querySelectorAll('.dest-region-chip').forEach(function(c) {
+          if (picks.indexOf(c.getAttribute('data-dest')) !== -1) c.classList.add('active');
+        });
+        showToast('Surprised you with: ' + picks.join(', '));
+      }
+      renderDestTags();
+      return;
+    }
+
     if (compareMode === 'tiers') {
       // Single select — clear all, select this one
       document.querySelectorAll('.dest-region-chip').forEach(function(c) { c.classList.remove('active'); });
@@ -2648,11 +2697,10 @@ async function generateTrip() {
 
     var completedPanels = [];
     var rendered = {};
+    var firstPanelShown = false;
 
-    // Show loading placeholders immediately
-    document.getElementById('results-loading').style.display = 'none';
-    document.getElementById('results-content').style.display = 'block';
-    renderResults({ panels: panelDefs.map(function(d) { return { label: d.label, destination: d.destination, _loading: true }; }) }, data);
+    // Keep single loading screen visible — don't show 3 separate spinners yet
+    // The results-content / panels render only once the first panel is actually ready
 
     function tryRenderPanel(label) {
       if (rendered[label]) return;
@@ -2662,8 +2710,26 @@ async function generateTrip() {
       // Merge A and B
       var merged = Object.assign({}, p._partA, p._partB, { label: label, destination: p.destination });
       completedPanels.push(merged);
-      // Update the panel in the DOM
       var idx = panelDefs.findIndex(function(d) { return d.label === label; });
+
+      if (!firstPanelShown) {
+        // First panel ready — reveal results-content now, with this panel real
+        // and the other two as lightweight placeholders (no spinner clutter)
+        firstPanelShown = true;
+        document.getElementById('results-loading').style.display = 'none';
+        document.getElementById('results-content').style.display = 'block';
+        var initialPanels = panelDefs.map(function(d, i) {
+          if (i === idx) return merged;
+          return { label: d.label, destination: d.destination, _loading: true };
+        });
+        renderResults({ panels: initialPanels }, data);
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { initMap(idx, 'results'); });
+        });
+        return;
+      }
+
+      // Subsequent panels — swap the placeholder for the real content
       var panelsEl = document.getElementById('results-panels');
       if (panelsEl) {
         var existing = panelsEl.querySelectorAll('.result-panel')[idx];
@@ -3720,6 +3786,18 @@ async function initMap(idx, mapPrefix) {
   // If still zero height, give it an explicit height to bootstrap
   if (mapEl.offsetHeight < 10) {
     mapEl.style.height = '400px';
+  }
+
+  // Watchdog — if the map still hasn't rendered (offsetHeight 0, e.g. parent tab
+  // still hidden on first paint) retry automatically after a short delay rather
+  // than leaving the user stuck on "Finding locations..." until they toggle tabs
+  if (mapEl.offsetHeight < 10) {
+    setTimeout(function() {
+      if (!mapInstances[mapId] && document.getElementById(mapId)) {
+        initMap(idx, mapPrefix);
+      }
+    }, 600);
+    return;
   }
 
   var dest = panel.destination || '';
