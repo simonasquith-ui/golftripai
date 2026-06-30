@@ -2550,6 +2550,46 @@ function getFormData() {
 }
 
 /* === GENERATE TRIP === */
+// ── TRIP CACHE ──────────────────────────────────────────────
+function buildCacheKey(destination, tier, travelMonth, groupSize) {
+  var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
+  return [destination.toLowerCase().trim(), tier.toLowerCase(), (travelMonth || 'any').toLowerCase(), sizeBracket].join('|');
+}
+
+async function getCachedPanel(cacheKey) {
+  try {
+    var r = await sbClient.from('trip_cache').select('panel_data,id,hit_count')
+      .eq('cache_key', cacheKey)
+      .gte('created_at', new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString()) // 21 day freshness
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (r.data && r.data.panel_data) {
+      // Fire-and-forget hit count increment
+      sbClient.from('trip_cache').update({ hit_count: (r.data.hit_count || 0) + 1 }).eq('id', r.data.id).then(function(){}).catch(function(){});
+      return r.data.panel_data;
+    }
+  } catch(e) { console.warn('Cache read error:', e.message); }
+  return null;
+}
+
+async function saveCachedPanel(cacheKey, destination, tier, travelMonth, groupSize, panelData) {
+  try {
+    var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
+    await sbClient.from('trip_cache').upsert({
+      cache_key: cacheKey,
+      destination: destination,
+      tier: tier,
+      travel_month: travelMonth || 'any',
+      group_size_bracket: sizeBracket,
+      panel_data: panelData,
+      created_at: new Date().toISOString(),
+      hit_count: 0
+    }, { onConflict: 'cache_key' });
+  } catch(e) { console.warn('Cache write error:', e.message); }
+}
+// ── END TRIP CACHE ───────────────────────────────────────────
+
 async function generateTrip() {
   var data = getFormData();
   if (!data.airports.length || !data.airports[0].airport) { showToast('Please select at least one departure airport.', true); return; }
@@ -2682,14 +2722,40 @@ async function generateTrip() {
       });
     }
 
-    // Fire 2 calls per panel (A=courses/hotels/flights, B=restaurants/car hire) — all in parallel
+    // Only use cache for generic searches — specific notes mean the AI needs to
+    // genuinely personalise, so always generate fresh in that case
+    var GENERIC_NOTES = ['', 'none', 'n/a', 'na'];
+    var notesAreGeneric = GENERIC_NOTES.indexOf((data.notes || '').trim().toLowerCase()) !== -1;
+    var groupSizeNum = parseInt(data.group_size) || 4;
+
+    // Fire 2 calls per panel (A=courses/hotels/flights, B=restaurants/car hire) — all in parallel,
+    // but check cache first for each panel when eligible
     var allCalls = [];
+    var cacheableLabels = {}; // label -> cacheKey, for panels we should save after generating
     panelDefs.forEach(function(def) {
-      allCalls.push({ def: def, part: 'A', promise: callAPI(makePromptA(def.destination, def.tier), def.tier, 'A') });
-      allCalls.push({ def: def, part: 'B', promise: callAPI(makePromptB(def.destination, def.tier, def.label), def.tier, 'B') });
+      var cacheKey = notesAreGeneric ? buildCacheKey(def.destination, def.tier, travelMonth, groupSizeNum) : null;
+
+      if (cacheKey) {
+        // Check cache first — if hit, skip both API calls entirely for this panel.
+        // cacheableLabels only gets set on an actual MISS, so cache hits never
+        // get needlessly re-saved at the end.
+        var cachePromise = getCachedPanel(cacheKey).then(function(cached) {
+          if (cached) {
+            console.log('Cache HIT for', def.label, '(' + def.destination + ', ' + def.tier + ')');
+            return { _cacheHit: true, data: cached };
+          }
+          console.log('Cache MISS for', def.label, '— generating fresh');
+          cacheableLabels[def.label] = cacheKey;
+          return { _cacheHit: false };
+        });
+        allCalls.push({ def: def, part: 'CACHE_CHECK', promise: cachePromise });
+      } else {
+        allCalls.push({ def: def, part: 'A', promise: callAPI(makePromptA(def.destination, def.tier), def.tier, 'A') });
+        allCalls.push({ def: def, part: 'B', promise: callAPI(makePromptB(def.destination, def.tier, def.label), def.tier, 'B') });
+      }
     });
 
-    console.log('Firing ' + allCalls.length + ' parallel calls (' + panelDefs.length + ' panels × 2)...');
+    console.log('Firing ' + allCalls.length + ' calls (' + panelDefs.length + ' panels, cache-eligible: ' + notesAreGeneric + ')...');
 
     // Progressive rendering — show each panel as soon as both its calls complete
     var panelData = {}; // keyed by label
@@ -2751,10 +2817,35 @@ async function generateTrip() {
       }
     }
 
-    // Resolve all calls — each updates its panel as it arrives
+    // Resolve all calls — each updates its panel as it arrives.
+    // CACHE_CHECK results either populate the panel directly (hit) or trigger
+    // fresh A+B calls on the fly (miss).
     var allPromises = allCalls.map(function(call) {
       return call.promise.then(function(result) {
         var label = call.def.label;
+
+        if (call.part === 'CACHE_CHECK') {
+          if (result._cacheHit) {
+            // Populate both halves directly from cached blob and render
+            panelData[label]._partA = result.data;
+            panelData[label]._partB = result.data;
+            tryRenderPanel(label);
+            return;
+          }
+          // Cache miss — fire the real calls now, same as the non-cached path
+          var def = call.def;
+          return Promise.all([
+            callAPI(makePromptA(def.destination, def.tier), def.tier, 'A').then(function(r) {
+              panelData[label]._partA = r;
+              tryRenderPanel(label);
+            }),
+            callAPI(makePromptB(def.destination, def.tier, def.label), def.tier, 'B').then(function(r) {
+              panelData[label]._partB = r;
+              tryRenderPanel(label);
+            })
+          ]);
+        }
+
         if (call.part === 'A') panelData[label]._partA = result;
         else panelData[label]._partB = result;
         tryRenderPanel(label);
@@ -2773,6 +2864,16 @@ async function generateTrip() {
     var parsed = { panels: panels };
     currentTripData = parsed;
     storedPanels = panels;
+
+    // Save freshly-generated (non-cached) panels to cache for next time
+    panels.forEach(function(panel, i) {
+      var def = panelDefs[i];
+      var cacheKey = cacheableLabels[def.label];
+      if (cacheKey) {
+        saveCachedPanel(cacheKey, def.destination, def.tier, travelMonth, groupSizeNum, panel);
+      }
+    });
+
     if (currentUser && currentTripRequestId) {
       try { await sbClient.from('trip_results').insert({ trip_request_id: currentTripRequestId, ai_response: parsed }); } catch(e) {}
       tripVoteCache = {};
