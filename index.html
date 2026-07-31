@@ -145,6 +145,14 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .notif-footer button{width:100%;background:none;border:none;font-size:.8rem;color:var(--text-muted,#888);cursor:pointer;padding:4px}
 .notif-footer button:hover{color:var(--green,#1a3a2a)}
 .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;cursor:pointer}
+.nav-more-wrap{position:relative}
+.nav-more-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.8);font-size:.85rem;font-weight:500;padding:8px 12px}
+.nav-more-btn:hover{color:var(--gold)}
+.nav-more-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;background:rgba(26,58,42,.98);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);min-width:130px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.15);overflow:hidden}
+.nav-more-dropdown.open{display:block}
+.nav-more-dropdown a{display:block;padding:10px 16px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;transition:all .15s}
+.nav-more-dropdown a:hover{background:rgba(201,168,76,.1);color:var(--gold)}
+.nav-cta{margin-left:4px}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
 .nav-hamburger span{display:block;width:22px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s}
 .nav-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(26,58,42,.98);border-bottom:1px solid rgba(201,168,76,.2);padding:16px 20px;flex-direction:column;gap:4px;z-index:99}
@@ -435,6 +443,12 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 .dest-rec-actions{display:flex;gap:10px;flex-wrap:wrap}
 .seasonal-refresh{background:none;border:none;color:var(--text-muted);font-size:.8rem;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;padding:8px 0;transition:color var(--tr)}
 .seasonal-refresh:hover{color:var(--green)}
+@media(max-width:640px){
+  .hero-split-grid{grid-template-columns:1fr!important}
+  .hero-split-grid .hero-split-left{border-radius:var(--rl) var(--rl) 0 0!important}
+  .hero-split-grid .hero-split-divider{padding:8px 16px!important;border-left:none!important;border-right:none!important;border:none;border-top:1.5px solid rgba(201,168,76,.4);border-bottom:1.5px solid rgba(201,168,76,.4)}
+  .hero-split-grid .hero-split-right{border-radius:0 0 var(--rl) var(--rl)!important}
+}
 @media(max-width:640px){.dest-rec-grid{grid-template-columns:1fr}.dest-rec-body{padding:20px}.dest-rec-header{padding:20px}.dest-rec-footer{padding:16px 20px}}
 @media(max-width:900px){
   .pricing-grid,.features-grid,.testimonials-grid{grid-template-columns:1fr 1fr}
@@ -535,11 +549,16 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <a href="#" class="nav-logo" onclick="showPage('landing');return false;">Golf<span>Trip</span></a>
     <div class="nav-links" id="nav-links-desktop">
       <a href="#" class="nav-link always" onclick="showPage('landing');return false;">Home</a>
-      <a href="#" class="nav-link always" onclick="showPage('about');return false;">About</a>
       <a href="#" class="nav-link always" onclick="showPage('seasonal');return false;">Destinations</a>
-      <a href="#" class="nav-link always" onclick="showPage('venue');return false;">&#128205; Find a Venue</a>
-      <a href="#" class="nav-link always" onclick="showPage('blog');return false;">Blog</a>
-      <a href="#" class="nav-link always" onclick="showPage('questionnaire');return false;">Plan a Trip</a>
+      <a href="#" class="nav-link always" onclick="showPage('venue');return false;">Build Around a Course</a>
+      <div class="nav-more-wrap">
+        <button class="nav-link always nav-more-btn" onclick="toggleNavMore(event)">More &#9660;</button>
+        <div class="nav-more-dropdown" id="nav-more-dropdown">
+          <a href="#" onclick="showPage('blog');closeNavMore();return false;">Blog</a>
+          <a href="#" onclick="showPage('about');closeNavMore();return false;">About</a>
+        </div>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm nav-cta" onclick="showPage('questionnaire');return false;">Plan a Trip &#9971;</a>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
       <div id="nav-auth-btns" class="flex gap-8">
@@ -573,12 +592,12 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   </div>
 </div>
 <div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="#" class="nav-mobile-link" style="background:var(--gold);color:var(--green);font-weight:600;border-radius:var(--r)" onclick="showPage('questionnaire');closeMobileMenu();return false;">&#9971; Plan a Trip</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
-  <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('seasonal');closeMobileMenu();return false;">Destinations</a>
-  <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">&#128205; Find a Venue</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">Build Around a Course</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('blog');closeMobileMenu();return false;">Blog</a>
-  <a href="#" class="nav-mobile-link" onclick="showPage('questionnaire');closeMobileMenu();return false;">Plan a Trip</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
   <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
   <div class="nav-mobile-divider"></div>
   <div class="nav-mobile-auth" id="nav-mobile-auth">
@@ -603,9 +622,26 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="hero-eyebrow">&#9971; Plan Less. Play More.</div>
       <h1>Build Your Perfect<br><em>Golf Holiday</em><br>in 60 Seconds</h1>
       <div class="hero-sub"><p>Tell us your airport, budget and handicap — our AI crafts a tailored itinerary comparing courses, hotels and flights. No travel agent required.</p></div>
-      <div class="hero-cta">
-        <button class="btn btn-primary btn-lg" onclick="showPage('questionnaire')">Plan My Trip &#9971;</button>
-        <button class="btn btn-secondary btn-lg" onclick="showPage('venue')">&#128205; Start With a Venue</button>
+      <div class="hero-cta" style="flex-direction:column;align-items:center;gap:0;max-width:540px;margin:0 auto">
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;width:100%;align-items:stretch">
+          <!-- Option 1: Plan My Trip -->
+          <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(201,168,76,.4);border-radius:var(--rl) 0 0 var(--rl);padding:20px 18px;text-align:center">
+            <div style="color:var(--gold);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">I want to explore</div>
+            <div style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;line-height:1.3">Pick a destination,<br>AI does the rest</div>
+            <button class="btn btn-primary" style="width:100%;padding:12px" onclick="showPage('questionnaire')">Plan My Trip &#9971;</button>
+          </div>
+          <!-- Divider -->
+          <div style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);padding:0 10px;border-top:1.5px solid rgba(201,168,76,.4);border-bottom:1.5px solid rgba(201,168,76,.4)">
+            <span style="color:rgba(255,255,255,.5);font-size:.8rem;font-weight:600">OR</span>
+          </div>
+          <!-- Option 2: Build Around a Course -->
+          <div style="background:rgba(201,168,76,.08);border:1.5px solid rgba(201,168,76,.6);border-radius:0 var(--rl) var(--rl) 0;padding:20px 18px;text-align:center">
+            <div style="color:var(--gold);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">I have a course in mind</div>
+            <div style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;line-height:1.3">Start with a course,<br>build everything around it</div>
+            <button class="btn btn-secondary" style="width:100%;padding:12px;border-color:var(--gold);color:var(--gold)" onclick="showPage('venue')">Build Around a Course &#9971;</button>
+          </div>
+        </div>
+        <div style="color:rgba(255,255,255,.45);font-size:.75rem;margin-top:10px">Free to try &nbsp;·&nbsp; No credit card needed</div>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><div class="num">&#127358;</div><div class="lbl">Early Access Beta</div></div>
@@ -626,6 +662,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="feature-card"><div class="feature-icon">&#9992;</div><h3>Multi-Airport Support</h3><p>Groups flying from different cities? Add multiple departure airports and we optimise so everyone gets the best deal.</p></div>
         <div class="feature-card"><div class="feature-icon">&#127948;</div><h3>Compare Budget vs Luxury</h3><p>See Budget, Mid-Range and Luxury options side by side for the same destination so you can pick what suits the group.</p></div>
         <div class="feature-card"><div class="feature-icon">&#128101;</div><h3>Group Planning Tools</h3><p>Invite society members, share the itinerary, vote on options and coordinate via the built-in group chat.</p></div>
+        <div class="feature-card" style="border:2px solid var(--gold);cursor:pointer" onclick="showPage('venue')"><div class="feature-icon">&#9971;</div><h3>Build Around a Course</h3><p>Already found a course you want to play? Drop in the name or link — AI finds nearby hotels, restaurants and flights and builds the trip around it.</p><div style="margin-top:12px"><span style="color:var(--gold);font-size:.82rem;font-weight:600">Try it &#8594;</span></div></div>
         <div class="feature-card"><div class="feature-icon">&#128197;</div><h3>Seasonal Recommendations</h3><p>Get advice on the best time to visit each destination based on weather, course conditions and pricing windows.</p></div>
         <div class="feature-card"><div class="feature-icon">&#128279;</div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to Skyscanner, Booking.com and GolfNow so you can book in one click.</p></div>
       </div>
@@ -770,6 +807,19 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="footer-bottom"><p>&#169; 2025 GolfTrip Ltd. All rights reserved.</p><p>Made for golfers everywhere</p></div>
     </div>
   </footer>
+  <!-- Bottom CTA strip -->
+  <div style="background:var(--green);padding:28px 0">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px">Ready to stop planning and start playing?</div>
+        <div style="color:rgba(255,255,255,.7);font-size:.9rem">Free to try — no card needed.</div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free &#9971;</button>
+        <button class="btn btn-ghost" onclick="showPage('venue')" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.3)">Build Around a Course</button>
+      </div>
+    </div>
+  </div>
 </div>
 <!-- QUESTIONNAIRE -->
 <div id="page-questionnaire" class="page">
@@ -1057,7 +1107,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
             <button class="currency-btn" data-currency="EUR">&#8364; EUR</button>
             <button class="currency-btn" data-currency="USD">$ USD</button>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="showPage('questionnaire')">Back to Preferences</button>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('questionnaire')">&#8592; New Search</button>
         </div>
         <div class="flex gap-8">
           <button class="btn btn-secondary btn-sm" onclick="saveTripResults()">Save Trip</button>
@@ -1135,7 +1185,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 
     <div class="results-tabs" style="margin-bottom:28px">
       <button class="results-tab active" id="td-tab-itinerary" onclick="switchTripTab('itinerary')">&#9971; Trip Itinerary</button>
-      <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')">&#128101; Group Planning</button>
+      <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')">&#128101; Group &amp; Booking</button>
     </div>
 
     <div id="td-panel-itinerary">
@@ -1241,9 +1291,9 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 <div id="page-venue" class="page">
   <div class="page-header">
     <div class="container">
-      <div class="section-label">Start With a Venue</div>
-      <h1>Build a Trip Around What You Already Want</h1>
-      <p style="color:rgba(255,255,255,.75);margin-top:8px;max-width:600px">Found a course, hotel or restaurant you want to visit? Drop in the link or search the name — GolfTrip AI will build everything else around it.</p>
+      <div class="section-label">Build Around a Course</div>
+      <h1>Already Know Where You Want to Play?</h1>
+      <p style="color:rgba(255,255,255,.75);margin-top:8px;max-width:600px">Found a course you want to play? Search by name or paste a link — GolfTrip AI builds the rest around it. Hotels nearby, other courses, restaurants, flights.</p>
     </div>
   </div>
   <div style="padding:60px 0 80px">
@@ -1908,6 +1958,18 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function toggleNavMore(e) {
+  e.stopPropagation();
+  document.getElementById('nav-more-dropdown').classList.toggle('open');
+}
+function closeNavMore() {
+  var d = document.getElementById('nav-more-dropdown');
+  if (d) d.classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.nav-more-wrap')) closeNavMore();
+});
 
 function toggleMobileMenu() {
   var menu = document.getElementById('nav-mobile-menu');
@@ -2657,6 +2719,73 @@ function getFormData() {
 }
 
 /* === GENERATE TRIP === */
+
+// ── WEATHER DATA ─────────────────────────────────────────────────────────────
+// Avg temp (C), sunshine (hrs/day), rainfall (days/month) by destination and month
+var WEATHER_DATA = {
+  'algarve': [13,14,15,17,19,23,26,27,25,21,17,14, 6,7,8,9,10,11,12,12,10,8,6,5, 10,9,7,7,4,2,1,1,3,7,9,11],
+  'lisbon':  [12,13,15,17,19,23,26,27,24,20,16,13, 5,6,7,8,9,10,11,11,9,7,5,5, 11,10,8,7,5,2,1,2,4,8,10,11],
+  'porto':   [11,12,14,16,18,21,24,24,22,18,14,11, 4,5,6,7,8,9,10,10,8,6,4,4, 15,13,11,10,8,4,2,3,6,11,13,15],
+  'madeira': [17,17,18,18,19,21,23,24,23,22,20,18, 6,6,7,8,8,9,9,9,8,7,6,5, 10,9,9,8,6,3,2,3,5,7,9,10],
+  'costa del sol': [13,14,16,18,20,24,27,28,25,21,17,13, 6,7,8,9,10,11,12,11,9,8,6,5, 7,6,5,5,4,1,1,1,2,5,7,8],
+  'costa brava': [8,9,11,14,17,21,24,25,22,17,12,9, 5,6,7,8,9,10,11,10,8,7,5,4, 8,7,6,7,6,3,2,3,5,7,8,9],
+  'mallorca': [11,12,14,16,19,23,27,27,24,20,15,12, 5,6,7,8,9,10,11,10,8,7,5,4, 8,7,6,6,5,2,1,2,4,7,8,9],
+  'tenerife': [18,18,19,20,21,23,25,26,26,24,21,19, 7,7,7,8,9,10,11,11,9,8,7,6, 5,5,5,4,3,1,1,1,2,4,5,6],
+  'spain':    [10,12,14,16,19,23,27,27,24,19,14,10, 5,6,7,8,9,10,11,10,8,7,5,4, 8,7,6,6,5,2,1,2,4,7,8,9],
+  'france':   [8,9,12,15,18,22,25,25,21,16,11,8, 4,5,6,7,8,9,10,9,7,6,4,3, 9,8,7,7,6,4,3,3,5,7,8,9],
+  'ireland':  [7,7,9,11,14,17,19,19,17,13,9,7, 3,4,5,6,6,6,6,6,5,4,3,3, 17,14,13,12,12,11,11,13,14,16,17,18],
+  'scotland': [5,6,8,10,13,16,18,18,16,12,8,6, 2,3,4,5,6,6,7,6,5,3,2,2, 18,15,14,13,12,11,12,14,15,17,18,19],
+  'morocco':  [14,15,17,19,22,25,28,29,27,23,18,14, 6,7,8,9,10,11,12,12,10,8,7,6, 8,7,6,5,3,1,0,1,2,5,7,8],
+  'italy':    [9,10,13,16,20,24,27,27,24,19,13,9, 4,5,6,7,8,9,10,9,7,6,4,3, 9,8,7,7,5,3,2,2,5,8,9,10],
+  'turkey':   [10,11,13,17,22,26,29,30,27,22,16,11, 4,5,6,7,8,10,11,11,9,7,5,4, 9,8,7,6,5,2,1,1,3,6,8,9],
+  'greece':   [11,12,14,17,22,26,29,29,25,21,16,12, 4,5,6,7,8,10,11,11,9,7,5,4, 9,8,6,5,4,1,0,1,2,6,8,9],
+  'uae':      [19,20,22,26,30,33,35,36,33,30,25,21, 8,9,10,10,11,12,12,12,11,10,9,8, 1,1,1,1,0,0,0,0,0,0,1,1],
+  'dubai':    [19,20,22,26,30,33,35,36,33,30,25,21, 8,9,10,10,11,12,12,12,11,10,9,8, 1,1,1,1,0,0,0,0,0,0,1,1],
+  'bulgaria': [2,4,8,13,18,22,25,25,21,15,8,3, 3,4,5,6,8,9,10,10,8,6,4,3, 9,8,7,8,9,9,6,5,6,7,8,9],
+  'default':  [15,16,17,19,21,24,27,27,25,21,17,15, 6,7,8,8,9,10,11,10,9,7,6,5, 7,6,6,6,5,3,2,2,4,6,7,8]
+};
+
+var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getWeatherData(destination) {
+  var dest = (destination || '').toLowerCase();
+  var keys = Object.keys(WEATHER_DATA);
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i] !== 'default' && dest.indexOf(keys[i]) !== -1) return WEATHER_DATA[keys[i]];
+  }
+  return WEATHER_DATA['default'];
+}
+
+function buildWeatherStrip(destination, travelMonth) {
+  var data = getWeatherData(destination);
+  var monthIdx = MONTH_NAMES.indexOf(travelMonth);
+  // data layout: temps[0-11], sunshine[12-23], rain[24-35]
+  var temps = data.slice(0, 12);
+  var sun = data.slice(12, 24);
+  var rain = data.slice(24, 36);
+
+  var html = '<div style="margin:0 0 20px;background:var(--off-white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">';
+  html += '<div style="padding:10px 16px;background:var(--green);display:flex;justify-content:space-between;align-items:center">';
+  html += '<span style="color:var(--gold);font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">&#127774; Average Weather</span>';
+  if (travelMonth && monthIdx !== -1) {
+    html += '<span style="color:rgba(255,255,255,.8);font-size:.78rem">' + travelMonth + ': ' + temps[monthIdx] + '°C · &#9728;&#65039; ' + sun[monthIdx] + 'h/day · &#127783;&#65039; ' + rain[monthIdx] + ' days</span>';
+  }
+  html += '</div>';
+  html += '<div style="display:flex;overflow-x:auto;padding:10px 12px;gap:4px">';
+  for (var m = 0; m < 12; m++) {
+    var isActive = m === monthIdx;
+    html += '<div style="flex:0 0 auto;text-align:center;padding:6px 8px;border-radius:var(--r);min-width:44px;' +
+      (isActive ? 'background:var(--green);color:var(--gold);font-weight:600;' : 'background:var(--white);') + '">' +
+      '<div style="font-size:.68rem;' + (isActive ? 'color:rgba(255,255,255,.7)' : 'color:var(--text-muted)') + '">' + MONTH_SHORT[m] + '</div>' +
+      '<div style="font-size:.85rem;font-weight:500;margin:2px 0">' + temps[m] + '°</div>' +
+      '<div style="font-size:.65rem;' + (isActive ? 'color:rgba(255,255,255,.7)' : 'color:var(--text-muted)') + '">&#9728;&#65039;' + sun[m] + 'h</div>' +
+    '</div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+// ── END WEATHER DATA ──────────────────────────────────────────────────────────
 // ── TRIP CACHE ──────────────────────────────────────────────
 function buildCacheKey(destination, tier, travelMonth, groupSize) {
   var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
@@ -3462,6 +3591,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   if (panel.best_time) html += '<span class="dest-chip">' + panel.best_time + '</span>';
   if (panel.flight_time) html += '<span class="dest-chip">' + panel.flight_time + '</span>';
   html += '</div></div>';
+
+  // Weather strip
+  html += buildWeatherStrip(dest, travelMonth);
 
   // Flight info section
   if (panel.flights) {
