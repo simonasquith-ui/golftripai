@@ -31,7 +31,7 @@
     if (!data.key) { console.warn('Maps key not available'); return; }
     window.__googleMapsReady = function() { window.__googleMapsLoaded = true; if (typeof onMapsReady === 'function') { onMapsReady(); } else { window.__mapsReadyPending = true; } };
     var s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async&libraries=places';
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&libraries=places';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
     document.head.appendChild(s);
   } catch(e) { console.warn('Could not load maps config:', e); }
@@ -1300,7 +1300,10 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         </div>
         <div id="venue-nearby-list"></div>
         <div id="venue-add-all-wrap" style="margin-top:16px;display:none">
-          <button class="btn btn-primary" style="width:100%" onclick="addAllVenueResults()">&#43; Add all to cart &amp; plan full trip</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" style="flex:1" onclick="addAllVenueResults()">&#43; Add all to cart</button>
+            <button class="btn btn-secondary" style="flex:1" onclick="saveVenueTrip()" id="venue-save-btn">&#10003; Save This Trip</button>
+          </div>
         </div>
       </div>
 
@@ -5537,6 +5540,174 @@ document.addEventListener('click', function(e) {
   }
 });
 // ── END VENUE AUTOCOMPLETE ───────────────────────────────────
+
+async function saveVenueTrip() {
+  if (!currentUser) { openAuthModal('signin'); showToast('Sign in to save trips.', true); return; }
+  if (!currentVenue) { showToast('No venue to save.', true); return; }
+  var btn = document.getElementById('venue-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+  try {
+    // Convert venue results into the standard panels[] format so the trip
+    // opens identically to a planned trip — same map, chat, booking links, voting
+    var anchorLocation = currentVenue.location || currentVenue.name;
+
+    // Reshape nearby venues into courses/hotels/restaurants arrays
+    var panelCourses = [];
+    var panelHotels = [];
+    var panelRestaurants = [];
+
+    // Add the anchor venue first in its own category
+    if (currentVenue.type === 'course') {
+      panelCourses.push({
+        name: currentVenue.name + ' ★',
+        location: anchorLocation,
+        par: 72,
+        yardage: null,
+        slope_rating: null,
+        course_rating: null,
+        green_fee: currentVenue.price || 0,
+        green_fee_range: currentVenue.price_display || '',
+        designer: '',
+        difficulty: 'Varies',
+        why_recommended: 'Your anchor venue — ' + (currentVenue.description || ''),
+        lat: currentVenue.lat || null,
+        lng: currentVenue.lng || null
+      });
+    } else if (currentVenue.type === 'hotel') {
+      panelHotels.push({
+        name: currentVenue.name + ' ★',
+        area: anchorLocation,
+        description: currentVenue.description || '',
+        why_recommended: 'Your anchor venue',
+        price_per_night: currentVenue.price || 0,
+        price_range: currentVenue.price_display || '',
+        lat: currentVenue.lat || null,
+        lng: currentVenue.lng || null
+      });
+    } else if (currentVenue.type === 'restaurant') {
+      panelRestaurants.push({
+        name: currentVenue.name + ' ★',
+        type: 'Restaurant',
+        description: currentVenue.description || '',
+        rating: currentVenue.rating || null,
+        opentable_available: false,
+        lat: currentVenue.lat || null,
+        lng: currentVenue.lng || null
+      });
+    }
+
+    // Add nearby results
+    venueResults.forEach(function(v) {
+      if (v.type === 'course') {
+        panelCourses.push({
+          name: v.name,
+          location: v.location || anchorLocation,
+          par: 72,
+          yardage: null,
+          slope_rating: null,
+          course_rating: null,
+          green_fee: v.price || 0,
+          green_fee_range: v.price_display || '',
+          designer: '',
+          difficulty: 'Varies',
+          why_recommended: (v.description || '') + (v.distance_km ? ' — ' + v.distance_km + 'km away' : ''),
+          lat: v.lat || null,
+          lng: v.lng || null
+        });
+      } else if (v.type === 'hotel') {
+        panelHotels.push({
+          name: v.name,
+          area: v.location || anchorLocation,
+          description: v.description || '',
+          why_recommended: v.distance_km ? v.distance_km + 'km from ' + currentVenue.name : '',
+          price_per_night: v.price || 0,
+          price_range: v.price_display || '',
+          lat: v.lat || null,
+          lng: v.lng || null
+        });
+      } else if (v.type === 'restaurant') {
+        panelRestaurants.push({
+          name: v.name,
+          type: v.location || 'Restaurant',
+          description: v.description || '',
+          rating: v.rating || null,
+          opentable_available: false,
+          lat: v.lat || null,
+          lng: v.lng || null
+        });
+      }
+    });
+
+    // Build the standard panel object
+    var panel = {
+      label: 'Venue Trip',
+      destination: anchorLocation,
+      description: 'Built around ' + currentVenue.name + '. ' + (currentVenue.description || ''),
+      weather: '',
+      best_time: '',
+      flight_time: '',
+      total_cost: 0,
+      costs: { flights: 0, accommodation: 0, golf: 0, food: 0 },
+      courses: panelCourses,
+      hotels: panelHotels,
+      restaurants: panelRestaurants,
+      flights: {
+        airlines: 'Check Skyscanner',
+        duration_hours: '',
+        frequency: '',
+        departure_times: '',
+        return_times: '',
+        price_range: 'Varies',
+        baggage_note: ''
+      },
+      car_hire: { needed: false, options: [], pickup_location: '' }
+    };
+
+    var parsed = { panels: [panel] };
+
+    // Create trip_request
+    var ins = await sbClient.from('trip_requests').insert({
+      user_id: currentUser.id,
+      departure_airport: 'TBC',
+      travel_dates: JSON.stringify({ type: 'flexible' }),
+      budget: 'flexible',
+      group_size: 1,
+      destination_type: currentVenue.name + ' — ' + anchorLocation,
+      trip_style: 'venue-anchored',
+      notes: 'Built around: ' + currentVenue.name
+    }).select().single();
+
+    if (ins.data) {
+      currentTripRequestId = ins.data.id;
+
+      // Save as standard panels format — opens like any other saved trip
+      await sbClient.from('trip_results').insert({
+        trip_request_id: ins.data.id,
+        ai_response: parsed
+      });
+
+      // Add creator as owner
+      await sbClient.from('trip_members').insert({
+        trip_request_id: ins.data.id,
+        user_id: currentUser.id,
+        role: 'owner',
+        status: 'Going'
+      });
+
+      if (btn) {
+        btn.textContent = '✓ Saved!';
+        btn.style.background = 'var(--green)';
+        btn.style.color = 'var(--gold)';
+        btn.style.border = 'none';
+      }
+      showToast('Trip saved — find it in My Trips');
+    }
+  } catch(e) {
+    console.error('saveVenueTrip error:', e);
+    showToast('Could not save trip. Try again.', true);
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Save This Trip'; }
+  }
+}
 
 // ── END VENUE FEATURE ────────────────────────────────────────
 
