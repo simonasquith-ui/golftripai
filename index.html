@@ -5087,8 +5087,18 @@ async function searchVenue() {
     var data = await res.json();
     if (!res.ok || !data.venue) throw new Error(data.error || 'Could not extract venue details');
     currentVenue = data.venue;
+    // If AI couldn't get GPS coords, geocode by name+location
+    if (currentVenue && (!currentVenue.lat || !currentVenue.lng)) {
+      try {
+        var geo = await searchGooglePlace(currentVenue.name, currentVenue.type || 'hotel', currentVenue.location || '');
+        if (geo && geo.lat && geo.lng) {
+          currentVenue.lat = geo.lat;
+          currentVenue.lng = geo.lng;
+          console.log('Geocoded anchor venue:', currentVenue.name, geo.lat, geo.lng);
+        }
+      } catch(geoErr) { console.warn('Geocode fallback failed:', geoErr.message); }
+    }
     renderVenuePreview(currentVenue);
-    // Save to venues database
     saveVenueToDb(currentVenue);
   } catch(e) {
     errEl.textContent = e.message;
@@ -5139,8 +5149,18 @@ async function buildAroundVenue() {
     var data = await res.json();
     var parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
     venueResults = parsed.venues || [];
+    // Geocode any results missing lat/lng
+    var geocodePromises = venueResults.map(async function(v) {
+      if (!v.lat || !v.lng) {
+        try {
+          var geo = await searchGooglePlace(v.name, v.type || 'hotel', v.location || '');
+          if (geo && geo.lat) { v.lat = geo.lat; v.lng = geo.lng; }
+        } catch(e) {}
+      }
+      return v;
+    });
+    venueResults = await Promise.all(geocodePromises);
     renderVenueResults(venueResults);
-    // Save all results to venues db
     venueResults.forEach(function(v) { saveVenueToDb(v); });
   } catch(e) {
     listEl.innerHTML = '<p class="fs-sm text-muted">Could not build trip — ' + e.message + '</p>';
