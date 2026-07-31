@@ -687,7 +687,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="feature-card"><div class="feature-icon">&#128101;</div><h3>Group Planning Tools</h3><p>Invite society members, share the itinerary, vote on options and coordinate via the built-in group chat.</p></div>
         <div class="feature-card" style="border:2px solid var(--gold);cursor:pointer" onclick="showPage('venue')"><div class="feature-icon">&#9971;</div><h3>Build Around a Course</h3><p>Already found a course you want to play? Drop in the name or link — AI finds nearby hotels, restaurants and flights and builds the trip around it.</p><div style="margin-top:12px"><span style="color:var(--gold);font-size:.82rem;font-weight:600">Try it &#8594;</span></div></div>
         <div class="feature-card"><div class="feature-icon">&#128197;</div><h3>Seasonal Recommendations</h3><p>Get advice on the best time to visit each destination based on weather, course conditions and pricing windows.</p></div>
-        <div class="feature-card"><div class="feature-icon">&#128279;</div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to GolfTrip Flights (powered by Duffel), Booking.com and GolfNow so you can book in one click.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128279;</div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to Google Flights, Booking.com and GolfNow so you can book in one click.</p></div>
       </div>
     </div>
   </section>
@@ -3983,11 +3983,6 @@ function activatePanel(idx) {
   }
 }
 
-function buildFlightUrl(panel, qData) {
-  // Use Duffel branded booking link — pre-built with GolfTrip branding and 5% markup
-  return 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
-}
-
 function buildSkyscannerUrl(panel, qData) {
   var origin = (qData && qData.airports && qData.airports[0]) ? qData.airports[0].airport : '';
   var dest = (panel.destination || '').split(',')[0].trim();
@@ -4084,7 +4079,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Flight info section
   if (panel.flights) {
     var fl = panel.flights;
-    var skyUrl = 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+    var skyUrl = buildSkyscannerUrl(panel, qData || currentTripQData);
     html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">' +
         '<div>' +
@@ -4334,9 +4329,9 @@ function buildBTT(panel, idx, qData) {
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
     '<div class="btt-grid">' +
-      '<a href="https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btt-btn btt-flights">' +
+      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon">&#9992;</div>' +
-        '<div><div class="btt-label">Flights</div><div class="btt-action">Book Flights via GolfTrip</div></div>' +
+        '<div><div class="btt-label">Flights</div><div class="btt-action">Search Google Flights</div></div>' +
       '</a>' +
       '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
         '<div class="btt-icon">&#127968;</div>' +
@@ -4356,7 +4351,7 @@ function buildBTT(panel, idx, qData) {
         '<div class="btt-total-label">Estimated total per person</div>' +
         '<div class="btt-total-price">' + fmtPrice(panel.total_cost || 0) + '</div>' +
       '</div>' +
-      '<a href="https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
     '</div>' +
   '</div>';
 }
@@ -5607,7 +5602,7 @@ function renderSeasonalContent(data, season, generatedAt) {
 
   destinations.forEach(function(dest) {
     var destEnc = encodeURIComponent(dest.name || '');
-    var flightsUrl = 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+    var flightsUrl = 'https://www.google.com/travel/flights?q=' + encodeURIComponent('flights to ' + (destName||'') + ' from UK');
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
     var golfnowUrl = buildDestTeeTimes(destName);
     var destNameSafe = (dest.name||'').replace(/'/g, '');
@@ -5908,7 +5903,7 @@ function renderVenueResults(venues) {
           '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:3px">&#9992; Flights</div>' +
           '<div style="font-size:.92rem;font-weight:500;color:var(--green)">' + airportName + ' → ' + (currentVenue ? currentVenue.location || currentVenue.name : 'Destination') + '</div>' +
         '</div>' +
-        '<a href="' + DUFFEL_LINK + '" target="_blank" class="btn btn-primary btn-sm">Search &amp; Book Flights</a>' +
+        '<a href="https://www.google.com/travel/flights" target="_blank" class="btn btn-primary btn-sm">Search &amp; Search Flights</a>' +
       '</div>' +
       '<p class="fs-sm text-muted" style="margin:0">Find and book the best fares from ' + airportName + ' via GolfTrip — 5% markup included, booked securely.</p>' +
     '</div>';
