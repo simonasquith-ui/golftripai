@@ -2997,6 +2997,37 @@ async function generateTrip() {
 }
 
 /* === RESULTS RENDERING === */
+// ── GOLF BOOKING LINK HELPER ────────────────────────────────
+var GOLFNOW_EU_DESTS = ['spain','france','germany','ireland','morocco','belgium','czech','switzerland','bilbao','madrid','barcelona','costa brava','costa del sol','marbella'];
+var GOLFNOW_UK_DESTS = ['scotland','england','wales',' uk','united kingdom','st andrews','ayrshire','east lothian'];
+var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai','abu dhabi','bulgaria','algarve','lisbon','porto','madeira','costa navarino','rhodes','crete','athens','tenerife','mallorca','sicily','tuscany','florence','rome','antalya','belek','istanbul','marrakech','agadir','black sea'];
+
+function buildTeeTimes(courseName, destination) {
+  var dest = (destination || '').toLowerCase();
+  var query = encodeURIComponent((courseName || '') + ' ' + (destination || ''));
+  for (var i = 0; i < LEADING_COURSES_DESTS.length; i++) {
+    if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) {
+      return { url: 'https://www.leadingcourses.com/golf-courses?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
+    }
+  }
+  for (var j = 0; j < GOLFNOW_UK_DESTS.length; j++) {
+    if (dest.indexOf(GOLFNOW_UK_DESTS[j]) !== -1) {
+      return { url: 'https://www.golfnow.co.uk/tee-times/search?searchText=' + query, label: 'Book on GolfNow', provider: 'GolfNow UK' };
+    }
+  }
+  for (var k = 0; k < GOLFNOW_EU_DESTS.length; k++) {
+    if (dest.indexOf(GOLFNOW_EU_DESTS[k]) !== -1) {
+      return { url: 'https://www.golfnow.eu/tee-times/search?searchText=' + query, label: 'Book on GolfNow', provider: 'GolfNow EU' };
+    }
+  }
+  return { url: 'https://www.golfnow.com/tee-times/search?searchText=' + query, label: 'Book Tee Time', provider: 'GolfNow' };
+}
+
+function buildDestTeeTimes(destination) {
+  return buildTeeTimes('', destination).url;
+}
+// ── END GOLF BOOKING LINK HELPER ────────────────────────────
+
 function fmtPrice(gbp) {
   if (isNaN(gbp) || gbp === null || gbp === undefined) return '';
   var rate = RATES[activeCurrency] || 1;
@@ -3462,7 +3493,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   html += '<div class="section-heading" data-icon="&#9971;">Golf Courses</div><div class="courses-grid">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
-      var gn = 'https://www.golfnow.com/tee-times/search?searchText=' + encodeURIComponent((c.name || '') + ' ' + (c.location || dest));
+      var gnData = buildTeeTimes(c.name || '', c.location || dest);
+      var gn = gnData.url;
+      var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
@@ -3490,7 +3523,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (c.why_recommended || '') + '</p>' +
         (c.club_hire ? '<p class="fs-sm" style="color:var(--gold)">Club hire available</p>' : '') +
         '<div class="card-links">' +
-          '<a href="' + gn + '" target="_blank" class="card-link">Book Tee Time</a>' +
+          '<a href="' + gn + '" target="_blank" class="card-link">' + gnLabel + '</a>' +
           '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
             'data-cart-type="course" ' +
             'data-cart-name="' + (c.name||'').replace(/"/g,'&quot;') + '" ' +
@@ -3683,7 +3716,7 @@ function buildBTT(panel, idx, qData) {
         '<div class="btt-icon">&#127968;</div>' +
         '<div><div class="btt-label">Hotels &amp; Resorts</div><div class="btt-action">Search on Booking.com</div></div>' +
       '</a>' +
-      '<a href="https://www.golfnow.com/tee-times/search#' + destEnc + '" target="_blank" class="btt-btn btt-teetimes">' +
+      '<a href="' + buildDestTeeTimes(panel.destination || dest) + '" target="_blank" class="btt-btn btt-teetimes">' +
         '<div class="btt-icon">&#9971;</div>' +
         '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
       '</a>' +
@@ -4031,7 +4064,7 @@ async function initMap(idx, mapPrefix) {
   (panel.courses || []).forEach(function(c) {
     toSearch.push({ type: 'course', name: c.name, area: c.location,
       detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: 'https://www.golfnow.com/tee-times/search?searchText=' + encodeURIComponent((c.name||'') + ' ' + dest),
+      link: buildTeeTimes(c.name||'', dest).url,
       aiLat: c.lat, aiLng: c.lng });
   });
   (panel.restaurants || []).forEach(function(r) {
@@ -4951,7 +4984,7 @@ function renderSeasonalContent(data, season, generatedAt) {
     var destEnc = encodeURIComponent(dest.name || '');
     var flightsUrl = dest.booking && dest.booking.flights ? dest.booking.flights : 'https://www.skyscanner.net';
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
-    var golfnowUrl = 'https://www.golfnow.com/tee-times/search?searchText=' + destEnc;
+    var golfnowUrl = buildDestTeeTimes(destName);
     var destNameSafe = (dest.name||'').replace(/'/g, '');
 
     html += '<div class="dest-recommendation">' +
