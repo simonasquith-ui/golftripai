@@ -531,6 +531,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <a href="#" class="nav-link always" onclick="showPage('landing');return false;">Home</a>
       <a href="#" class="nav-link always" onclick="showPage('about');return false;">About</a>
       <a href="#" class="nav-link always" onclick="showPage('seasonal');return false;">Destinations</a>
+      <a href="#" class="nav-link always" onclick="showPage('venue');return false;">&#128205; Find a Venue</a>
       <a href="#" class="nav-link always" onclick="showPage('blog');return false;">Blog</a>
       <a href="#" class="nav-link always" onclick="showPage('questionnaire');return false;">Plan a Trip</a>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
@@ -569,6 +570,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('seasonal');closeMobileMenu();return false;">Destinations</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">&#128205; Find a Venue</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('blog');closeMobileMenu();return false;">Blog</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('questionnaire');closeMobileMenu();return false;">Plan a Trip</a>
   <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
@@ -597,7 +599,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="hero-sub"><p>Tell us your airport, budget and handicap — our AI crafts a tailored itinerary comparing courses, hotels and flights. No travel agent required.</p></div>
       <div class="hero-cta">
         <button class="btn btn-primary btn-lg" onclick="showPage('questionnaire')">Plan My Trip &#9971;</button>
-        <button class="btn btn-secondary btn-lg" onclick="document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'})">See Pricing</button>
+        <button class="btn btn-secondary btn-lg" onclick="showPage('venue')">&#128205; Start With a Venue</button>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><div class="num">&#127358;</div><div class="lbl">Early Access Beta</div></div>
@@ -1230,6 +1232,91 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 </div>
 
 <!-- ABOUT -->
+<div id="page-venue" class="page">
+  <div class="page-header">
+    <div class="container">
+      <div class="section-label">Start With a Venue</div>
+      <h1>Build a Trip Around What You Already Want</h1>
+      <p style="color:rgba(255,255,255,.75);margin-top:8px;max-width:600px">Found a course, hotel or restaurant you want to visit? Drop in the link or search the name — GolfTrip AI will build everything else around it.</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:840px">
+
+      <!-- Search / URL input -->
+      <div class="card" style="padding:28px;margin-bottom:24px">
+        <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" id="venue-mode-search" onclick="setVenueMode('search')">Search by name</button>
+          <button class="btn btn-ghost btn-sm" id="venue-mode-url" onclick="setVenueMode('url')">Paste a link</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <input type="text" id="venue-input" placeholder="Search for a golf course, hotel or restaurant..." style="flex:1;font-size:.95rem">
+          <button class="btn btn-primary" id="venue-search-btn" onclick="searchVenue()">Find</button>
+        </div>
+        <div id="venue-loading" style="display:none;margin-top:14px;text-align:center">
+          <div class="loading-spinner" style="width:24px;height:24px;margin:0 auto 8px"></div>
+          <p class="fs-sm text-muted">AI is extracting venue details...</p>
+        </div>
+        <div id="venue-error" style="display:none;margin-top:12px" class="fs-sm" style="color:#a32d2d"></div>
+      </div>
+
+      <!-- Venue preview card (shown after extraction) -->
+      <div id="venue-preview" style="display:none;margin-bottom:24px">
+        <div class="card" style="padding:24px;border:2px solid var(--gold)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+            <div style="flex:1">
+              <div class="fs-sm" style="color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px" id="venue-preview-type">Course</div>
+              <h3 style="color:var(--green);margin-bottom:6px" id="venue-preview-name">Quinta do Lago South</h3>
+              <div class="text-muted fs-sm" id="venue-preview-location">Algarve, Portugal</div>
+              <div class="fs-sm" style="margin-top:6px" id="venue-preview-desc"></div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="color:var(--gold);font-weight:700;font-size:1.1rem" id="venue-preview-price"></div>
+              <div class="fs-sm text-muted" id="venue-preview-rating"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="buildAroundVenue()">&#129302; Build trip around this</button>
+            <button class="btn btn-ghost" onclick="addVenueToCart()">&#43; Add to cart</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearVenuePreview()" style="margin-left:auto">Change</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Built trip results (shown after building) -->
+      <div id="venue-trip-results" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="color:var(--green)">&#128205; Built Around Your Venue</h3>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('venue-trip-results').style.display='none'">Start over</button>
+        </div>
+        <div id="venue-nearby-list"></div>
+        <div id="venue-add-all-wrap" style="margin-top:16px;display:none">
+          <button class="btn btn-primary" style="width:100%" onclick="addAllVenueResults()">&#43; Add all to cart &amp; plan full trip</button>
+        </div>
+      </div>
+
+      <!-- User-contributed venue database -->
+      <div style="margin-top:40px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <h3 style="color:var(--green)">&#127942; Community Venues</h3>
+          <button class="btn btn-ghost btn-sm" onclick="loadCommunityVenues()">&#8635; Refresh</button>
+        </div>
+        <p class="fs-sm text-muted" style="margin-bottom:16px">Venues added and rated by GolfTrip users. The more trips planned, the richer this gets.</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm active" onclick="filterCommunityVenues('all',this)">All</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCommunityVenues('course',this)">&#9971; Courses</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCommunityVenues('hotel',this)">&#127968; Hotels</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCommunityVenues('restaurant',this)">&#127869; Restaurants</button>
+        </div>
+        <div id="community-venues-list">
+          <p class="fs-sm text-muted">Loading venues...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="page-about" class="page">
   <div class="page-header">
     <div class="container">
@@ -2000,6 +2087,14 @@ if (document.readyState === 'loading') {
 } else {
   startMapObserver();
 }
+
+// Venue result buttons delegation
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-venue-idx]');
+  if (btn) { addSingleVenueResult(parseInt(btn.getAttribute('data-venue-idx'))); return; }
+  var card = e.target.closest('[data-venue-prefill]');
+  if (card) { prefillVenueSearch(card.getAttribute('data-venue-prefill')); return; }
+});
 
 // Cart button delegation
 document.addEventListener('click', function(e) {
@@ -4944,6 +5039,250 @@ async function processJoin(tripId, user) {
 })();
 
 /* === INIT === */
+// ── VENUE FEATURE ───────────────────────────────────────────
+var venueMode = 'search';
+var currentVenue = null;
+var venueResults = [];
+var communityVenuesCache = [];
+var communityFilter = 'all';
+
+function setVenueMode(mode) {
+  venueMode = mode;
+  var inp = document.getElementById('venue-input');
+  var searchBtn = document.getElementById('venue-mode-search');
+  var urlBtn = document.getElementById('venue-mode-url');
+  if (mode === 'url') {
+    inp.placeholder = 'Paste a URL from Booking.com, GolfNow, OpenTable...';
+    searchBtn.classList.remove('btn-primary'); searchBtn.classList.add('btn-ghost');
+    urlBtn.classList.remove('btn-ghost'); urlBtn.classList.add('btn-primary');
+  } else {
+    inp.placeholder = 'Search for a golf course, hotel or restaurant...';
+    urlBtn.classList.remove('btn-primary'); urlBtn.classList.add('btn-ghost');
+    searchBtn.classList.remove('btn-ghost'); searchBtn.classList.add('btn-primary');
+  }
+}
+
+async function searchVenue() {
+  var input = document.getElementById('venue-input').value.trim();
+  if (!input) { showToast('Enter a name or URL first.', true); return; }
+  var loadEl = document.getElementById('venue-loading');
+  var errEl = document.getElementById('venue-error');
+  var previewEl = document.getElementById('venue-preview');
+  loadEl.style.display = 'block';
+  errEl.style.display = 'none';
+  previewEl.style.display = 'none';
+  document.getElementById('venue-search-btn').disabled = true;
+  try {
+    var body = {};
+    if (venueMode === 'url' || input.startsWith('http')) {
+      body.url = input;
+    } else {
+      body.query = input;
+    }
+    var res = await fetch('/.netlify/functions/extract-venue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    var data = await res.json();
+    if (!res.ok || !data.venue) throw new Error(data.error || 'Could not extract venue details');
+    currentVenue = data.venue;
+    renderVenuePreview(currentVenue);
+    // Save to venues database
+    saveVenueToDb(currentVenue);
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    loadEl.style.display = 'none';
+    document.getElementById('venue-search-btn').disabled = false;
+  }
+}
+
+function renderVenuePreview(v) {
+  var typeLabels = { hotel: '&#127968; Hotel', course: '&#9971; Golf Course', restaurant: '&#127869; Restaurant', car_hire: '&#128663; Car Hire', other: '&#128205; Venue' };
+  document.getElementById('venue-preview-type').innerHTML = typeLabels[v.type] || '&#128205; Venue';
+  document.getElementById('venue-preview-name').textContent = v.name || 'Unknown venue';
+  document.getElementById('venue-preview-location').textContent = v.location || '';
+  document.getElementById('venue-preview-desc').textContent = v.description || '';
+  document.getElementById('venue-preview-price').textContent = v.price_display || '';
+  document.getElementById('venue-preview-rating').textContent = v.rating ? '&#9733; ' + v.rating : '';
+  document.getElementById('venue-preview').style.display = 'block';
+}
+
+function clearVenuePreview() {
+  currentVenue = null;
+  venueResults = [];
+  document.getElementById('venue-preview').style.display = 'none';
+  document.getElementById('venue-trip-results').style.display = 'none';
+  document.getElementById('venue-input').value = '';
+}
+
+async function buildAroundVenue() {
+  if (!currentVenue) return;
+  var resultsEl = document.getElementById('venue-trip-results');
+  var listEl = document.getElementById('venue-nearby-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:24px"><div class="loading-spinner" style="width:24px;height:24px;margin:0 auto 8px"></div><p class="fs-sm text-muted">AI is building your trip around ' + (currentVenue.name || 'this venue') + '...</p></div>';
+  resultsEl.style.display = 'block';
+  try {
+    var prompt = 'I want to plan a golf trip anchored around this venue: ' +
+      currentVenue.name + ' (' + currentVenue.type + ') in ' + (currentVenue.location || 'unknown location') + '. ' +
+      'Find and return 6-8 nearby complementary venues: ' +
+      '2-3 hotels within 10km, 2-3 other golf courses nearby, 2 restaurants nearby. ' +
+      'Return JSON: {"venues":[{"name","type","location","distance_km","description","price_display","rating","lat","lng","booking_suggestion"}]}. ' +
+      'Use real venues with accurate GPS. distance_km is distance from the anchor venue. type is hotel|course|restaurant.';
+    var res = await fetch('/.netlify/functions/generate-trip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, tier: 'anchor', part: 'venues' })
+    });
+    var data = await res.json();
+    var parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+    venueResults = parsed.venues || [];
+    renderVenueResults(venueResults);
+    // Save all results to venues db
+    venueResults.forEach(function(v) { saveVenueToDb(v); });
+  } catch(e) {
+    listEl.innerHTML = '<p class="fs-sm text-muted">Could not build trip — ' + e.message + '</p>';
+  }
+}
+
+function renderVenueResults(venues) {
+  var listEl = document.getElementById('venue-nearby-list');
+  var typeIcons = { hotel: '&#127968;', course: '&#9971;', restaurant: '&#127869;', car_hire: '&#128663;' };
+  var typeBg = { hotel: '#e1f5ee', course: '#faeeda', restaurant: '#f0ece4' };
+  var html = venues.map(function(v, i) {
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="width:36px;height:36px;border-radius:var(--r);background:' + (typeBg[v.type] || '#f0ece4') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">' + (typeIcons[v.type] || '&#128205;') + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:.88rem;font-weight:500;color:var(--text)">' + (v.name || '') + '</div>' +
+        '<div style="font-size:.78rem;color:var(--text-muted)">' + (v.location || '') + (v.distance_km ? ' &nbsp;·&nbsp; ' + v.distance_km + 'km away' : '') + '</div>' +
+        (v.price_display ? '<div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-top:2px">' + v.price_display + '</div>' : '') +
+        (v.description ? '<div style="font-size:.78rem;color:var(--text-muted);margin-top:3px">' + v.description + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
+        (v.rating ? '<span style="font-size:.72rem;color:var(--gold)">&#9733; ' + v.rating + '</span>' : '') +
+        '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;padding:3px 8px" data-venue-idx="' + i + '">&#43; Cart</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  listEl.innerHTML = html || '<p class="fs-sm text-muted">No nearby venues found.</p>';
+  document.getElementById('venue-add-all-wrap').style.display = venues.length ? 'block' : 'none';
+}
+
+function addSingleVenueResult(idx) {
+  var v = venueResults[idx];
+  if (!v) return;
+  tripCart.push({ id: v.type + '|' + v.name, type: v.type, name: v.name, sub: v.location || '', price: v.price_display || '', priceNum: 0, status: 'pending', votes: { yes: 0, no: 0 } });
+  renderCart();
+  saveTripCart();
+  showToast(v.name + ' added to cart');
+}
+
+function addAllVenueResults() {
+  if (currentVenue) {
+    tripCart.push({ id: currentVenue.type + '|' + currentVenue.name, type: currentVenue.type, name: currentVenue.name, sub: currentVenue.location || '', price: currentVenue.price_display || '', priceNum: currentVenue.price || 0, status: 'pending', votes: { yes: 0, no: 0 } });
+  }
+  venueResults.forEach(function(v) {
+    var id = v.type + '|' + v.name;
+    if (!tripCart.find(function(i) { return i.id === id; })) {
+      tripCart.push({ id: id, type: v.type, name: v.name, sub: v.location || '', price: v.price_display || '', priceNum: 0, status: 'pending', votes: { yes: 0, no: 0 } });
+    }
+  });
+  renderCart();
+  saveTripCart();
+  showToast('All venues added to cart');
+  showPage('questionnaire');
+}
+
+function addVenueToCart() {
+  if (!currentVenue) return;
+  var id = currentVenue.type + '|' + currentVenue.name;
+  if (tripCart.find(function(i) { return i.id === id; })) { showToast('Already in cart', true); return; }
+  tripCart.push({ id: id, type: currentVenue.type, name: currentVenue.name, sub: currentVenue.location || '', price: currentVenue.price_display || '', priceNum: currentVenue.price || 0, status: 'pending', votes: { yes: 0, no: 0 } });
+  renderCart();
+  saveTripCart();
+  showToast(currentVenue.name + ' added to cart');
+}
+
+// Venue database
+async function saveVenueToDb(v) {
+  if (!v || !v.name) return;
+  try {
+    await sbClient.from('venues').upsert({
+      name: v.name,
+      type: v.type || 'other',
+      location: v.location || '',
+      description: v.description || '',
+      price_display: v.price_display || '',
+      booking_url: v.booking_url || null,
+      lat: v.lat || null,
+      lng: v.lng || null,
+      source: 'user',
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'name,location' });
+  } catch(e) { /* silent fail — db optional */ }
+}
+
+async function loadCommunityVenues() {
+  var listEl = document.getElementById('community-venues-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<p class="fs-sm text-muted">Loading...</p>';
+  try {
+    var r = await sbClient.from('venues')
+      .select('name,type,location,description,price_display,avg_rating,trip_count')
+      .order('trip_count', { ascending: false })
+      .limit(30);
+    communityVenuesCache = r.data || [];
+    renderCommunityVenues();
+  } catch(e) {
+    listEl.innerHTML = '<p class="fs-sm text-muted">Could not load venues.</p>';
+  }
+}
+
+function filterCommunityVenues(type, btn) {
+  communityFilter = type;
+  document.querySelectorAll('#page-venue .btn-ghost').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderCommunityVenues();
+}
+
+function renderCommunityVenues() {
+  var listEl = document.getElementById('community-venues-list');
+  if (!listEl) return;
+  var filtered = communityFilter === 'all' ? communityVenuesCache : communityVenuesCache.filter(function(v) { return v.type === communityFilter; });
+  if (!filtered.length) { listEl.innerHTML = '<p class="fs-sm text-muted">No venues yet — be the first to add one.</p>'; return; }
+  var typeIcons = { hotel: '&#127968;', course: '&#9971;', restaurant: '&#127869;', other: '&#128205;' };
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">';
+  filtered.forEach(function(v) {
+    html += '<div class="card" style="padding:14px;cursor:pointer" data-venue-prefill="' + (v.name||'').replace(/"/g,'&quot;') + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">' +
+        '<div style="font-size:.88rem;font-weight:500;color:var(--green)">' + (typeIcons[v.type]||'') + ' ' + (v.name||'') + '</div>' +
+        (v.avg_rating ? '<span style="font-size:.75rem;color:var(--gold);white-space:nowrap">&#9733; ' + v.avg_rating + '</span>' : '') +
+      '</div>' +
+      '<div style="font-size:.75rem;color:var(--text-muted);margin-top:3px">' + (v.location||'') + '</div>' +
+      (v.price_display ? '<div style="font-size:.75rem;color:var(--gold);margin-top:3px">' + v.price_display + '</div>' : '') +
+      (v.trip_count ? '<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">&#128197; In ' + v.trip_count + ' trips</div>' : '') +
+    '</div>';
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+}
+
+function prefillVenueSearch(name) {
+  setVenueMode('search');
+  document.getElementById('venue-input').value = name;
+  searchVenue();
+}
+
+// Load community venues when venue page opens
+var _origShowPage = showPage;
+showPage = function(name) {
+  _origShowPage(name);
+  if (name === 'venue') { loadCommunityVenues(); }
+};
+// ── END VENUE FEATURE ────────────────────────────────────────
+
 sbClient.auth.getSession().then(function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
