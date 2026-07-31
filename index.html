@@ -5149,25 +5149,90 @@ async function buildAroundVenue() {
 
 function renderVenueResults(venues) {
   var listEl = document.getElementById('venue-nearby-list');
-  var typeIcons = { hotel: '&#127968;', course: '&#9971;', restaurant: '&#127869;', car_hire: '&#128663;' };
-  var typeBg = { hotel: '#e1f5ee', course: '#faeeda', restaurant: '#f0ece4' };
-  var html = venues.map(function(v, i) {
-    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
-      '<div style="width:36px;height:36px;border-radius:var(--r);background:' + (typeBg[v.type] || '#f0ece4') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">' + (typeIcons[v.type] || '&#128205;') + '</div>' +
-      '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:.88rem;font-weight:500;color:var(--text)">' + (v.name || '') + '</div>' +
-        '<div style="font-size:.78rem;color:var(--text-muted)">' + (v.location || '') + (v.distance_km ? ' &nbsp;·&nbsp; ' + v.distance_km + 'km away' : '') + '</div>' +
-        (v.price_display ? '<div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-top:2px">' + v.price_display + '</div>' : '') +
-        (v.description ? '<div style="font-size:.78rem;color:var(--text-muted);margin-top:3px">' + v.description + '</div>' : '') +
+  if (!venues.length) {
+    listEl.innerHTML = '<p class="fs-sm text-muted">No nearby venues found.</p>';
+    return;
+  }
+
+  // Group by type for display sections
+  var courses = venues.filter(function(v) { return v.type === 'course'; });
+  var hotels = venues.filter(function(v) { return v.type === 'hotel'; });
+  var restaurants = venues.filter(function(v) { return v.type === 'restaurant'; });
+  var others = venues.filter(function(v) { return v.type !== 'course' && v.type !== 'hotel' && v.type !== 'restaurant'; });
+
+  function venueCard(v, i) {
+    var typeIcons = { hotel: '&#127968;', course: '&#9971;', restaurant: '&#127869;', car_hire: '&#128663;', other: '&#128205;' };
+    return '<div class="card" style="padding:16px;margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<h4 style="color:var(--green);font-size:.95rem;margin:0 0 3px">' + (typeIcons[v.type]||'') + ' ' + (v.name || '') + '</h4>' +
+          '<div class="text-muted fs-sm">' + (v.location || '') + (v.distance_km ? ' &nbsp;·&nbsp; <strong>' + v.distance_km + 'km</strong> from anchor' : '') + '</div>' +
+          (v.description ? '<p style="font-size:.83rem;margin-top:6px;color:var(--text)">' + v.description + '</p>' : '') +
+        '</div>' +
+        '<div style="text-align:right;flex-shrink:0">' +
+          (v.rating ? '<div style="color:var(--gold);font-size:.82rem;font-weight:600">&#9733; ' + v.rating + '</div>' : '') +
+          (v.price_display ? '<div style="color:var(--gold);font-size:.82rem;font-weight:600;margin-top:2px">' + v.price_display + '</div>' : '') +
+        '</div>' +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
-        (v.rating ? '<span style="font-size:.72rem;color:var(--gold)">&#9733; ' + v.rating + '</span>' : '') +
-        '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;padding:3px 8px" data-venue-idx="' + i + '">&#43; Cart</button>' +
+      '<div class="card-links" style="margin-top:10px">' +
+        '<button class="card-link" data-venue-idx="' + i + '" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)">&#43; Add to cart</button>' +
+        (v.booking_suggestion ? '<a href="https://www.google.com/search?q=' + encodeURIComponent(v.name + ' ' + (v.location||'')) + '" target="_blank" class="card-link">&#128269; Search</a>' : '') +
       '</div>' +
     '</div>';
-  }).join('');
-  listEl.innerHTML = html || '<p class="fs-sm text-muted">No nearby venues found.</p>';
-  document.getElementById('venue-add-all-wrap').style.display = venues.length ? 'block' : 'none';
+  }
+
+  var html = '';
+
+  if (courses.length) {
+    html += '<div class="section-heading" data-icon="&#9971;">Nearby Golf Courses</div>';
+    courses.forEach(function(v) { html += venueCard(v, venues.indexOf(v)); });
+  }
+  if (hotels.length) {
+    html += '<div class="section-heading" data-icon="&#127968;">Nearby Hotels</div>';
+    hotels.forEach(function(v) { html += venueCard(v, venues.indexOf(v)); });
+  }
+  if (restaurants.length) {
+    html += '<div class="section-heading" data-icon="&#127869;">Nearby Restaurants</div>';
+    restaurants.forEach(function(v) { html += venueCard(v, venues.indexOf(v)); });
+  }
+  if (others.length) {
+    html += '<div class="section-heading" data-icon="&#128205;">Other Nearby</div>';
+    others.forEach(function(v) { html += venueCard(v, venues.indexOf(v)); });
+  }
+
+  // Build a pseudo-panel for initMap using the venue data
+  var anchorVenue = currentVenue;
+  var mapPanel = {
+    destination: anchorVenue ? (anchorVenue.location || anchorVenue.name) : 'Venue',
+    courses: venues.filter(function(v) { return v.type === 'course'; }).map(function(v) {
+      return { name: v.name, location: v.location || '', lat: v.lat, lng: v.lng, green_fee: 0, difficulty: '', why_recommended: v.description || '' };
+    }),
+    hotels: venues.filter(function(v) { return v.type === 'hotel'; }).map(function(v) {
+      return { name: v.name, area: v.location || '', lat: v.lat, lng: v.lng, description: v.description || '', why_recommended: '' };
+    }),
+    restaurants: venues.filter(function(v) { return v.type === 'restaurant'; }).map(function(v) {
+      return { name: v.name, type: v.type, description: v.description || '', lat: v.lat, lng: v.lng };
+    })
+  };
+  // Add the anchor venue itself to the appropriate array
+  if (anchorVenue && anchorVenue.lat && anchorVenue.lng) {
+    var anchorEntry = { name: anchorVenue.name + ' ★ (anchor)', location: anchorVenue.location || '', lat: anchorVenue.lat, lng: anchorVenue.lng, description: 'Your anchor venue', why_recommended: 'Your starting point', green_fee: anchorVenue.price || 0, area: anchorVenue.location || '' };
+    if (anchorVenue.type === 'course') mapPanel.courses.unshift(anchorEntry);
+    else if (anchorVenue.type === 'hotel') mapPanel.hotels.unshift(anchorEntry);
+    else if (anchorVenue.type === 'restaurant') mapPanel.restaurants.unshift(anchorEntry);
+  }
+
+  // Add map section
+  storedPanels[99] = mapPanel; // use idx 99 for venue page map
+  html += buildMapSection(mapPanel, 99, 'venue');
+
+  listEl.innerHTML = html;
+  document.getElementById('venue-add-all-wrap').style.display = 'block';
+
+  // Init map after DOM update
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initMap(99, 'venue'); });
+  });
 }
 
 function addSingleVenueResult(idx) {
@@ -5279,7 +5344,14 @@ function prefillVenueSearch(name) {
 var _origShowPage = showPage;
 showPage = function(name) {
   _origShowPage(name);
-  if (name === 'venue') { loadCommunityVenues(); }
+  if (name === 'venue') {
+    loadCommunityVenues();
+  } else {
+    // Clean up venue map instance when leaving venue page
+    if (mapInstances['venue-trip-map-99']) {
+      delete mapInstances['venue-trip-map-99'];
+    }
+  }
 };
 // ── END VENUE FEATURE ────────────────────────────────────────
 
