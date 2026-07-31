@@ -1180,8 +1180,9 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           <button class="btn btn-ghost btn-sm" onclick="showPage('questionnaire')">&#8592; New Search</button>
         </div>
         <div class="flex gap-8">
-          <button class="btn btn-secondary btn-sm" onclick="saveTripResults()">Save Trip</button>
-          <button class="btn btn-ghost btn-sm" onclick="shareTrip()">Share Link</button>
+          <button class="btn btn-primary btn-sm" id="save-trip-top-btn" onclick="saveTripResults()">&#10003; Save Trip</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareTrip()">&#128279; Share</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportToPDF()">&#128196; PDF</button>
         </div>
       </div>
     </div>
@@ -1189,6 +1190,20 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="container">
       <div class="results-tabs" id="results-tabs"></div>
       <div id="results-panels"></div>
+      <!-- Bottom save strip -->
+      <div id="results-bottom-save" style="display:none;padding:28px 0;margin-top:8px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-weight:600;color:var(--green);margin-bottom:4px">Happy with your trip plan?</div>
+            <div class="fs-sm text-muted">Save it to My Trips, share with your group, or export as PDF.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="save-trip-bottom-btn" onclick="saveTripResults()">&#10003; Save This Trip</button>
+            <button class="btn btn-ghost" onclick="shareTrip()">&#128279; Share Link</button>
+            <button class="btn btn-ghost" onclick="exportToPDF()">&#128196; Export PDF</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2386,7 +2401,13 @@ document.addEventListener('click', function(e) {
   var itemName = btn.getAttribute('data-vote-name');
   var panelLabel = btn.getAttribute('data-vote-panel');
   if (!itemType || !itemName) return;
-  castVote(tripId || currentTripRequestId, itemType, itemName, panelLabel, btn);
+  // If trip not yet saved, prompt to save first
+  var effectiveTripId = tripId || currentTripRequestId;
+  if (!effectiveTripId && storedPanels && storedPanels.length) {
+    showToast('Save your trip first to vote on options — use the Save Trip button above.');
+    return;
+  }
+  castVote(effectiveTripId, itemType, itemName, panelLabel, btn);
 });
 
 // ── NOTIFICATION SYSTEM ────────────────────────────────────
@@ -2981,6 +3002,74 @@ function buildWeatherStrip(destination, travelMonth) {
   return html;
 }
 // ── END WEATHER DATA ──────────────────────────────────────────────────────────
+// ── SAVE TRIP RESULTS ────────────────────────────────────────
+async function saveTripResults() {
+  if (!currentUser) {
+    openAuthModal('signin');
+    showToast('Sign in to save trips.', true);
+    return;
+  }
+  if (!storedPanels || !storedPanels.length) {
+    showToast('No trip to save yet — generate one first.', true);
+    return;
+  }
+  var topBtn = document.getElementById('save-trip-top-btn');
+  var botBtn = document.getElementById('save-trip-bottom-btn');
+  [topBtn, botBtn].forEach(function(b) { if (b) { b.disabled = true; b.textContent = 'Saving...'; } });
+
+  try {
+    var qData = currentTripQData || {};
+    var destLabel = storedPanels[0] ? (storedPanels[0].destination || storedPanels[0].label || 'Golf Trip') : 'Golf Trip';
+
+    var ins = await sbClient.from('trip_requests').insert({
+      user_id: currentUser.id,
+      departure_airport: (qData.airports && qData.airports[0]) ? qData.airports[0].airport : 'TBC',
+      travel_dates: JSON.stringify({ depart: (qData.dates && qData.dates.depart) || '', returnDate: (qData.dates && qData.dates.returnDate) || '' }),
+      budget: qData.budget || 'flexible',
+      group_size: qData.group_size || 1,
+      destination_type: destLabel,
+      trip_style: qData.compare_mode === 'tiers' ? 'tiers' : 'compare',
+      notes: qData.notes || ''
+    }).select().single();
+
+    if (!ins.data) throw new Error('Could not create trip record');
+    currentTripRequestId = ins.data.id;
+
+    var parsed = { panels: storedPanels };
+    await sbClient.from('trip_results').insert({
+      trip_request_id: ins.data.id,
+      ai_response: parsed
+    });
+
+    await sbClient.from('trip_members').insert({
+      trip_request_id: ins.data.id,
+      user_id: currentUser.id,
+      role: 'owner',
+      status: 'Going'
+    });
+
+    [topBtn, botBtn].forEach(function(b) {
+      if (b) {
+        b.textContent = '✓ Saved!';
+        b.style.background = 'var(--green)';
+        b.style.color = 'var(--gold)';
+        b.style.border = 'none';
+      }
+    });
+    showToast('Trip saved to My Trips');
+    tripVoteCache = {};
+    await loadVotesForTrip(ins.data.id);
+
+  } catch(e) {
+    console.error('saveTripResults error:', e);
+    showToast('Could not save trip. Try again.', true);
+    [topBtn, botBtn].forEach(function(b) {
+      if (b) { b.disabled = false; b.textContent = '✓ Save Trip'; }
+    });
+  }
+}
+// ── END SAVE TRIP RESULTS ─────────────────────────────────────
+
 // ── LIVE FLIGHTS ─────────────────────────────────────────────
 var liveFlightsCache = {}; // keyed by origin|dest|date
 
@@ -3443,6 +3532,8 @@ async function generateTrip() {
         firstPanelShown = true;
         document.getElementById('results-loading').style.display = 'none';
         document.getElementById('results-content').style.display = 'block';
+    var bottomSave = document.getElementById('results-bottom-save');
+    if (bottomSave) bottomSave.style.display = 'block';
         var initialPanels = panelDefs.map(function(d, i) {
           if (i === idx) return merged;
           return { label: d.label, destination: d.destination, _loading: true };
@@ -3461,13 +3552,20 @@ async function generateTrip() {
         if (existing) {
           // Update storedPanels so initMap has real venue coordinates
           storedPanels[idx] = merged;
+          // Clear old map instance — panel DOM is being replaced so the old
+          // map container element is gone; initMap must fire fresh on the new one
+          var oldMapId = 'results-trip-map-' + idx;
+          if (mapInstances[oldMapId]) { delete mapInstances[oldMapId]; }
           var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
           var capturedIdx = idx;
           var capturedMerged = merged;
           var capturedData = data;
           requestAnimationFrame(function() {
-            requestAnimationFrame(function() { initMap(capturedIdx, 'results'); });
+            requestAnimationFrame(function() {
+              // Extra delay for the map container to be measurable in the DOM
+              setTimeout(function() { initMap(capturedIdx, 'results'); }, 200);
+            });
           });
           // Fetch live flight prices and inject into panel after render
           (async function() {
@@ -5903,7 +6001,7 @@ function renderVenueResults(venues) {
           '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:3px">&#9992; Flights</div>' +
           '<div style="font-size:.92rem;font-weight:500;color:var(--green)">' + airportName + ' → ' + (currentVenue ? currentVenue.location || currentVenue.name : 'Destination') + '</div>' +
         '</div>' +
-        '<a href="https://www.google.com/travel/flights" target="_blank" class="btn btn-primary btn-sm">Search &amp; Search Flights</a>' +
+        '<a href="https://www.google.com/travel/flights?q=" + encodeURIComponent("flights from " + airportName + " to " + (currentVenue ? currentVenue.location||currentVenue.name : "destination")) + "" target="_blank" class="btn btn-primary btn-sm">Search Flights</a>' +
       '</div>' +
       '<p class="fs-sm text-muted" style="margin:0">Find and book the best fares from ' + airportName + ' via GolfTrip — 5% markup included, booked securely.</p>' +
     '</div>';
