@@ -31,7 +31,7 @@
     if (!data.key) { console.warn('Maps key not available'); return; }
     window.__googleMapsReady = function() { window.__googleMapsLoaded = true; if (typeof onMapsReady === 'function') { onMapsReady(); } else { window.__mapsReadyPending = true; } };
     var s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async';
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key + '&callback=__googleMapsReady&loading=async&libraries=places';
     s.onerror = function() { console.warn('Google Maps failed to load'); };
     document.head.appendChild(s);
   } catch(e) { console.warn('Could not load maps config:', e); }
@@ -59,6 +59,12 @@ p{color:var(--text-muted)}
 .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-sm{padding:8px 16px;font-size:.8rem}.btn-lg{padding:16px 32px;font-size:1rem}
 .hidden{display:none!important}
+.venue-ac-item{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border,#d4c9b0);font-size:.88rem;color:var(--text,#1a1a1a)}
+.venue-ac-item:last-child{border-bottom:none}
+.venue-ac-item:hover,.venue-ac-item.active{background:var(--sand,#f0ece4)}
+.venue-ac-icon{width:28px;height:28px;border-radius:var(--r,8px);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.venue-ac-name{font-weight:500;color:var(--green,#1a3a2a)}
+.venue-ac-loc{font-size:.78rem;color:var(--text-muted,#888);margin-top:1px}
 .result-panel.loading{min-height:200px;display:flex;align-items:center;justify-content:center}
 .panel-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
 .compare-item.loading .ci-price{opacity:0.4}
@@ -1250,7 +1256,10 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           <button class="btn btn-ghost btn-sm" id="venue-mode-url" onclick="setVenueMode('url')">Paste a link</button>
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
-          <input type="text" id="venue-input" placeholder="Search for a golf course, hotel or restaurant..." style="flex:1;font-size:.95rem">
+          <div style="position:relative;flex:1">
+            <input type="text" id="venue-input" placeholder="Search for a golf course, hotel or restaurant..." style="width:100%;font-size:.95rem" autocomplete="off" oninput="onVenueInputChange(this.value)" onkeydown="onVenueInputKeydown(event)">
+            <div id="venue-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white,#fff);border:1.5px solid var(--border,#d4c9b0);border-top:none;border-radius:0 0 var(--r,8px) var(--r,8px);box-shadow:0 4px 16px rgba(0,0,0,.08);z-index:50;max-height:280px;overflow-y:auto"></div>
+          </div>
           <button class="btn btn-primary" id="venue-search-btn" onclick="searchVenue()">Find</button>
         </div>
         <div id="venue-loading" style="display:none;margin-top:14px;text-align:center">
@@ -5373,6 +5382,162 @@ showPage = function(name) {
     }
   }
 };
+// ── VENUE AUTOCOMPLETE ──────────────────────────────────────
+var acDebounceTimer = null;
+var acSelectedIdx = -1;
+var acItems = [];
+
+function onVenueInputChange(val) {
+  clearTimeout(acDebounceTimer);
+  if (val.length < 2 || val.startsWith('http')) {
+    hideAutocomplete();
+    return;
+  }
+  acDebounceTimer = setTimeout(function() { fetchAutocompleteSuggestions(val); }, 250);
+}
+
+function onVenueInputKeydown(e) {
+  var dropdown = document.getElementById('venue-autocomplete');
+  if (dropdown.style.display === 'none') {
+    if (e.key === 'Enter') searchVenue();
+    return;
+  }
+  var items = dropdown.querySelectorAll('.venue-ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acSelectedIdx = Math.min(acSelectedIdx + 1, items.length - 1);
+    updateAcHighlight(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acSelectedIdx = Math.max(acSelectedIdx - 1, -1);
+    updateAcHighlight(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (acSelectedIdx >= 0 && acItems[acSelectedIdx]) {
+      selectAcItem(acItems[acSelectedIdx]);
+    } else {
+      hideAutocomplete();
+      searchVenue();
+    }
+  } else if (e.key === 'Escape') {
+    hideAutocomplete();
+  }
+}
+
+function updateAcHighlight(items) {
+  items.forEach(function(el, i) {
+    el.classList.toggle('active', i === acSelectedIdx);
+  });
+}
+
+async function fetchAutocompleteSuggestions(query) {
+  acItems = [];
+  var dropdown = document.getElementById('venue-autocomplete');
+  var typeIcons = { course: '&#9971;', hotel: '&#127968;', restaurant: '&#127869;', other: '&#128205;' };
+  var typeBg = { course: '#faeeda', hotel: '#e1f5ee', restaurant: '#f0ece4', other: '#f0ece4' };
+
+  // 1. Search own venues database first
+  var ownResults = [];
+  try {
+    var r = await sbClient.from('venues')
+      .select('name,type,location')
+      .ilike('name', '%' + query + '%')
+      .limit(4);
+    ownResults = (r.data || []).map(function(v) {
+      return { name: v.name, type: v.type || 'other', location: v.location || '', source: 'community' };
+    });
+  } catch(e) {}
+
+  // 2. Use Google Places Autocomplete if Maps is loaded
+  var googleResults = [];
+  if (window.google && window.google.maps && window.google.maps.places) {
+    try {
+      await new Promise(function(resolve) {
+        var svc = new google.maps.places.AutocompleteService();
+        svc.getPlacePredictions({
+          input: query,
+          types: ['establishment'],
+          componentRestrictions: {}
+        }, function(predictions, status) {
+          if (status === 'OK' && predictions) {
+            googleResults = predictions.slice(0, 5).map(function(p) {
+              var types = p.types || [];
+              var type = types.indexOf('lodging') !== -1 ? 'hotel'
+                : types.indexOf('golf_course') !== -1 ? 'course'
+                : types.indexOf('restaurant') !== -1 ? 'restaurant' : 'other';
+              return {
+                name: p.structured_formatting.main_text,
+                location: p.structured_formatting.secondary_text || '',
+                type: type,
+                source: 'google',
+                placeId: p.place_id
+              };
+            });
+          }
+          resolve();
+        });
+      });
+    } catch(e) {}
+  }
+
+  // Merge — own results first, then google, deduplicated
+  var seen = new Set(ownResults.map(function(v) { return v.name.toLowerCase(); }));
+  var merged = ownResults.concat(googleResults.filter(function(v) {
+    return !seen.has(v.name.toLowerCase());
+  })).slice(0, 7);
+
+  if (!merged.length) { hideAutocomplete(); return; }
+
+  acItems = merged;
+  acSelectedIdx = -1;
+
+  dropdown.innerHTML = merged.map(function(item, i) {
+    var bg = typeBg[item.type] || '#f0ece4';
+    var icon = typeIcons[item.type] || '&#128205;';
+    var badge = item.source === 'community'
+      ? '<span style="font-size:.68rem;background:#e1f5ee;color:#085041;border-radius:20px;padding:1px 6px;margin-left:4px">saved</span>' : '';
+    return '<div class="venue-ac-item" data-ac-idx="' + i + '">' +
+      '<div class="venue-ac-icon" style="background:' + bg + '">' + icon + '</div>' +
+      '<div>' +
+        '<div class="venue-ac-name">' + item.name + badge + '</div>' +
+        (item.location ? '<div class="venue-ac-loc">' + item.location + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  dropdown.style.display = 'block';
+}
+
+function hideAutocomplete() {
+  var dropdown = document.getElementById('venue-autocomplete');
+  if (dropdown) dropdown.style.display = 'none';
+  acSelectedIdx = -1;
+}
+
+function selectAcItem(item) {
+  document.getElementById('venue-input').value = item.name + (item.location ? ', ' + item.location : '');
+  hideAutocomplete();
+  // Set to name search mode and fire
+  setVenueMode('search');
+  searchVenue();
+}
+
+// Delegation for autocomplete item clicks
+document.addEventListener('click', function(e) {
+  var acItem = e.target.closest('.venue-ac-item');
+  if (acItem) {
+    var idx = parseInt(acItem.getAttribute('data-ac-idx'));
+    if (!isNaN(idx) && acItems[idx]) { selectAcItem(acItems[idx]); return; }
+  }
+  // Click outside — hide dropdown
+  var dropdown = document.getElementById('venue-autocomplete');
+  var input = document.getElementById('venue-input');
+  if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) {
+    hideAutocomplete();
+  }
+});
+// ── END VENUE AUTOCOMPLETE ───────────────────────────────────
+
 // ── END VENUE FEATURE ────────────────────────────────────────
 
 sbClient.auth.getSession().then(function(r) {
