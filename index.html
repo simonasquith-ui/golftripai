@@ -683,7 +683,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="feature-card"><div class="feature-icon">&#128101;</div><h3>Group Planning Tools</h3><p>Invite society members, share the itinerary, vote on options and coordinate via the built-in group chat.</p></div>
         <div class="feature-card" style="border:2px solid var(--gold);cursor:pointer" onclick="showPage('venue')"><div class="feature-icon">&#9971;</div><h3>Build Around a Course</h3><p>Already found a course you want to play? Drop in the name or link — AI finds nearby hotels, restaurants and flights and builds the trip around it.</p><div style="margin-top:12px"><span style="color:var(--gold);font-size:.82rem;font-weight:600">Try it &#8594;</span></div></div>
         <div class="feature-card"><div class="feature-icon">&#128197;</div><h3>Seasonal Recommendations</h3><p>Get advice on the best time to visit each destination based on weather, course conditions and pricing windows.</p></div>
-        <div class="feature-card"><div class="feature-icon">&#128279;</div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to Skyscanner, Booking.com and GolfNow so you can book in one click.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128279;</div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to GolfTrip Flights (powered by Duffel), Booking.com and GolfNow so you can book in one click.</p></div>
       </div>
     </div>
   </section>
@@ -1466,7 +1466,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           Sixteen guys. Four different cities. Four different airports. Different budgets, different handicaps, different opinions on whether we wanted championship courses or hidden gems. Some flying Tuesday, some Thursday. Half of them needing club hire. All of them with very strong views on the hotel.
         </p>
         <p style="line-height:1.9;margin-bottom:20px">
-          I'd spend weeks buried in browser tabs. Skyscanner in one window, Booking.com in another, a golf course directory in a third, a spreadsheet trying to make sense of it all. Cross-referencing flight times with tee time availability. Checking whether the hotel was actually near the courses or just near the airport. Working out whether the Budget option was actually worse than the Mid-Range or just on a different part of the coast.
+          I'd spend weeks buried in browser tabs. Google Flights in one window, Booking.com in another, a golf course directory in a third, a spreadsheet trying to make sense of it all. Cross-referencing flight times with tee time availability. Checking whether the hotel was actually near the courses or just near the airport. Working out whether the Budget option was actually worse than the Mid-Range or just on a different part of the coast.
         </p>
         <p style="line-height:1.9;margin-bottom:20px">
           It was, as I used to tell people, like herding sheep. Except the sheep all had opinions about green fees.
@@ -1784,7 +1784,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         </p>
 
         <p style="line-height:1.9;margin-bottom:20px">
-          For two decades, planning a golf trip meant one of two routes: ring a specialist travel agent and pay for their time and inventory access, or do it yourself across fifteen browser tabs — Skyscanner, Booking.com, three different course websites, and a Google Doc that everyone forgets to check.
+          For two decades, planning a golf trip meant one of two routes: ring a specialist travel agent and pay for their time and inventory access, or do it yourself across fifteen browser tabs — Google Flights, Booking.com, three different course websites, and a Google Doc that everyone forgets to check.
         </p>
 
         <p style="line-height:1.9;margin-bottom:20px">
@@ -1798,7 +1798,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 
         <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What it's not good at — and won't pretend to be</h2>
         <p style="line-height:1.9;margin-bottom:20px">
-          AI-generated pricing is an estimate, not a live quote — nobody's built a system yet that pulls real-time prices from every hotel and flight provider simultaneously without a hefty licensing deal behind it. Good AI trip planners are honest about this: the numbers are there to give you a realistic ballpark, and the actual booking happens through the real providers (Skyscanner, Booking.com, the course's own tee sheet) where the live price lives.
+          AI-generated pricing is an estimate, not a live quote — nobody's built a system yet that pulls real-time prices from every hotel and flight provider simultaneously without a hefty licensing deal behind it. Good AI trip planners are honest about this: the numbers are there to give you a realistic ballpark, and the actual booking happens through the real providers (Google Flights, Booking.com, the course's own tee sheet) where the live price lives.
         </p>
         <p style="line-height:1.9;margin-bottom:20px">
           Anyone telling you their AI shows perfectly accurate live pricing across every provider in real time is either overselling it or sitting on an enterprise data deal most startups don't have.
@@ -1923,7 +1923,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <h3 style="color:var(--green);margin-bottom:12px">The service</h3>
       <p style="line-height:1.9;margin-bottom:24px">GolfTrip provides AI-generated golf holiday itineraries for planning purposes. All prices, course details, hotel recommendations and availability shown are estimates only and should be verified directly with the relevant providers before booking.</p>
       <h3 style="color:var(--green);margin-bottom:12px">Accuracy of information</h3>
-      <p style="line-height:1.9;margin-bottom:24px">GolfTrip uses AI to generate trip plans. While we aim for accuracy, we cannot guarantee that all information is correct, current or complete. Green fees, hotel prices, flight costs and availability change frequently. Always check directly with Skyscanner, Booking.com, GolfNow and course operators before making any booking or financial commitment.</p>
+      <p style="line-height:1.9;margin-bottom:24px">GolfTrip uses AI to generate trip plans. While we aim for accuracy, we cannot guarantee that all information is correct, current or complete. Green fees, hotel prices, flight costs and availability change frequently. Always check directly with Booking.com, GolfNow and course operators before making any booking or financial commitment.</p>
       <h3 style="color:var(--green);margin-bottom:12px">Limitation of liability</h3>
       <p style="line-height:1.9;margin-bottom:24px">GolfTrip is not a travel agent and does not make bookings on your behalf. We accept no liability for any loss, cost or inconvenience arising from decisions made based on information provided by GolfTrip.</p>
       <h3 style="color:var(--green);margin-bottom:12px">User accounts</h3>
@@ -2853,6 +2853,62 @@ function buildWeatherStrip(destination, travelMonth) {
   return html;
 }
 // ── END WEATHER DATA ──────────────────────────────────────────────────────────
+// ── LIVE FLIGHTS ─────────────────────────────────────────────
+var liveFlightsCache = {}; // keyed by origin|dest|date
+
+async function fetchLiveFlights(originCode, destCode, departDate, returnDate, groupSize) {
+  if (!originCode || !destCode || !departDate) return null;
+  var cacheKey = [originCode, destCode, departDate, returnDate||''].join('|');
+  if (liveFlightsCache[cacheKey]) return liveFlightsCache[cacheKey];
+
+  try {
+    var res = await fetch('/.netlify/functions/flights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        origin: originCode,
+        destination: destCode,
+        departDate: departDate,
+        returnDate: returnDate || null,
+        adults: 1 // price per person — multiply by group size for total
+      })
+    });
+    var data = await res.json();
+    if (data.flights && data.flights.length) {
+      liveFlightsCache[cacheKey] = data.flights;
+      return data.flights;
+    }
+  } catch(e) { console.warn('Live flights fetch failed:', e.message); }
+  return null;
+}
+
+function renderLiveFlights(flights, groupSize) {
+  if (!flights || !flights.length) return '';
+  var html = '<div class="live-flights-wrap">';
+  html += '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px">&#9992; Live Flight Prices</div>';
+  flights.slice(0, 3).forEach(function(f) {
+    var stops = f.stops === 0 ? 'Direct' : f.stops + ' stop' + (f.stops > 1 ? 's' : '');
+    var total = f.pricePerPerson * (groupSize || 1);
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:.88rem;font-weight:500;color:var(--text)">' + f.airline + ' ' + f.flightNumber + '</div>' +
+        '<div style="font-size:.78rem;color:var(--text-muted);margin-top:2px">' +
+          f.departureTime + ' → ' + f.arrivalTime + ' &nbsp;·&nbsp; ' + f.duration + ' &nbsp;·&nbsp; ' + stops +
+        '</div>' +
+      '</div>' +
+      '<div style="text-align:right;flex-shrink:0">' +
+        '<div style="font-size:.95rem;font-weight:700;color:var(--gold)">' + f.priceDisplay + '</div>' +
+        (groupSize > 1 ? '<div style="font-size:.72rem;color:var(--text-muted)">£' + total.toFixed(0) + ' total</div>' : '') +
+      '</div>' +
+      '<a href="' + f.bookingUrl + '" target="_blank" class="btn btn-primary btn-sm" style="flex-shrink:0;font-size:.78rem;padding:6px 12px">Book</a>' +
+    '</div>';
+  });
+  html += '<div style="font-size:.72rem;color:var(--text-muted);margin-top:8px;text-align:right">Live prices from Amadeus · Updates daily</div>';
+  html += '</div>';
+  return html;
+}
+// ── END LIVE FLIGHTS ──────────────────────────────────────────
+
 // ── TRIP CACHE ──────────────────────────────────────────────
 function buildCacheKey(destination, tier, travelMonth, groupSize) {
   var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
@@ -3106,9 +3162,59 @@ async function generateTrip() {
           var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
           var capturedIdx = idx;
+          var capturedMerged = merged;
+          var capturedData = data;
           requestAnimationFrame(function() {
             requestAnimationFrame(function() { initMap(capturedIdx, 'results'); });
           });
+          // Fetch live flight prices and inject into panel after render
+          (async function() {
+            try {
+              var DEST_CODES = {
+                'algarve':'FAO','lisbon':'LIS','porto':'OPO','madeira':'FNC',
+                'costa del sol':'AGP','mallorca':'PMI','tenerife':'TFS',
+                'bilbao':'BIO','madrid':'MAD','barcelona':'BCN','costa brava':'BCN',
+                'marrakech':'RAK','agadir':'AGA','morocco':'RAK',
+                'dublin':'DUB','ireland':'DUB',
+                'nice':'NCE','france':'CDG','paris':'CDG',
+                'florence':'FLR','italy':'FCO','rome':'FCO','sicily':'CTA',
+                'antalya':'AYT','turkey':'AYT','istanbul':'IST',
+                'dubai':'DXB','uae':'DXB','abu dhabi':'AUH',
+                'greece':'ATH','athens':'ATH','rhodes':'RHO','crete':'HER',
+                'costa navarino':'KLX','bulgaria':'SOF','black sea':'VAR',
+                'scotland':'EDI','england':'LHR'
+              };
+              var airports = capturedData && capturedData.airports ? capturedData.airports : [];
+              var originCode = airports[0] ? (airports[0].airport || '').slice(0,3).toUpperCase() : '';
+              var destStr = (capturedMerged.destination || '').toLowerCase();
+              var destCode = '';
+              Object.keys(DEST_CODES).forEach(function(k) {
+                if (!destCode && destStr.indexOf(k) !== -1) destCode = DEST_CODES[k];
+              });
+              if (!originCode || !destCode) return;
+              var departDate = capturedData && capturedData.dates ? capturedData.dates.depart : '';
+              var returnDate = capturedData && capturedData.dates ? capturedData.dates.returnDate : '';
+              var groupSize = capturedData ? parseInt(capturedData.group_size) || 1 : 1;
+              var flights = await fetchLiveFlights(originCode, destCode, departDate, returnDate, groupSize);
+              if (!flights || !flights.length) return;
+              // Find the flights section in this panel and inject live data above it
+              var panels = document.querySelectorAll('.result-panel');
+              var panelEl = panels[capturedIdx];
+              if (!panelEl) return;
+              var flightSection = panelEl.querySelector('.section-heading[data-icon="✈️"], [data-section="flights"]');
+              if (!flightSection) {
+                // Insert before the first section heading as a live flights banner
+                var firstSection = panelEl.querySelector('.section-heading');
+                if (firstSection) {
+                  var liveDiv = document.createElement('div');
+                  liveDiv.className = 'card';
+                  liveDiv.style.cssText = 'margin-bottom:20px;padding:16px 20px;background:var(--white);border:1.5px solid var(--gold)';
+                  liveDiv.innerHTML = renderLiveFlights(flights, groupSize);
+                  firstSection.parentNode.insertBefore(liveDiv, firstSection);
+                }
+              }
+            } catch(e) { console.warn('Live flights injection failed:', e.message); }
+          })();
         }
       }
       // Update compare bar price
@@ -3574,6 +3680,11 @@ function activatePanel(idx) {
   }
 }
 
+function buildFlightUrl(panel, qData) {
+  // Use Duffel branded booking link — pre-built with GolfTrip branding and 5% markup
+  return 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+}
+
 function buildSkyscannerUrl(panel, qData) {
   var origin = (qData && qData.airports && qData.airports[0]) ? qData.airports[0].airport : '';
   var dest = (panel.destination || '').split(',')[0].trim();
@@ -3611,22 +3722,27 @@ function buildSkyscannerUrl(panel, qData) {
     if (!destCode && dest.toLowerCase().indexOf(k.toLowerCase()) !== -1) destCode = DEST_CODES[k];
   });
 
-  // Build URL: use Skyscanner's working search format
-  var base = 'https://www.skyscanner.net/transport/flights/';
-  if (originCode && destCode && depart && ret) {
-    var d1 = depart.replace(/-/g,'').slice(2); // YYMMDD
-    var d2 = ret.replace(/-/g,'').slice(2);
-    return base + originCode.toLowerCase() + '/' + destCode.toLowerCase() + '/' + d1 + '/' + d2 +
-      '/?adults=' + adults + '&cabinclass=economy&rtn=1';
+  // Build Google Flights deep link — pre-populated with origin, destination, dates and pax
+  // Format: google.com/travel/flights/search?tfs=encoded_params
+  // Simpler format that always works:
+  if (originCode && destCode) {
+    var params = new URLSearchParams();
+    params.set('q', 'flights from ' + originCode + ' to ' + destCode);
+    if (depart) params.set('outboundDate', depart);
+    if (ret) params.set('returnDate', ret);
+    params.set('adults', adults);
+    params.set('curr', 'GBP');
+    params.set('gl', 'uk');
+    params.set('hl', 'en-GB');
+    return 'https://www.google.com/travel/flights?' + params.toString();
   }
-  // Fallback: Skyscanner search with query string (always works)
-  var params = new URLSearchParams();
-  if (origin) params.set('origin', origin);
-  params.set('destination', dest);
-  if (depart) params.set('outboundDate', depart);
-  if (ret) params.set('inboundDate', ret);
-  params.set('adults', adults);
-  return 'https://www.skyscanner.net/flights/?' + params.toString();
+  // Fallback — Google Flights generic search for destination
+  var fallback = new URLSearchParams();
+  fallback.set('q', 'flights to ' + dest + ' from UK');
+  fallback.set('curr', 'GBP');
+  fallback.set('gl', 'uk');
+  fallback.set('hl', 'en-GB');
+  return 'https://www.google.com/travel/flights?' + fallback.toString();
 }
 
 function buildPanel(panel, idx, qData, mapPrefix) {
@@ -3665,7 +3781,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Flight info section
   if (panel.flights) {
     var fl = panel.flights;
-    var skyUrl = buildSkyscannerUrl(panel, qData);
+    var skyUrl = 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
     html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">' +
         '<div>' +
@@ -3907,9 +4023,9 @@ function buildBTT(panel, idx, qData) {
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
     '<div class="btt-grid">' +
-      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
+      '<a href="https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon">&#9992;</div>' +
-        '<div><div class="btt-label">Flights</div><div class="btt-action">Search on Skyscanner</div></div>' +
+        '<div><div class="btt-label">Flights</div><div class="btt-action">Book Flights via GolfTrip</div></div>' +
       '</a>' +
       '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
         '<div class="btt-icon">&#127968;</div>' +
@@ -3929,7 +4045,7 @@ function buildBTT(panel, idx, qData) {
         '<div class="btt-total-label">Estimated total per person</div>' +
         '<div class="btt-total-price">' + fmtPrice(panel.total_cost || 0) + '</div>' +
       '</div>' +
-      '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+      '<a href="https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
     '</div>' +
   '</div>';
 }
@@ -4021,7 +4137,7 @@ function exportPDF(panelIdx) {
     '<div class="total-box"><span class="lbl">Total Estimate Per Person</span><span class="val">' + p(panel.total_cost||0) + '</span></div>' +
     '</div>' +
 
-    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Skyscanner, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
+    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Google Flights, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
     '</div></body></html>');
   printWin.document.close();
   printWin.focus();
@@ -5116,23 +5232,23 @@ async function generateSeasonalContent(season) {
     '{"name":"Portugal (Algarve)","tagline":"[one line why great this season]","weather":"[temp]","flight_time":"2h 30m","best_for":"[golfer type]","insider_tip":"[tip]","budget_from":850,"budget_to":1400,' +
     '"courses":[{"name":"[real course]","green_fee":120,"why":"[sentence]"},{"name":"[real course]","green_fee":85,"why":"[sentence]"}],' +
     '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=Algarve"}},' +
+    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=Algarve"}},' +
     '{"name":"Spain (Costa del Sol)","tagline":"[tagline]","weather":"[temp]","flight_time":"2h 30m","best_for":"[type]","insider_tip":"[tip]","budget_from":750,"budget_to":1200,' +
     '"courses":[{"name":"[real course]","green_fee":95,"why":"[sentence]"},{"name":"[real course]","green_fee":65,"why":"[sentence]"}],' +
     '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=Costa+del+Sol"}},' +
+    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=Costa+del+Sol"}},' +
     '{"name":"[dest 3]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":700,"budget_to":1100,' +
     '"courses":[{"name":"[real course]","green_fee":80,"why":"[sentence]"},{"name":"[real course]","green_fee":60,"why":"[sentence]"}],' +
     '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[2] || '') + '"}},' +
+    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[2] || '') + '"}},' +
     '{"name":"[dest 4]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":900,"budget_to":1500,' +
     '"courses":[{"name":"[real course]","green_fee":100,"why":"[sentence]"},{"name":"[real course]","green_fee":70,"why":"[sentence]"}],' +
     '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[3] || '') + '"}},' +
+    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[3] || '') + '"}},' +
     '{"name":"[dest 5]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":1200,"budget_to":2000,' +
     '"courses":[{"name":"[real course]","green_fee":150,"why":"[sentence]"},{"name":"[real course]","green_fee":110,"why":"[sentence]"}],' +
     '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.skyscanner.net","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[4] || '') + '"}}' +
+    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[4] || '') + '"}}' +
     ']}';
   try {
     var res = await fetch('/.netlify/functions/generate-trip', {
@@ -5180,7 +5296,7 @@ function renderSeasonalContent(data, season, generatedAt) {
 
   destinations.forEach(function(dest) {
     var destEnc = encodeURIComponent(dest.name || '');
-    var flightsUrl = dest.booking && dest.booking.flights ? dest.booking.flights : 'https://www.skyscanner.net';
+    var flightsUrl = 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
     var golfnowUrl = buildDestTeeTimes(destName);
     var destNameSafe = (dest.name||'').replace(/'/g, '');
@@ -5277,8 +5393,22 @@ async function processJoin(tripId, user) {
   var params = new URLSearchParams(window.location.search);
   var joinId = params.get('join');
   var tripId = params.get('trip');
+  var booking = params.get('booking');
   if (joinId) pendingJoinId = joinId;
   if (tripId) currentTripRequestId = tripId;
+  if (booking === 'success') {
+    setTimeout(function() {
+      showToast('&#9989; Flight booked! Check your email for confirmation.');
+    }, 800);
+  } else if (booking === 'failed') {
+    setTimeout(function() {
+      showToast('Flight booking failed — please try again.', true);
+    }, 800);
+  } else if (booking === 'abandoned') {
+    setTimeout(function() {
+      showToast('Flight search saved — come back anytime to complete your booking.');
+    }, 800);
+  }
 })();
 
 /* === INIT === */
