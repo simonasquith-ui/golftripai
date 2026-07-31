@@ -145,14 +145,16 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .notif-footer button{width:100%;background:none;border:none;font-size:.8rem;color:var(--text-muted,#888);cursor:pointer;padding:4px}
 .notif-footer button:hover{color:var(--green,#1a3a2a)}
 .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;cursor:pointer}
-.nav-more-wrap{position:relative}
-.nav-more-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.8);font-size:.85rem;font-weight:500;padding:8px 12px}
-.nav-more-btn:hover{color:var(--gold)}
-.nav-more-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;background:rgba(26,58,42,.98);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);min-width:130px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.15);overflow:hidden}
-.nav-more-dropdown.open{display:block}
-.nav-more-dropdown a{display:block;padding:10px 16px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;transition:all .15s}
-.nav-more-dropdown a:hover{background:rgba(201,168,76,.1);color:var(--gold)}
 .nav-cta{margin-left:4px}
+.nav-plan-wrap{position:relative;margin-left:4px}
+.nav-plan-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:#1a3a2a;border:1px solid rgba(201,168,76,.3);border-radius:12px;min-width:260px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.2);overflow:hidden}
+.nav-plan-dropdown.open{display:block}
+.nav-plan-dropdown a{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;color:rgba(255,255,255,.9);text-decoration:none;transition:background .15s;border-bottom:1px solid rgba(201,168,76,.1)}
+.nav-plan-dropdown a:last-child{border-bottom:none}
+.nav-plan-dropdown a:hover{background:rgba(201,168,76,.1)}
+.nav-plan-dropdown a strong{display:block;font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:2px}
+.nav-plan-dropdown a em{display:block;font-size:.75rem;color:rgba(255,255,255,.55);font-style:normal;line-height:1.3}
+.nav-plan-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
 .nav-hamburger span{display:block;width:22px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s}
 .nav-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(26,58,42,.98);border-bottom:1px solid rgba(201,168,76,.2);padding:16px 20px;flex-direction:column;gap:4px;z-index:99}
@@ -445,6 +447,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 .seasonal-refresh:hover{color:var(--green)}
 @media(max-width:640px){
   .hero-split-grid{grid-template-columns:1fr!important}
+  .about-blog-grid{grid-template-columns:1fr!important}
   .hero-split-grid .hero-split-left{border-radius:var(--rl) var(--rl) 0 0!important}
   .hero-split-grid .hero-split-divider{padding:8px 16px!important;border-left:none!important;border-right:none!important;border:none;border-top:1.5px solid rgba(201,168,76,.4);border-bottom:1.5px solid rgba(201,168,76,.4)}
   .hero-split-grid .hero-split-right{border-radius:0 0 var(--rl) var(--rl)!important}
@@ -550,15 +553,27 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="nav-links" id="nav-links-desktop">
       <a href="#" class="nav-link always" onclick="showPage('landing');return false;">Home</a>
       <a href="#" class="nav-link always" onclick="showPage('seasonal');return false;">Destinations</a>
-      <a href="#" class="nav-link always" onclick="showPage('venue');return false;">Build Around a Course</a>
-      <div class="nav-more-wrap">
-        <button class="nav-link always nav-more-btn" onclick="toggleNavMore(event)">More &#9660;</button>
-        <div class="nav-more-dropdown" id="nav-more-dropdown">
-          <a href="#" onclick="showPage('blog');closeNavMore();return false;">Blog</a>
-          <a href="#" onclick="showPage('about');closeNavMore();return false;">About</a>
+
+
+      <div class="nav-plan-wrap">
+        <button class="btn btn-primary btn-sm nav-cta" onclick="togglePlanDropdown(event)">Plan a Trip &#9971; <span style="font-size:.7rem;opacity:.8">&#9660;</span></button>
+        <div class="nav-plan-dropdown" id="nav-plan-dropdown">
+          <a href="#" onclick="showPage('questionnaire');closePlanDropdown();return false;">
+            <span class="nav-plan-icon">&#128101;</span>
+            <span>
+              <strong>Build Around My Group</strong>
+              <em>Tell us your airports, budget &amp; group size</em>
+            </span>
+          </a>
+          <a href="#" onclick="showPage('venue');closePlanDropdown();return false;">
+            <span class="nav-plan-icon">&#9971;</span>
+            <span>
+              <strong>Build Around a Course</strong>
+              <em>Start with a course, we build the rest</em>
+            </span>
+          </a>
         </div>
       </div>
-      <a href="#" class="btn btn-primary btn-sm nav-cta" onclick="showPage('questionnaire');return false;">Plan a Trip &#9971;</a>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
       <div id="nav-auth-btns" class="flex gap-8">
@@ -592,12 +607,16 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   </div>
 </div>
 <div class="nav-mobile-menu" id="nav-mobile-menu">
-  <a href="#" class="nav-mobile-link" style="background:var(--gold);color:var(--green);font-weight:600;border-radius:var(--r)" onclick="showPage('questionnaire');closeMobileMenu();return false;">&#9971; Plan a Trip</a>
+  <div style="padding:8px 0;border-bottom:1px solid rgba(201,168,76,.2)">
+    <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);padding:4px 16px 8px">Plan a Trip</div>
+    <a href="#" class="nav-mobile-link" style="background:rgba(201,168,76,.1);border-left:3px solid var(--gold);padding-left:13px" onclick="showPage('questionnaire');closeMobileMenu();return false;">&#128101; Build Around My Group</a>
+    <a href="#" class="nav-mobile-link" style="background:rgba(201,168,76,.06);border-left:3px solid rgba(201,168,76,.5);padding-left:13px" onclick="showPage('venue');closeMobileMenu();return false;">&#9971; Build Around a Course</a>
+  </div>
   <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('seasonal');closeMobileMenu();return false;">Destinations</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">Build Around a Course</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('blog');closeMobileMenu();return false;">Blog</a>
-  <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About</a>
+  <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About Us</a>
   <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
   <div class="nav-mobile-divider"></div>
   <div class="nav-mobile-auth" id="nav-mobile-auth">
@@ -626,9 +645,9 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;width:100%;align-items:stretch">
           <!-- Option 1: Plan My Trip -->
           <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(201,168,76,.4);border-radius:var(--rl) 0 0 var(--rl);padding:20px 18px;text-align:center">
-            <div style="color:var(--gold);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">I want to explore</div>
-            <div style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;line-height:1.3">Pick a destination,<br>AI does the rest</div>
-            <button class="btn btn-primary" style="width:100%;padding:12px" onclick="showPage('questionnaire')">Plan My Trip &#9971;</button>
+            <div style="color:var(--gold);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Start with your group</div>
+            <div style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;line-height:1.3">Tell us your airports,<br>budget &amp; group size</div>
+            <button class="btn btn-primary" style="width:100%;padding:12px" onclick="showPage('questionnaire')">Build Around My Group &#128101;</button>
           </div>
           <!-- Divider -->
           <div style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);padding:0 10px;border-top:1.5px solid rgba(201,168,76,.4);border-bottom:1.5px solid rgba(201,168,76,.4)">
@@ -807,6 +826,53 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="footer-bottom"><p>&#169; 2025 GolfTrip Ltd. All rights reserved.</p><p>Made for golfers everywhere</p></div>
     </div>
   </footer>
+  <!-- About + Blog section -->
+  <div style="background:var(--white);padding:60px 0;border-top:1px solid var(--border)">
+    <div class="container">
+      <div class="about-blog-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+
+        <!-- About column -->
+        <div>
+          <div class="section-label" style="margin-bottom:12px">About GolfTrip</div>
+          <h3 style="color:var(--green);font-size:1.4rem;margin-bottom:14px">Built by a golf society organiser, for golf society organisers</h3>
+          <p style="color:var(--text-muted);line-height:1.8;margin-bottom:16px">Every year, twice a year, someone in the group chat would say "right, where are we going?" and somehow — without anyone officially deciding — it became my problem. GolfTrip came out of that. A 60-second AI planner that does the research, the comparisons and the group coordination so you can get back to the game.</p>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('about')">Read our story &#8594;</button>
+        </div>
+
+        <!-- Blog column -->
+        <div>
+          <div class="section-label" style="margin-bottom:12px">From the Blog</div>
+          <h3 style="color:var(--green);font-size:1.4rem;margin-bottom:16px">Guides &amp; destination advice</h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid var(--border);cursor:pointer" onclick="showPage('blog-article-1')">
+              <div style="width:48px;height:48px;border-radius:var(--r);background:var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">&#128101;</div>
+              <div>
+                <div style="font-size:.88rem;font-weight:500;color:var(--green);margin-bottom:3px">How to Plan a Golf Society Trip for 16 People</div>
+                <div style="font-size:.78rem;color:var(--text-muted)">Without losing your mind in the group chat</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid var(--border);cursor:pointer" onclick="showPage('blog-article-2')">
+              <div style="width:48px;height:48px;border-radius:var(--r);background:var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">&#9971;</div>
+              <div>
+                <div style="font-size:.88rem;font-weight:500;color:var(--green);margin-bottom:3px">Costa del Sol vs Algarve</div>
+                <div style="font-size:.78rem;color:var(--text-muted)">Which is better for your golf break?</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="showPage('blog-article-4')">
+              <div style="width:48px;height:48px;border-radius:var(--r);background:var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">&#129302;</div>
+              <div>
+                <div style="font-size:.88rem;font-weight:500;color:var(--green);margin-bottom:3px">How AI is Changing Golf Trip Planning in 2026</div>
+                <div style="font-size:.78rem;color:var(--text-muted)">What it's good at, and what it's not</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:16px" onclick="showPage('blog')">All articles &#8594;</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom CTA strip -->
   <div style="background:var(--green);padding:28px 0">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
@@ -815,7 +881,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div style="color:rgba(255,255,255,.7);font-size:.9rem">Free to try — no card needed.</div>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free &#9971;</button>
+        <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group &#128101;</button>
         <button class="btn btn-ghost" onclick="showPage('venue')" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.3)">Build Around a Course</button>
       </div>
     </div>
@@ -1959,16 +2025,17 @@ const SUPABASE_URL = 'https://ddordyjwkdwqaarplwmc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_K-YgHnXKdhBuXShqhvU7Hw_iC3z70CX';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function toggleNavMore(e) {
+function togglePlanDropdown(e) {
   e.stopPropagation();
-  document.getElementById('nav-more-dropdown').classList.toggle('open');
+  var d = document.getElementById('nav-plan-dropdown');
+  d.classList.toggle('open');
 }
-function closeNavMore() {
-  var d = document.getElementById('nav-more-dropdown');
+function closePlanDropdown() {
+  var d = document.getElementById('nav-plan-dropdown');
   if (d) d.classList.remove('open');
 }
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('.nav-more-wrap')) closeNavMore();
+  if (!e.target.closest('.nav-plan-wrap')) closePlanDropdown();
 });
 
 function toggleMobileMenu() {
@@ -4966,14 +5033,15 @@ function initSeasonalPage(season) {
   document.getElementById('seasonal-subheading').textContent = meta.months + ' - ' + meta.desc;
   document.getElementById('seasonal-content').innerHTML = '';
 
+  // Try cache first, auto-generate on miss
   sbClient.from('seasonal_recommendations').select('*').eq('season', season).single().then(function(cached) {
     if (cached.data && cached.data.content) {
       renderSeasonalContent(cached.data.content, season, cached.data.generated_at);
     } else {
-      showSeasonalGenerateBtn(season);
+      generateSeasonalContent(season);
     }
   }).catch(function() {
-    showSeasonalGenerateBtn(season);
+    generateSeasonalContent(season);
   });
 }
 
@@ -5076,14 +5144,12 @@ async function generateSeasonalContent(season) {
     var json = await res.json();
     var parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
 
-    // Cache in Supabase
-    try {
-      await sbClient.from('seasonal_recommendations').upsert({
-        season: season,
-        content: parsed,
-        generated_at: new Date().toISOString()
-      }, { onConflict: 'season' });
-    } catch(e) { console.warn('Could not cache seasonal data:', e); }
+    // Cache in Supabase (silent fail if table doesn't exist yet)
+    sbClient.from('seasonal_recommendations').upsert({
+      season: season,
+      content: parsed,
+      generated_at: new Date().toISOString()
+    }, { onConflict: 'season' }).then(function(){}).catch(function(){});
 
     loadEl.style.display = 'none';
     renderSeasonalContent(parsed, season, new Date().toISOString());
