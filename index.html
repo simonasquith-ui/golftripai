@@ -261,7 +261,11 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .dest-card p{color:rgba(255,255,255,.75)}
 .dest-card .dest-meta{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
 .dest-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:5px 12px;border-radius:20px;font-size:.8rem}
-.section-heading{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green);margin:28px 0 16px;display:flex;align-items:center;gap:10px}
+.section-heading{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green);margin:28px 0 16px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.section-refresh-btn{font-family:var(--font-body,inherit);font-size:.75rem;font-weight:500;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.section-refresh-btn:hover{color:var(--green);border-color:var(--green);background:rgba(26,58,42,.05)}
+.section-refresh-btn.loading{opacity:.6;pointer-events:none}
+.section-refresh-btn .spin{display:inline-block;animation:spin .6s linear infinite;margin-right:4px}
 .section-heading::before{content:attr(data-icon)}
 .courses-grid,.hotels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:32px}
 .course-card,.hotel-card{background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:8px}
@@ -1401,6 +1405,11 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
             </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <label style="display:block;font-size:.8rem;font-weight:600;color:var(--green);margin-bottom:6px">&#9992; Departure Airport</label>
+              <select id="venue-airport-select" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:.88rem;background:var(--white)">
+              </select>
+            </div>
             <button class="btn btn-primary" onclick="buildAroundVenue()">&#129302; Build trip around this</button>
             <button class="btn btn-ghost" onclick="addVenueToCart()">&#43; Add to cart</button>
             <button class="btn btn-ghost btn-sm" onclick="clearVenuePreview()" style="margin-left:auto">Change</button>
@@ -1557,6 +1566,42 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </a>
 
+        <a href="#" onclick="showPage('blog-article-5');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-manchester.jpg" alt="Best golf courses Algarve" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">DESTINATION GUIDE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">The Best Golf Courses in the Algarve</h3><p class="fs-sm text-muted">An honest rundown from someone who's been going six years running — what's worth the money and what isn't.</p></div>
+          </div>
+        </a>
+        <a href="#" onclick="showPage('blog-article-6');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-society-16.jpg" alt="Scotland golf weekends" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">DESTINATION GUIDE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">Golf Weekends in Scotland: St Andrews, Ayrshire &amp; East Lothian Compared</h3><p class="fs-sm text-muted">Three regions, very different vibes. Which one is right for your society?</p></div>
+          </div>
+        </a>
+        <a href="#" onclick="showPage('blog-article-7');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-society-16.jpg" alt="Golf society trip checklist" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">SOCIETY PLANNING</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">Golf Society Trip Checklist: Everything Your Group Needs</h3><p class="fs-sm text-muted">Twelve trips in fourteen years. Everything we wish we'd had written down the first time.</p></div>
+          </div>
+        </a>
+        <a href="#" onclick="showPage('blog-article-8');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-costadelsol-algarve.jpg" alt="Tenerife golf holidays budget vs luxury" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">DESTINATION GUIDE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">Budget vs Luxury Golf Holidays in Tenerife — What Do You Actually Get?</h3><p class="fs-sm text-muted">Tenerife gets unfairly dismissed. Here's the honest case for both ends of the price range.</p></div>
+          </div>
+        </a>
+        <a href="#" onclick="showPage('blog-article-9');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-ai-2026.jpg" alt="Best time to book golf holiday" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">PLANNING ADVICE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">Best Time of Year to Book a Golf Holiday in Europe</h3><p class="fs-sm text-muted">When to go, and when to book. Two different questions with two different answers.</p></div>
+          </div>
+        </a>
+        <a href="#" onclick="showPage('blog-article-10');return false;" style="text-decoration:none;color:inherit;display:flex">
+          <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="height:160px;overflow:hidden"><img src="/blog-manchester.jpg" alt="Golf breaks from London" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+            <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">DESTINATION GUIDE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">Golf Breaks from London: The Best Destinations &amp; How to Get There</h3><p class="fs-sm text-muted">Five airports, one trip. The sensible guide to not spending two weeks arguing about which terminal.</p></div>
+          </div>
+        </a>
         <a href="#" onclick="showPage('blog-article-4');return false;" style="text-decoration:none;color:inherit;display:flex">
           <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
             <div style="height:160px;overflow:hidden"><img src="/blog-ai-2026.jpg" alt="Golfer with AI golf trip planning" style="width:100%;height:100%;object-fit:cover;display:block"></div>
@@ -1587,60 +1632,24 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="container" style="max-width:700px">
       <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
 
-        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">
-          "Right, where are we going this year?" Six words. Said in a group chat. By someone who will not be the one organising it.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          If you're reading this, congratulations — you've been quietly appointed Trip Organiser. Nobody voted for you. There was no ceremony. You just happened to be the one who said "I'll sort it" eighteen months ago and now it's permanently your job.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          Here's how to actually get sixteen golfers, sixteen opinions, and sixteen different budgets onto the same flight without it taking over your evenings for three months.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">1. Get the constraints first, the destination second</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          The instinct is to pick somewhere nice and work backwards. Don't. Find out three things before you mention a single destination: who's actually coming, what they're each willing to spend, and which airports they're flying from. A society of sixteen rarely all lives in one city — you'll usually have a Manchester contingent, a London contingent, and someone who insists on driving from Edinburgh "because flights are a rip-off."
-        </p>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Once you know the budget spread and the departure airports, the destination shortlist writes itself. This is the bit that actually takes the longest if you're doing it manually — checking flight times and prices from three different airports to five different destinations is twenty-plus searches before you've even looked at a single golf course.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">2. Give people 3 real options, not 1 vague idea</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          "Shall we do Portugal?" gets a group chat full of thumbs up emojis and zero commitment. People don't vote for vague ideas — they vote for specifics. Show them Budget, Mid-Range and Luxury versions of the same trip side by side, with actual courses and actual hotels named, and suddenly people have opinions worth listening to.
-        </p>
-        <p style="line-height:1.9;margin-bottom:20px">
-          This is also where you'll find out who's quietly hoping for a bargain and who wants the trip of a lifetime — better to surface that now than three weeks before departure.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">3. Vote with a deadline, not an open-ended chat</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Group chats are where decisions go to die. "What does everyone think?" followed by silence, followed by one reply four days later, followed by the thread getting buried under unrelated banter. Set a hard deadline — "votes in by Sunday night, majority wins" — and stick to it. Indecision is the single biggest killer of golf trips that never actually happen.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">4. Book the controllable things first</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Flights and the headline hotel first — those are the things that get more expensive the longer you wait. Tee times and restaurant bookings can usually wait until closer to the date. Don't let the perfect be the enemy of the booked; you can refine the finer details later, but a flight that's sold out is sold out.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">5. Collect money early, and collect it properly</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          The organiser fronting £4,000 on a personal card and chasing fifteen mates for their share via WhatsApp for the next two months is a rite of passage nobody should have to go through twice. Get deposits in upfront, ideally before you book anything irreversible. The "I'll pay you back after payday" crowd are charming right up until the invoice is due.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The honest bit</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          We built GolfTrip because this exact process — the airport juggling, the three-tier comparisons, the voting, the chasing people for deposits — was eating an entire weekend every time, twice a year, for years. The AI planner does the research in about 60 seconds instead of a weekend, the group voting actually lives somewhere instead of a buried WhatsApp thread, and everyone can see the same trip cart instead of fifteen separate conversations about what's actually been decided.
-        </p>
-        <p style="line-height:1.9;margin-bottom:32px">
-          It won't stop someone changing their mind about flights for the fourth time. Nothing can fix that. But it'll save you the weekend.
-        </p>
-
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Right, where are we going this year?" Six words. Said in the group chat. By someone who absolutely will not be the one sorting it.</p>
+        <p style="line-height:1.9;margin-bottom:20px">If you're reading this, you're the one who sorts it. Nobody elected you. There was no ceremony. You just happened to be the organised one and now, year after year, that's your identity within the society whether you like it or not. The good news is there's a better way to do this than the spreadsheet-and-browser-tabs approach most people are still using.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Get the constraints before you get the destination</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The number one mistake is picking a destination and then trying to make everyone fit around it. Go the other way. Before you mention a single place, find out who's actually coming, what they're willing to spend, and where they're flying from. Sixteen people rarely all live in the same place — you'll have a London contingent, a Manchester lot, and the one bloke who drives from somewhere near Inverness and considers that perfectly reasonable.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Once you know the budget range and the airports, the shortlist mostly sorts itself. This sounds obvious but it's the step most organisers skip, which is why they end up three weeks into planning discovering that four people can't actually afford what they'd already half-agreed to.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Give them options, not a question</h2>
+        <p style="line-height:1.9;margin-bottom:20px">"Shall we do Portugal?" produces thumbs up emojis and no decisions. "Here are Budget, Mid-Range and Luxury versions of an Algarve trip — which works for the group?" produces actual answers. People vote for specifics. They can't vote for a vague idea. Get three real options in front of them with actual courses and actual hotels named, and the conversation moves forward instead of going in circles for three weeks.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">A deadline isn't optional</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Group chats are where decisions go to quietly expire. Set a hard deadline for votes — "reply by Sunday or I'm assuming you're flexible" — and stick to it. The people who miss the deadline and then have strong opinions afterwards are a known phenomenon and you are within your rights to ignore them.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Flights and hotel before anything else</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Book the things that get more expensive the longer you leave them. Tee times can usually be sorted closer to the date. Restaurants definitely can. But a flight that was £89 in November is £189 in January and sold out in March. Lock in the accommodation and flights, then work outward from there.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Collect money before you spend it</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The organiser fronting four grand on a personal card and chasing people via WhatsApp for the next two months is one of those experiences that everyone laughs about afterwards and nobody wants to repeat. Get deposits before you book anything you can't cancel. The people who say "I'll sort you after payday" mean it entirely sincerely and will still owe you money at the airport.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Why we built GolfTrip</h2>
+        <p style="line-height:1.9;margin-bottom:20px">This exact process — the airport juggling, the three-tier comparisons, the voting that never quite happens, the chasing people for deposits — was taking up entire weekends. Twice a year, every year. GolfTrip does the research in about sixty seconds, the group voting happens in the app instead of a buried thread, and everyone can see the same information instead of fifteen slightly different versions of what's been decided. It won't stop someone changing their mind about flights for the fourth time. Nothing can fix that. But it cuts the rest of it down considerably.</p>
         <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
-          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Ready to stop herding sheep with opinions?</p>
-          <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free</button>
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Stop herding sheep with opinions about green fees.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
         </div>
 
       </div>
@@ -1662,45 +1671,20 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="container" style="max-width:700px">
       <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
 
-        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">
-          Every golf society in Britain has had this argument at least once. Usually in a pub. Usually unresolved.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          Costa del Sol and the Algarve are the two heavyweight contenders for a UK golf trip — both a short, cheap flight away, both blessed with reliable sun and a genuinely deep bench of quality courses. But they're not the same trip, and which one wins depends on what your group actually wants.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The golf itself</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          The Algarve has the edge on sheer density and pedigree — courses like Quinta do Lago and Vale do Lobo sit within a 20-minute drive of each other, so you can play a different world-class layout every day without much transfer time. Costa del Sol spreads its courses out more along the coast, which means slightly more driving between rounds, but the variety is excellent too, with Valderrama (one of Europe's most celebrated layouts) as the standout.
-        </p>
-        <p style="line-height:1.9;margin-bottom:20px">
-          If your group is serious about ticking off marquee courses, the Algarve probably wins on convenience. If you don't mind a bit more driving for a wider geographic spread, Costa del Sol holds its own.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Flights and getting there</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Both are roughly a 2.5-hour flight from most UK airports, and both are well served by budget carriers, so price differences are usually marginal. Faro (Algarve) tends to have slightly more direct routes from regional UK airports outside London — worth checking if your group is scattered across the country rather than London-based.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Off the course</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Costa del Sol has the bigger nightlife and restaurant scene, particularly around Marbella and Puerto Banús, if your group wants more going on after the 18th hole. The Algarve leans quieter and more family-resort in feel, with excellent seafood and a more relaxed pace — better suited to a group that wants golf by day and a decent dinner by night, rather than a big one out.
-        </p>
-
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Portugal's better." "No it isn't, Spain's warmer in April." "You haven't even been to Spain." "I went to Marbella in 2019." The conversation happens at some point in every society. Here's an attempt to settle it properly.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Both are roughly two and a half hours from most UK airports, both have excellent courses, both have reliable sun from March through October. The difference isn't really about quality — it's about what kind of trip your group wants.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The golf</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The Algarve wins on concentration. Quinta do Lago, Vale do Lobo and Penina are within about twenty minutes of each other, which means you can play three completely different world-class courses without a significant drive between any of them. That matters on a five-day trip. Costa del Sol is more spread out — Valderrama, La Cañada, Real Club de Golf Guadalmina are excellent but you'll be in the car between them more. Not a dealbreaker, just worth knowing.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Valderrama, though. If your group has any ambition to play genuinely iconic golf, the Costa del Sol has the edge there. It hosted the Ryder Cup in 1997 and it's still one of the best-designed tests in Europe. The Algarve has outstanding courses but nothing quite as historically significant.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">After the round</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Costa del Sol is the obvious choice if the group wants a proper evening out. Marbella old town, Puerto Banús, the restaurant strip around San Pedro — there's a lot going on and it doesn't all shut at 10pm. The Algarve is better for a group that wants excellent food and a civilised evening rather than a night out. Lagos and Vilamoura have good restaurants and decent bars, but it's a different energy to the Costa del Sol.</p>
         <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Cost</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Green fees run fairly similar across both — expect anywhere from £60 for a quieter course up to £150+ for the marquee names in peak season at either destination. Accommodation in the Algarve tends to be slightly more golf-resort focused (often bundling course access), while Costa del Sol has a wider range of standalone hotels and villas, which can work out cheaper for larger groups splitting a villa.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The honest verdict</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          For a tighter, golf-focused trip with minimal driving between rounds: Algarve. For a livelier trip with more going on in the evenings and slightly more flexible accommodation: Costa del Sol. Both are safe, proven choices — you're choosing between two excellent options, not gambling on either.
-        </p>
-
+        <p style="line-height:1.9;margin-bottom:20px">Green fees are broadly similar — budget around £80-100 for good courses, £150-200 for the marquee names at either destination in peak season. Accommodation is where the difference shows. The Algarve has more golf-resort packages that bundle accommodation and rounds together, which often works out better value for a society. The Costa del Sol has more standalone hotel and villa options, which suits larger groups who want space to spread out.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The actual answer</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Golf-first, convenient, quieter evenings: Algarve. More to do off the course, iconic courses, livelier atmosphere: Costa del Sol. Neither is a wrong answer. We've had good trips in both and will keep going to both. The argument in the pub remains unresolved, which is probably how it should be.</p>
         <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
-          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Compare both destinations side by side, with real courses and pricing.</p>
-          <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free</button>
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">See both side by side — same budget, same dates, different destinations.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
         </div>
 
       </div>
@@ -1722,42 +1706,21 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="container" style="max-width:700px">
       <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
 
-        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">
-          Most golf trip content is written for London golfers, by London writers, assuming everyone's flying from Gatwick. If you're organising from Manchester, here's what actually matters.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          Manchester Airport is one of the best-connected regional airports in the UK for golf trips — direct routes to most of the major European golf destinations, often cheaper than the equivalent London flight, and none of the M25 to deal with beforehand.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Algarve — the easy win</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Direct flights from Manchester to Faro run regularly with easyJet and Jet2, roughly 2 hours 45 minutes. It's the path of least resistance for a Manchester-based society — short flight, no connections, world-class golf waiting at the other end.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Costa del Sol — nearly as easy</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Direct to Malaga, around 2 hours 50 minutes, with multiple daily flights from Manchester. Good value, especially outside July/August peak pricing.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Scotland — for the purists</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          If your group wants links golf and proper heritage courses without leaving the country, Manchester to Edinburgh is under an hour, and you're at St Andrews or East Lothian within a couple more hours' drive. No passport admin, and arguably some of the best golf in the world on your doorstep.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">A quieter option — Bilbao / Northern Spain</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Less obvious, often overlooked, and noticeably cheaper than the Algarve or Costa del Sol in peak season. Direct flights from Manchester run a few times a week. Fewer golfers means easier tee time availability and a more relaxed pace.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The practical bit</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          If your society has members scattered beyond Manchester — Leeds, Liverpool, Sheffield — it's worth checking whether they're better off flying from their own regional airport rather than everyone converging on Manchester. A planner that lets you compare multiple departure airports side by side saves a lot of "well it's cheaper for me from Liverpool" back-and-forth in the group chat.
-        </p>
-
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Just fly from Gatwick." Thanks for that. Very helpful from someone who lives in Surrey.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Most golf trip content assumes you're flying from London. Manchester Airport is actually excellent for European golf destinations — often better connected than people realise, usually cheaper than the equivalent London fares, and without the two-hour M25 experience beforehand. Here's what actually works from the North West.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Algarve — still the obvious first choice</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Manchester to Faro with easyJet or Jet2, around two hours forty-five minutes direct. It's the safe choice for a reason — short flight, straightforward, world-class golf at the other end. We've done this route probably four or five times now and there's never been a complaint about getting there. Book early and the fares are genuinely good value.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Costa del Sol — similar distance, different trip</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Direct to Malaga, roughly the same flight time. Multiple daily services from Manchester with several carriers. If the group wants more going on in the evenings alongside the golf, this is the better choice. The golf is excellent and Marbella is only forty minutes from the airport.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Scotland — less than an hour away</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Manchester to Edinburgh is fifty minutes. You're at St Andrews in two hours from the gate. No passport, no currency, and links golf that most of the world would get on a plane for. For a long weekend it's almost criminally convenient from Manchester and most northern societies have never done it because it doesn't feel like a proper trip. It is.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Bilbao — the one that surprises people</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Direct from Manchester a few times a week, under two hours. Northern Spain is dramatically cheaper than the Algarve or Costa del Sol — green fees, restaurants, accommodation, all of it. The golf in the Basque Country is excellent and largely unknown to UK societies because nobody thinks to look there. The food in Bilbao and San Sebastián is genuinely world-class. If your group has done Portugal and Spain and wants something different, this is the answer.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">If the group isn't all from Manchester</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Leeds, Liverpool, Sheffield — everyone in the North has a vaguely different nearest airport and strong opinions about which one is actually convenient. The right answer is for people to fly from wherever makes sense for them and meet at the destination. It works better than it sounds and removes the "well it's cheaper for me from East Midlands" conversation that would otherwise go on for three weeks.</p>
         <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
-          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Compare flights from multiple UK airports in one trip plan.</p>
-          <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free</button>
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Multiple airports, one trip plan.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
         </div>
 
       </div>
@@ -1779,46 +1742,211 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="container" style="max-width:700px">
       <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
 
-        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">
-          Golf trip planning hasn't changed much in twenty years. The way people plan them has.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          For two decades, planning a golf trip meant one of two routes: ring a specialist travel agent and pay for their time and inventory access, or do it yourself across fifteen browser tabs — Google Flights, Booking.com, three different course websites, and a Google Doc that everyone forgets to check.
-        </p>
-
-        <p style="line-height:1.9;margin-bottom:20px">
-          Neither route has fundamentally changed. What's changed is that AI can now do the research portion — cross-referencing destinations, courses, hotels and flights against a budget and group size — in about the time it takes to make a coffee, rather than a weekend.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What AI is actually good at here</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Cross-referencing constraints. "I've got 8 golfers flying from 3 different airports, a budget of £1,200 each, and we want somewhere warm in September" is exactly the kind of multi-variable problem that used to take a human hours of manual searching and now takes an AI under a minute to produce three genuinely different, genuinely usable options for.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What it's not good at — and won't pretend to be</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          AI-generated pricing is an estimate, not a live quote — nobody's built a system yet that pulls real-time prices from every hotel and flight provider simultaneously without a hefty licensing deal behind it. Good AI trip planners are honest about this: the numbers are there to give you a realistic ballpark, and the actual booking happens through the real providers (Google Flights, Booking.com, the course's own tee sheet) where the live price lives.
-        </p>
-        <p style="line-height:1.9;margin-bottom:20px">
-          Anyone telling you their AI shows perfectly accurate live pricing across every provider in real time is either overselling it or sitting on an enterprise data deal most startups don't have.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The bigger shift: planning tool vs travel agent</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          The interesting structural change isn't really about AI at all — it's about a new category of product sitting between "do it yourself" and "pay an agent." A planning tool that does the research and comparison, then hands you off to the actual booking providers, rather than acting as the middleman who books and holds the inventory itself. No ATOL bonding complexity, no inventory risk, and crucially, no markup baked into the price because nobody's reselling anything.
-        </p>
-
-        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What's next</h2>
-        <p style="line-height:1.9;margin-bottom:20px">
-          The next real leap will be live pricing integration — actual API connections into flight and hotel booking systems rather than AI-estimated ranges. That's coming, slowly, as the affiliate and partner programmes that smaller platforms rely on mature. Until then, the honest version of this technology gives you a fast, genuinely useful starting point — and is upfront about where the estimate ends and the real booking begins.
-        </p>
-
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"I spent four evenings on this." That's how I described planning our 2023 Algarve trip to someone who asked. Four evenings. For a five-night holiday. That felt wrong.</p>
+        <p style="line-height:1.9;margin-bottom:20px">The actual golf took twelve hours across three days. The planning took longer than that. Flight comparisons from four different airports, hotel searches, course availability, green fee research, trying to work out whether the cheap hotel was actually near the courses or just near the motorway. By the time I'd sorted it I was mildly sick of the Algarve before we'd even landed.</p>
+        <p style="line-height:1.9;margin-bottom:20px">That's the problem AI travel planning is actually solving. Not the big philosophical question of whether AI is good or bad — just the unglamorous reality that sorting out a group golf trip used to eat your evenings and now it doesn't have to.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What it actually does well</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The bit AI is genuinely useful for is cross-referencing a lot of variables quickly. Eight golfers, three different departure airports, a budget of around £1,200 each, somewhere warm in September — that's a twenty-plus search exercise if you're doing it manually and about sixty seconds if you're not. The output is a starting point, not a finished plan, but it's a properly informed starting point rather than just picking the first thing that looks reasonable.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">What it doesn't do — and shouldn't claim to</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The prices are estimates. That's worth saying plainly. AI-generated green fees and hotel costs are based on training data, not live availability. They give you an accurate enough ballpark to make decisions — yes this destination is broadly in budget, no that tier is too expensive — but you book the actual flights and hotels through the real providers where the live price lives. Anyone claiming their AI shows you real-time availability across every provider simultaneously is either not being straight with you or has a set of airline and hotel partnerships most startups don't have.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The thing that's actually changed</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The more interesting shift isn't really about AI — it's about what sits between "do it yourself for free" and "pay a travel agent to do it." For golf trips specifically that gap has been pretty empty. A planning tool that does the research and comparison and then sends you to Booking.com and GolfNow to actually book, rather than acting as the booking agent themselves — that's the genuinely new thing. No agent markup in the price, no ATOL bonding headaches, just the research done for you.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Whether GolfTrip specifically is any good at this is something you can find out for free in about sixty seconds. The planning for our next trip took considerably less than four evenings. That's the honest measure of whether it works.</p>
         <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
-          <p style="font-weight:600;color:var(--green);margin-bottom:14px">See what an AI-built golf trip actually looks like.</p>
-          <button class="btn btn-primary" onclick="showPage('questionnaire')">Plan My Trip Free</button>
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">See what sixty seconds actually produces.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-5" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-manchester.jpg" alt="Golf courses in the Algarve" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">DESTINATION GUIDE</div>
+      <h1 style="font-size:2.1rem;color:#fff">The Best Golf Courses in the Algarve</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">9 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Right, same again next year?" Before the transfer back to Faro had even left the resort, we'd already agreed on coming back.</p>
+        <p style="line-height:1.9;margin-bottom:20px">We've been going to the Algarve as a society for six years now. Different hotels, different months, slightly different arguments about handicaps — but the courses stay largely the same because frankly, once you've played Quinta do Lago, Vale do Lobo and Penina, you've played some of the finest parkland golf in Europe. Here's an honest rundown of what's actually worth your money and what isn't.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Quinta do Lago South</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The one everyone wants to play, and for good reason. Immaculate conditioning, wide corridors off the tee that make you feel like a better golfer than you are, and views over the Ria Formosa nature reserve that make you want to stop and take photos instead of playing. It's expensive — you'll be looking at £150-200 a round in peak season — but if you're only playing one marquee course, this is the one. Book direct and book early; tee times go months in advance in July and August.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Vale do Lobo Royal</h2>
+        <p style="line-height:1.9;margin-bottom:20px">The 16th hole. That's all you really need to know. It's a par 3 across two clifftops with the Atlantic below and it will either be the best hole you've ever played or the most expensive — depends entirely on whether you find the green or the sea. The rest of the course is demanding and varied, and the conditioning is consistently good. Slightly more character than Quinta, slightly fewer camera phones on the fairway. Our group has a love-hate relationship with it. We keep going back.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Penina Championship</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Henry Cotton designed it and it shows — this is old-school Algarve golf, flat, tree-lined, strategic. Not as visually dramatic as the cliff-top courses but genuinely one of the best tests of accuracy in the region. Green fees are noticeably more reasonable than the marquee names, and if your society includes a few mid-to-high handicappers who find the exposed layouts punishing, Penina is kinder while still being excellent.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The honest bit about the Algarve</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Peak season (July-August) is expensive, hot — genuinely uncomfortable hot for some golfers — and busy. September and October are the sweet spot. Same sunshine, emptier tee sheets, prices 20-30% lower. If your society has any flexibility on timing, go in October. You'll thank yourself.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Plan your Algarve trip in 60 seconds.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-6" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-society-16.jpg" alt="Golf in Scotland" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">DESTINATION GUIDE</div>
+      <h1 style="font-size:2.1rem;color:#fff">Golf Weekends in Scotland: St Andrews, Ayrshire &amp; East Lothian Compared</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">8 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"It's just a field." That's what someone in our group said before his first round on the Old Course. By the 17th he'd gone very quiet.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Scotland does something to you. It's not just the golf — though the golf is extraordinary — it's the whole thing. The cold, the wind, the way the light hits a links course at 7am when you're the only group on the first tee. If your society hasn't done a Scottish trip yet, you're overdue. Here's how the three main regions compare.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">St Andrews — the pilgrimage</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Getting a tee time on the Old Course is genuinely difficult. The ballot system means you can apply months in advance and still not get one. The locals call it character building. If you do get on, the experience is unlike anything else in golf — flat, featureless to the eye, deadly to the scorecard. The Swilcan Bridge photo is unavoidable and nobody apologises for it. The town itself is excellent for an evening — good restaurants, whisky bars, the kind of place that makes you want to stay an extra day. Book other courses on the St Andrews Links (the New, Jubilee, Eden) to fill the week; they're excellent in their own right and much easier to get on.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Ayrshire — Turnberry and Prestwick</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Turnberry's Ailsa course is as dramatic as golf gets anywhere in the world. Perched on the Firth of Clyde with Ailsa Craig sitting in the sea beyond, it's the kind of course you have to see to believe. Expensive — proper resort pricing — but if you're going to treat the group once, this is how. Prestwick, a few miles up the coast, is the antidote: ancient, quirky, blind holes that would never get planning permission today, and a fraction of the price. Playing both in the same trip is the right approach.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">East Lothian — the underrated one</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Twenty minutes from Edinburgh and most people have never heard of it as a golf destination, which is precisely why you should go. Muirfield is there — one of the Open Championship venues, strict dress code, no buggies, no nonsense, and worth every penny of the green fee. Gullane and North Berwick offer outstanding links golf at sensible prices. You can fly into Edinburgh, be on a golf course within an hour and be back in the airport two hours after your last putt. For a long weekend, nothing beats it for value and quality.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Plan your Scotland trip — flights from any UK airport.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-7" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-society-16.jpg" alt="Golf society trip checklist" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">SOCIETY PLANNING</div>
+      <h1 style="font-size:2.1rem;color:#fff">Golf Society Trip Checklist: Everything Your Group Needs</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">7 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Did anyone bring the handicap certificates?" The taxi to the airport. Every single time.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Twelve trips in fourteen years. We've forgotten something on almost every one. The list below is everything we wish we'd had written down the first time — covering the stuff that actually causes problems, not the obvious things that everyone remembers anyway.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Before you book anything</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Get firm numbers before touching a credit card. A WhatsApp "who's in?" produces an unreliable count. An actual message saying "reply by Friday or you're not on the list" produces a reliable one. Establish the budget range early — not everyone's in the same position, and finding out the hard way three weeks before departure is miserable for everyone.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Documents and admin</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Every player needs their handicap certificate or WHS index printout — most European courses won't let you on without one, and they mean it. Check passport expiry dates; at least one person in every group discovers theirs expired during a recent name change or just hasn't checked in three years. Travel insurance that covers golf equipment specifically, not just general baggage. And if anyone's flying separately, make sure they know the tee time, not just the course name.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Equipment</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Hire clubs at the destination if anyone's on the fence — they've got significantly better in the last ten years and lugging a bag through an airport is genuinely miserable. If you are taking your own, a hard case and a lock. Always. Budget airlines have a talent for finding soft bags. Check the airline's golf bag policy before assuming; some count it as oversized baggage, some have a specific golf rate.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">On the ground</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Shared minibus or individual taxis — sort it before you land, not in the arrivals hall. Tee time confirmation in writing, not just a verbal booking. Know the course dress code; some European clubs are stricter than you'd expect. Sort dinner reservations for at least the first night before you go — arriving hungry and disorganised after a long travel day when nobody's eaten properly since the airport is a guaranteed atmosphere killer.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The bit people always forget</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Sort the Stableford scoring system and the side bets before you leave, not on the first tee. Twelve people arguing about whether it's gross or net while a group is waiting behind you is one of those experiences that stays with you.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Let GolfTrip handle the planning part at least.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-8" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-costadelsol-algarve.jpg" alt="Tenerife golf" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">DESTINATION GUIDE</div>
+      <h1 style="font-size:2.1rem;color:#fff">Budget vs Luxury Golf Holidays in Tenerife — What Do You Actually Get?</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">6 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"It's a bit Benidorm" is not something anyone has ever said about the south of Tenerife while standing on the fairway at Golf Costa Adeje with the Atlantic behind them.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Tenerife gets unfairly dismissed by golf travellers who lump it in with package holiday resorts. The south of the island is a genuinely good golf destination — reliable sunshine year-round, short flight from most UK airports, and a surprising spread of quality courses. The question is what you actually get at different price points.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Budget (under £800pp for 5 nights)</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Perfectly achievable. Flights from most UK airports are cheap outside school holidays, and mid-range hotels in Los Cristianos or Playa de las Américas are solid without being exciting. Green fees at courses like Amarilla Golf or Golf del Sur are reasonable — you're playing decent, well-maintained layouts without paying resort prices. You'll eat well and cheaply in the local restaurants rather than the resort dining rooms, which is honestly often the better choice anyway. The golf won't blow your mind but it's good enough to justify the trip, and the weather in January or February when everywhere else is miserable makes the value obvious.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Luxury (£1,500pp+)</h2>
+        <p style="line-height:1.9;margin-bottom:20px">This is a different trip. Abama Resort sits on the west coast and is one of the more extraordinary hotel and golf experiences in Europe — Dave Thomas designed the course along a volcanic hillside, the holes descend toward the ocean, and the resort itself is the kind of place that makes you feel guilty about how good your life briefly is. Green fees match the setting. Paired with a night or two at a boutique hotel in the north of the island — where it's genuinely lush and green and completely unlike the south — and you have a trip that punches well above what Tenerife's reputation suggests.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The honest verdict</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Tenerife budget trips are great value for winter golf. Tenerife luxury trips are genuinely surprising — Abama specifically is one of those places that converts people who thought they'd never go back. If the group budget is split — some want cheap, some want to splash out — a compromise at £1,000-1,200pp gets you good hotels in the south and green fees at the better courses. Nobody feels like they've been short-changed.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Compare budget and luxury Tenerife options side by side.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-9" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-ai-2026.jpg" alt="Best time to book a golf holiday" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">PLANNING ADVICE</div>
+      <h1 style="font-size:2.1rem;color:#fff">Best Time of Year to Book a Golf Holiday in Europe</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">6 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"We'll book it in January." We say this every October. We book it in March and the flights have gone up forty quid.</p>
+        <p style="line-height:1.9;margin-bottom:20px">Timing a golf trip is two separate questions: when to travel, and when to book. They have different answers, and mixing them up is the most common way societies end up either in the wrong destination at the wrong time of year, or paying over the odds for something they could have had for less.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">When to travel — by destination</h2>
+        <p style="line-height:1.9;margin-bottom:20px"><strong>Portugal and Spain:</strong> April-May and September-October. The summer months are genuinely uncomfortable — 35 degrees on an exposed fairway with no shade is not golf, it's survival. September is the Algarve at its best: still warm, courses emptier, prices lower. If you can only do summer, go early morning tee times and accept you'll be done by 1pm.</p>
+        <p style="line-height:1.9;margin-bottom:20px"><strong>Morocco:</strong> March-April or October-November. Avoid July and August entirely — Marrakech in August is not designed for human activity of any kind, let alone sport.</p>
+        <p style="line-height:1.9;margin-bottom:20px"><strong>Ireland and Scotland:</strong> May-September. You can play year-round but you're taking your chances with the weather outside those months. May is consistently underrated — long evenings, relatively dry, fewer tourists. September is often the best month on a links course anywhere.</p>
+        <p style="line-height:1.9;margin-bottom:20px"><strong>UAE and Dubai:</strong> November to March only. April onwards is too hot to play. The winter season is excellent — warm enough, good courses, competitive package pricing as the operators compete for European visitors.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">When to book</h2>
+        <p style="line-height:1.9;margin-bottom:20px">For a spring trip: book flights in October or November the year before. For an autumn trip: book in March or April. The sweet spot for European short-haul is roughly five to seven months out — before the algorithms notice demand picking up but late enough that schedules are confirmed. Booking the hotel two to four months out is usually fine; unlike flights, hotel rates don't always go up with proximity to the date and occasionally go down if occupancy is soft.</p>
+        <p style="line-height:1.9;margin-bottom:20px">The one exception is peak July and August, where everything should be booked as early as possible because popular resort hotels and marquee courses genuinely do sell out.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Start planning. The best time to book was six months ago. The second best time is now.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-blog-article-10" class="page">
+  <div style="height:280px;overflow:hidden;position:relative">
+    <img src="/blog-manchester.jpg" alt="Golf breaks from London" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
+    <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
+      <div class="section-label">DESTINATION GUIDE</div>
+      <h1 style="font-size:2.1rem;color:#fff">Golf Breaks from London: The Best Destinations &amp; How to Get There</h1>
+      <p style="color:rgba(255,255,255,.8);margin-top:10px">6 min read</p>
+    </div>
+  </div>
+  <div style="padding:60px 0 80px">
+    <div class="container" style="max-width:700px">
+      <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);padding:48px">
+        <p style="font-size:1.1rem;line-height:1.9;margin-bottom:24px;font-style:italic;color:var(--green)">"Five airports within an hour of central London and we still somehow end up arguing about which one to use." A tradition as old as the society itself.</p>
+        <p style="line-height:1.9;margin-bottom:20px">London societies have the best flight options in the country and somehow manage to make choosing between them the most complicated part of the whole trip. Here's a sensible guide to the main destinations and how to actually get there without it turning into a two-week WhatsApp debate.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Portugal — the default, for good reason</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Gatwick to Faro is two and a half hours and the Algarve is waiting at the other end. TAP, easyJet and Ryanair all fly it, which keeps prices competitive. If your group is split between south and west London, Gatwick is almost always the right call — easier than Heathrow and better served for the Algarve route specifically. Lisbon is worth considering if the group wants a city element alongside the golf: Porto is closer to some excellent northern Portugal courses that most Algarve-fixated societies have never seen.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Spain — more options than people realise</h2>
+        <p style="line-height:1.9;margin-bottom:20px">Costa del Sol via Malaga is the obvious one but not the only one. If half your group is in north London, Luton to Malaga with easyJet is often significantly cheaper than Gatwick. Stansted has good Spanish connections too. For something different, Bilbao in northern Spain is less than two hours from Stansted or Gatwick, has excellent golf, food that makes the Costa del Sol look like a motorway service station, and roughly half the crowds.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">Ireland — underrated for a long weekend</h2>
+        <p style="line-height:1.9;margin-bottom:20px">An hour from almost any London airport to Dublin, Kerry or Cork. No passport. Golf that's genuinely world-class — Lahinch, Ballybunion, the K Club. The weather is what it is but a late May weekend in the west of Ireland on a links course with a decent group is one of the better experiences in golf. Prices have gone up but it's still better value than an equivalent standard of course in Portugal.</p>
+        <h2 style="margin:36px 0 16px;color:var(--green);font-size:1.4rem">The airport question</h2>
+        <p style="line-height:1.9;margin-bottom:20px">If your group genuinely lives all over London and beyond, the right move is for everyone to book their own flights from their nearest airport and meet at the destination. The savings on not driving across London to consolidate at one airport often more than cover any difference in flight price. GolfTrip handles multi-airport planning specifically for this — you put in everyone's departure point and it optimises around it.</p>
+        <div style="background:var(--off-white);border-radius:var(--r);padding:28px;text-align:center;margin-top:8px">
+          <p style="font-weight:600;color:var(--green);margin-bottom:14px">Multiple London airports, one trip plan.</p>
+          <button class="btn btn-primary" onclick="showPage('questionnaire')">Build Around My Group</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2909,6 +3037,178 @@ function renderLiveFlights(flights, groupSize) {
 }
 // ── END LIVE FLIGHTS ──────────────────────────────────────────
 
+// ── SECTION REFRESH ─────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.section-refresh-btn');
+  if (!btn) return;
+  var section = btn.getAttribute('data-refresh-section');
+  var idx = parseInt(btn.getAttribute('data-refresh-idx'));
+  var dest = btn.getAttribute('data-refresh-dest');
+  var tier = btn.getAttribute('data-refresh-tier');
+  refreshSection(section, idx, dest, tier, btn);
+});
+
+async function refreshSection(section, idx, dest, tier, btn) {
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spin">&#8635;</span> Finding options...';
+
+  var sectionLabels = {
+    courses: 'golf courses',
+    hotels: 'hotels',
+    restaurants: 'restaurants and bars',
+    car_hire: 'car hire options'
+  };
+
+  var prompts = {
+    courses: 'Suggest 3 DIFFERENT golf courses in ' + dest + ' for ' + tier + ' budget UK golfers. ' +
+      'Do NOT repeat any courses already shown. Return JSON: {"courses":[{"name","location","par","yardage","slope_rating","course_rating","green_fee","green_fee_range","designer","difficulty","why_recommended","lat","lng"}]}. ' +
+      'Real courses only. Include accurate GPS coordinates.',
+
+    hotels: 'Suggest 3 DIFFERENT hotels in ' + dest + ' for ' + tier + ' budget UK golfers on a golf trip. ' +
+      'Do NOT repeat common options. Return JSON: {"hotels":[{"name","area","description","why_recommended","price_per_night","price_range","lat","lng","villa_rental"}]}. ' +
+      'Real hotels only. Accurate GPS.',
+
+    restaurants: 'Suggest 5 DIFFERENT restaurants or bars near golf courses in ' + dest + '. ' +
+      'Mix of casual and nicer options. Return JSON: {"restaurants":[{"name","type","description","rating","price_range","opentable_available","lat","lng","google_maps_url"}]}. Real venues.',
+
+    car_hire: 'Suggest 3 car hire options for a golf group in ' + dest + '. ' +
+      'Include different vehicle sizes for ' + tier + ' budget. Return JSON: {"car_hire":{"needed":true,"options":[{"company","vehicle_type","seats","price_per_day","features","booking_url"}],"pickup_location":"airport or resort"}}'
+  };
+
+  var prompt = prompts[section];
+  if (!prompt) { btn.classList.remove('loading'); btn.innerHTML = '&#8635; Different options'; return; }
+
+  try {
+    var res = await fetch('/.netlify/functions/generate-trip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, tier: tier, part: 'refresh' })
+    });
+    var data = await res.json();
+    var parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+
+    // Update the section in the DOM
+    var sectionEl = document.getElementById('section-' + section + '-' + idx);
+    if (!sectionEl) {
+      btn.classList.remove('loading');
+      btn.innerHTML = '&#8635; Different options';
+      return;
+    }
+
+    // Get current panel data to rebuild with new section
+    var panel = storedPanels[idx];
+    if (!panel) { btn.classList.remove('loading'); btn.innerHTML = '&#8635; Different options'; return; }
+
+    // Update the panel data
+    if (section === 'courses' && parsed.courses) panel.courses = parsed.courses;
+    else if (section === 'hotels' && parsed.hotels) panel.hotels = parsed.hotels;
+    else if (section === 'restaurants' && parsed.restaurants) panel.restaurants = parsed.restaurants;
+    else if (section === 'car_hire' && parsed.car_hire) panel.car_hire = parsed.car_hire;
+
+    // Rebuild and replace just the section content
+    var qData = currentTripQData || {};
+    var tempPanel = document.createElement('div');
+    tempPanel.className = 'result-panel active';
+    tempPanel.innerHTML = buildPanelSection(section, panel, idx, qData);
+    var newSection = tempPanel.querySelector('#section-' + section + '-' + idx);
+    if (newSection) {
+      sectionEl.innerHTML = newSection.innerHTML;
+    }
+
+    btn.classList.remove('loading');
+    btn.innerHTML = '&#8635; Different options';
+    showToast('New ' + (sectionLabels[section] || 'options') + ' loaded');
+
+  } catch(e) {
+    console.error('Section refresh error:', e);
+    btn.classList.remove('loading');
+    btn.innerHTML = '&#8635; Try again';
+    showToast('Could not load new options. Try again.', true);
+  }
+}
+
+function buildPanelSection(section, panel, idx, qData) {
+  // Rebuild just the HTML for a specific section
+  var dest = panel.destination || '';
+  var destEnc = encodeURIComponent(dest);
+  var panelLabel = panel.label || '';
+  var tripId = currentTripRequestId || null;
+  var html = '';
+
+  if (section === 'courses') {
+    html += '<div id="section-courses-' + idx + '">';
+    (panel.courses || []).forEach(function(c) {
+      var gnData = buildTeeTimes(c.name||'', c.location||dest);
+      var gn = gnData.url; var gnLabel = gnData.label;
+      var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
+      html += '<div class="course-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+          '<h4 style="margin:0;flex:1">' + (c.name||'') + '</h4>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
+            makeVoteBtn(tripId,'course',c.name||'',panelLabel) +
+            '<span class="tag tag-green">' + (c.difficulty||'') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="text-muted fs-sm">' + (c.location||'') + '</div>' +
+        '<div class="course-stats"><span class="course-stat">Par '+(c.par||72)+'</span>' +
+          (c.yardage?'<span class="course-stat">'+c.yardage+' yds</span>':'') + '</div>' +
+        (c.why_recommended?'<p class="fs-sm" style="margin-top:8px">'+c.why_recommended+'</p>':'') +
+        '<div class="card-links">' +
+          '<a href="'+gn+'" target="_blank" class="card-link">'+gnLabel+'</a>' +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" data-cart-type="course" data-cart-name="'+(c.name||'').replace(/"/g,'&quot;')+'" data-cart-sub="'+(c.location||'').replace(/"/g,'&quot;')+'" data-cart-price="Est. '+fmtPrice(c.green_fee||0)+'/round" data-cart-pricenum="'+(c.green_fee||0)+'">&#43; Cart</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  } else if (section === 'hotels') {
+    html += '<div id="section-hotels-' + idx + '">';
+    (panel.hotels || []).forEach(function(h) {
+      var isVilla = h.villa_rental;
+      var bookUrl = 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest);
+      var altUrl = isVilla ? 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest) : 'https://www.vrbo.com/search?destination='+encodeURIComponent(dest);
+      html += '<div class="hotel-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+          '<h4 style="margin:0;flex:1">' + (h.name||'') + '</h4>' +
+          makeVoteBtn(tripId,'hotel',h.name||'',panelLabel) +
+        '</div>' +
+        '<div class="text-muted fs-sm">' + (h.area||'') + '</div>' +
+        (h.why_recommended?'<p class="fs-sm" style="margin-top:8px">'+h.why_recommended+'</p>':'') +
+        '<div class="price-badge">'+fmtPrice(h.price_per_night||0)+'/night</div>' +
+        '<div class="card-links">' +
+          '<a href="'+bookUrl+'" target="_blank" class="card-link">'+(isVilla?'Search Vrbo':'Check on Booking.com')+'</a>' +
+          '<a href="'+altUrl+'" target="_blank" class="card-link">'+(isVilla?'Try Booking.com':'Try Vrbo')+'</a>' +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" data-cart-type="hotel" data-cart-name="'+(h.name||'').replace(/"/g,'&quot;')+'" data-cart-sub="'+(h.area||'').replace(/"/g,'&quot;')+'" data-cart-price="Est. '+fmtPrice(h.price_per_night||0)+'/night" data-cart-pricenum="'+(h.price_per_night||0)+'">&#43; Cart</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  } else if (section === 'restaurants') {
+    html += '<div id="section-restaurants-' + idx + '" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
+    (panel.restaurants || []).forEach(function(r) {
+      var gMaps = r.google_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent((r.name||'') + ' ' + dest));
+      var ot = r.opentable_available ? 'https://www.opentable.co.uk/s?covers=4&term=' + encodeURIComponent(r.name||'') : null;
+      html += '<div class="restaurant-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">' +
+          '<h4 style="margin:0;flex:1">' + (r.name||'') + '</h4>' +
+          makeVoteBtn(tripId,'restaurant',r.name||'',panelLabel) +
+        '</div>' +
+        '<div class="text-muted fs-sm">' + (r.type||'') + (r.rating?' &nbsp;·&nbsp; &#9733; '+r.rating:'') + '</div>' +
+        (r.description?'<p class="fs-sm" style="margin-top:6px">'+r.description+'</p>':'') +
+        '<div class="card-links" style="margin-top:8px">' +
+          (ot?'<a href="'+ot+'" target="_blank" class="card-link">Reserve on OpenTable</a>':'') +
+          '<a href="'+gMaps+'" target="_blank" class="card-link">View on Maps</a>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+// Store qData for section refresh use
+var currentTripQData = null;
+// ── END SECTION REFRESH ──────────────────────────────────────
+
 // ── TRIP CACHE ──────────────────────────────────────────────
 function buildCacheKey(destination, tier, travelMonth, groupSize) {
   var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
@@ -3159,6 +3459,8 @@ async function generateTrip() {
       if (panelsEl) {
         var existing = panelsEl.querySelectorAll('.result-panel')[idx];
         if (existing) {
+          // Update storedPanels so initMap has real venue coordinates
+          storedPanels[idx] = merged;
           var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
           var capturedIdx = idx;
@@ -3273,6 +3575,7 @@ async function generateTrip() {
     var parsed = { panels: panels };
     currentTripData = parsed;
     storedPanels = panels;
+    currentTripQData = data; // store for section refresh
 
     // Save freshly-generated (non-cached) panels to cache for next time
     panels.forEach(function(panel, i) {
@@ -3682,7 +3985,7 @@ function activatePanel(idx) {
 
 function buildFlightUrl(panel, qData) {
   // Use Duffel branded booking link — pre-built with GolfTrip branding and 5% markup
-  return 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+  return 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
 }
 
 function buildSkyscannerUrl(panel, qData) {
@@ -3781,7 +4084,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Flight info section
   if (panel.flights) {
     var fl = panel.flights;
-    var skyUrl = 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+    var skyUrl = 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
     html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">' +
         '<div>' +
@@ -3805,7 +4108,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Trip Map section
   html += buildMapSection(panel, idx, mapPrefix);
 
-  html += '<div class="section-heading" data-icon="&#9971;">Golf Courses</div><div class="courses-grid">';
+  html += '<div class="section-heading" data-icon="&#9971;">Golf Courses' +
+    '<button class="section-refresh-btn" data-refresh-section="courses" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '">&#8635; Different options</button>' +
+  '</div><div class="courses-grid" id="section-courses-' + idx + '">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
       var gnData = buildTeeTimes(c.name || '', c.location || dest);
@@ -3854,7 +4159,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   }
   html += '</div>';
 
-  html += '<div class="section-heading" data-icon="&#127968;">Recommended Hotels</div><div class="hotels-grid">';
+  html += '<div class="section-heading" data-icon="&#127968;">Recommended Hotels' +
+    '<button class="section-refresh-btn" data-refresh-section="hotels" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '">&#8635; Different options</button>' +
+  '</div><div class="hotels-grid" id="section-hotels-' + idx + '">';
   if (panel.hotels && panel.hotels.length) {
     panel.hotels.forEach(function(h) {
       var isVilla = qData && (qData.accommodation === 'Villa' || qData.accommodation === 'Apartment');
@@ -3940,7 +4247,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '</div>';
     });
     carHtml += '</div>';
-    html += '<div class="section-heading" data-icon="&#128663;">Car Hire</div>' +
+    html += '<div class="section-heading" data-icon="&#128663;">Car Hire' +
+      '<button class="section-refresh-btn" data-refresh-section="car_hire" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '">&#8635; Different options</button>' +
+    '</div>' +
       '<div class="card" style="padding:20px;margin-bottom:24px">' +
         (ch.pickup_location ? '<p class="fs-sm text-muted" style="margin-bottom:12px">&#128205; Pickup: ' + ch.pickup_location + '</p>' : '') +
         carHtml +
@@ -3952,7 +4261,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   }
 
   if (panel.restaurants && panel.restaurants.length) {
-    html += '<div class="section-heading" data-icon="&#127373;">Restaurants &amp; Bars</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
+    html += '<div class="section-heading" data-icon="&#127373;">Restaurants &amp; Bars' +
+      '<button class="section-refresh-btn" data-refresh-section="restaurants" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '">&#8635; Different options</button>' +
+    '</div><div id="section-restaurants-' + idx + '" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
     panel.restaurants.forEach(function(r) {
       var mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent((r.name || '') + ' ' + dest);
       var rating = r.rating ? r.rating : null;
@@ -4023,7 +4334,7 @@ function buildBTT(panel, idx, qData) {
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
     '<div class="btt-grid">' +
-      '<a href="https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btt-btn btt-flights">' +
+      '<a href="https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon">&#9992;</div>' +
         '<div><div class="btt-label">Flights</div><div class="btt-action">Book Flights via GolfTrip</div></div>' +
       '</a>' +
@@ -4045,7 +4356,7 @@ function buildBTT(panel, idx, qData) {
         '<div class="btt-total-label">Estimated total per person</div>' +
         '<div class="btt-total-price">' + fmtPrice(panel.total_cost || 0) + '</div>' +
       '</div>' +
-      '<a href="https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
+      '<a href="https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv" target="_blank" class="btn btn-primary">Start Booking &#8594;</a>' +
     '</div>' +
   '</div>';
 }
@@ -5296,7 +5607,7 @@ function renderSeasonalContent(data, season, generatedAt) {
 
   destinations.forEach(function(dest) {
     var destEnc = encodeURIComponent(dest.name || '');
-    var flightsUrl = 'https://links.duffel.com?token=U0ZNeU1UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
+    var flightsUrl = 'https://links.duffel.com?token=U0ZNeU5UWS5nMmdEYlFBQUFCWXdNREF3UWpoMGVGVjVTWFJqYTNORVRscEdTM1U0YmdZQUk0VWp1WjhCWWdBQlVZQS43TE1ObkJKakUtM193N1NlOHdYNXNkMk1KSEtBVUhrWkJoVk1xS1JET0dv';
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
     var golfnowUrl = buildDestTeeTimes(destName);
     var destNameSafe = (dest.name||'').replace(/'/g, '');
@@ -5490,6 +5801,9 @@ function renderVenuePreview(v) {
   document.getElementById('venue-preview-desc').textContent = v.description || '';
   document.getElementById('venue-preview-price').textContent = v.price_display || '';
   document.getElementById('venue-preview-rating').textContent = v.rating ? '&#9733; ' + v.rating : '';
+  // Populate airport dropdown
+  var airportSelect = document.getElementById('venue-airport-select');
+  if (airportSelect) airportSelect.innerHTML = buildAirportOptions();
   document.getElementById('venue-preview').style.display = 'block';
 }
 
@@ -5503,10 +5817,16 @@ function clearVenuePreview() {
 
 async function buildAroundVenue() {
   if (!currentVenue) return;
+  var airportSelect = document.getElementById('venue-airport-select');
+  var selectedAirport = airportSelect ? airportSelect.value : '';
+  var selectedAirportName = airportSelect ? (airportSelect.options[airportSelect.selectedIndex] ? airportSelect.options[airportSelect.selectedIndex].text : '') : '';
   var resultsEl = document.getElementById('venue-trip-results');
   var listEl = document.getElementById('venue-nearby-list');
   listEl.innerHTML = '<div style="text-align:center;padding:24px"><div class="loading-spinner" style="width:24px;height:24px;margin:0 auto 8px"></div><p class="fs-sm text-muted">AI is building your trip around ' + (currentVenue.name || 'this venue') + '...</p></div>';
   resultsEl.style.display = 'block';
+  // Store airport for later use in save
+  currentVenue._departureAirport = selectedAirport;
+  currentVenue._departureAirportName = selectedAirportName;
   try {
     var prompt = 'I want to plan a golf trip anchored around this venue: ' +
       currentVenue.name + ' (' + currentVenue.type + ') in ' + (currentVenue.location || 'unknown location') + '. ' +
@@ -5547,6 +5867,10 @@ function renderVenueResults(venues) {
     return;
   }
 
+  // Build flights card if airport was selected
+  var airport = currentVenue && currentVenue._departureAirport ? currentVenue._departureAirport : '';
+  var airportName = currentVenue && currentVenue._departureAirportName ? currentVenue._departureAirportName : '';
+
   // Group by type for display sections
   var courses = venues.filter(function(v) { return v.type === 'course'; });
   var hotels = venues.filter(function(v) { return v.type === 'hotel'; });
@@ -5575,6 +5899,20 @@ function renderVenueResults(venues) {
   }
 
   var html = '';
+
+  // Flights card — shown if airport was selected
+  if (airport) {
+    html += '<div class="card" style="padding:16px 20px;margin-bottom:20px;border:1.5px solid var(--gold)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<div>' +
+          '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:3px">&#9992; Flights</div>' +
+          '<div style="font-size:.92rem;font-weight:500;color:var(--green)">' + airportName + ' → ' + (currentVenue ? currentVenue.location || currentVenue.name : 'Destination') + '</div>' +
+        '</div>' +
+        '<a href="' + DUFFEL_LINK + '" target="_blank" class="btn btn-primary btn-sm">Search &amp; Book Flights</a>' +
+      '</div>' +
+      '<p class="fs-sm text-muted" style="margin:0">Find and book the best fares from ' + airportName + ' via GolfTrip — 5% markup included, booked securely.</p>' +
+    '</div>';
+  }
 
   if (courses.length) {
     html += '<div class="section-heading" data-icon="&#9971;">Nearby Golf Courses</div>';
@@ -6029,7 +6367,7 @@ async function saveVenueTrip() {
     // Create trip_request
     var ins = await sbClient.from('trip_requests').insert({
       user_id: currentUser.id,
-      departure_airport: 'TBC',
+      departure_airport: (currentVenue && currentVenue._departureAirport) ? currentVenue._departureAirport : 'TBC',
       travel_dates: JSON.stringify({ type: 'flexible' }),
       budget: 'flexible',
       group_size: 1,
