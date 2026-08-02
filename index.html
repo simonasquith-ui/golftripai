@@ -243,9 +243,16 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-b
 .currency-toggle{display:flex;background:var(--sand);border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
 .currency-btn{padding:6px 14px;background:transparent;border:none;cursor:pointer;font-size:.85rem;font-weight:500;transition:all var(--tr);font-family:'Inter',sans-serif}
 .currency-btn.active{background:var(--green);color:var(--white)}
-.results-tabs{display:flex;gap:4px;background:var(--sand);border-radius:var(--rl);padding:4px;margin-bottom:24px}
-.results-tab{flex:1;padding:12px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-muted);transition:all var(--tr);text-align:center}
-.results-tab.active{background:var(--white);color:var(--green);font-weight:600;box-shadow:var(--sh)}
+.results-tabs{display:flex;gap:4px;background:var(--sand);border-radius:var(--rl);padding:4px;margin-bottom:24px;position:relative}
+.results-tab{flex:1;padding:10px 6px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-family:'Playfair Display',serif;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);text-align:center;position:relative;min-width:0}
+.results-tab.active{background:var(--green);color:var(--gold);font-weight:600;box-shadow:var(--sh)}
+.results-tab.active::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid var(--green)}
+.results-nav-wrap{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.results-nav-arrow{width:36px;height:36px;border-radius:50%;background:var(--green);color:var(--gold);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;box-shadow:var(--sh)}
+.results-nav-arrow:hover{background:var(--gold);color:var(--green)}
+.results-nav-arrow:disabled{background:var(--sand);color:var(--text-muted);cursor:default;box-shadow:none}
+.results-nav-label{flex:1;text-align:center;font-size:.78rem;color:var(--text-muted)}
+.panel-switch-hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(26,58,42,.92);color:var(--gold);border-radius:20px;padding:8px 18px;font-size:.82rem;font-weight:500;z-index:999;pointer-events:none;transition:opacity .5s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .sticky-compare{position:sticky;top:64px;z-index:50;background:var(--green-dark);border-bottom:2px solid var(--gold);padding:12px 0;margin-bottom:24px}
 .compare-bar{display:flex;border-radius:var(--rl);overflow:hidden;border:1px solid rgba(255,255,255,.15)}
 .compare-item{flex:1;padding:14px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background var(--tr)}
@@ -518,7 +525,11 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 @media(max-width:640px){
   .hero-stats{flex-direction:column;gap:20px}
   .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid{grid-template-columns:1fr}
-  .results-tabs,.compare-bar{flex-direction:column}
+  .results-tabs{flex-wrap:wrap;gap:3px}
+  .results-tab{flex:1;min-width:80px;font-size:.78rem;padding:8px 4px}
+  .results-nav-wrap{flex-wrap:nowrap}
+  .results-nav-arrow{width:32px;height:32px;font-size:1rem}
+  .compare-bar{flex-direction:column}
   .footer-inner{grid-template-columns:1fr}
   #nav-links-desktop{display:none!important}
   .nav-hamburger{display:flex!important}
@@ -1216,7 +1227,12 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     </div>
     <div class="sticky-compare"><div class="container"><div class="compare-bar" id="compare-bar"></div></div></div>
     <div class="container">
-      <div class="results-tabs" id="results-tabs"></div>
+      <!-- Navigation arrows + tab strip -->
+      <div class="results-nav-wrap" id="results-nav-wrap" style="display:none">
+        <button class="results-nav-arrow" id="panel-prev-btn" onclick="navigatePanel(-1)" title="Previous option">&#8592;</button>
+        <div class="results-tabs" id="results-tabs" style="flex:1;margin-bottom:0"></div>
+        <button class="results-nav-arrow" id="panel-next-btn" onclick="navigatePanel(1)" title="Next option">&#8594;</button>
+      </div>
       <div id="results-panels"></div>
       <!-- Bottom save strip -->
       <div id="results-bottom-save" style="display:none;padding:28px 0;margin-top:8px;border-top:1px solid var(--border)">
@@ -2836,7 +2852,21 @@ function checkDomesticDestination() {
   domesticDestinationSelected = hasDomestic;
   var section = document.getElementById('domestic-travel-section');
   if (section) section.style.display = hasDomestic ? 'block' : 'none';
-  if (!hasDomestic) selectedTravelMethod = 'fly';
+  if (!hasDomestic) {
+    selectedTravelMethod = 'fly';
+  } else if (selectedTravelMethod === 'fly') {
+    // Default to Train when a UK domestic destination is first selected
+    selectedTravelMethod = 'train';
+    document.querySelectorAll('#travel-method-toggle .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+    var trainBtn = document.querySelector('#travel-method-toggle [data-method="train"]');
+    if (trainBtn) trainBtn.classList.add('active');
+    var driveNote = document.getElementById('travel-method-drive-note');
+    var trainNote = document.getElementById('travel-method-train-note');
+    var flyNote = document.getElementById('travel-method-fly-note');
+    if (flyNote) flyNote.style.display = 'none';
+    if (driveNote) driveNote.style.display = 'none';
+    if (trainNote) trainNote.style.display = 'block';
+  }
   updateAirportVisibility();
 }
 
@@ -3512,8 +3542,8 @@ async function saveCachedPanel(cacheKey, destination, tier, travelMonth, groupSi
 
 async function generateTrip() {
   var data = getFormData();
-  var isDomesticNoFly = domesticDestinationSelected && (selectedTravelMethod === 'drive' || selectedTravelMethod === 'train');
-  if (!isDomesticNoFly && (!data.airports.length || !data.airports[0].airport)) {
+  var isDomesticNoFly = (data.travel_method === 'drive' || data.travel_method === 'train');
+  if (!isDomesticNoFly && (!data.airports || !data.airports.length || !data.airports[0].airport)) {
     showToast('Please select at least one departure airport.', true); return;
   }
   if (!data.budget) { showToast('Please select a budget range.', true); return; }
@@ -3602,8 +3632,8 @@ async function generateTrip() {
 
       var travelSection = isDomesticNoFly
         ? (travelMethod === 'drive'
-            ? 'travel{method:"drive",from:"' + (travelFrom || 'UK') + '",drive_time:"estimated drive time",route_summary:"main route",motorway_notes:"key motorway junctions",parking:"parking options near accommodation"}'
-            : 'travel{method:"train",from:"' + (travelFrom || 'UK') + '",journey_time:"estimated journey time",main_routes:"key train services",station:"arrival station",ticket_price_range:"typical advance/anytime fares"}')
+            ? 'travel{method:"drive",from:"' + (travelFrom || 'a major UK city') + '",drive_time:"e.g. 4h 30m",route_summary:"e.g. M6 North then A82",motorway_notes:"key junctions",parking:"e.g. hotel car park free"}'
+            : 'travel{method:"train",from:"' + (travelFrom || 'a major UK city') + '",journey_time:"e.g. 2h 15m",main_routes:"e.g. LNER London Kings Cross to Edinburgh",station:"e.g. Edinburgh Waverley",ticket_price_range:"e.g. £45-120 advance/anytime"}')
         : 'flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note}';
 
       var costsLabel = isDomesticNoFly ? 'costs{travel,accommodation,golf,food}' : 'costs{flights,accommodation,golf,food}';
@@ -4240,6 +4270,7 @@ function renderResults(aiData, qData) {
     fetch('/.netlify/functions/geocode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: 'warmup', type: 'hotel' }) }).catch(function() {});
   }, 500);
 
+  currentPanelIdx = 0;
   panels.forEach(function(panel, i) {
     var ci = document.createElement('div');
     ci.className = 'compare-item' + (i === 0 ? ' active-tab' : '');
@@ -4251,18 +4282,35 @@ function renderResults(aiData, qData) {
 
     var tab = document.createElement('button');
     tab.className = 'results-tab' + (i === 0 ? ' active' : '');
+    // Show emoji flag for destination tabs, just label for tier tabs
+    var isDest = panels.length > 1 && panel.destination && panel.destination !== panel.label;
     tab.textContent = panel.label || ('Option ' + (i + 1));
+    tab.setAttribute('title', panel.destination || panel.label || '');
     tab.addEventListener('click', function() { activatePanel(i); });
     tabsEl.appendChild(tab);
 
     panelsEl.appendChild(buildPanel(panel, i, qData, 'results'));
   });
+
+  // Show nav arrows if more than 1 panel
+  var navWrap = document.getElementById('results-nav-wrap');
+  if (navWrap) navWrap.style.display = panels.length > 1 ? 'flex' : 'none';
+  updateNavArrows();
+
+  // Show hint after a short delay so user notices the arrows
+  if (panels.length > 1) {
+    setTimeout(function() { showPanelSwitchHint(panels.length); }, 1200);
+  }
 }
 
+var currentPanelIdx = 0;
+
 function activatePanel(idx) {
+  currentPanelIdx = idx;
   document.querySelectorAll('.results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.result-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('.compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
+  updateNavArrows();
   // Trigger resize if map already inited for this panel
   var mapId = 'results-trip-map-' + idx;
   if (mapInstances[mapId] && window.google && window.google.maps) {
@@ -4270,6 +4318,36 @@ function activatePanel(idx) {
   } else {
     requestAnimationFrame(function() { requestAnimationFrame(function() { initMap(idx, 'results'); }); });
   }
+  // Scroll to top of panel on mobile
+  var panelsEl = document.getElementById('results-panels');
+  if (panelsEl) panelsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function navigatePanel(dir) {
+  var panels = document.querySelectorAll('.result-panel');
+  var newIdx = currentPanelIdx + dir;
+  if (newIdx < 0 || newIdx >= panels.length) return;
+  activatePanel(newIdx);
+}
+
+function updateNavArrows() {
+  var panels = document.querySelectorAll('.result-panel');
+  var prevBtn = document.getElementById('panel-prev-btn');
+  var nextBtn = document.getElementById('panel-next-btn');
+  if (prevBtn) prevBtn.disabled = currentPanelIdx === 0;
+  if (nextBtn) nextBtn.disabled = currentPanelIdx >= panels.length - 1;
+}
+
+function showPanelSwitchHint(count) {
+  if (count < 2) return;
+  var hint = document.createElement('div');
+  hint.className = 'panel-switch-hint';
+  hint.innerHTML = '&#8592; &#8594; &nbsp;' + count + ' options to compare — use arrows to switch';
+  document.body.appendChild(hint);
+  setTimeout(function() {
+    hint.style.opacity = '0';
+    setTimeout(function() { if (hint.parentNode) hint.parentNode.removeChild(hint); }, 500);
+  }, 3000);
 }
 
 function buildSkyscannerUrl(panel, qData) {
@@ -4367,8 +4445,29 @@ function buildPanel(panel, idx, qData, mapPrefix) {
 
   // Flight info section
   // Show drive/train travel card OR flight card depending on travel method
+  // Normalise — AI sometimes returns travel data inside panel.flights
+  // Check both panel.travel and panel.flights for drive/train content
+  var travelData = null;
   if (panel.travel && (panel.travel.method === 'drive' || panel.travel.method === 'train')) {
-    var tr = panel.travel;
+    travelData = panel.travel;
+  } else if (panel.flights && (panel.flights.method === 'drive' || panel.flights.method === 'train')) {
+    travelData = panel.flights;
+  } else if (qData && (qData.travel_method === 'drive' || qData.travel_method === 'train')) {
+    // qData says domestic but AI returned flights anyway — build travel card from flights data
+    travelData = {
+      method: qData.travel_method,
+      from: qData.travel_from || '',
+      drive_time: panel.flights && panel.flights.duration_hours ? panel.flights.duration_hours + 'h approx' : 'See Google Maps',
+      route_summary: panel.flights ? (panel.flights.airlines || '') : '',
+      journey_time: panel.flights && panel.flights.duration_hours ? panel.flights.duration_hours + 'h approx' : 'See Trainline',
+      main_routes: panel.flights ? (panel.flights.airlines || '') : '',
+      station: panel.flights ? (panel.flights.departure_times || '') : '',
+      ticket_price_range: panel.flights ? (panel.flights.price_range || '') : ''
+    };
+  }
+
+  if (travelData) {
+    var tr = travelData;
     var isDrive = tr.method === 'drive';
     var mapsUrl = isDrive
       ? 'https://www.google.com/maps/dir/' + encodeURIComponent(tr.from || '') + '/' + encodeURIComponent(dest)
@@ -4387,10 +4486,13 @@ function buildPanel(panel, idx, qData, mapPrefix) {
           (!isDrive && tr.station ? '<div class="fs-sm text-muted" style="margin-bottom:6px">&#128648; Arrive at: ' + tr.station + '</div>' : '') +
           (!isDrive && tr.ticket_price_range ? '<div class="fs-sm" style="margin-bottom:4px"><strong style="color:var(--green)">Est. tickets:</strong> ' + tr.ticket_price_range + '</div>' : '') +
         '</div>' +
-        '<a href="' + mapsUrl + '" target="_blank" class="btn btn-primary btn-sm" style="white-space:nowrap">' + (isDrive ? 'Get Directions &#8594;' : 'Book on Trainline &#8594;') + '</a>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+          '<a href="' + mapsUrl + '" target="_blank" class="btn btn-primary btn-sm" style="white-space:nowrap">' + (isDrive ? 'Get Directions &#8594;' : 'Book on Trainline &#8594;') + '</a>' +
+          (isDrive ? '<a href="https://www.thetrainline.com/search?origin=' + encodeURIComponent(tr.from||'') + '&destination=' + encodeURIComponent(dest) + '" target="_blank" class="btn btn-ghost btn-sm" style="white-space:nowrap">&#128648; Train option</a>' : '') +
+        '</div>' +
       '</div>' +
     '</div>';
-  } else if (panel.flights) {
+  } else if (!travelData && panel.flights) {
     var fl = panel.flights;
     var skyUrl = buildSkyscannerUrl(panel, qData || currentTripQData);
     html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
