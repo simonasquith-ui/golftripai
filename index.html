@@ -905,6 +905,23 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div class="q-section-title" data-num="1">Departure Airports</div>
       <div id="airport-groups"></div>
       <button class="add-airport" id="add-airport-btn">+ Add another departure airport</button>
+      <div id="domestic-travel-section" style="display:none;margin-top:16px;padding:16px;background:var(--sand);border-radius:var(--r);border:1px solid var(--border)">
+        <div style="font-size:.82rem;font-weight:600;color:var(--green);margin-bottom:10px">&#127988; UK Domestic Trip — How are you travelling?</div>
+        <div class="toggle-group" style="max-width:420px" id="travel-method-toggle">
+          <button class="toggle-btn active" data-method="fly">&#9992; Fly</button>
+          <button class="toggle-btn" data-method="drive">&#128663; Drive</button>
+          <button class="toggle-btn" data-method="train">&#128648; Train</button>
+        </div>
+        <div id="travel-method-fly-note" style="display:none;margin-top:10px;font-size:.82rem;color:var(--text-muted)">Select your departure airport above.</div>
+        <div id="travel-method-drive-note" style="display:none;margin-top:10px">
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:8px">Enter your approximate postcode or town and we'll include drive time in your trip plan.</p>
+          <input type="text" id="drive-from-location" placeholder="e.g. Manchester, M1 or Leeds" style="width:100%;max-width:320px;font-size:.88rem">
+        </div>
+        <div id="travel-method-train-note" style="display:none;margin-top:10px">
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:8px">Enter your nearest station or town and we'll include train options in your trip plan.</p>
+          <input type="text" id="train-from-location" placeholder="e.g. London King's Cross or Edinburgh Waverley" style="width:100%;max-width:320px;font-size:.88rem">
+        </div>
+      </div>
     </div>
     <div class="q-section">
       <div class="q-section-title" data-num="2">Travel Dates</div>
@@ -1028,10 +1045,21 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <div class="dest-country" data-country="Scotland">
           <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; Scotland</span><span class="dest-caret">&#9660;</span></div>
           <div class="dest-country-body" style="display:none">
-            <div class="chip dest-region-chip" data-dest="St Andrews & Fife, Scotland">St Andrews &amp; Fife</div>
-            <div class="chip dest-region-chip" data-dest="Scottish Highlands">Highlands</div>
-            <div class="chip dest-region-chip" data-dest="Ayrshire, Scotland">Ayrshire</div>
-            <div class="chip dest-region-chip" data-dest="East Lothian, Scotland">East Lothian</div>
+            <div class="chip dest-region-chip" data-dest="St Andrews & Fife, Scotland" data-domestic="true">St Andrews &amp; Fife</div>
+            <div class="chip dest-region-chip" data-dest="Scottish Highlands" data-domestic="true">Highlands</div>
+            <div class="chip dest-region-chip" data-dest="Ayrshire, Scotland" data-domestic="true">Ayrshire</div>
+            <div class="chip dest-region-chip" data-dest="East Lothian, Scotland" data-domestic="true">East Lothian</div>
+          </div>
+        </div>
+        <div class="dest-country" data-country="England & Wales">
+          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917603;&#917614;&#917605;&#917631; England &amp; Wales</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-body" style="display:none">
+            <div class="chip dest-region-chip" data-dest="Cornwall & Devon, England" data-domestic="true">Cornwall &amp; Devon</div>
+            <div class="chip dest-region-chip" data-dest="Surrey & Kent, England" data-domestic="true">Surrey &amp; Kent</div>
+            <div class="chip dest-region-chip" data-dest="Yorkshire, England" data-domestic="true">Yorkshire</div>
+            <div class="chip dest-region-chip" data-dest="Norfolk & Suffolk, England" data-domestic="true">Norfolk &amp; Suffolk</div>
+            <div class="chip dest-region-chip" data-dest="Northumberland, England" data-domestic="true">Northumberland</div>
+            <div class="chip dest-region-chip" data-dest="North Wales" data-domestic="true">North Wales</div>
           </div>
         </div>
         <div class="dest-country" data-country="Morocco">
@@ -2757,6 +2785,46 @@ document.getElementById('budget-chips').addEventListener('click', function(e) {
 });
 
 // Destination accordion — open/close countries
+// ── DOMESTIC TRAVEL DETECTION ────────────────────────────────
+var selectedTravelMethod = 'fly';
+var domesticDestinationSelected = false;
+
+function checkDomesticDestination() {
+  var selected = document.querySelectorAll('.dest-region-chip.selected');
+  var hasDomestic = false;
+  selected.forEach(function(chip) {
+    if (chip.getAttribute('data-domestic') === 'true') hasDomestic = true;
+  });
+  domesticDestinationSelected = hasDomestic;
+  var section = document.getElementById('domestic-travel-section');
+  if (section) section.style.display = hasDomestic ? 'block' : 'none';
+  if (!hasDomestic) selectedTravelMethod = 'fly';
+  updateAirportVisibility();
+}
+
+function updateAirportVisibility() {
+  var isDriveOrTrain = domesticDestinationSelected && (selectedTravelMethod === 'drive' || selectedTravelMethod === 'train');
+  var airportGroups = document.getElementById('airport-groups');
+  var addBtn = document.getElementById('add-airport-btn');
+  var label = document.querySelector('.q-section-title[data-num="1"]');
+  if (airportGroups) { airportGroups.style.opacity = isDriveOrTrain ? '0.35' : '1'; airportGroups.style.pointerEvents = isDriveOrTrain ? 'none' : ''; }
+  if (addBtn) addBtn.style.display = isDriveOrTrain ? 'none' : '';
+  if (label) label.textContent = isDriveOrTrain ? 'Departure Airports (optional — not needed for drive/train)' : 'Departure Airports';
+}
+
+document.getElementById('travel-method-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('.toggle-btn');
+  if (!btn) return;
+  document.querySelectorAll('#travel-method-toggle .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  selectedTravelMethod = btn.getAttribute('data-method');
+  document.getElementById('travel-method-fly-note').style.display = selectedTravelMethod === 'fly' ? 'block' : 'none';
+  document.getElementById('travel-method-drive-note').style.display = selectedTravelMethod === 'drive' ? 'block' : 'none';
+  document.getElementById('travel-method-train-note').style.display = selectedTravelMethod === 'train' ? 'block' : 'none';
+  updateAirportVisibility();
+});
+// ── END DOMESTIC TRAVEL DETECTION ─────────────────────────────
+
 document.getElementById('dest-accordion').addEventListener('click', function(e) {
   var header = e.target.closest('.dest-country-header');
   var chip = e.target.closest('.dest-region-chip');
@@ -2824,6 +2892,7 @@ document.getElementById('dest-accordion').addEventListener('click', function(e) 
       chipSelections.dest = selectedDests[0] || null;
     }
     renderDestTags();
+    checkDomesticDestination();
   }
 });
 
@@ -2847,6 +2916,7 @@ document.getElementById('dest-selected-tags').addEventListener('click', function
     if (c.getAttribute('data-dest') === dest) c.classList.remove('active');
   });
   renderDestTags();
+  checkDomesticDestination();
 });
 
 document.querySelectorAll('.chip[data-single]').forEach(function(chip) {
@@ -2930,7 +3000,13 @@ function getFormData() {
     flights: multiChipSelections.flight || [],
     clubs: chipSelections.clubs || '',
     car_hire: chipSelections.carhire || 'No thanks',
-    notes: document.getElementById('additional-notes').value
+    notes: document.getElementById('additional-notes').value,
+    travel_method: (typeof selectedTravelMethod !== 'undefined') ? selectedTravelMethod : 'fly',
+    travel_from: (selectedTravelMethod === 'drive' && document.getElementById('drive-from-location'))
+      ? document.getElementById('drive-from-location').value.trim()
+      : (selectedTravelMethod === 'train' && document.getElementById('train-from-location'))
+        ? document.getElementById('train-from-location').value.trim()
+        : ''
   };
 }
 
@@ -3340,7 +3416,10 @@ async function saveCachedPanel(cacheKey, destination, tier, travelMonth, groupSi
 
 async function generateTrip() {
   var data = getFormData();
-  if (!data.airports.length || !data.airports[0].airport) { showToast('Please select at least one departure airport.', true); return; }
+  var isDomesticNoFly = domesticDestinationSelected && (selectedTravelMethod === 'drive' || selectedTravelMethod === 'train');
+  if (!isDomesticNoFly && (!data.airports.length || !data.airports[0].airport)) {
+    showToast('Please select at least one departure airport.', true); return;
+  }
   if (!data.budget) { showToast('Please select a budget range.', true); return; }
   if (compareMode === 'destinations' && selectedDests.length < 2) { showToast('Please select at least 2 destinations to compare.', true); return; }
 
@@ -3413,20 +3492,36 @@ async function generateTrip() {
     var tripCtx = 'Golf trip: ' + data.group_size + ' golfers from ' + airportList +
       ', dates: ' + dateStr +
       ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
-      ', handicap: ' + (data.handicap || 'mixed') + ', notes: ' + (data.notes || 'none') + '.' +
+      ', handicap: ' + (data.handicap || 'mixed') +
+      ', notes: ' + (data.notes || 'none') +
+      (data.travel_method && data.travel_method !== 'fly' ? ', travel method: ' + data.travel_method + (data.travel_from ? ' from ' + data.travel_from : '') + ' — include drive time or train routes from this location to the destination in the trip plan.' : '') +
+      '.' +
       seasonNote;
 
     function makePromptA(destination, tier) {
       var budgetForTier = tierRanges[tier] || tierRanges['Mid-Range'];
+      var travelMethod = data.travel_method || 'fly';
+      var travelFrom = data.travel_from || '';
+      var isDomesticNoFly = (travelMethod === 'drive' || travelMethod === 'train');
+
+      var travelSection = isDomesticNoFly
+        ? (travelMethod === 'drive'
+            ? 'travel{method:"drive",from:"' + (travelFrom || 'UK') + '",drive_time:"estimated drive time",route_summary:"main route",motorway_notes:"key motorway junctions",parking:"parking options near accommodation"}'
+            : 'travel{method:"train",from:"' + (travelFrom || 'UK') + '",journey_time:"estimated journey time",main_routes:"key train services",station:"arrival station",ticket_price_range:"typical advance/anytime fares"}')
+        : 'flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note}';
+
+      var costsLabel = isDomesticNoFly ? 'costs{travel,accommodation,golf,food}' : 'costs{flights,accommodation,golf,food}';
+
       return tripCtx + ' Destination: ' + destination + '.' +
         ' Generate the ' + tier + ' option. IMPORTANT: total_cost per person MUST be within ' + budgetForTier + ' GBP.' +
         ' Budget cheapest, Mid-Range middle, Luxury highest.' +
         ' price_per_night MUST reflect realistic ' + (travelMonth || 'typical') + ' rates.' +
+        (isDomesticNoFly ? ' This is a DOMESTIC UK trip. Do NOT include flights. Focus on ' + travelMethod + ' travel.' : '') +
         ' Return JSON: label,destination,description,weather,best_time,flight_time,total_cost,' +
-        'costs{flights,accommodation,golf,food},' +
+        costsLabel + ',' +
         'courses(EXACTLY 5:name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
         'hotels(EXACTLY 3:name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
-        'flights{airlines,duration_hours,frequency,departure_times,return_times,price_range,baggage_note}.' +
+        travelSection + '.' +
         ' CRITICAL: every course and hotel MUST have lat and lng as decimal numbers (e.g. lat:37.123, lng:-8.456). These are plotted on a map — use precise real-world GPS coordinates.';
     }
 
@@ -4175,7 +4270,31 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   html += buildWeatherStrip(dest, travelMonth);
 
   // Flight info section
-  if (panel.flights) {
+  // Show drive/train travel card OR flight card depending on travel method
+  if (panel.travel && (panel.travel.method === 'drive' || panel.travel.method === 'train')) {
+    var tr = panel.travel;
+    var isDrive = tr.method === 'drive';
+    var mapsUrl = isDrive
+      ? 'https://www.google.com/maps/dir/' + encodeURIComponent(tr.from || '') + '/' + encodeURIComponent(dest)
+      : 'https://www.thetrainline.com/search?origin=' + encodeURIComponent(tr.from || '') + '&destination=' + encodeURIComponent(dest) + '&outwardDate=&numberOfAdults=1';
+    html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--green)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">' +
+        '<div style="flex:1">' +
+          '<div class="section-label" style="margin-bottom:6px">' + (isDrive ? '&#128663; Drive Overview' : '&#128648; Train Overview') + '</div>' +
+          (tr.from ? '<div class="fs-sm" style="margin-bottom:8px;color:var(--text-muted)">From: <strong>' + tr.from + '</strong></div>' : '') +
+          (isDrive && tr.drive_time ? '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"><span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128336; ' + tr.drive_time + '</span></div>' : '') +
+          (!isDrive && tr.journey_time ? '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"><span class="dest-chip" style="background:var(--sand);color:var(--green);border:1px solid var(--border)">&#128336; ' + tr.journey_time + '</span></div>' : '') +
+          (isDrive && tr.route_summary ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Route:</strong> ' + tr.route_summary + '</div>' : '') +
+          (isDrive && tr.motorway_notes ? '<div class="fs-sm text-muted" style="margin-bottom:6px">&#128205; ' + tr.motorway_notes + '</div>' : '') +
+          (isDrive && tr.parking ? '<div class="fs-sm text-muted" style="margin-bottom:4px">&#128663; Parking: ' + tr.parking + '</div>' : '') +
+          (!isDrive && tr.main_routes ? '<div class="fs-sm" style="margin-bottom:6px"><strong style="color:var(--green)">Services:</strong> ' + tr.main_routes + '</div>' : '') +
+          (!isDrive && tr.station ? '<div class="fs-sm text-muted" style="margin-bottom:6px">&#128648; Arrive at: ' + tr.station + '</div>' : '') +
+          (!isDrive && tr.ticket_price_range ? '<div class="fs-sm" style="margin-bottom:4px"><strong style="color:var(--green)">Est. tickets:</strong> ' + tr.ticket_price_range + '</div>' : '') +
+        '</div>' +
+        '<a href="' + mapsUrl + '" target="_blank" class="btn btn-primary btn-sm" style="white-space:nowrap">' + (isDrive ? 'Get Directions &#8594;' : 'Book on Trainline &#8594;') + '</a>' +
+      '</div>' +
+    '</div>';
+  } else if (panel.flights) {
     var fl = panel.flights;
     var skyUrl = buildSkyscannerUrl(panel, qData || currentTripQData);
     html += '<div class="card" style="padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)">' +
