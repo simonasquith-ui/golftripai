@@ -988,7 +988,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <button class="toggle-btn active" data-mode="tiers">Budget vs Mid vs Luxury</button>
         <button class="toggle-btn" data-mode="destinations">Compare Destinations</button>
       </div>
-      <div class="compare-notice" id="compare-notice">Select up to 3 destinations to compare side by side.</div>
+      <div class="compare-notice" id="compare-notice">Select up to 4 destinations to compare side by side. Use "Select all" on a country to add all its regions at once.</div>
       <div id="compare-tier-pick" style="display:none;margin-top:14px">
         <label style="display:block;font-size:.85rem;font-weight:600;color:var(--green);margin-bottom:8px">Compare at which level?</label>
         <div class="toggle-group" style="max-width:380px" id="compare-tier-toggle">
@@ -1004,7 +1004,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div id="dest-selected-tags" style="display:none;flex-wrap:wrap;gap:6px;margin:12px 0 4px"></div>
       <div id="dest-accordion" style="margin-top:12px">
         <div class="dest-country" data-country="Portugal">
-          <div class="dest-country-header"><span>&#127477;&#127481; Portugal</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127477;&#127481; Portugal</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Algarve, Portugal">Algarve</div>
             <div class="chip dest-region-chip" data-dest="Lisbon Coast, Portugal">Lisbon Coast</div>
@@ -1013,7 +1013,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Spain">
-          <div class="dest-country-header"><span>&#127466;&#127480; Spain</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127466;&#127480; Spain</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Costa del Sol, Spain">Costa del Sol</div>
             <div class="chip dest-region-chip" data-dest="Costa Brava, Spain">Costa Brava</div>
@@ -1024,7 +1024,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="France">
-          <div class="dest-country-header"><span>&#127467;&#127479; France</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127467;&#127479; France</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Brittany, France">Brittany</div>
             <div class="chip dest-region-chip" data-dest="Cote d'Azur, France">C&ocirc;te d&apos;Azur</div>
@@ -1034,7 +1034,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Ireland">
-          <div class="dest-country-header"><span>&#127470;&#127466; Ireland</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127470;&#127466; Ireland</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="South West Ireland (Kerry)">South West (Kerry)</div>
             <div class="chip dest-region-chip" data-dest="West Coast Ireland">West Coast</div>
@@ -1043,7 +1043,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Scotland">
-          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; Scotland</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; Scotland</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="St Andrews & Fife, Scotland" data-domestic="true">St Andrews &amp; Fife</div>
             <div class="chip dest-region-chip" data-dest="Scottish Highlands" data-domestic="true">Highlands</div>
@@ -1052,7 +1052,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="England & Wales">
-          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917603;&#917614;&#917605;&#917631; England &amp; Wales</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127988;&#917607;&#917602;&#917603;&#917614;&#917605;&#917631; England &amp; Wales</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Cornwall & Devon, England" data-domestic="true">Cornwall &amp; Devon</div>
             <div class="chip dest-region-chip" data-dest="Surrey & Kent, England" data-domestic="true">Surrey &amp; Kent</div>
@@ -1063,7 +1063,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Morocco">
-          <div class="dest-country-header"><span>&#127474;&#127462; Morocco</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127474;&#127462; Morocco</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Marrakech, Morocco">Marrakech</div>
             <div class="chip dest-region-chip" data-dest="Agadir, Morocco">Agadir</div>
@@ -1071,7 +1071,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Italy">
-          <div class="dest-country-header"><span>&#127470;&#127481; Italy</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127470;&#127481; Italy</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Tuscany, Italy">Tuscany</div>
             <div class="chip dest-region-chip" data-dest="Sicily, Italy">Sicily</div>
@@ -1080,7 +1080,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Turkey">
-          <div class="dest-country-header"><span>&#127481;&#127479; Turkey</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127481;&#127479; Turkey</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Antalya / Belek, Turkey">Antalya / Belek</div>
             <div class="chip dest-region-chip" data-dest="Istanbul, Turkey">Istanbul</div>
@@ -1088,14 +1088,14 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="UAE">
-          <div class="dest-country-header"><span>&#127462;&#127466; UAE</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127462;&#127466; UAE</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Dubai, UAE">Dubai</div>
             <div class="chip dest-region-chip" data-dest="Abu Dhabi, UAE">Abu Dhabi</div>
           </div>
         </div>
         <div class="dest-country" data-country="Greece">
-          <div class="dest-country-header"><span>&#127468;&#127479; Greece</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127468;&#127479; Greece</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Costa Navarino, Greece">Costa Navarino</div>
             <div class="chip dest-region-chip" data-dest="Rhodes, Greece">Rhodes</div>
@@ -1104,7 +1104,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
         </div>
         <div class="dest-country" data-country="Bulgaria">
-          <div class="dest-country-header"><span>&#127463;&#127468; Bulgaria</span><span class="dest-caret">&#9660;</span></div>
+          <div class="dest-country-header"><span>&#127463;&#127468; Bulgaria</span><span style="display:flex;align-items:center;gap:8px"><button class="dest-select-all-btn btn btn-ghost btn-sm" style="font-size:.7rem;padding:2px 8px;height:auto;line-height:1.4" onclick="selectAllInCountry(this,event)">Select all</button><span class="dest-caret">&#9660;</span></span></div>
           <div class="dest-country-body" style="display:none">
             <div class="chip dest-region-chip" data-dest="Black Sea Coast, Bulgaria">Black Sea Coast</div>
             <div class="chip dest-region-chip" data-dest="Sofia region, Bulgaria">Sofia region</div>
@@ -1280,6 +1280,22 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 
 <!-- TRIP DETAIL -->
 <div id="page-trip" class="page">
+  <!-- Public view banner — shown to non-logged-in users viewing a shared link -->
+  <div id="public-trip-banner" style="display:none;background:linear-gradient(135deg,#1a3a2a 0%,#0f2318 100%);padding:14px 0;border-bottom:2px solid var(--gold)">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.2rem">&#9971;</span>
+        <div>
+          <div style="color:var(--gold);font-weight:600;font-size:.88rem">You've been invited to view a golf trip</div>
+          <div style="color:rgba(255,255,255,.7);font-size:.78rem">Sign in to vote on options, join the group and add items to the cart</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="openAuthModal('signup')">Join free</button>
+        <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.3)" onclick="openAuthModal('signin')">Sign in</button>
+      </div>
+    </div>
+  </div>
   <div class="page-header">
     <div class="container">
       <div class="section-label">Trip Detail</div>
@@ -1299,6 +1315,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     <div class="results-tabs" style="margin-bottom:28px">
       <button class="results-tab active" id="td-tab-itinerary" onclick="switchTripTab('itinerary')">&#9971; Trip Itinerary</button>
       <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')">&#128101; Group &amp; Booking</button>
+      <div id="td-public-note" style="display:none;font-size:.75rem;color:var(--text-muted);padding:8px 0 0;width:100%">&#128274; Sign in to access group planning, voting and the trip cart</div>
     </div>
 
     <div id="td-panel-itinerary">
@@ -2429,6 +2446,12 @@ document.addEventListener('click', function(e) {
   var itemName = btn.getAttribute('data-vote-name');
   var panelLabel = btn.getAttribute('data-vote-panel');
   if (!itemType || !itemName) return;
+  // If not logged in, prompt sign in
+  if (!currentUser) {
+    showToast('Sign in to vote on trip options', true);
+    openAuthModal('signin');
+    return;
+  }
   // If trip not yet saved, prompt to save first
   var effectiveTripId = tripId || currentTripRequestId;
   if (!effectiveTripId && storedPanels && storedPanels.length) {
@@ -2651,9 +2674,24 @@ sbClient.auth.onAuthStateChange(function(event, session) {
   if (currentUser) { startNotifPolling(); } else { stopNotifPolling(); }
   if (currentUser) {
     closeAuthModal();
-    // Process a pending invite join now that we have a user
     if (pendingJoinId) {
       processJoin(pendingJoinId, currentUser);
+    }
+    // If signing in while viewing a shared public trip — unlock full access
+    var banner = document.getElementById('public-trip-banner');
+    if (banner && banner.style.display !== 'none') {
+      banner.style.display = 'none';
+      var note = document.getElementById('td-public-note');
+      if (note) note.style.display = 'none';
+      var groupTab = document.getElementById('td-tab-group');
+      if (groupTab) {
+        groupTab.style.opacity = '1';
+        groupTab.onclick = function() { switchTripTab('group'); };
+      }
+      if (currentTripRequestId) {
+        tripVoteCache = {};
+        loadVotesForTrip(currentTripRequestId);
+      }
     }
   }
 });
@@ -2885,7 +2923,7 @@ document.getElementById('dest-accordion').addEventListener('click', function(e) 
         chip.classList.remove('active');
         selectedDests = selectedDests.filter(function(d) { return d !== dest; });
       } else {
-        if (selectedDests.length >= 3) { showToast('Maximum 3 destinations in compare mode.', true); return; }
+        if (selectedDests.length >= 4) { showToast('Maximum 4 destinations — deselect one first.', true); return; }
         chip.classList.add('active');
         selectedDests.push(dest);
       }
@@ -2895,6 +2933,64 @@ document.getElementById('dest-accordion').addEventListener('click', function(e) 
     checkDomesticDestination();
   }
 });
+
+function selectAllInCountry(btn, e) {
+  e.stopPropagation(); // prevent country header toggle firing
+  if (compareMode === 'tiers') {
+    showToast('Switch to "Compare Destinations" mode to select multiple.', true);
+    return;
+  }
+  var country = btn.closest('.dest-country');
+  if (!country) return;
+  var chips = Array.from(country.querySelectorAll('.dest-region-chip'));
+  var countryChips = chips.filter(function(c) { return c.getAttribute('data-dest') !== 'Flexible'; });
+
+  // Check if all are already selected — if so, deselect all (toggle behaviour)
+  var allSelected = countryChips.every(function(c) { return c.classList.contains('active'); });
+  if (allSelected) {
+    countryChips.forEach(function(c) {
+      var dest = c.getAttribute('data-dest');
+      c.classList.remove('active');
+      selectedDests = selectedDests.filter(function(d) { return d !== dest; });
+    });
+    chipSelections.dest = selectedDests[0] || null;
+    btn.textContent = 'Select all';
+    renderDestTags();
+    checkDomesticDestination();
+    return;
+  }
+
+  // Select up to 4 from this country — open the body first if closed
+  var body = country.querySelector('.dest-country-body');
+  if (body && body.style.display === 'none') {
+    body.style.display = 'flex';
+    country.classList.add('open');
+  }
+
+  var toAdd = countryChips.slice(0, 4); // max 4 per country
+  var added = 0;
+  toAdd.forEach(function(c) {
+    var dest = c.getAttribute('data-dest');
+    if (selectedDests.indexOf(dest) === -1) {
+      if (selectedDests.length >= 4) {
+        showToast('Limit reached — ' + selectedDests.length + ' destinations selected. Deselect some first.', true);
+        return;
+      }
+      c.classList.add('active');
+      selectedDests.push(dest);
+      added++;
+    } else {
+      c.classList.add('active'); // already selected, just ensure visual
+    }
+  });
+
+  chipSelections.dest = selectedDests[0] || null;
+  btn.textContent = 'Deselect all';
+  renderDestTags();
+  checkDomesticDestination();
+
+  if (added > 0) showToast(added + ' destination' + (added > 1 ? 's' : '') + ' added');
+}
 
 function renderDestTags() {
   var container = document.getElementById('dest-selected-tags');
@@ -6622,10 +6718,20 @@ async function saveVenueTrip() {
 
 // ── END VENUE FEATURE ────────────────────────────────────────
 
-sbClient.auth.getSession().then(function(r) {
+sbClient.auth.getSession().then(async function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); }
+
+  // If there's a ?trip= param, load the trip — for logged-in users AND public viewers
+  var params = new URLSearchParams(window.location.search);
+  var sharedTripId = params.get('trip');
+  if (sharedTripId) {
+    currentTripRequestId = sharedTripId;
+    await loadSharedTrip(sharedTripId, currentUser);
+    return;
+  }
+
   if (currentUser && pendingJoinId) {
     processJoin(pendingJoinId, currentUser);
   } else if (pendingJoinId) {
@@ -6633,6 +6739,70 @@ sbClient.auth.getSession().then(function(r) {
     openAuthModal('signup');
   }
 });
+
+async function loadSharedTrip(tripId, user) {
+  // Load trip data from Supabase — public read (RLS allows anyone to read shared trips)
+  try {
+    showPage('trip');
+    document.getElementById('td-itinerary-loading').style.display = 'block';
+
+    // Fetch trip request data
+    var tripReq = await sbClient.from('trip_requests')
+      .select('*')
+      .eq('id', tripId)
+      .single();
+
+    // Fetch trip results
+    var tripRes = await sbClient.from('trip_results')
+      .select('ai_response')
+      .eq('trip_request_id', tripId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    document.getElementById('td-itinerary-loading').style.display = 'none';
+
+    if (!tripReq.data) {
+      showToast('Trip not found or no longer available.', true);
+      showPage('landing');
+      return;
+    }
+
+    var tripData = tripReq.data;
+    var aiData = tripRes && tripRes.data ? tripRes.data.ai_response : null;
+
+    // Show public banner if not logged in
+    if (!user) {
+      var banner = document.getElementById('public-trip-banner');
+      var note = document.getElementById('td-public-note');
+      var groupTab = document.getElementById('td-tab-group');
+      if (banner) banner.style.display = 'block';
+      if (note) note.style.display = 'block';
+      if (groupTab) {
+        groupTab.style.opacity = '0.5';
+        groupTab.onclick = function() {
+          showToast('Sign in to access group planning and voting');
+          openAuthModal('signin');
+        };
+      }
+    }
+
+    // Load the trip itinerary
+    await loadTripItinerary(tripId, tripData);
+
+    // If logged in, also load votes
+    if (user) {
+      tripVoteCache = {};
+      await loadVotesForTrip(tripId);
+    }
+
+  } catch(e) {
+    console.error('loadSharedTrip error:', e);
+    document.getElementById('td-itinerary-loading').style.display = 'none';
+    showToast('Could not load trip. Try again.', true);
+    showPage('landing');
+  }
+}
 </script>
 </body>
 </html>
