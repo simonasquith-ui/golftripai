@@ -6839,9 +6839,10 @@ function closePricingModal() {
   if (modal) modal.style.display = 'none';
 }
 
-// Close modal on backdrop click
-document.getElementById('pricing-modal').addEventListener('click', function(e) {
-  if (e.target === this) closePricingModal();
+// Close modal on backdrop click — deferred so DOM is ready
+document.addEventListener('click', function(e) {
+  var modal = document.getElementById('pricing-modal');
+  if (modal && e.target === modal) closePricingModal();
 });
 
 async function startCheckout(plan) {
