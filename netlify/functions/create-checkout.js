@@ -44,6 +44,7 @@ exports.handler = async (event) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
       success_url: 'https://gogolftrip.co.uk/?payment=success&plan=' + plan,
       cancel_url: 'https://gogolftrip.co.uk/?payment=cancelled',
       customer_email: userEmail || undefined,
