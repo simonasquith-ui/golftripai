@@ -591,6 +591,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
+      <button id="nav-upgrade-btn" onclick="openPricingModal()" style="display:none;background:none;border:1.5px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:4px">&#11088; Upgrade</button>
       <div id="nav-auth-btns" class="flex gap-8">
         <button class="btn btn-ghost btn-sm" onclick="openAuthModal('signin')">Sign In</button>
         <button class="btn btn-primary btn-sm" onclick="openAuthModal('signup')">Get Started</button>
@@ -2399,6 +2400,8 @@ async function signOut() {
 }
 
 function updateNav(user) {
+  var upgradeBtn = document.getElementById('nav-upgrade-btn');
+  if (upgradeBtn) upgradeBtn.style.display = user ? 'inline-block' : 'none';
   var authBtns = document.getElementById('nav-auth-btns');
   var navUser = document.getElementById('nav-user');
   var myTrips = document.getElementById('nav-my-trips');
@@ -6823,6 +6826,75 @@ async function saveVenueTrip() {
 
 // ── END VENUE FEATURE ────────────────────────────────────────
 
+// ── STRIPE PAYMENTS ──────────────────────────────────────────
+var STRIPE_PK = 'pk_test_51TzFP49KczNOnp4RxMUIBIiUk5uzUGYicdSsaoM6LL1rNsi2gMpKxv4xJzoNYDRIadBDNmZp8wQNp7xQiBibPvsh00Bpb53Bk9';
+
+function openPricingModal() {
+  var modal = document.getElementById('pricing-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closePricingModal() {
+  var modal = document.getElementById('pricing-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Close modal on backdrop click
+document.getElementById('pricing-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePricingModal();
+});
+
+async function startCheckout(plan) {
+  if (!currentUser) {
+    closePricingModal();
+    openAuthModal('signup');
+    showToast('Create an account first, then upgrade.');
+    return;
+  }
+  var btn = document.getElementById('checkout-btn-' + plan);
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+  try {
+    var res = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan: plan,
+        userId: currentUser.id,
+        userEmail: currentUser.email
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Could not create checkout session');
+    }
+  } catch(e) {
+    showToast('Payment error: ' + e.message, true);
+    if (btn) { btn.disabled = false; btn.textContent = plan === 'pro' ? 'Get Pro' : 'Get Society'; }
+  }
+}
+
+// Handle return from Stripe
+(function handlePaymentReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var payment = params.get('payment');
+  var plan = params.get('plan');
+  if (payment === 'success') {
+    setTimeout(function() {
+      showToast('🎉 Welcome to GolfTrip ' + (plan === 'society' ? 'Society' : 'Pro') + '! Your account has been upgraded.');
+    }, 800);
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+  } else if (payment === 'cancelled') {
+    setTimeout(function() {
+      showToast('Payment cancelled — you can upgrade any time.');
+    }, 800);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+// ── END STRIPE PAYMENTS ───────────────────────────────────────
+
 sbClient.auth.getSession().then(async function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   updateNav(currentUser);
@@ -6909,5 +6981,57 @@ async function loadSharedTrip(tripId, user) {
   }
 }
 </script>
+
+<!-- PRICING MODAL -->
+<div id="pricing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;position:relative">
+    <button onclick="closePricingModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666;z-index:1">&#215;</button>
+    <div style="background:#1a3a2a;border-radius:16px 16px 0 0;padding:32px;text-align:center">
+      <div style="color:#c9a84c;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Upgrade GolfTrip</div>
+      <h2 style="color:#fff;font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:8px">Plan more trips. Stress less.</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:.88rem">Start free. Upgrade when you're ready.</p>
+    </div>
+    <div style="padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <!-- Pro Plan -->
+      <div style="border:2px solid #e5ddd0;border-radius:12px;padding:24px;position:relative">
+        <div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px">Pro</div>
+        <div style="font-size:2rem;font-weight:700;color:#1a3a2a;margin-bottom:4px">£49<span style="font-size:.9rem;font-weight:400;color:#888">/year</span></div>
+        <div style="font-size:.78rem;color:#888;margin-bottom:16px">That's £4.08/month</div>
+        <ul style="list-style:none;margin-bottom:20px;font-size:.85rem;color:#333;line-height:2">
+          <li>&#10003; Unlimited trip generations</li>
+          <li>&#10003; Budget, Mid &amp; Luxury comparisons</li>
+          <li>&#10003; Save &amp; share trips</li>
+          <li>&#10003; Group voting tools</li>
+          <li>&#10003; PDF export</li>
+          <li>&#10003; All booking links</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;padding:12px" onclick="startCheckout('pro')" id="checkout-btn-pro">Get Pro</button>
+      </div>
+
+      <!-- Society Plan -->
+      <div style="border:2px solid #c9a84c;border-radius:12px;padding:24px;position:relative;background:#fffdf7">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#c9a84c;color:#1a3a2a;font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap">MOST POPULAR</div>
+        <div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#c9a84c;margin-bottom:8px">Society</div>
+        <div style="font-size:2rem;font-weight:700;color:#1a3a2a;margin-bottom:4px">£99<span style="font-size:.9rem;font-weight:400;color:#888">/year</span></div>
+        <div style="font-size:.78rem;color:#888;margin-bottom:16px">That's £8.25/month</div>
+        <ul style="list-style:none;margin-bottom:20px;font-size:.85rem;color:#333;line-height:2">
+          <li>&#10003; Everything in Pro</li>
+          <li>&#10003; Invite your whole group</li>
+          <li>&#10003; Group chat per trip</li>
+          <li>&#10003; Shared trip cart</li>
+          <li>&#10003; Share trip via link</li>
+          <li>&#10003; Perfect for 8+ players</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;padding:12px;background:#1a3a2a" onclick="startCheckout('society')" id="checkout-btn-society">Get Society</button>
+      </div>
+
+    </div>
+    <div style="padding:0 28px 24px;text-align:center;font-size:.78rem;color:#999">
+      Secure payment via Stripe &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; 7-day money back guarantee
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
