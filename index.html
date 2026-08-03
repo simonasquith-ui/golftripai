@@ -2261,6 +2261,7 @@ document.addEventListener('click', function(e) {
 
 /* === STATE === */
 let currentUser = null;
+let userPlan = 'free'; // 'free' | 'pro' | 'society' — reflects user_plans table
 let currentTripRequestId = null;
 let currentTripData = null;
 let storedPanels = []; // panels stored for PDF export
@@ -2396,8 +2397,52 @@ async function sendPasswordReset() {
 
 async function signOut() {
   await sbClient.auth.signOut();
-  currentUser = null; updateNav(null); showPage('landing'); showToast('Signed out successfully.');
+  currentUser = null; userPlan = 'free'; updateNav(null); showPage('landing'); showToast('Signed out successfully.');
 }
+
+// ── PLAN GATING ──────────────────────────────────────────────
+async function loadUserPlan() {
+  if (!currentUser) { userPlan = 'free'; return; }
+  try {
+    var r = await sbClient.from('user_plans').select('plan,status').eq('user_id', currentUser.id).single();
+    if (r.data && r.data.status === 'active' && (r.data.plan === 'pro' || r.data.plan === 'society')) {
+      userPlan = r.data.plan;
+    } else {
+      userPlan = 'free';
+    }
+  } catch (e) { userPlan = 'free'; }
+}
+
+function isPaid() { return userPlan === 'pro' || userPlan === 'society'; }
+function isSociety() { return userPlan === 'society'; }
+
+// Free tier: 1 lifetime trip generation. Logged-in free users are checked
+// against trip_requests; signed-out visitors are checked against localStorage.
+async function canGenerateTrip() {
+  if (isPaid()) return true;
+  if (currentUser) {
+    try {
+      var c = await sbClient.from('trip_requests').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+      return (c.count || 0) < 1;
+    } catch (e) { return true; }
+  }
+  return !localStorage.getItem('golftrip_free_used');
+}
+
+function requirePaid(message) {
+  if (isPaid()) return true;
+  showToast(message || 'This is a Pro feature — upgrade to unlock it.', true);
+  openPricingModal();
+  return false;
+}
+
+function requireSociety(message) {
+  if (isSociety()) return true;
+  showToast(message || 'This is a Society feature — upgrade to unlock it.', true);
+  openPricingModal();
+  return false;
+}
+// ── END PLAN GATING ──────────────────────────────────────────
 
 function updateNav(user) {
   var upgradeBtn = document.getElementById('nav-upgrade-btn');
@@ -2687,8 +2732,9 @@ function stopNotifPolling() {
 }
 // ── END NOTIFICATION SYSTEM ─────────────────────────────────
 
-sbClient.auth.onAuthStateChange(function(event, session) {
+sbClient.auth.onAuthStateChange(async function(event, session) {
   currentUser = session ? session.user : null;
+  await loadUserPlan();
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); } else { stopNotifPolling(); }
   if (currentUser) {
@@ -3214,6 +3260,7 @@ async function saveTripResults() {
     showToast('Sign in to save trips.', true);
     return;
   }
+  if (!requirePaid('Saving trips is a Pro feature — upgrade to save and manage your trips.')) return;
   if (!storedPanels || !storedPanels.length) {
     showToast('No trip to save yet — generate one first.', true);
     return;
@@ -3554,6 +3601,19 @@ async function generateTrip() {
   }
   if (!data.budget) { showToast('Please select a budget range.', true); return; }
   if (compareMode === 'destinations' && selectedDests.length < 2) { showToast('Please select at least 2 destinations to compare.', true); return; }
+
+  var canGen = await canGenerateTrip();
+  if (!canGen) {
+    if (currentUser) {
+      showToast("You've used your free trip generation — upgrade to Pro for unlimited trips.", true);
+      openPricingModal();
+    } else {
+      showToast('Sign up free to save this trip, or upgrade for unlimited generations.');
+      openAuthModal('signup');
+    }
+    return;
+  }
+  if (!currentUser) localStorage.setItem('golftrip_free_used', '1');
 
   showPage('results');
   document.getElementById('results-loading').style.display = 'block';
@@ -4095,7 +4155,8 @@ async function loadVotesForTrip(tripId) {
 }
 
 async function castVote(tripId, itemType, itemName, panelLabel, btnEl) {
-  if (!currentUser) { showAuthModal(); showToast('Sign in to vote for your favourites.', true); return; }
+  if (!currentUser) { openAuthModal('signin'); showToast('Sign in to vote for your favourites.', true); return; }
+  if (!requireSociety('Group voting is a Society feature — upgrade to unlock it.')) return;
   if (!tripId) { showToast('Save this trip first to vote on options.', true); return; }
   var key = panelLabel + '|' + itemType + '|' + itemName;
   var already = tripVoteCache[key] && tripVoteCache[key].userVoted;
@@ -4778,7 +4839,12 @@ function buildBTT(panel, idx, qData) {
 }
 
 /* === PDF EXPORT === */
+function exportToPDF() {
+  exportPDF(currentPanelIdx || 0);
+}
+
 function exportPDF(panelIdx) {
+  if (!requirePaid('PDF export is a Pro feature — upgrade to download your trip pack.')) return;
   var panel = storedPanels[panelIdx];
   if (!panel) { showToast('Could not find trip data. Please regenerate.', true); return; }
   // Open print dialog with a clean formatted page
@@ -5691,6 +5757,7 @@ document.getElementById('chat-input').addEventListener('keydown', function(e) {
 
 async function sendChatMessage() {
   if (!currentUser) { openAuthModal('signin'); return; }
+  if (!requireSociety('Group chat is a Society feature — upgrade to unlock it.')) return;
   var input = document.getElementById('chat-input');
   var msg = input.value.trim();
   if (!msg || !activeTripId) return;
@@ -5703,6 +5770,7 @@ async function sendChatMessage() {
 
 async function inviteMember() {
   if (!currentUser) { openAuthModal('signin'); return; }
+  if (!requireSociety('Inviting group members is a Society feature — upgrade to unlock it.')) return;
   var emailEl = document.getElementById('invite-email');
   var inviteBtn = document.querySelector('.invite-section .btn-primary');
   var email = emailEl.value.trim();
@@ -6898,6 +6966,7 @@ async function startCheckout(plan) {
 
 sbClient.auth.getSession().then(async function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
+  await loadUserPlan();
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); }
 
@@ -7033,6 +7102,77 @@ async function loadSharedTrip(tripId, user) {
     </div>
   </div>
 </div>
+
+<!-- FEEDBACK WIDGET -->
+<button id="feedback-fab" onclick="openFeedbackModal()" style="position:fixed;bottom:22px;right:22px;z-index:900;background:#1a3a2a;color:#fff;border:none;border-radius:24px;padding:10px 18px;font-size:.85rem;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-family:inherit">&#128172; Feedback</button>
+
+<div id="feedback-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;max-width:440px;width:100%;padding:28px;position:relative">
+    <button onclick="closeFeedbackModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666">&#215;</button>
+    <h2 style="color:#1a3a2a;font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:6px">Got feedback?</h2>
+    <p style="color:#888;font-size:.85rem;margin-bottom:18px">We're in early access — tell us what's working, what's not, or what you'd like to see next.</p>
+    <div style="display:flex;gap:6px;margin-bottom:16px" id="feedback-rating">
+      <button class="fb-star" data-val="1" onclick="setFeedbackRating(1)" style="background:none;border:none;font-size:1.5rem;cursor:pointer;opacity:.35">&#9733;</button>
+      <button class="fb-star" data-val="2" onclick="setFeedbackRating(2)" style="background:none;border:none;font-size:1.5rem;cursor:pointer;opacity:.35">&#9733;</button>
+      <button class="fb-star" data-val="3" onclick="setFeedbackRating(3)" style="background:none;border:none;font-size:1.5rem;cursor:pointer;opacity:.35">&#9733;</button>
+      <button class="fb-star" data-val="4" onclick="setFeedbackRating(4)" style="background:none;border:none;font-size:1.5rem;cursor:pointer;opacity:.35">&#9733;</button>
+      <button class="fb-star" data-val="5" onclick="setFeedbackRating(5)" style="background:none;border:none;font-size:1.5rem;cursor:pointer;opacity:.35">&#9733;</button>
+    </div>
+    <textarea id="feedback-message" placeholder="What's on your mind?" rows="4" style="width:100%;border:1.5px solid #e5ddd0;border-radius:8px;padding:10px;font-family:inherit;font-size:.9rem;resize:vertical;margin-bottom:12px"></textarea>
+    <input id="feedback-email" type="email" placeholder="Email (optional — if you'd like a reply)" style="width:100%;border:1.5px solid #e5ddd0;border-radius:8px;padding:10px;font-family:inherit;font-size:.85rem;margin-bottom:16px">
+    <button class="btn btn-primary" style="width:100%;padding:12px" onclick="submitFeedback()" id="feedback-submit-btn">Send Feedback</button>
+  </div>
+</div>
+
+<script>
+var feedbackRatingVal = 0;
+function openFeedbackModal() {
+  var m = document.getElementById('feedback-modal');
+  if (m) m.style.display = 'flex';
+}
+function closeFeedbackModal() {
+  var m = document.getElementById('feedback-modal');
+  if (m) m.style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('feedback-modal');
+  if (m && e.target === m) closeFeedbackModal();
+});
+function setFeedbackRating(val) {
+  feedbackRatingVal = val;
+  document.querySelectorAll('.fb-star').forEach(function(s) {
+    s.style.opacity = parseInt(s.getAttribute('data-val')) <= val ? '1' : '.35';
+  });
+}
+async function submitFeedback() {
+  var msgEl = document.getElementById('feedback-message');
+  var emailEl = document.getElementById('feedback-email');
+  var msg = msgEl.value.trim();
+  var email = emailEl.value.trim();
+  if (!msg) { showToast('Please add a message before sending.', true); return; }
+  var btn = document.getElementById('feedback-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    await sbClient.from('feedback').insert({
+      user_id: currentUser ? currentUser.id : null,
+      email: email || (currentUser ? currentUser.email : null),
+      rating: feedbackRatingVal || null,
+      message: msg,
+      page: window.location.pathname + window.location.search,
+      plan: userPlan
+    });
+    showToast('Thanks — feedback sent!');
+    msgEl.value = ''; emailEl.value = ''; feedbackRatingVal = 0;
+    document.querySelectorAll('.fb-star').forEach(function(s) { s.style.opacity = '.35'; });
+    closeFeedbackModal();
+  } catch (e) {
+    showToast('Could not send feedback — please try again.', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Feedback'; }
+  }
+}
+</script>
+<!-- END FEEDBACK WIDGET -->
 
 </body>
 </html>
