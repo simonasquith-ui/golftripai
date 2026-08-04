@@ -7,3 +7,8 @@
 
 [functions."generate-trip"]
   timeout = 30
+
+[[redirects]]
+  from = "/destinations"
+  to = "/index.html"
+  status = 200
