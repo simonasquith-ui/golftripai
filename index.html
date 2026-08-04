@@ -5108,14 +5108,45 @@ function startPuttGame() {
     if (state.dragging && state.dragStart) {
       var dx = state.dragStart.x - state.ball.x;
       var dy = state.dragStart.y - state.ball.y;
-      ctx.strokeStyle = 'rgba(255,255,255,.55)';
+      var pDist = Math.min(Math.hypot(dx, dy), 90);
+      var pPower = pDist / 90;
+      var pAngle = Math.atan2(dy, dx);
+      var tipX = state.ball.x - dx, tipY = state.ball.y - dy;
+      // Putter shaft, pulled back toward the drag point
+      var shaftX = state.ball.x + Math.cos(pAngle) * pDist;
+      var shaftY = state.ball.y + Math.sin(pAngle) * pDist;
+      ctx.strokeStyle = '#c9a84c';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(state.ball.x, state.ball.y);
+      ctx.lineTo(shaftX, shaftY);
+      ctx.stroke();
+      // Putter head — small perpendicular cap at the end of the shaft
+      var perpX = -Math.sin(pAngle) * 6, perpY = Math.cos(pAngle) * 6;
+      ctx.beginPath();
+      ctx.moveTo(shaftX - perpX, shaftY - perpY);
+      ctx.lineTo(shaftX + perpX, shaftY + perpY);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.stroke();
+      // Direction line + arrowhead — colour shows power (green=soft, red=hard)
+      var pColor = pPower < 0.4 ? '#8fd19e' : pPower < 0.75 ? '#f5c542' : '#e05d44';
+      ctx.strokeStyle = pColor;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
       ctx.moveTo(state.ball.x, state.ball.y);
-      ctx.lineTo(state.ball.x - dx, state.ball.y - dy);
+      ctx.lineTo(tipX, tipY);
       ctx.stroke();
       ctx.setLineDash([]);
+      var aAngle = Math.atan2(tipY - state.ball.y, tipX - state.ball.x);
+      ctx.fillStyle = pColor;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX - Math.cos(aAngle - 0.4) * 10, tipY - Math.sin(aAngle - 0.4) * 10);
+      ctx.lineTo(tipX - Math.cos(aAngle + 0.4) * 10, tipY - Math.sin(aAngle + 0.4) * 10);
+      ctx.closePath();
+      ctx.fill();
     }
     // Ball
     ctx.beginPath();
@@ -5209,8 +5240,8 @@ function startPuttGame() {
     if (dist > 6) {
       var power = dist / 90;
       var norm = Math.hypot(dx, dy) || 1;
-      state.vel.x = (dx / norm) * power * 9;
-      state.vel.y = (dy / norm) * power * 9;
+      state.vel.x = -(dx / norm) * power * 9;
+      state.vel.y = -(dy / norm) * power * 9;
       state.strokes++;
       playPuttSound(power);
       updateStats();
@@ -5380,9 +5411,26 @@ function runPuttChallenge(tripId) {
     ctx.closePath(); ctx.fill();
     if (state.dragging && state.dragStart) {
       var dx = state.dragStart.x - state.ball.x, dy = state.dragStart.y - state.ball.y;
-      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
-      ctx.beginPath(); ctx.moveTo(state.ball.x, state.ball.y); ctx.lineTo(state.ball.x - dx, state.ball.y - dy); ctx.stroke();
+      var pDist = Math.min(Math.hypot(dx, dy), 90);
+      var pPower = pDist / 90;
+      var pAngle = Math.atan2(dy, dx);
+      var tipX = state.ball.x - dx, tipY = state.ball.y - dy;
+      var shaftX = state.ball.x + Math.cos(pAngle) * pDist, shaftY = state.ball.y + Math.sin(pAngle) * pDist;
+      ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(state.ball.x, state.ball.y); ctx.lineTo(shaftX, shaftY); ctx.stroke();
+      var perpX = -Math.sin(pAngle) * 6, perpY = Math.cos(pAngle) * 6;
+      ctx.beginPath(); ctx.moveTo(shaftX - perpX, shaftY - perpY); ctx.lineTo(shaftX + perpX, shaftY + perpY);
+      ctx.lineWidth = 5; ctx.strokeStyle = '#1a1a1a'; ctx.stroke();
+      var pColor = pPower < 0.4 ? '#8fd19e' : pPower < 0.75 ? '#f5c542' : '#e05d44';
+      ctx.strokeStyle = pColor; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(state.ball.x, state.ball.y); ctx.lineTo(tipX, tipY); ctx.stroke();
       ctx.setLineDash([]);
+      var aAngle = Math.atan2(tipY - state.ball.y, tipX - state.ball.x);
+      ctx.fillStyle = pColor;
+      ctx.beginPath(); ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX - Math.cos(aAngle - 0.4) * 10, tipY - Math.sin(aAngle - 0.4) * 10);
+      ctx.lineTo(tipX - Math.cos(aAngle + 0.4) * 10, tipY - Math.sin(aAngle + 0.4) * 10);
+      ctx.closePath(); ctx.fill();
     }
     ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, 6, 0, Math.PI * 2);
     ctx.fillStyle = '#fff'; ctx.fill();
@@ -5446,8 +5494,8 @@ function runPuttChallenge(tripId) {
     var dist = Math.min(Math.hypot(dx, dy), 90);
     if (dist > 6) {
       var power = dist / 90, norm = Math.hypot(dx, dy) || 1;
-      state.vel.x = (dx / norm) * power * 9;
-      state.vel.y = (dy / norm) * power * 9;
+      state.vel.x = -(dx / norm) * power * 9;
+      state.vel.y = -(dy / norm) * power * 9;
       state.strokes++;
       playPuttSound(power);
       updateStats();
