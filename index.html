@@ -524,7 +524,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 }
 @media(max-width:640px){
   .hero-stats{flex-direction:column;gap:20px}
-  .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid{grid-template-columns:1fr}
+  .pricing-grid,.features-grid,.testimonials-grid,.form-row,.date-flex-grid,.pc-grid{grid-template-columns:1fr}
   .results-tabs{flex-wrap:wrap;gap:3px}
   .results-tab{flex:1;min-width:80px;font-size:.78rem;padding:8px 4px}
   .results-nav-wrap{flex-wrap:nowrap}
@@ -1266,7 +1266,15 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
   <div id="results-loading" class="loading-state container" style="display:none">
     <div class="loading-spinner"></div>
     <h3>Building Your Trip Plan...</h3>
-    <p>Our AI is researching courses, hotels and flights. This takes about 20 seconds.</p>
+    <p>Our AI is researching courses, hotels and flights. This takes about 20 seconds. Fancy a putt while you wait?</p>
+    <div style="max-width:360px;margin:20px auto 0;text-align:center">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem;color:var(--text-muted)">
+        <span id="putt-stat-strokes">Strokes: 0</span>
+        <span id="putt-stat-holed" style="color:var(--gold);font-weight:600"></span>
+      </div>
+      <canvas id="putt-canvas" width="320" height="440" style="width:100%;max-width:320px;background:#2d6a3e;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);touch-action:none;cursor:crosshair"></canvas>
+      <p class="fs-sm text-muted" style="margin-top:8px">Click and drag back from the ball, then release to putt.</p>
+    </div>
   </div>
   <div id="results-content" style="display:none">
     <div class="container">
@@ -1450,6 +1458,32 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
 
       <!-- BTT wrap kept for compatibility -->
       <div id="group-btt-wrap" style="margin-bottom:20px"></div>
+
+      <!-- PUTTING CHALLENGE — full width -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <h3 style="color:var(--green);font-family:'Playfair Display',serif;font-size:1rem;margin:0">&#9971; Putting Challenge</h3>
+          <span class="fs-sm text-muted" id="pc-subhead">Same hole for everyone on this trip — lowest strokes wins</span>
+        </div>
+        <div id="pc-upgrade-prompt" style="display:none">
+          <p class="fs-sm text-muted" style="margin-bottom:12px">Compete with your group on a shared putting hole — this is a Society feature.</p>
+          <button class="btn btn-primary btn-sm" onclick="openPricingModal()">Upgrade to Society</button>
+        </div>
+        <div id="pc-game-wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="pc-grid">
+          <div style="text-align:center">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem;color:var(--text-muted)">
+              <span id="pc-stat-strokes">Strokes: 0</span>
+              <span id="pc-stat-holed" style="color:var(--gold);font-weight:600"></span>
+            </div>
+            <canvas id="pc-canvas" width="280" height="380" style="width:100%;max-width:280px;background:#2d6a3e;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);touch-action:none;cursor:crosshair"></canvas>
+            <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="restartPuttChallenge()">Play Again</button>
+          </div>
+          <div>
+            <div class="gp-section-head">&#127942; Leaderboard</div>
+            <div id="pc-leaderboard"><p class="fs-sm text-muted">No scores yet — be the first to hole out.</p></div>
+          </div>
+        </div>
+      </div>
 
       <!-- BOTTOM GRID: members+status LEFT, chat RIGHT -->
       <div class="gp-grid">
@@ -3687,6 +3721,7 @@ async function generateTrip() {
   showPage('results');
   document.getElementById('results-loading').style.display = 'block';
   document.getElementById('results-content').style.display = 'none';
+  try { startPuttGame(); } catch (e) { console.warn('Putting game failed to start:', e); }
 
   if (currentUser) {
     try {
@@ -3888,6 +3923,7 @@ async function generateTrip() {
         firstPanelShown = true;
         document.getElementById('results-loading').style.display = 'none';
         document.getElementById('results-content').style.display = 'block';
+        try { stopPuttGame(); } catch (e) { console.warn('Putting game failed to stop:', e); }
     var bottomSave = document.getElementById('results-bottom-save');
     if (bottomSave) bottomSave.style.display = 'block';
         var initialPanels = panelDefs.map(function(d, i) {
@@ -4052,6 +4088,7 @@ async function generateTrip() {
   } finally {
     document.getElementById('results-loading').style.display = 'none';
     document.getElementById('results-content').style.display = 'block';
+    try { stopPuttGame(); } catch (e) { console.warn('Putting game failed to stop:', e); }
   }
 }
 
@@ -4946,6 +4983,551 @@ function buildBTT(panel, idx, qData) {
   '</div>';
 }
 
+/* === PUTTING MINI-GAME (shown during trip generation) === */
+var puttGame = null;
+
+function startPuttGame() {
+  stopPuttGame(); // clean up any previous instance first
+  var canvas = document.getElementById('putt-canvas');
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+
+  var state = {
+    ball: { x: W / 2, y: H - 40 },
+    vel: { x: 0, y: 0 },
+    hole: { x: 0, y: 70, r: 9 },
+    break: 0,          // constant lateral force simulating a sloped green
+    dragging: false,
+    dragStart: null,
+    strokes: 0,
+    holed: false,
+    animId: null,
+    audioCtx: null
+  };
+  puttGame = state;
+
+  function newHole() {
+    state.hole.x = 60 + Math.random() * (W - 120);
+    // Random left/right break each hole — this is what makes it genuinely
+    // tricky rather than a straight-line putt every time.
+    state.break = (Math.random() < 0.5 ? -1 : 1) * (0.006 + Math.random() * 0.01);
+  }
+  newHole();
+
+  function resetBall() {
+    state.ball.x = W / 2;
+    state.ball.y = H - 40;
+    state.vel.x = 0;
+    state.vel.y = 0;
+  }
+
+  function getAudioCtx() {
+    if (!state.audioCtx) {
+      try { state.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    }
+    return state.audioCtx;
+  }
+
+  function playPuttSound(strength) {
+    var ac = getAudioCtx();
+    if (!ac) return;
+    var osc = ac.createOscillator();
+    var gain = ac.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180 + strength * 60, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(90, ac.currentTime + 0.09);
+    gain.gain.setValueAtTime(Math.min(0.25, 0.08 + strength * 0.02), ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime + 0.13);
+  }
+
+  function playHoledSound() {
+    var ac = getAudioCtx();
+    if (!ac) return;
+    [523, 659, 784].forEach(function (freq, i) {
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      var t = ac.currentTime + i * 0.09;
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.start(t); osc.stop(t + 0.32);
+    });
+  }
+
+  function playLipOutSound() {
+    var ac = getAudioCtx();
+    if (!ac) return;
+    var osc = ac.createOscillator();
+    var gain = ac.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(300, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ac.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.1, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.1);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime + 0.1);
+  }
+
+  function updateStats() {
+    var s = document.getElementById('putt-stat-strokes');
+    var h = document.getElementById('putt-stat-holed');
+    if (s) s.textContent = 'Strokes: ' + state.strokes;
+    if (h) h.textContent = state.holed ? '\u2b50 Holed out!' : '';
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // Green background with a subtle grain pattern for texture
+    ctx.fillStyle = '#2d6a3e';
+    ctx.fillRect(0, 0, W, H);
+    for (var i = 0; i < 40; i++) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.015 + (i % 3) * 0.005) + ')';
+      ctx.fillRect((i * 53) % W, (i * 97) % H, 2, 2);
+    }
+    // Hole
+    ctx.beginPath();
+    ctx.arc(state.hole.x, state.hole.y, state.hole.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#0a1a0f';
+    ctx.fill();
+    // Flag
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(state.hole.x, state.hole.y); ctx.lineTo(state.hole.x, state.hole.y - 34); ctx.stroke();
+    ctx.fillStyle = '#c9a84c';
+    ctx.beginPath();
+    ctx.moveTo(state.hole.x, state.hole.y - 34);
+    ctx.lineTo(state.hole.x + 14, state.hole.y - 28);
+    ctx.lineTo(state.hole.x, state.hole.y - 22);
+    ctx.closePath(); ctx.fill();
+    // Aim line while dragging
+    if (state.dragging && state.dragStart) {
+      var dx = state.dragStart.x - state.ball.x;
+      var dy = state.dragStart.y - state.ball.y;
+      ctx.strokeStyle = 'rgba(255,255,255,.55)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(state.ball.x, state.ball.y);
+      ctx.lineTo(state.ball.x - dx, state.ball.y - dy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // Ball
+    ctx.beginPath();
+    ctx.arc(state.ball.x, state.ball.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  function tick() {
+    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    if (moving && !state.holed) {
+      // Friction
+      state.vel.x *= 0.985;
+      state.vel.y *= 0.985;
+      // Break (slope) — curves the path, more noticeable as the ball slows,
+      // which is what makes reading the line genuinely tricky.
+      state.vel.x += state.break * (1 - Math.min(1, (Math.abs(state.vel.x) + Math.abs(state.vel.y)) / 8));
+
+      state.ball.x += state.vel.x;
+      state.ball.y += state.vel.y;
+
+      // Wall bounce
+      if (state.ball.x < 8) { state.ball.x = 8; state.vel.x *= -0.6; }
+      if (state.ball.x > W - 8) { state.ball.x = W - 8; state.vel.x *= -0.6; }
+      if (state.ball.y > H - 10) { state.ball.y = H - 10; state.vel.y *= -0.6; }
+      if (state.ball.y < 8) { state.ball.y = 8; state.vel.y *= -0.6; }
+
+      // Hole check
+      var d = Math.hypot(state.ball.x - state.hole.x, state.ball.y - state.hole.y);
+      var speed = Math.hypot(state.vel.x, state.vel.y);
+      if (d < state.hole.r + 5) {
+        if (speed < 2.2) {
+          state.holed = true;
+          state.vel.x = 0; state.vel.y = 0;
+          state.ball.x = state.hole.x; state.ball.y = state.hole.y;
+          playHoledSound();
+          updateStats();
+          setTimeout(function () {
+            if (!puttGame) return;
+            state.holed = false;
+            state.strokes = 0;
+            newHole();
+            resetBall();
+            updateStats();
+          }, 1400);
+        } else {
+          // Too fast — lips out and deflects away rather than dropping in
+          playLipOutSound();
+          var angle = Math.atan2(state.ball.y - state.hole.y, state.ball.x - state.hole.x);
+          state.vel.x = Math.cos(angle) * speed * 0.5;
+          state.vel.y = Math.sin(angle) * speed * 0.5;
+        }
+      }
+    }
+    draw();
+    state.animId = requestAnimationFrame(tick);
+  }
+
+  function posFromEvent(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+
+  function onDown(e) {
+    if (state.holed) return;
+    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    if (moving) return; // can't putt while ball is still rolling
+    var p = posFromEvent(e);
+    if (Math.hypot(p.x - state.ball.x, p.y - state.ball.y) < 40) {
+      state.dragging = true;
+      state.dragStart = p;
+      e.preventDefault();
+    }
+  }
+  function onMove(e) {
+    if (!state.dragging) return;
+    state.dragStart = posFromEvent(e);
+    e.preventDefault();
+  }
+  function onUp(e) {
+    if (!state.dragging) return;
+    state.dragging = false;
+    var dx = state.dragStart.x - state.ball.x;
+    var dy = state.dragStart.y - state.ball.y;
+    var dist = Math.min(Math.hypot(dx, dy), 90); // cap max power
+    if (dist > 6) {
+      var power = dist / 90;
+      var norm = Math.hypot(dx, dy) || 1;
+      state.vel.x = (dx / norm) * power * 9;
+      state.vel.y = (dy / norm) * power * 9;
+      state.strokes++;
+      playPuttSound(power);
+      updateStats();
+    }
+    state.dragStart = null;
+  }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onUp);
+
+  state._listeners = { onDown: onDown, onMove: onMove, onUp: onUp, canvas: canvas };
+  updateStats();
+  tick();
+}
+
+function stopPuttGame() {
+  if (!puttGame) return;
+  if (puttGame.animId) cancelAnimationFrame(puttGame.animId);
+  if (puttGame._listeners) {
+    var l = puttGame._listeners;
+    l.canvas.removeEventListener('mousedown', l.onDown);
+    l.canvas.removeEventListener('mousemove', l.onMove);
+    window.removeEventListener('mouseup', l.onUp);
+    l.canvas.removeEventListener('touchstart', l.onDown);
+    l.canvas.removeEventListener('touchmove', l.onMove);
+    l.canvas.removeEventListener('touchend', l.onUp);
+  }
+  if (puttGame.audioCtx) { try { puttGame.audioCtx.close(); } catch (e) {} }
+  puttGame = null;
+}
+
+/* === PUTTING CHALLENGE (group leaderboard, on the trip's Group tab) === */
+var puttChallenge = null;
+
+// Simple seeded RNG so every member of a given trip gets the exact same
+// hole position and break — otherwise "lowest strokes wins" wouldn't be fair.
+function seededRandom(seedStr) {
+  var h = 1779033703 ^ seedStr.length;
+  for (var i = 0; i < seedStr.length; i++) {
+    h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822519);
+    h = Math.imul(h ^ (h >>> 13), 3266489917);
+    h = (h ^= h >>> 16) >>> 0;
+    return h / 4294967296;
+  };
+}
+
+async function initPuttChallenge(tripId) {
+  var upgradePrompt = document.getElementById('pc-upgrade-prompt');
+  var gameWrap = document.getElementById('pc-game-wrap');
+  if (!upgradePrompt || !gameWrap) return;
+  if (!tripId || !isSociety()) {
+    upgradePrompt.style.display = 'block';
+    gameWrap.style.display = 'none';
+    return;
+  }
+  upgradePrompt.style.display = 'none';
+  gameWrap.style.display = 'grid';
+  runPuttChallenge(tripId);
+  await refreshPuttLeaderboard(tripId);
+}
+
+function restartPuttChallenge() {
+  if (puttChallenge && puttChallenge.tripId) runPuttChallenge(puttChallenge.tripId);
+}
+
+function runPuttChallenge(tripId) {
+  if (puttChallenge) { try { puttChallenge.stop(); } catch (e) {} }
+  var canvas = document.getElementById('pc-canvas');
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var rng = seededRandom(String(tripId)); // same hole/break for every member
+
+  var state = {
+    tripId: tripId,
+    ball: { x: W / 2, y: H - 40 },
+    vel: { x: 0, y: 0 },
+    hole: {
+      x: 50 + rng() * (W - 100),
+      y: 60,
+      r: 9
+    },
+    brk: (rng() < 0.5 ? -1 : 1) * (0.007 + rng() * 0.011),
+    dragging: false,
+    dragStart: null,
+    strokes: 0,
+    holed: false,
+    animId: null,
+    audioCtx: null
+  };
+  puttChallenge = state;
+  state.stop = function () { stopChallenge(state); };
+
+  function getAudioCtx() {
+    if (!state.audioCtx) {
+      try { state.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    }
+    return state.audioCtx;
+  }
+  function playPuttSound(strength) {
+    var ac = getAudioCtx(); if (!ac) return;
+    var osc = ac.createOscillator(), gain = ac.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180 + strength * 60, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(90, ac.currentTime + 0.09);
+    gain.gain.setValueAtTime(Math.min(0.25, 0.08 + strength * 0.02), ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime + 0.13);
+  }
+  function playHoledSound() {
+    var ac = getAudioCtx(); if (!ac) return;
+    [523, 659, 784].forEach(function (freq, i) {
+      var osc = ac.createOscillator(), gain = ac.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      var t = ac.currentTime + i * 0.09;
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.start(t); osc.stop(t + 0.32);
+    });
+  }
+  function playLipOutSound() {
+    var ac = getAudioCtx(); if (!ac) return;
+    var osc = ac.createOscillator(), gain = ac.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(300, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ac.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.1, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.1);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime + 0.1);
+  }
+
+  function updateStats() {
+    var s = document.getElementById('pc-stat-strokes');
+    var h = document.getElementById('pc-stat-holed');
+    if (s) s.textContent = 'Strokes: ' + state.strokes;
+    if (h) h.textContent = state.holed ? '\u2b50 Holed out!' : '';
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#2d6a3e'; ctx.fillRect(0, 0, W, H);
+    for (var i = 0; i < 30; i++) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.015 + (i % 3) * 0.005) + ')';
+      ctx.fillRect((i * 53) % W, (i * 97) % H, 2, 2);
+    }
+    ctx.beginPath(); ctx.arc(state.hole.x, state.hole.y, state.hole.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#0a1a0f'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(state.hole.x, state.hole.y); ctx.lineTo(state.hole.x, state.hole.y - 30); ctx.stroke();
+    ctx.fillStyle = '#c9a84c';
+    ctx.beginPath();
+    ctx.moveTo(state.hole.x, state.hole.y - 30);
+    ctx.lineTo(state.hole.x + 12, state.hole.y - 25);
+    ctx.lineTo(state.hole.x, state.hole.y - 20);
+    ctx.closePath(); ctx.fill();
+    if (state.dragging && state.dragStart) {
+      var dx = state.dragStart.x - state.ball.x, dy = state.dragStart.y - state.ball.y;
+      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(state.ball.x, state.ball.y); ctx.lineTo(state.ball.x - dx, state.ball.y - dy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  function tick() {
+    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    if (moving && !state.holed) {
+      state.vel.x *= 0.985; state.vel.y *= 0.985;
+      state.vel.x += state.brk * (1 - Math.min(1, (Math.abs(state.vel.x) + Math.abs(state.vel.y)) / 8));
+      state.ball.x += state.vel.x; state.ball.y += state.vel.y;
+      if (state.ball.x < 8) { state.ball.x = 8; state.vel.x *= -0.6; }
+      if (state.ball.x > W - 8) { state.ball.x = W - 8; state.vel.x *= -0.6; }
+      if (state.ball.y > H - 10) { state.ball.y = H - 10; state.vel.y *= -0.6; }
+      if (state.ball.y < 8) { state.ball.y = 8; state.vel.y *= -0.6; }
+      var d = Math.hypot(state.ball.x - state.hole.x, state.ball.y - state.hole.y);
+      var speed = Math.hypot(state.vel.x, state.vel.y);
+      if (d < state.hole.r + 5) {
+        if (speed < 2.2) {
+          state.holed = true; state.vel.x = 0; state.vel.y = 0;
+          state.ball.x = state.hole.x; state.ball.y = state.hole.y;
+          playHoledSound(); updateStats();
+          submitPuttScore(state.tripId, state.strokes);
+        } else {
+          playLipOutSound();
+          var angle = Math.atan2(state.ball.y - state.hole.y, state.ball.x - state.hole.x);
+          state.vel.x = Math.cos(angle) * speed * 0.5;
+          state.vel.y = Math.sin(angle) * speed * 0.5;
+        }
+      }
+    }
+    draw();
+    state.animId = requestAnimationFrame(tick);
+  }
+
+  function posFromEvent(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+  function onDown(e) {
+    if (state.holed) return;
+    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    if (moving) return;
+    var p = posFromEvent(e);
+    if (Math.hypot(p.x - state.ball.x, p.y - state.ball.y) < 40) {
+      state.dragging = true; state.dragStart = p; e.preventDefault();
+    }
+  }
+  function onMove(e) {
+    if (!state.dragging) return;
+    state.dragStart = posFromEvent(e); e.preventDefault();
+  }
+  function onUp() {
+    if (!state.dragging) return;
+    state.dragging = false;
+    var dx = state.dragStart.x - state.ball.x, dy = state.dragStart.y - state.ball.y;
+    var dist = Math.min(Math.hypot(dx, dy), 90);
+    if (dist > 6) {
+      var power = dist / 90, norm = Math.hypot(dx, dy) || 1;
+      state.vel.x = (dx / norm) * power * 9;
+      state.vel.y = (dy / norm) * power * 9;
+      state.strokes++;
+      playPuttSound(power);
+      updateStats();
+    }
+    state.dragStart = null;
+  }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onUp);
+  state._listeners = { onDown: onDown, onMove: onMove, onUp: onUp, canvas: canvas };
+
+  updateStats();
+  tick();
+}
+
+function stopChallenge(state) {
+  if (state.animId) cancelAnimationFrame(state.animId);
+  if (state._listeners) {
+    var l = state._listeners;
+    l.canvas.removeEventListener('mousedown', l.onDown);
+    l.canvas.removeEventListener('mousemove', l.onMove);
+    window.removeEventListener('mouseup', l.onUp);
+    l.canvas.removeEventListener('touchstart', l.onDown);
+    l.canvas.removeEventListener('touchmove', l.onMove);
+    l.canvas.removeEventListener('touchend', l.onUp);
+  }
+  if (state.audioCtx) { try { state.audioCtx.close(); } catch (e) {} }
+}
+
+async function submitPuttScore(tripId, strokes) {
+  if (!currentUser) return;
+  try {
+    var existing = await sbClient.from('putt_scores').select('best_strokes')
+      .eq('trip_request_id', tripId).eq('user_id', currentUser.id).single();
+    if (existing.data && existing.data.best_strokes <= strokes) {
+      // Existing score is already as good or better — nothing to update
+      await refreshPuttLeaderboard(tripId);
+      return;
+    }
+    await sbClient.from('putt_scores').upsert({
+      trip_request_id: tripId,
+      user_id: currentUser.id,
+      display_name: (currentUser.display_name || (currentUser.email || '').split('@')[0]),
+      best_strokes: strokes,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'trip_request_id,user_id' });
+    showToast(existing.data ? 'New personal best — ' + strokes + ' strokes!' : 'Score submitted — ' + strokes + ' strokes!');
+  } catch (e) {
+    console.warn('submitPuttScore error:', e);
+  }
+  await refreshPuttLeaderboard(tripId);
+}
+
+async function refreshPuttLeaderboard(tripId) {
+  var el = document.getElementById('pc-leaderboard');
+  if (!el) return;
+  try {
+    var r = await sbClient.from('putt_scores').select('user_id,display_name,best_strokes')
+      .eq('trip_request_id', tripId).order('best_strokes', { ascending: true });
+    var rows = (r.data || []);
+    if (!rows.length) { el.innerHTML = '<p class="fs-sm text-muted">No scores yet — be the first to hole out.</p>'; return; }
+    var medals = ['&#129351;', '&#129352;', '&#129353;'];
+    el.innerHTML = rows.map(function (row, i) {
+      var isMe = currentUser && row.user_id === currentUser.id;
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;' +
+        (i < rows.length - 1 ? 'border-bottom:1px solid var(--border);' : '') +
+        (isMe ? 'font-weight:600;' : '') + '">' +
+        '<span>' + (medals[i] || (i + 1) + '.') + ' ' + (row.display_name || 'Golfer') + (isMe ? ' (you)' : '') + '</span>' +
+        '<span style="color:var(--gold);font-weight:600">' + row.best_strokes + '</span>' +
+      '</div>';
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '<p class="fs-sm text-muted">Could not load leaderboard.</p>';
+  }
+}
+
 /* === PDF EXPORT === */
 function exportToPDF() {
   exportPDF(currentPanelIdx || 0);
@@ -5624,6 +6206,12 @@ async function openBillingPortal() {
 function switchTripTab(tab) {
   document.getElementById('td-panel-itinerary').style.display = tab === 'itinerary' ? 'block' : 'none';
   document.getElementById('td-panel-group').style.display = tab === 'group' ? 'block' : 'none';
+  if (tab === 'group' && activeTripId) {
+    try { initPuttChallenge(activeTripId); } catch (e) { console.warn('Putting challenge failed to init:', e); }
+  } else if (puttChallenge) {
+    try { stopChallenge(puttChallenge); } catch (e) {}
+    puttChallenge = null;
+  }
   if (tab === 'itinerary') {
     // Trigger resize on any already-initialised maps when itinerary tab becomes visible
     requestAnimationFrame(function() {
