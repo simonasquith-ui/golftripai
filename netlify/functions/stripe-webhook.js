@@ -34,7 +34,7 @@ exports.handler = async (event) => {
       const subscriptionId = session.subscription
 
       if (userId && plan) {
-        await supabase.from('user_plans').upsert({
+        const upsertResult = await supabase.from('user_plans').upsert({
           user_id: userId,
           plan: plan,
           stripe_customer_id: customerId,
@@ -43,6 +43,10 @@ exports.handler = async (event) => {
           started_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
+        if (upsertResult.error) {
+          console.error('Supabase upsert FAILED:', JSON.stringify(upsertResult.error))
+          return { statusCode: 500, body: 'Failed to write plan upgrade to database' }
+        }
         console.log('Plan upgraded:', userId, plan)
       }
     }
@@ -51,11 +55,14 @@ exports.handler = async (event) => {
       const sub = stripeEvent.data.object
       const userId = sub.metadata && sub.metadata.userId
       if (userId) {
-        await supabase.from('user_plans').update({
+        const cancelResult = await supabase.from('user_plans').update({
           plan: 'free',
           status: 'cancelled',
           updated_at: new Date().toISOString()
         }).eq('user_id', userId)
+        if (cancelResult.error) {
+          console.error('Supabase cancel-update FAILED:', JSON.stringify(cancelResult.error))
+        }
         console.log('Plan cancelled:', userId)
       }
     }
