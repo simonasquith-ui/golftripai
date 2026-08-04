@@ -7150,41 +7150,40 @@ async function generateSeasonalContent(season) {
     autumn: ['Portugal (Algarve)', 'Spain (Costa del Sol)', 'England (Northumberland)', 'Turkey (Antalya)', 'Ireland'],
     winter: ['Dubai', 'Morocco', 'Portugal (Algarve)', 'Spain (Costa del Sol)', 'Turkey (Antalya)']
   };
+  var destNames = destinations[season].slice(0, 5);
 
-  var dests = destinations[season].slice(0, 5).join(', ');
+  function buildPrompt(destName) {
+    return 'Generate a seasonal golf destination recommendation for UK golfers travelling to ' + destName + ' in ' + meta.label + ' (' + meta.months + '). Provide: why it is great this season specifically; 2 real golf courses with green fee estimates in GBP; 1 recommended hotel; typical budget per person for 5 nights from London (a from/to range); one seasonal insider tip. Respond with valid JSON only, this exact shape: ' +
+      '{"name":"' + destName + '","tagline":"[one line why great this season]","weather":"[temp]","flight_time":"[time]","best_for":"[golfer type]","insider_tip":"[tip]","budget_from":000,"budget_to":000,' +
+      '"courses":[{"name":"[real course]","green_fee":00,"why":"[sentence]"},{"name":"[real course]","green_fee":00,"why":"[sentence]"}],' +
+      '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
+      '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(destName) + '"}}';
+  }
 
-  var prompt = 'Generate seasonal golf destination recommendations for UK golfers travelling in ' + meta.label + ' (' + meta.months + '). Create recommendations for these 5 destinations: ' + dests + '. For each destination provide: why it is great this season specifically; 2 real golf courses with green fee estimates in GBP; 1 recommended hotel; typical budget per person for 5 nights from London; one seasonal insider tip. Respond with valid JSON only: ' +
-    '{"season":"' + season + '","destinations":[' +
-    '{"name":"Portugal (Algarve)","tagline":"[one line why great this season]","weather":"[temp]","flight_time":"2h 30m","best_for":"[golfer type]","insider_tip":"[tip]","budget_from":850,"budget_to":1400,' +
-    '"courses":[{"name":"[real course]","green_fee":120,"why":"[sentence]"},{"name":"[real course]","green_fee":85,"why":"[sentence]"}],' +
-    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=Algarve"}},' +
-    '{"name":"Spain (Costa del Sol)","tagline":"[tagline]","weather":"[temp]","flight_time":"2h 30m","best_for":"[type]","insider_tip":"[tip]","budget_from":750,"budget_to":1200,' +
-    '"courses":[{"name":"[real course]","green_fee":95,"why":"[sentence]"},{"name":"[real course]","green_fee":65,"why":"[sentence]"}],' +
-    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=Costa+del+Sol"}},' +
-    '{"name":"[dest 3]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":700,"budget_to":1100,' +
-    '"courses":[{"name":"[real course]","green_fee":80,"why":"[sentence]"},{"name":"[real course]","green_fee":60,"why":"[sentence]"}],' +
-    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[2] || '') + '"}},' +
-    '{"name":"[dest 4]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":900,"budget_to":1500,' +
-    '"courses":[{"name":"[real course]","green_fee":100,"why":"[sentence]"},{"name":"[real course]","green_fee":70,"why":"[sentence]"}],' +
-    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[3] || '') + '"}},' +
-    '{"name":"[dest 5]","tagline":"[tagline]","weather":"[temp]","flight_time":"[time]","best_for":"[type]","insider_tip":"[tip]","budget_from":1200,"budget_to":2000,' +
-    '"courses":[{"name":"[real course]","green_fee":150,"why":"[sentence]"},{"name":"[real course]","green_fee":110,"why":"[sentence]"}],' +
-    '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-    '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(dests.split(', ')[4] || '') + '"}}' +
-    ']}';
   try {
-    var res = await fetch('/.netlify/functions/generate-trip', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt, max_tokens: 4500 })
-    });
-    if (!res.ok) throw new Error('Server error ' + res.status);
-    var json = await res.json();
-    var parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result || json;
+    // 5 small, focused calls in parallel — much less likely to be truncated
+    // or time out than one giant call, and a single destination failing
+    // doesn't take the whole page down with it.
+    var results = await Promise.all(destNames.map(function(destName) {
+      return fetch('/.netlify/functions/generate-trip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: buildPrompt(destName), max_tokens: 1200 })
+      }).then(function(res) {
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        return res.json();
+      }).then(function(json) {
+        return typeof json.result === 'string' ? JSON.parse(json.result) : (json.result || json);
+      }).catch(function(e) {
+        console.warn('Seasonal destination failed:', destName, e.message);
+        return null;
+      });
+    }));
+
+    var destinationsData = results.filter(Boolean);
+    if (!destinationsData.length) throw new Error('All destinations failed to generate');
+
+    var parsed = { season: season, destinations: destinationsData };
 
     // Cache in Supabase (silent fail if table doesn't exist yet)
     sbClient.from('seasonal_recommendations').upsert({
