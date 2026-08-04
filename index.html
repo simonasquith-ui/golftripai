@@ -4833,6 +4833,12 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     html += '</div>';
   }
 
+  // Things To Do (Viator) — sits right after Restaurants & Bars, loaded async below
+  html += '<div class="section-heading" data-icon="&#127958;" id="activities-heading-' + idx + '">Things To Do</div>' +
+    '<div id="activities-' + idx + '" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">' +
+      '<p class="fs-sm text-muted" style="grid-column:1/-1">Loading nearby activities…</p>' +
+    '</div>';
+
   if (panel.itinerary && panel.itinerary.length) {
     html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div><div class="itinerary">';
     panel.itinerary.forEach(function(day) {
@@ -4860,9 +4866,6 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Book This Trip — below cost breakdown
   html += buildBTT(panel, idx, qData);
 
-  // Things To Do (Viator) — loaded async below
-  html += '<div id="activities-' + idx + '" class="activities-section" style="margin-top:24px"></div>';
-
   // PDF Export bar — bottom
   html += '<div class="pdf-export-bar">' +
     '<div>' +
@@ -4880,33 +4883,32 @@ function buildPanel(panel, idx, qData, mapPrefix) {
 // === THINGS TO DO (VIATOR) ===
 async function loadActivities(destination, idx) {
   var container = document.getElementById('activities-' + idx);
+  var heading = document.getElementById('activities-heading-' + idx);
   if (!container || !destination) return;
   try {
     var r = await fetch('/.netlify/functions/get-activities?destination=' + encodeURIComponent(destination));
-    if (!r.ok) return;
+    if (!r.ok) { container.innerHTML = ''; if (heading) heading.style.display = 'none'; return; }
     var data = await r.json();
     var activities = data.activities || [];
-    if (!activities.length) return; // fail soft — just don't show the section
+    if (!activities.length) { container.innerHTML = ''; if (heading) heading.style.display = 'none'; return; }
 
-    var html = '<div class="activities-header"><h3>&#127958; Things To Do</h3>' +
-      '<p class="btt-sub">For rest days or non-golfers in the group — activities near ' + (destination.split(',')[0]) + '.</p></div>' +
-      '<div class="activities-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">';
-
+    var html = '';
     activities.forEach(function (a) {
-      html += '<a href="' + a.url + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;display:block">' +
-        (a.image ? '<img src="' + a.image + '" alt="' + (a.title || '').replace(/"/g, '') + '" style="width:100%;height:120px;object-fit:cover;display:block">' : '') +
-        '<div style="padding:12px">' +
-          '<div style="font-size:.88rem;font-weight:600;color:var(--green);margin-bottom:4px;line-height:1.3">' + (a.title || 'Activity') + '</div>' +
-          (a.rating ? '<div style="font-size:.78rem;color:var(--gold)">&#9733; ' + a.rating + '</div>' : '') +
-          (a.price ? '<div style="font-size:.82rem;color:var(--text-muted);margin-top:4px">From &#163;' + Math.round(a.price) + '</div>' : '') +
+      html += '<div class="card" style="padding:16px">' +
+        (a.image ? '<img src="' + a.image + '" alt="' + (a.title || '').replace(/"/g, '') + '" style="width:100%;height:130px;object-fit:cover;border-radius:8px;margin-bottom:10px;display:block">' : '') +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+          '<h4 style="color:var(--green);font-size:.95rem;margin:0">' + (a.title || 'Activity') + '</h4>' +
+          (a.rating ? '<span style="color:#f59e0b;font-size:.8rem;white-space:nowrap;font-weight:600">&#9733; ' + a.rating + '</span>' : '') +
         '</div>' +
-      '</a>';
+        (a.price ? '<div style="color:var(--gold);font-weight:600;margin-top:6px;font-size:.9rem">From &#163;' + Math.round(a.price) + '</div>' : '') +
+        '<div style="margin-top:10px">' +
+          '<a href="' + a.url + '" target="_blank" rel="noopener" class="card-link" style="display:inline-flex;align-items:center;gap:5px;background:var(--sand)">&#127958; View on Viator</a>' +
+        '</div>' +
+      '</div>';
     });
-
-    html += '</div>';
     container.innerHTML = html;
   } catch (e) {
-    // fail soft — activities are a nice-to-have, never block the results page
+    container.innerHTML = ''; if (heading) heading.style.display = 'none'; // fail soft — activities are a nice-to-have, never block the results page
   }
 }
 
