@@ -22,7 +22,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'OPENAI_API_KEY not configured' })
       }
     }
-    const { prompt, tier, part } = JSON.parse(event.body)
+    const { prompt, tier, part, max_tokens } = JSON.parse(event.body)
     if (!prompt) {
       return {
         statusCode: 400,
@@ -50,7 +50,7 @@ exports.handler = async (event) => {
           }
         ],
         temperature: 0.5,
-        max_tokens: 3000,
+        max_tokens: max_tokens || 3000,
         response_format: { type: 'json_object' }
       })
     })
