@@ -2433,7 +2433,23 @@ function buildAirportOptions() {
 }
 
 /* === PAGE ROUTING === */
-function showPage(name) {
+// Routes that get a real URL + back-button history entry. Everything else
+// (My Trips, Plan a Trip, trip detail, etc.) stays as in-page JS switching
+// since those are logged-in/tool views with no public SEO value.
+var ROUTED_PAGES = {
+  landing: { path: '/', title: 'GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds', desc: 'Plan the perfect golf holiday in 60 seconds. AI-powered itineraries with courses, hotels and flights compared across Budget, Mid-Range and Luxury. Built for UK golf societies.' },
+  seasonal: { path: '/destinations', title: 'Best Golf Destinations by Season | GolfTrip', desc: 'Hand-picked golf destinations for every season — courses, hotels and typical budgets for UK golfers, updated throughout the year.' }
+};
+
+function setPageMeta(name) {
+  var route = ROUTED_PAGES[name];
+  if (!route) return;
+  document.title = route.title;
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', route.desc);
+}
+
+function showPage(name, skipHistory) {
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   var el = document.getElementById('page-' + name);
   if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -2444,7 +2460,30 @@ function showPage(name) {
   }
   if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+
+  // Give routed pages a real URL and working back button
+  var route = ROUTED_PAGES[name];
+  if (route) {
+    setPageMeta(name);
+    if (!skipHistory && window.location.pathname !== route.path) {
+      history.pushState({ page: name }, '', route.path);
+    }
+  }
 }
+
+// Back/forward button support for the routed pages
+window.addEventListener('popstate', function(e) {
+  var name = (e.state && e.state.page) || pageNameFromPath(window.location.pathname);
+  showPage(name, true);
+});
+
+function pageNameFromPath(path) {
+  for (var key in ROUTED_PAGES) {
+    if (ROUTED_PAGES[key].path === path) return key;
+  }
+  return 'landing';
+}
+
 
 /* === TOAST === */
 function showToast(msg, isError) {
@@ -8116,6 +8155,15 @@ sbClient.auth.getSession().then(async function(r) {
     return;
   }
   if (params.get('plan') === 'true' || params.get('plan') === '1') { showPage('questionnaire'); }
+
+  // If the URL is already /destinations (direct visit, refresh, or a shared
+  // link), show that page instead of defaulting to the homepage.
+  var initialRouteName = pageNameFromPath(window.location.pathname);
+  if (initialRouteName !== 'landing') {
+    showPage(initialRouteName, true);
+  } else {
+    setPageMeta('landing');
+  }
 
   if (currentUser && pendingJoinId) {
     processJoin(pendingJoinId, currentUser);
