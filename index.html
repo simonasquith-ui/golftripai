@@ -7221,9 +7221,9 @@ function renderSeasonalContent(data, season, generatedAt) {
 
   destinations.forEach(function(dest) {
     var destEnc = encodeURIComponent(dest.name || '');
-    var flightsUrl = 'https://www.google.com/travel/flights?q=' + encodeURIComponent('flights to ' + (destName||'') + ' from UK');
+    var flightsUrl = 'https://www.google.com/travel/flights?q=' + encodeURIComponent('flights to ' + (dest.name || '') + ' from UK');
     var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
-    var golfnowUrl = buildDestTeeTimes(destName);
+    var golfnowUrl = buildDestTeeTimes(dest.name || '');
     var destNameSafe = (dest.name||'').replace(/'/g, '');
 
     html += '<div class="dest-recommendation">' +
