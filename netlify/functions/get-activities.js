@@ -45,7 +45,7 @@ exports.handler = async (event) => {
     // simple place name rather than a long descriptive string.
     const searchTerm = destination.split(',')[0].trim();
 
-    const viatorRes = await fetch('https://api.viator.com/partner/search/freetext', {
+    const viatorRes = await fetch('https://api.sandbox.viator.com/partner/search/freetext', {
       method: 'POST',
       headers: {
         'exp-api-key': apiKey,
