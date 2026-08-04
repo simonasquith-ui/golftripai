@@ -4986,6 +4986,39 @@ function buildBTT(panel, idx, qData) {
 /* === PUTTING MINI-GAME (shown during trip generation) === */
 var puttGame = null;
 
+// Shared background renderer — gives both putting games a proper mini-golf
+// course look (wooden rail border + mowed-stripe green) instead of a flat block of colour.
+function drawMiniGolfBackground(ctx, W, H) {
+  var border = 10;
+  // Outer rail/frame — mini-golf wooden boundary
+  ctx.fillStyle = '#8a5a34';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#a06f42';
+  ctx.fillRect(2, 2, W - 4, H - 4);
+  // Inner green with alternating mowing stripes
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(border, border, W - border * 2, H - border * 2);
+  ctx.clip();
+  var stripeH = 26;
+  for (var y = -stripeH; y < H + stripeH; y += stripeH) {
+    var stripeIdx = Math.floor((y + stripeH) / stripeH);
+    ctx.fillStyle = stripeIdx % 2 === 0 ? '#2d6a3e' : '#296035';
+    ctx.fillRect(0, y, W, stripeH);
+  }
+  // Subtle vignette for depth
+  var grad = ctx.createRadialGradient(W / 2, H / 2, H / 3, W / 2, H / 2, H);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,.18)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+  // Inner rail edge highlight
+  ctx.strokeStyle = 'rgba(0,0,0,.25)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(border, border, W - border * 2, H - border * 2);
+}
+
 function startPuttGame() {
   stopPuttGame(); // clean up any previous instance first
   var canvas = document.getElementById('putt-canvas');
@@ -4996,7 +5029,7 @@ function startPuttGame() {
   var state = {
     ball: { x: W / 2, y: H - 40 },
     vel: { x: 0, y: 0 },
-    hole: { x: 0, y: 70, r: 9 },
+    hole: { x: 0, y: 70, r: 15 },
     break: 0,          // constant lateral force simulating a sloped green
     dragging: false,
     dragStart: null,
@@ -5083,13 +5116,7 @@ function startPuttGame() {
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    // Green background with a subtle grain pattern for texture
-    ctx.fillStyle = '#2d6a3e';
-    ctx.fillRect(0, 0, W, H);
-    for (var i = 0; i < 40; i++) {
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.015 + (i % 3) * 0.005) + ')';
-      ctx.fillRect((i * 53) % W, (i * 97) % H, 2, 2);
-    }
+    drawMiniGolfBackground(ctx, W, H);
     // Hole
     ctx.beginPath();
     ctx.arc(state.hole.x, state.hole.y, state.hole.r, 0, Math.PI * 2);
@@ -5148,15 +5175,19 @@ function startPuttGame() {
       ctx.closePath();
       ctx.fill();
     }
-    // Ball
-    ctx.beginPath();
-    ctx.arc(state.ball.x, state.ball.y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+    // Ball — shrinks away once holed, rather than just sitting on top of the hole
+    var ballR = state.holed ? Math.max(0, 6 * (1 - state.holeAnim / 12)) : 6;
+    if (ballR > 0.3) {
+      ctx.beginPath();
+      ctx.arc(state.ball.x, state.ball.y, ballR, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+    }
   }
 
   function tick() {
+    if (state.holed) state.holeAnim = (state.holeAnim || 0) + 1;
     var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
     if (moving && !state.holed) {
       // Friction
@@ -5181,6 +5212,7 @@ function startPuttGame() {
       if (d < state.hole.r + 5) {
         if (speed < 2.2) {
           state.holed = true;
+          state.holeAnim = 0;
           state.vel.x = 0; state.vel.y = 0;
           state.ball.x = state.hole.x; state.ball.y = state.hole.y;
           playHoledSound();
@@ -5250,7 +5282,7 @@ function startPuttGame() {
   }
 
   canvas.addEventListener('mousedown', onDown);
-  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
   canvas.addEventListener('touchstart', onDown, { passive: false });
   canvas.addEventListener('touchmove', onMove, { passive: false });
@@ -5267,7 +5299,7 @@ function stopPuttGame() {
   if (puttGame._listeners) {
     var l = puttGame._listeners;
     l.canvas.removeEventListener('mousedown', l.onDown);
-    l.canvas.removeEventListener('mousemove', l.onMove);
+    window.removeEventListener('mousemove', l.onMove);
     window.removeEventListener('mouseup', l.onUp);
     l.canvas.removeEventListener('touchstart', l.onDown);
     l.canvas.removeEventListener('touchmove', l.onMove);
@@ -5330,7 +5362,7 @@ function runPuttChallenge(tripId) {
     hole: {
       x: 50 + rng() * (W - 100),
       y: 60,
-      r: 9
+      r: 15
     },
     brk: (rng() < 0.5 ? -1 : 1) * (0.007 + rng() * 0.011),
     dragging: false,
@@ -5394,11 +5426,7 @@ function runPuttChallenge(tripId) {
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#2d6a3e'; ctx.fillRect(0, 0, W, H);
-    for (var i = 0; i < 30; i++) {
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.015 + (i % 3) * 0.005) + ')';
-      ctx.fillRect((i * 53) % W, (i * 97) % H, 2, 2);
-    }
+    drawMiniGolfBackground(ctx, W, H);
     ctx.beginPath(); ctx.arc(state.hole.x, state.hole.y, state.hole.r, 0, Math.PI * 2);
     ctx.fillStyle = '#0a1a0f'; ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
@@ -5432,12 +5460,16 @@ function runPuttChallenge(tripId) {
       ctx.lineTo(tipX - Math.cos(aAngle + 0.4) * 10, tipY - Math.sin(aAngle + 0.4) * 10);
       ctx.closePath(); ctx.fill();
     }
-    ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff'; ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+    var ballR = state.holed ? Math.max(0, 6 * (1 - state.holeAnim / 12)) : 6;
+    if (ballR > 0.3) {
+      ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, ballR, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.stroke();
+    }
   }
 
   function tick() {
+    if (state.holed) state.holeAnim = (state.holeAnim || 0) + 1;
     var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
     if (moving && !state.holed) {
       state.vel.x *= 0.985; state.vel.y *= 0.985;
@@ -5451,7 +5483,7 @@ function runPuttChallenge(tripId) {
       var speed = Math.hypot(state.vel.x, state.vel.y);
       if (d < state.hole.r + 5) {
         if (speed < 2.2) {
-          state.holed = true; state.vel.x = 0; state.vel.y = 0;
+          state.holed = true; state.holeAnim = 0; state.vel.x = 0; state.vel.y = 0;
           state.ball.x = state.hole.x; state.ball.y = state.hole.y;
           playHoledSound(); updateStats();
           submitPuttScore(state.tripId, state.strokes);
@@ -5504,7 +5536,7 @@ function runPuttChallenge(tripId) {
   }
 
   canvas.addEventListener('mousedown', onDown);
-  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
   canvas.addEventListener('touchstart', onDown, { passive: false });
   canvas.addEventListener('touchmove', onMove, { passive: false });
@@ -5520,7 +5552,7 @@ function stopChallenge(state) {
   if (state._listeners) {
     var l = state._listeners;
     l.canvas.removeEventListener('mousedown', l.onDown);
-    l.canvas.removeEventListener('mousemove', l.onMove);
+    window.removeEventListener('mousemove', l.onMove);
     window.removeEventListener('mouseup', l.onUp);
     l.canvas.removeEventListener('touchstart', l.onDown);
     l.canvas.removeEventListener('touchmove', l.onMove);
