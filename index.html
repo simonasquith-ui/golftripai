@@ -7042,23 +7042,15 @@ async function startCheckout(plan) {
 }
 
 // Handle return from Stripe
-(function handlePaymentReturn() {
-  var params = new URLSearchParams(window.location.search);
-  var payment = params.get('payment');
-  var plan = params.get('plan');
-  if (payment === 'success') {
-    setTimeout(function() {
-      showToast('🎉 Welcome to GolfTrip ' + (plan === 'society' ? 'Society' : 'Pro') + '! Your account has been upgraded.');
-    }, 800);
-    // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
-  } else if (payment === 'cancelled') {
-    setTimeout(function() {
-      showToast('Payment cancelled — you can upgrade any time.');
-    }, 800);
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-})();
+var __paymentReturnParams = new URLSearchParams(window.location.search);
+var __paymentStatus = __paymentReturnParams.get('payment');
+var __paymentPlan = __paymentReturnParams.get('plan');
+if (__paymentStatus === 'success' || __paymentStatus === 'cancelled') {
+  window.history.replaceState({}, '', window.location.pathname);
+}
+if (__paymentStatus === 'cancelled') {
+  setTimeout(function() { showToast('Payment cancelled — you can upgrade any time.'); }, 800);
+}
 // ── END STRIPE PAYMENTS ───────────────────────────────────────
 
 sbClient.auth.getSession().then(async function(r) {
@@ -7066,6 +7058,20 @@ sbClient.auth.getSession().then(async function(r) {
   await loadUserPlan();
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); }
+
+  if (__paymentStatus === 'success') {
+    // Stripe's webhook writes the upgrade to Supabase asynchronously, so it may
+    // not have landed the instant we're redirected back — poll for a few
+    // seconds rather than trusting a single check.
+    for (var attempt = 0; attempt < 6 && !isPaid(); attempt++) {
+      await new Promise(function(res) { setTimeout(res, 1500); });
+      await loadUserPlan();
+    }
+    updateNav(currentUser);
+    showToast(isPaid()
+      ? '🎉 Welcome to GolfTrip ' + (__paymentPlan === 'society' ? 'Society' : 'Pro') + '! Your account has been upgraded.'
+      : "Payment received — your upgrade is still processing. Refresh in a moment if it doesn't appear.");
+  }
 
   // If there's a ?trip= param, load the trip — for logged-in users AND public viewers
   var params = new URLSearchParams(window.location.search);
@@ -7075,7 +7081,7 @@ sbClient.auth.getSession().then(async function(r) {
     await loadSharedTrip(sharedTripId, currentUser);
     return;
   }
-  if (params.get('plan') === '1') { showPage('questionnaire'); }
+  if (params.get('plan') === 'true' || params.get('plan') === '1') { showPage('questionnaire'); }
 
   if (currentUser && pendingJoinId) {
     processJoin(pendingJoinId, currentUser);
