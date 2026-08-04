@@ -591,7 +591,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       </div>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
-      <button id="nav-upgrade-btn" onclick="openPricingModal()" style="display:none;background:none;border:1.5px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:4px">&#11088; Upgrade</button>
+      <button id="nav-upgrade-btn" onclick="openPricingModal()" style="display:none;background:none;border:1.5px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:4px">Upgrade</button>
       <div id="nav-auth-btns" class="flex gap-8">
         <button class="btn btn-ghost btn-sm" onclick="openAuthModal('signin')">Sign In</button>
         <button class="btn btn-primary btn-sm" onclick="openAuthModal('signup')">Get Started</button>
@@ -1335,6 +1335,14 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
       <div>
         <div class="profile-card">
           <h3>Account Settings</h3>
+          <div class="form-group" style="display:flex;align-items:center;gap:16px">
+            <div id="profile-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:var(--green);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;flex-shrink:0;overflow:hidden">?</div>
+            <div>
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-block" for="profile-avatar-input">Change photo</label>
+              <input type="file" id="profile-avatar-input" accept="image/*" style="display:none" onchange="uploadProfileAvatar(this.files[0])">
+              <div class="fs-sm text-muted" id="profile-avatar-status" style="margin-top:4px"></div>
+            </div>
+          </div>
           <div class="form-group"><label>Full Name</label><input type="text" id="profile-name" placeholder="Your name"></div>
           <div class="form-group"><label>Home Airport</label>
             <select id="profile-airport"><option value="">Select airport</option><option>London Heathrow (LHR)</option><option>London Gatwick (LGW)</option><option>London Stansted (STN)</option><option>London Luton (LTN)</option><option>Manchester (MAN)</option><option>Birmingham (BHX)</option><option>Edinburgh (EDI)</option><option>Glasgow (GLA)</option><option>Bristol (BRS)</option><option>Leeds Bradford (LBA)</option><option>Newcastle (NCL)</option></select>
@@ -1356,7 +1364,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
           </div>
           <p id="profile-plan-desc" class="fs-sm text-muted" style="margin-bottom:16px">You're on the free plan — 1 trip generation, no saving or PDF export.</p>
           <button class="btn btn-primary" id="profile-upgrade-btn" style="width:100%;margin-bottom:8px" onclick="openPricingModal()">Upgrade Plan</button>
-          <button class="btn btn-ghost" id="profile-billing-btn" style="width:100%;display:none" onclick="openBillingPortal()">Manage Billing &amp; Cancel Subscription</button>
+          <button class="btn btn-ghost" id="profile-billing-btn" style="width:100%;display:none" onclick="openBillingPortal()">Manage Billing</button>
         </div>
       </div>
       <div>
@@ -1427,6 +1435,16 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
     </div>
 
     <div id="td-panel-group" style="display:none">
+
+      <!-- GROUP NAME -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="gp-section-head">&#127932; Group Name</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="group-name-input" placeholder="e.g. The Fairway Fellas" style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="saveGroupName()">Save</button>
+        </div>
+        <p class="fs-sm text-muted" style="margin-top:8px">Shows in your group chat and trip list for everyone on this trip.</p>
+      </div>
 
       <!-- CART + BOOKING PROGRESS — full width -->
       <div class="card" style="margin-bottom:20px">
@@ -1520,7 +1538,7 @@ footer{background:var(--green-dark);border-top:1px solid rgba(255,255,255,.08);p
         <!-- RIGHT: group chat -->
         <div>
           <div class="card" style="height:100%">
-            <div class="gp-section-head">&#128172; Group Chat</div>
+            <div class="gp-section-head" id="group-chat-heading">&#128172; Group Chat</div>
             <div class="gp-chat-wrap">
               <div class="gp-chat-messages" id="chat-messages"></div>
               <div class="gp-chat-input">
@@ -2516,6 +2534,19 @@ async function loadUserPlan() {
   } catch (e) { userPlan = 'free'; }
 }
 
+// Loads the current user's name + avatar so the nav, chat, and leaderboard
+// can all show the same identity consistently rather than a raw email/UUID.
+async function loadUserDisplayInfo() {
+  if (!currentUser) return;
+  try {
+    var r = await sbClient.from('users').select('name, avatar_url').eq('id', currentUser.id).single();
+    if (r.data) {
+      currentUser.display_name = r.data.name || null;
+      currentUser.avatar_url = r.data.avatar_url || null;
+    }
+  } catch (e) { /* fall back silently to email/initials */ }
+}
+
 function isPaid() { return userPlan === 'pro' || userPlan === 'society'; }
 function isSociety() { return userPlan === 'society'; }
 
@@ -2560,10 +2591,16 @@ function updateNav(user) {
   if (user) {
     authBtns.style.display = 'none'; navUser.style.display = 'flex'; myTrips.style.display = 'flex';
     var init = (user.email || '?').charAt(0).toUpperCase();
-    document.getElementById('nav-avatar').textContent = init;
-    document.getElementById('nav-username').textContent = (user.email || '').split('@')[0];
-    if (document.getElementById('nav-mobile-avatar')) document.getElementById('nav-mobile-avatar').textContent = init;
-    if (document.getElementById('nav-mobile-username')) document.getElementById('nav-mobile-username').textContent = (user.email || '').split('@')[0];
+    var displayName = user.display_name || (user.email || '').split('@')[0];
+    var avatarHtml = user.avatar_url
+      ? '<img src="' + user.avatar_url + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      : init;
+    var navAvatarEl = document.getElementById('nav-avatar');
+    if (navAvatarEl) navAvatarEl.innerHTML = avatarHtml;
+    document.getElementById('nav-username').textContent = displayName;
+    var mobileAvatarEl = document.getElementById('nav-mobile-avatar');
+    if (mobileAvatarEl) mobileAvatarEl.innerHTML = avatarHtml;
+    if (document.getElementById('nav-mobile-username')) document.getElementById('nav-mobile-username').textContent = displayName;
     if (mobileAuth) mobileAuth.style.display = 'none';
     if (mobileUser) mobileUser.style.display = 'block';
     if (mobileTrips) mobileTrips.style.display = 'block';
@@ -2838,6 +2875,7 @@ function stopNotifPolling() {
 sbClient.auth.onAuthStateChange(async function(event, session) {
   currentUser = session ? session.user : null;
   await loadUserPlan();
+  await loadUserDisplayInfo();
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); } else { stopNotifPolling(); }
   if (currentUser) {
@@ -5085,89 +5123,79 @@ function playGolfHoledSound(ac) {
   }
 }
 
-// Shared obstacle renderer — windmill, carousel or clown-face bumper,
-// same three types both games pick from so a "mini-golf" course actually
-// has something to putt around, not just an open green.
-function drawObstacle(ctx, obs, spinAngle) {
-  var x = obs.x, y = obs.y, r = obs.r;
-  if (obs.type === 'windmill') {
-    // Base tower
-    ctx.fillStyle = '#e8e2d5';
-    ctx.fillRect(x - r * 0.35, y - r * 0.2, r * 0.7, r * 1.3);
-    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1;
-    ctx.strokeRect(x - r * 0.35, y - r * 0.2, r * 0.7, r * 1.3);
-    // Red roof cap
+// Shared obstacle renderer — a barrier spanning the green with a gap you
+// must putt through (the clown's mouth, a windmill archway, a carousel
+// entrance) rather than a bump you just deflect off.
+function drawObstacle(ctx, obs, spinAngle, W) {
+  var y = obs.y, h = obs.h, gapX = obs.gapX, gapW = obs.gapW;
+  var leftW = gapX - gapW / 2;
+  var rightX = gapX + gapW / 2;
+  var rightW = W - rightX;
+
+  if (obs.type === 'clown') {
+    var faceH = h * 2.4;
+    var faceTop = y - faceH / 2;
+    ctx.fillStyle = '#f7d9b6';
+    ctx.fillRect(0, faceTop, W, faceH);
+    ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1;
+    ctx.strokeRect(0, faceTop, W, faceH);
+    // Hair band
+    ctx.fillStyle = '#e05d44';
+    ctx.fillRect(0, faceTop, W, faceH * 0.22);
+    // Eyes
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(W * 0.3, faceTop + faceH * 0.45, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W * 0.7, faceTop + faceH * 0.45, 6, 0, Math.PI * 2); ctx.fill();
+    // Nose, above the mouth
+    ctx.beginPath(); ctx.arc(gapX, faceTop + faceH * 0.6, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#e05d44'; ctx.fill();
+    // The mouth — this dark opening IS the gap you putt through
     ctx.beginPath();
-    ctx.moveTo(x - r * 0.42, y - r * 0.2);
-    ctx.lineTo(x + r * 0.42, y - r * 0.2);
-    ctx.lineTo(x, y - r * 0.65);
-    ctx.closePath();
-    ctx.fillStyle = '#c0392b'; ctx.fill();
-    // Spinning blades
+    ctx.ellipse(gapX, y, gapW / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#3a0d0d'; ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = '#a5312a'; ctx.stroke();
+  } else if (obs.type === 'windmill') {
+    ctx.fillStyle = '#e8e2d5';
+    ctx.fillRect(0, y - h / 2, leftW, h);
+    ctx.fillRect(rightX, y - h / 2, rightW, h);
+    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1;
+    ctx.strokeRect(0, y - h / 2, leftW, h);
+    ctx.strokeRect(rightX, y - h / 2, rightW, h);
+    // Archway posts framing the gap
+    ctx.fillStyle = '#8a5a34';
+    ctx.fillRect(Math.max(0, leftW - 5), y - h / 2 - 6, 6, h + 12);
+    ctx.fillRect(rightX - 1, y - h / 2 - 6, 6, h + 12);
+    // Spinning windmill on top of the left block
+    var mx = Math.max(24, leftW * 0.5), my = y - h / 2 - 24;
+    ctx.fillStyle = '#e8e2d5'; ctx.fillRect(mx - 5, my, 10, 26);
     ctx.save();
-    ctx.translate(x, y - r * 0.2);
+    ctx.translate(mx, my);
     ctx.rotate(spinAngle || 0);
     for (var b = 0; b < 4; b++) {
       ctx.rotate(Math.PI / 2);
       ctx.fillStyle = b % 2 === 0 ? '#fff' : '#e05d44';
-      ctx.beginPath();
-      ctx.ellipse(0, -r * 0.5, r * 0.16, r * 0.5, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, -13, 4, 13, 0, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 0.5; ctx.stroke();
     }
     ctx.restore();
-    ctx.beginPath(); ctx.arc(x, y - r * 0.2, r * 0.1, 0, Math.PI * 2);
-    ctx.fillStyle = '#333'; ctx.fill();
-  } else if (obs.type === 'carousel') {
-    // Base platform
-    ctx.beginPath(); ctx.ellipse(x, y + r * 0.55, r * 0.75, r * 0.22, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#c9a84c'; ctx.fill();
-    // Poles
-    ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 2;
-    [-0.5, 0, 0.5].forEach(function (f) {
-      ctx.beginPath(); ctx.moveTo(x + f * r * 0.7, y + r * 0.4); ctx.lineTo(x + f * r * 0.45, y - r * 0.35); ctx.stroke();
-    });
-    // Striped tent roof
-    ctx.beginPath();
-    ctx.moveTo(x - r * 0.75, y - r * 0.35);
-    ctx.quadraticCurveTo(x, y - r * 0.95, x + r * 0.75, y - r * 0.35);
-    ctx.closePath();
-    ctx.fillStyle = '#e05d44'; ctx.fill();
-    ctx.fillStyle = '#fff';
-    for (var s = -2; s <= 2; s++) {
-      ctx.beginPath();
-      ctx.moveTo(x + s * r * 0.15, y - r * 0.35);
-      ctx.quadraticCurveTo(x + s * r * 0.08, y - r * 0.75, x + s * r * 0.06, y - r * 0.9);
-      ctx.lineTo(x + s * r * 0.2, y - r * 0.85);
-      ctx.quadraticCurveTo(x + s * r * 0.2, y - r * 0.5, x + s * r * 0.28, y - r * 0.35);
-      ctx.closePath(); ctx.fill();
-    }
-    ctx.beginPath(); ctx.arc(x, y - r * 0.9, r * 0.06, 0, Math.PI * 2);
-    ctx.fillStyle = '#c9a84c'; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, 3, 0, Math.PI * 2); ctx.fillStyle = '#333'; ctx.fill();
   } else {
-    // Clown face
-    ctx.beginPath(); ctx.arc(x, y, r * 0.75, 0, Math.PI * 2);
-    ctx.fillStyle = '#f7d9b6'; ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke();
-    // Hair tufts
+    // Carousel — striped barrier with a tent-topped entrance
     ctx.fillStyle = '#e05d44';
-    [-1, 1].forEach(function (side) {
-      ctx.beginPath();
-      ctx.arc(x + side * r * 0.65, y - r * 0.1, r * 0.28, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    // Eyes
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath(); ctx.arc(x - r * 0.25, y - r * 0.15, r * 0.08, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + r * 0.25, y - r * 0.15, r * 0.08, 0, Math.PI * 2); ctx.fill();
-    // Nose
-    ctx.beginPath(); ctx.arc(x, y + r * 0.05, r * 0.16, 0, Math.PI * 2);
-    ctx.fillStyle = '#e05d44'; ctx.fill();
-    // Big grin (the classic mini-golf clown mouth)
+    ctx.fillRect(0, y - h / 2, leftW, h);
+    ctx.fillRect(rightX, y - h / 2, rightW, h);
+    ctx.fillStyle = '#fff';
+    var sx;
+    for (sx = 4; sx < leftW; sx += 16) ctx.fillRect(sx, y - h / 2, 8, h);
+    for (sx = rightX + 4; sx < W; sx += 16) ctx.fillRect(sx, y - h / 2, 8, h);
+    ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(Math.max(3, leftW - 3), y - h / 2 - 22); ctx.lineTo(Math.max(3, leftW - 3), y + h / 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rightX + 3, y - h / 2 - 22); ctx.lineTo(rightX + 3, y + h / 2); ctx.stroke();
     ctx.beginPath();
-    ctx.arc(x, y + r * 0.15, r * 0.45, 0.15 * Math.PI, 0.85 * Math.PI);
-    ctx.strokeStyle = '#a5312a'; ctx.lineWidth = r * 0.16; ctx.lineCap = 'round';
-    ctx.stroke();
+    ctx.moveTo(Math.max(3, leftW - 3), y - h / 2 - 22);
+    ctx.quadraticCurveTo(gapX, y - h / 2 - 48, rightX + 3, y - h / 2 - 22);
+    ctx.closePath();
+    ctx.fillStyle = '#c9a84c'; ctx.fill();
   }
 }
 
@@ -5197,15 +5225,19 @@ function startPuttGame() {
   var OBSTACLE_TYPES = ['windmill', 'carousel', 'clown'];
   function newHole() {
     state.hole.x = 60 + Math.random() * (W - 120);
-    // Random left/right break each hole — this is what makes it genuinely
-    // tricky rather than a straight-line putt every time.
-    state.break = (Math.random() < 0.5 ? -1 : 1) * (0.003 + Math.random() * 0.005);
-    // One themed obstacle, placed between the tee and the hole
+    // Flat green — no slope, just aim and power
+    state.break = 0;
+    // One themed barrier between the tee and the hole, with a gap to putt
+    // through — always different from the previous hole's obstacle.
+    var choices = OBSTACLE_TYPES.filter(function (t) { return t !== state.lastObstacleType; });
+    var newType = choices[Math.floor(Math.random() * choices.length)];
+    state.lastObstacleType = newType;
     state.obstacle = {
-      type: OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)],
-      x: 70 + Math.random() * (W - 140),
-      y: state.hole.y + 90 + Math.random() * (H - state.hole.y - 220),
-      r: 22
+      type: newType,
+      y: state.hole.y + 100 + Math.random() * (H - state.hole.y - 220),
+      h: 30,
+      gapX: 60 + Math.random() * (W - 120),
+      gapW: 50
     };
   }
   newHole();
@@ -5271,7 +5303,7 @@ function startPuttGame() {
     ctx.lineTo(state.hole.x, state.hole.y - 22);
     ctx.closePath(); ctx.fill();
     // Obstacle
-    if (state.obstacle) drawObstacle(ctx, state.obstacle, state.spinAngle);
+    if (state.obstacle) drawObstacle(ctx, state.obstacle, state.spinAngle, W);
     // Aim line while dragging
     if (state.dragging && state.dragStart) {
       var dx = state.dragStart.x - state.ball.x;
@@ -5330,15 +5362,16 @@ function startPuttGame() {
   function tick() {
     if (state.holed) state.holeAnim = (state.holeAnim || 0) + 1;
     state.spinAngle = (state.spinAngle || 0) + 0.03;
-    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    var moving = Math.abs(state.vel.x) > 0.15 || Math.abs(state.vel.y) > 0.15;
     if (moving && !state.holed) {
       // Friction
-      state.vel.x *= 0.972;
-      state.vel.y *= 0.972;
+      state.vel.x *= 0.958;
+      state.vel.y *= 0.958;
       // Break (slope) — curves the path, more noticeable as the ball slows,
       // which is what makes reading the line genuinely tricky.
       state.vel.x += state.break * (1 - Math.min(1, (Math.abs(state.vel.x) + Math.abs(state.vel.y)) / 8));
 
+      var prevBallY = state.ball.y;
       state.ball.x += state.vel.x;
       state.ball.y += state.vel.y;
 
@@ -5348,18 +5381,17 @@ function startPuttGame() {
       if (state.ball.y > H - 10) { state.ball.y = H - 10; state.vel.y *= -0.15; }
       if (state.ball.y < 8) { state.ball.y = 8; state.vel.y *= -0.15; }
 
-      // Obstacle collision — bounce off the windmill/carousel/clown
+      // Obstacle collision — barrier with a gap; ball passes through the
+      // gap freely, but bounces off the solid parts either side of it
       if (state.obstacle) {
-        var ox = state.ball.x - state.obstacle.x, oy = state.ball.y - state.obstacle.y;
-        var odist = Math.hypot(ox, oy);
-        var minDist = state.obstacle.r * 0.55 + 6;
-        if (odist < minDist && odist > 0.001) {
-          var nx = ox / odist, ny = oy / odist;
-          state.ball.x = state.obstacle.x + nx * minDist;
-          state.ball.y = state.obstacle.y + ny * minDist;
-          var dot = state.vel.x * nx + state.vel.y * ny;
-          state.vel.x -= 2 * dot * nx * 0.55;
-          state.vel.y -= 2 * dot * ny * 0.55;
+        var obs = state.obstacle;
+        var top = obs.y - obs.h / 2, bottom = obs.y + obs.h / 2;
+        var inGap = Math.abs(state.ball.x - obs.gapX) < obs.gapW / 2 - 6;
+        if (!inGap && state.ball.y + 6 > top && state.ball.y - 6 < bottom) {
+          if (prevBallY <= top) { state.ball.y = top - 6; }
+          else { state.ball.y = bottom + 6; }
+          state.vel.y *= -0.25;
+          state.vel.x *= 0.6;
           playLipOutSound();
         }
       }
@@ -5407,7 +5439,7 @@ function startPuttGame() {
 
   function onDown(e) {
     if (state.holed) return;
-    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    var moving = Math.abs(state.vel.x) > 0.15 || Math.abs(state.vel.y) > 0.15;
     if (moving) return; // can't putt while ball is still rolling
     var p = posFromEvent(e);
     if (Math.hypot(p.x - state.ball.x, p.y - state.ball.y) < 40) {
@@ -5523,12 +5555,13 @@ function runPuttChallenge(tripId) {
       y: 60,
       r: 15
     },
-    brk: (rng() < 0.5 ? -1 : 1) * (0.003 + rng() * 0.005),
+    brk: 0, // flat green — no slope
     obstacle: {
       type: OBSTACLE_TYPES_C[Math.floor(rng() * OBSTACLE_TYPES_C.length)],
-      x: 70 + rng() * (W - 140),
-      y: 60 + 90 + rng() * (H - 60 - 220),
-      r: 20
+      y: 60 + 100 + rng() * (H - 60 - 220),
+      h: 28,
+      gapX: 60 + rng() * (W - 120),
+      gapW: 46
     },
     spinAngle: 0,
     dragging: false,
@@ -5585,7 +5618,7 @@ function runPuttChallenge(tripId) {
     ctx.lineTo(state.hole.x + 12, state.hole.y - 25);
     ctx.lineTo(state.hole.x, state.hole.y - 20);
     ctx.closePath(); ctx.fill();
-    if (state.obstacle) drawObstacle(ctx, state.obstacle, state.spinAngle);
+    if (state.obstacle) drawObstacle(ctx, state.obstacle, state.spinAngle, W);
     if (state.dragging && state.dragStart) {
       var dx = state.dragStart.x - state.ball.x, dy = state.dragStart.y - state.ball.y;
       var pDist = Math.min(Math.hypot(dx, dy), 90);
@@ -5620,26 +5653,25 @@ function runPuttChallenge(tripId) {
   function tick() {
     if (state.holed) state.holeAnim = (state.holeAnim || 0) + 1;
     state.spinAngle = (state.spinAngle || 0) + 0.03;
-    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    var moving = Math.abs(state.vel.x) > 0.15 || Math.abs(state.vel.y) > 0.15;
     if (moving && !state.holed) {
-      state.vel.x *= 0.972; state.vel.y *= 0.972;
+      state.vel.x *= 0.958; state.vel.y *= 0.958;
       state.vel.x += state.brk * (1 - Math.min(1, (Math.abs(state.vel.x) + Math.abs(state.vel.y)) / 8));
+      var prevBallY = state.ball.y;
       state.ball.x += state.vel.x; state.ball.y += state.vel.y;
       if (state.ball.x < 8) { state.ball.x = 8; state.vel.x *= -0.15; }
       if (state.ball.x > W - 8) { state.ball.x = W - 8; state.vel.x *= -0.15; }
       if (state.ball.y > H - 10) { state.ball.y = H - 10; state.vel.y *= -0.15; }
       if (state.ball.y < 8) { state.ball.y = 8; state.vel.y *= -0.15; }
       if (state.obstacle) {
-        var ox = state.ball.x - state.obstacle.x, oy = state.ball.y - state.obstacle.y;
-        var odist = Math.hypot(ox, oy);
-        var minDist = state.obstacle.r * 0.55 + 6;
-        if (odist < minDist && odist > 0.001) {
-          var nx = ox / odist, ny = oy / odist;
-          state.ball.x = state.obstacle.x + nx * minDist;
-          state.ball.y = state.obstacle.y + ny * minDist;
-          var dot = state.vel.x * nx + state.vel.y * ny;
-          state.vel.x -= 2 * dot * nx * 0.55;
-          state.vel.y -= 2 * dot * ny * 0.55;
+        var obs = state.obstacle;
+        var top = obs.y - obs.h / 2, bottom = obs.y + obs.h / 2;
+        var inGap = Math.abs(state.ball.x - obs.gapX) < obs.gapW / 2 - 6;
+        if (!inGap && state.ball.y + 6 > top && state.ball.y - 6 < bottom) {
+          if (prevBallY <= top) { state.ball.y = top - 6; }
+          else { state.ball.y = bottom + 6; }
+          state.vel.y *= -0.25;
+          state.vel.x *= 0.6;
           playLipOutSound();
         }
       }
@@ -5672,7 +5704,7 @@ function runPuttChallenge(tripId) {
   }
   function onDown(e) {
     if (state.holed) return;
-    var moving = Math.abs(state.vel.x) > 0.02 || Math.abs(state.vel.y) > 0.02;
+    var moving = Math.abs(state.vel.x) > 0.15 || Math.abs(state.vel.y) > 0.15;
     if (moving) return;
     var p = posFromEvent(e);
     if (Math.hypot(p.x - state.ball.x, p.y - state.ball.y) < 40) {
@@ -5739,6 +5771,7 @@ async function submitPuttScore(tripId, strokes) {
       trip_request_id: tripId,
       user_id: currentUser.id,
       display_name: (currentUser.display_name || (currentUser.email || '').split('@')[0]),
+      avatar_url: currentUser.avatar_url || null,
       best_strokes: strokes,
       updated_at: new Date().toISOString()
     }, { onConflict: 'trip_request_id,user_id' });
@@ -5753,17 +5786,20 @@ async function refreshPuttLeaderboard(tripId) {
   var el = document.getElementById('pc-leaderboard');
   if (!el) return;
   try {
-    var r = await sbClient.from('putt_scores').select('user_id,display_name,best_strokes')
+    var r = await sbClient.from('putt_scores').select('user_id,display_name,avatar_url,best_strokes')
       .eq('trip_request_id', tripId).order('best_strokes', { ascending: true });
     var rows = (r.data || []);
     if (!rows.length) { el.innerHTML = '<p class="fs-sm text-muted">No scores yet — be the first to hole out.</p>'; return; }
     var medals = ['&#129351;', '&#129352;', '&#129353;'];
     el.innerHTML = rows.map(function (row, i) {
       var isMe = currentUser && row.user_id === currentUser.id;
+      var avatarHtml = row.avatar_url
+        ? '<img src="' + row.avatar_url + '" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;margin-right:4px">'
+        : '';
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;' +
         (i < rows.length - 1 ? 'border-bottom:1px solid var(--border);' : '') +
         (isMe ? 'font-weight:600;' : '') + '">' +
-        '<span>' + (medals[i] || (i + 1) + '.') + ' ' + (row.display_name || 'Golfer') + (isMe ? ' (you)' : '') + '</span>' +
+        '<span>' + (medals[i] || (i + 1) + '.') + ' ' + avatarHtml + (row.display_name || 'Golfer') + (isMe ? ' (you)' : '') + '</span>' +
         '<span style="color:var(--gold);font-weight:600">' + row.best_strokes + '</span>' +
       '</div>';
     }).join('');
@@ -6276,6 +6312,12 @@ function shareTrip() {
 }
 
 /* === PROFILE === */
+function formatBudgetDisplay(budget) {
+  if (!budget) return '';
+  if (/^\d/.test(budget)) return '\u00A3' + budget.replace('-', '\u2013');
+  return budget;
+}
+
 async function loadSavedTrips() {
   if (!currentUser) return;
   var listEl = document.getElementById('saved-trips-list');
@@ -6312,12 +6354,12 @@ async function loadSavedTrips() {
       var info = document.createElement('div');
       info.className = 'trip-card-info';
       var h4 = document.createElement('h4');
-      h4.textContent = (trip.destination_type || 'Golf Trip') + (isShared ? ' — Invited' : '');
+      h4.textContent = (trip.group_name || trip.destination_type || 'Golf Trip') + (isShared ? ' — Invited' : '');
       if (isShared) h4.style.color = 'var(--gold)';
       var meta = document.createElement('div');
       meta.className = 'trip-card-meta';
       var dateStr = trip.created_at ? new Date(trip.created_at).toLocaleDateString('en-GB') : '';
-      meta.textContent = (trip.budget || '') + (trip.group_size ? ' • ' + trip.group_size + ' golfers' : '') + (dateStr ? ' • ' + dateStr : '');
+      meta.textContent = formatBudgetDisplay(trip.budget) + (trip.group_size ? ' • ' + trip.group_size + ' golfers' : '') + (dateStr ? ' • ' + dateStr : '');
       info.appendChild(h4);
       info.appendChild(meta);
 
@@ -6369,13 +6411,48 @@ async function saveProfile() {
       typical_budget: budget
     }).eq('id', currentUser.id);
     if (res.error) throw res.error;
-    // Store name in memory so member list can use it
+    // Store name in memory so member list, chat and nav can use it
     currentUser.display_name = name || null;
+    updateNav(currentUser);
     showToast('Profile saved!');
   } catch(e) {
     // Columns may not exist yet — show instructions
     showToast('Could not save profile. See console for details.', true);
     console.error('saveProfile error:', e);
+  }
+}
+
+async function uploadProfileAvatar(file) {
+  if (!file || !currentUser) return;
+  var statusEl = document.getElementById('profile-avatar-status');
+  if (!file.type.startsWith('image/')) {
+    if (statusEl) statusEl.textContent = 'Please choose an image file.';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    if (statusEl) statusEl.textContent = 'Image too large — please use one under 5MB.';
+    return;
+  }
+  if (statusEl) statusEl.textContent = 'Uploading...';
+  try {
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    var path = currentUser.id + '/avatar.' + ext;
+    var upErr = await sbClient.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' });
+    if (upErr.error) throw upErr.error;
+    var pub = sbClient.storage.from('avatars').getPublicUrl(path);
+    var publicUrl = pub.data.publicUrl + '?t=' + Date.now(); // cache-bust so the new image shows immediately
+    var res = await sbClient.from('users').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+    if (res.error) throw res.error;
+    currentUser.avatar_url = publicUrl;
+    var preview = document.getElementById('profile-avatar-preview');
+    if (preview) preview.innerHTML = '<img src="' + publicUrl + '" alt="" style="width:100%;height:100%;object-fit:cover">';
+    updateNav(currentUser);
+    if (statusEl) statusEl.textContent = 'Photo updated!';
+    showToast('Profile picture updated!');
+  } catch (e) {
+    console.error('uploadProfileAvatar error:', e);
+    if (statusEl) statusEl.textContent = 'Could not upload — please try again.';
+    showToast('Could not upload photo.', true);
   }
 }
 
@@ -6389,8 +6466,15 @@ async function loadProfile() {
     if (u.home_airport) document.getElementById('profile-airport').value = u.home_airport;
     if (u.handicap) document.getElementById('profile-handicap').value = u.handicap;
     if (u.typical_budget) document.getElementById('profile-budget').value = u.typical_budget;
-    // Cache display name
+    // Cache display name + avatar so nav/chat/leaderboard can use them
     currentUser.display_name = u.name || null;
+    currentUser.avatar_url = u.avatar_url || null;
+    var preview = document.getElementById('profile-avatar-preview');
+    if (preview) {
+      preview.innerHTML = u.avatar_url
+        ? '<img src="' + u.avatar_url + '" alt="" style="width:100%;height:100%;object-fit:cover">'
+        : (currentUser.email || '?').charAt(0).toUpperCase();
+    }
   } catch(e) { console.warn('loadProfile error:', e); }
   renderProfilePlan();
 }
@@ -6442,11 +6526,28 @@ async function openBillingPortal() {
     }
   } catch (e) {
     showToast(e.message || 'Could not open billing portal — please try again.', true);
-    if (btn) { btn.disabled = false; btn.textContent = 'Manage Billing & Cancel Subscription'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage Billing'; }
   }
 }
 
 /* === TRIP DETAIL === */
+async function saveGroupName() {
+  if (!activeTripId || !currentUser) return;
+  var input = document.getElementById('group-name-input');
+  var name = input ? input.value.trim() : '';
+  try {
+    var res = await sbClient.from('trip_requests').update({ group_name: name || null }).eq('id', activeTripId);
+    if (res.error) throw res.error;
+    document.getElementById('trip-detail-heading').textContent = name || document.getElementById('td-dest').textContent || 'Golf Trip';
+    var chatHeading = document.getElementById('group-chat-heading');
+    if (chatHeading) chatHeading.innerHTML = '&#128172; ' + (name ? name + ' Chat' : 'Group Chat');
+    showToast(name ? 'Group name saved!' : 'Group name cleared.');
+  } catch (e) {
+    console.error('saveGroupName error:', e);
+    showToast('Could not save group name.', true);
+  }
+}
+
 function switchTripTab(tab) {
   document.getElementById('td-panel-itinerary').style.display = tab === 'itinerary' ? 'block' : 'none';
   document.getElementById('td-panel-group').style.display = tab === 'group' ? 'block' : 'none';
@@ -6485,11 +6586,15 @@ async function openTripDetail(tripId, tripData) {
   activeTripId = tripId;
   showPage('trip');
   switchTripTab('itinerary');
-  document.getElementById('trip-detail-heading').textContent = tripData.destination_type || 'Golf Trip';
-  document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers • ' + (tripData.budget || '');
+  document.getElementById('trip-detail-heading').textContent = tripData.group_name || tripData.destination_type || 'Golf Trip';
+  document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers • ' + formatBudgetDisplay(tripData.budget);
   document.getElementById('td-dest').textContent = tripData.destination_type || '—';
   document.getElementById('td-golfers').textContent = tripData.group_size || '—';
-  document.getElementById('td-budget').textContent = tripData.budget || '—';
+  document.getElementById('td-budget').textContent = formatBudgetDisplay(tripData.budget) || '—';
+  var groupNameInput = document.getElementById('group-name-input');
+  if (groupNameInput) groupNameInput.value = tripData.group_name || '';
+  var chatHeading = document.getElementById('group-chat-heading');
+  if (chatHeading) chatHeading.innerHTML = '&#128172; ' + (tripData.group_name ? tripData.group_name + ' Chat' : 'Group Chat');
   try {
     var td = JSON.parse(tripData.travel_dates || '{}');
     document.getElementById('td-dates').textContent = td.month || td.depart || '—';
@@ -6634,12 +6739,14 @@ async function loadTripMembers(tripId) {
     var userIds = members.map(function(m) { return m.user_id; }).filter(Boolean);
     var emailMap = {};
     var nameMap = {};
+    var avatarMap = {};
     if (userIds.length) {
-      var ur = await sbClient.from('users').select('id, email, name').in('id', userIds);
+      var ur = await sbClient.from('users').select('id, email, name, avatar_url').in('id', userIds);
       if (ur.data) {
         ur.data.forEach(function(u) {
           emailMap[u.id] = u.email;
           if (u.name) nameMap[u.id] = u.name;
+          if (u.avatar_url) avatarMap[u.id] = u.avatar_url;
         });
       }
     }
@@ -6647,6 +6754,7 @@ async function loadTripMembers(tripId) {
     if (currentUser) {
       emailMap[currentUser.id] = currentUser.email;
       if (currentUser.display_name) nameMap[currentUser.id] = currentUser.display_name;
+      if (currentUser.avatar_url) avatarMap[currentUser.id] = currentUser.avatar_url;
     }
 
     members.forEach(function(m) {
@@ -6660,7 +6768,12 @@ async function loadTripMembers(tripId) {
 
       var av = document.createElement('div');
       av.className = 'member-avatar';
-      av.textContent = initial;
+      var memberAvatarUrl = avatarMap[m.user_id];
+      if (memberAvatarUrl) {
+        av.innerHTML = '<img src="' + memberAvatarUrl + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      } else {
+        av.textContent = initial;
+      }
 
       var info = document.createElement('div');
       info.className = 'member-info';
@@ -6720,6 +6833,22 @@ async function loadChatMessages(tripId) {
       el.appendChild(d);
       return;
     }
+    // Resolve sender names + avatars in one query, rather than showing raw user IDs
+    var senderIds = Array.from(new Set(msgs.map(function(m) { return m.user_id; }).filter(Boolean)));
+    var nameMap = {}, avatarMap = {};
+    if (senderIds.length) {
+      var ur = await sbClient.from('users').select('id, email, name, avatar_url').in('id', senderIds);
+      if (ur.data) {
+        ur.data.forEach(function(u) {
+          nameMap[u.id] = u.name || (u.email ? u.email.split('@')[0] : 'Golfer');
+          avatarMap[u.id] = u.avatar_url || null;
+        });
+      }
+    }
+    if (currentUser) {
+      nameMap[currentUser.id] = currentUser.display_name || (currentUser.email || '').split('@')[0];
+      avatarMap[currentUser.id] = currentUser.avatar_url || null;
+    }
     msgs.forEach(function(msg) {
       var isSystem = msg.message && (msg.message.indexOf(' voted for ') !== -1 || msg.message.indexOf(' joined') !== -1);
       var isMine = currentUser && msg.user_id === currentUser.id;
@@ -6731,9 +6860,19 @@ async function loadChatMessages(tripId) {
       if (!isSystem) {
         var meta = document.createElement('div');
         meta.className = 'chat-msg-meta';
-        var sender = (msg.user_id || '').split('@')[0] || 'User';
+        meta.style.display = 'flex'; meta.style.alignItems = 'center'; meta.style.gap = '6px';
+        var senderName = nameMap[msg.user_id] || 'Golfer';
+        var senderAvatar = avatarMap[msg.user_id];
+        var avEl = document.createElement('span');
+        avEl.style.cssText = 'width:16px;height:16px;border-radius:50%;background:var(--green);color:var(--gold);font-size:.6rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0';
+        avEl.innerHTML = senderAvatar
+          ? '<img src="' + senderAvatar + '" alt="" style="width:100%;height:100%;object-fit:cover">'
+          : senderName.charAt(0).toUpperCase();
         var time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        meta.textContent = sender + ' \u2022 ' + time;
+        var textSpan = document.createElement('span');
+        textSpan.textContent = senderName + ' \u2022 ' + time;
+        meta.appendChild(avEl);
+        meta.appendChild(textSpan);
         div.appendChild(meta);
       }
       el.appendChild(div);
@@ -7041,7 +7180,7 @@ async function generateSeasonalContent(season) {
     var res = await fetch('/.netlify/functions/generate-trip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt })
+      body: JSON.stringify({ prompt: prompt, max_tokens: 4500 })
     });
     if (!res.ok) throw new Error('Server error ' + res.status);
     var json = await res.json();
@@ -7951,6 +8090,7 @@ if (__paymentStatus === 'cancelled') {
 sbClient.auth.getSession().then(async function(r) {
   currentUser = r.data && r.data.session ? r.data.session.user : null;
   await loadUserPlan();
+  await loadUserDisplayInfo();
   updateNav(currentUser);
   if (currentUser) { startNotifPolling(); }
 
