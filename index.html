@@ -5256,7 +5256,10 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   '</div>';
 
   el.innerHTML = html;
-  loadActivities(dest, idx);
+  // Defer until after the caller has attached `el` to the document —
+  // loadActivities looks up its container via document.getElementById,
+  // which fails silently on a still-detached element.
+  setTimeout(function() { loadActivities(dest, idx); }, 0);
   return el;
 }
 
