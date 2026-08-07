@@ -48,6 +48,7 @@ exports.handler = async (event) => {
     }
 
     const place = data.results[0]
+    const photoRef = (place.photos && place.photos[0] && place.photos[0].photo_reference) || null
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
@@ -57,7 +58,8 @@ exports.handler = async (event) => {
         name: place.name,
         address: place.formatted_address,
         rating: place.rating || null,
-        place_id: place.place_id
+        place_id: place.place_id,
+        photo_reference: photoRef
       })
     }
 
