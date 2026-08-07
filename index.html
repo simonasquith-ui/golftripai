@@ -159,6 +159,13 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .toggle-btn{flex:1;padding:10px 16px;border-radius:0;border:none;background:transparent;cursor:pointer;font-size:.82rem;font-weight:400;transition:all var(--tr);font-family:var(--font-body);color:var(--muted)}
 .toggle-btn+.toggle-btn{border-left:1px solid var(--line)}
 .toggle-btn.active{background:var(--moss);color:var(--surface);font-weight:500;box-shadow:none}
+/* Quantity stepper — used for Rounds of Golf */
+.qty-stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.qty-stepper button{width:38px;height:38px;border:none;background:transparent;color:var(--moss);font-size:1.1rem;font-weight:500;cursor:pointer;transition:background var(--tr),color var(--tr);display:flex;align-items:center;justify-content:center}
+.qty-stepper button:hover:not(:disabled){background:var(--paper-deep)}
+.qty-stepper button:disabled{opacity:.35;cursor:not-allowed}
+.qty-stepper .qty-value{min-width:42px;text-align:center;font-size:.95rem;font-weight:500;color:var(--ink)}
+.qty-hint{font-size:.75rem;color:var(--muted);margin-top:6px}
 /* Nav: transparent over the hero, solid moss once scrolled past it or on interior pages.
    Text stays white in both states so there is no colour flip mid-scroll. */
 #nav{position:fixed;top:0;left:0;right:0;z-index:100;color:#fff;background:transparent;border-bottom:1px solid transparent;transition:background var(--tr),border-color var(--tr)}
@@ -497,6 +504,21 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .itin-activity{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem;display:flex;gap:14px;align-items:flex-start}
 .itin-activity:last-child{border-bottom:none}
 .itin-time{color:var(--brass);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;min-width:66px;flex-shrink:0;padding-top:3px}
+/* Drag-and-drop trip schedule (B3) — reuses .itin-day/.itin-day-header/.itin-day-body/.itin-activity above */
+.schedule-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.schedule-hint{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.schedule-save-note{font-size:.72rem;color:var(--muted);min-width:44px;display:inline-block}
+.schedule-save-note.saved{color:var(--moss)}
+.schedule-reset-btn{background:none;border:1px solid var(--line);color:var(--muted);font-size:.72rem;font-weight:600;padding:7px 14px;border-radius:var(--r);cursor:pointer;transition:border-color var(--tr),color var(--tr);white-space:nowrap}
+.schedule-reset-btn:hover{border-color:var(--brass);color:var(--moss)}
+.itin-day.schedule-mode{cursor:grab}
+.itin-day.schedule-mode.dragging{opacity:.4}
+.itin-day-header.schedule-mode{display:flex;align-items:center;gap:10px}
+.day-drag-handle,.item-drag-handle{color:rgba(255,255,255,.5);font-size:.85rem;flex-shrink:0}
+.itin-activity.schedule-item{cursor:grab;gap:10px}
+.itin-activity.schedule-item.dragging{opacity:.4}
+.itin-activity.schedule-item .item-drag-handle{color:var(--muted);padding-top:3px}
+.itin-day-body.drop-target{background:var(--paper-deep);outline:1px dashed var(--brass);outline-offset:-4px}
 .booking-links-section{background:var(--moss-dark);border-radius:var(--rl);padding:28px;margin:28px 0}
 .booking-links-section h3{color:var(--brass);margin-bottom:18px;font-family:var(--font-display);font-weight:500;font-size:1.15rem}
 .booking-btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -627,6 +649,33 @@ tr:last-child td{border-bottom:none}
 .auth-msg.error{background:none;color:#e8a49c}.auth-msg.success{background:none;color:#9fd0ae}
 .forgot-link{font-size:.72rem;color:var(--brass);text-decoration:none;float:right;letter-spacing:.02em}
 .forgot-link:hover{text-decoration:underline}
+/* === SWIPE-TO-SHORTLIST (B4) — Tinder-style card stack for courses/hotels ===
+   Reuses .modal-overlay/.modal for consistency but widens the panel via .swipe-modal. */
+.modal.swipe-modal{max-width:400px;padding:28px 22px 24px;text-align:center}
+.swipe-modal h2{font-size:1.35rem;margin-bottom:4px}
+.swipe-modal-sub{font-size:.78rem;color:rgba(255,255,255,.55);margin-bottom:20px}
+.swipe-stack{position:relative;height:360px;margin-bottom:20px;touch-action:none}
+.swipe-card{position:absolute;inset:0;background:var(--surface);border-radius:var(--rl);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 40px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column;color:var(--ink);cursor:grab;user-select:none;transition:transform .3s ease,opacity .3s ease}
+.swipe-card.dragging{transition:none;cursor:grabbing}
+.swipe-card.leaving-like{transform:translate(160%,-40px) rotate(24deg) !important;opacity:0}
+.swipe-card.leaving-pass{transform:translate(-160%,-40px) rotate(-24deg) !important;opacity:0}
+.swipe-card-media{height:150px;background:linear-gradient(135deg,var(--moss),var(--moss-dark));display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:2.2rem;flex-shrink:0}
+.swipe-card-body{padding:16px 18px;flex:1;overflow:auto;text-align:left}
+.swipe-card-body h4{margin:0 0 4px;font-size:1.05rem;color:var(--moss-dark)}
+.swipe-card-body .swipe-card-sub{font-size:.78rem;color:var(--muted);margin-bottom:8px}
+.swipe-card-body p{font-size:.82rem;line-height:1.55;color:var(--ink)}
+.swipe-card-price{font-weight:600;color:var(--brass-light);font-size:.85rem;margin-top:8px;display:block}
+.swipe-stamp{position:absolute;top:18px;font-family:var(--font-display);font-weight:600;font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase;border:3px solid;border-radius:var(--r);padding:4px 10px;opacity:0;transform:rotate(-12deg)}
+.swipe-stamp-like{right:16px;color:#7fbf8f;border-color:#7fbf8f}
+.swipe-stamp-pass{left:16px;color:#d98f86;border-color:#d98f86}
+.swipe-card.show-like .swipe-stamp-like,.swipe-card.show-pass .swipe-stamp-pass{opacity:1}
+.swipe-controls{display:flex;justify-content:center;align-items:center;gap:22px}
+.swipe-btn{width:54px;height:54px;border-radius:50%;border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--tr),color var(--tr),transform var(--tr)}
+.swipe-btn:hover{transform:translateY(-2px)}
+.swipe-btn-pass:hover{border-color:#d98f86;color:#d98f86}
+.swipe-btn-like:hover{border-color:#7fbf8f;color:#7fbf8f}
+.swipe-progress{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:14px}
+.swipe-empty{padding:60px 10px;color:rgba(255,255,255,.6);font-size:.9rem}
 #toast{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:8px}
 .toast-item{background:var(--moss-dark);color:#fff;padding:13px 20px;border-radius:var(--r);font-size:.85rem;font-weight:400;box-shadow:none;animation:slideIn .3s ease;border:1px solid rgba(255,255,255,.14);border-left:2px solid var(--brass)}
 .toast-item.error{background:var(--moss-dark);border-left-color:#c0574c}
@@ -714,6 +763,16 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 .btt-total{background:none;border:none;border-top:1px solid rgba(255,255,255,.14);border-radius:0;padding:20px 0 0;margin-top:22px;display:flex;align-items:center;justify-content:space-between}
 .btt-total-label{color:rgba(255,255,255,.55);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em}
 .btt-total-price{font-family:var(--font-display);font-size:1.7rem;color:var(--brass);font-weight:300;letter-spacing:-.025em}
+/* "Find a Stay" dropdown — merges Hotels & Villas (& Expedia, once live) into one btt cell */
+.btt-findstay{position:relative;flex-wrap:wrap}
+.btt-findstay-menu{display:none;position:absolute;left:0;right:0;top:100%;margin-top:1px;background:var(--moss-dark);border:1px solid rgba(255,255,255,.14);border-radius:var(--r);box-shadow:0 12px 28px rgba(0,0,0,.35);z-index:20;overflow:hidden}
+.btt-findstay.open .btt-findstay-menu{display:block}
+.btt-findstay-menu a{display:flex;align-items:center;gap:12px;padding:14px 20px;text-decoration:none;color:#fff;font-size:.88rem;transition:background var(--tr)}
+.btt-findstay-menu a:hover{background:rgba(255,255,255,.06)}
+.btt-findstay-menu a+a{border-top:1px solid rgba(255,255,255,.1)}
+.btt-findstay-menu .ti{color:var(--brass);font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.btt-findstay .btt-caret{margin-left:auto;color:rgba(255,255,255,.4);font-size:.75rem;transition:transform var(--tr)}
+.btt-findstay.open .btt-caret{transform:rotate(180deg)}
 /* PDF Export */
 .pdf-export-bar{background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);padding:22px 26px;margin:28px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .pdf-export-bar h4{color:var(--moss);font-family:var(--font-display);font-weight:500;margin-bottom:4px}
@@ -843,7 +902,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   <a href="#" class="nav-mobile-link" onclick="showPage('landing');closeMobileMenu();return false;">Home</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('seasonal');closeMobileMenu();return false;">Destinations</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">Build Around a Course</a>
-  <a href="#" class="nav-mobile-link" href="https://gogolftrip.co.uk/blog/">Blog</a>
+  <a href="https://gogolftrip.co.uk/blog/" class="nav-mobile-link">Blog</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About Us</a>
   <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
   <div class="nav-mobile-divider"></div>
@@ -1137,10 +1196,10 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
           <a href="#" class="nav-logo" onclick="showPage('landing');return false;">Golf<span>Trip</span></a>
           <p>AI-powered golf holiday planning for individuals, groups and societies across the UK.</p>
         </div>
-        <div class="footer-col"><h4>Product</h4><ul><li><a href="#" onclick="showPage('questionnaire');return false;">Plan a Trip</a></li><li><a href="#pricing-section">Pricing</a></li><li><a href="#">How It Works</a></li></ul></div>
+        <div class="footer-col"><h4>Product</h4><ul><li><a href="#" onclick="showPage('questionnaire');return false;">Plan a Trip</a></li><li><a href="#pricing-section">Pricing</a></li></ul></div>
         <div class="footer-col"><h4>Destinations</h4><ul><li><a href="#" onclick="showPage('seasonal');return false;">Seasonal Guide</a></li>
         <li><a href="#">Spain</a></li><li><a href="#">Portugal</a></li><li><a href="#">Ireland</a></li><li><a href="#">Scotland</a></li><li><a href="#">England</a></li></ul></div>
-        <div class="footer-col"><h4>Company</h4><ul><li><a href="#" onclick="showPage('about');return false;">About</a></li><li><a href="https://gogolftrip.co.uk/blog/">Blog</a></li><li><a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a></li><li><a href="#" onclick="showPage('terms');return false;">Terms of Service</a></li><li><a href="#">Contact</a></li></ul></div>
+        <div class="footer-col"><h4>Company</h4><ul><li><a href="#" onclick="showPage('about');return false;">About</a></li><li><a href="https://gogolftrip.co.uk/blog/">Blog</a></li><li><a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a></li><li><a href="#" onclick="showPage('terms');return false;">Terms of Service</a></li><li><a href="mailto:hello@golftrip.com">Contact</a></li></ul></div>
       </div>
       <div class="footer-bottom"><p>&#169; 2025 GolfTrip Ltd. All rights reserved.</p><p>Made for golfers everywhere</p></div>
     </div>
@@ -1185,7 +1244,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
               </div>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm" style="margin-top:24px" href="https://gogolftrip.co.uk/blog/">All articles &#8594;</button>
+          <a class="btn btn-ghost btn-sm" style="margin-top:24px;display:inline-block" href="https://gogolftrip.co.uk/blog/">All articles &#8594;</a>
         </div>
 
       </div>
@@ -1259,6 +1318,15 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
           <div class="form-group"><label>Departure Date</label><input type="date" id="specific-depart"></div>
           <div class="form-group"><label>Return Date</label><input type="date" id="specific-return"></div>
         </div>
+      </div>
+      <div class="form-group" style="margin-top:6px;max-width:280px">
+        <label>Rounds of Golf</label>
+        <div class="qty-stepper" id="rounds-stepper">
+          <button type="button" id="rounds-minus" aria-label="Decrease rounds of golf">&#8722;</button>
+          <span class="qty-value" id="rounds-value">2</span>
+          <button type="button" id="rounds-plus" aria-label="Increase rounds of golf">&#43;</button>
+        </div>
+        <div class="qty-hint" id="rounds-hint">Defaults to one less than your nights — adjust if your group wants more or fewer rounds.</div>
       </div>
     </div>
     <div class="q-section">
@@ -1654,6 +1722,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
       <div class="stat-box"><div class="sb-val" id="td-dest">&#8212;</div><div class="sb-lbl">Destination</div></div>
       <div class="stat-box"><div class="sb-val" id="td-dates">&#8212;</div><div class="sb-lbl">Dates</div></div>
       <div class="stat-box"><div class="sb-val" id="td-golfers">&#8212;</div><div class="sb-lbl">Golfers</div></div>
+      <div class="stat-box"><div class="sb-val" id="td-rounds">&#8212;</div><div class="sb-lbl">Rounds of Golf</div></div>
       <div class="stat-box"><div class="sb-val" id="td-budget">&#8212;</div><div class="sb-lbl">Budget p/p</div></div>
     </div>
 
@@ -1687,6 +1756,13 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
           <button class="btn btn-primary btn-sm" onclick="saveGroupName()">Save</button>
         </div>
         <p class="fs-sm text-muted" style="margin-top:8px">Shows in your group chat and trip list for everyone on this trip.</p>
+      </div>
+
+      <!-- TRIP SCHEDULE — full width -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="gp-section-head"><i class="ti ti-calendar-event"></i> Trip Schedule</div>
+        <p class="fs-sm text-muted" style="margin:0 0 14px">Drag days and activities to turn the AI's suggested itinerary into your group's actual plan.</p>
+        <div id="group-schedule-wrap"><p class="fs-sm text-muted">Select a trip option above to see its schedule.</p></div>
       </div>
 
       <!-- CART + BOOKING PROGRESS — full width -->
@@ -2009,7 +2085,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 
         <a href="#" onclick="window.location.href='https://gogolftrip.co.uk/blog/best-golf-courses-algarve.html';return false;" style="text-decoration:none;color:inherit;display:flex">
           <div style="background:var(--white);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;width:100%" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shl)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-            <div style="height:160px;overflow:hidden"><img src="/blog-manchester.jpg" alt="Best golf courses Algarve" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75) contrast(1.02)"></div>
+            <div style="height:160px;overflow:hidden"><img src="/blog-costadelsol-algarve.jpg" alt="Best golf courses Algarve" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75) contrast(1.02)"></div>
             <div style="padding:24px;flex:1;display:flex;flex-direction:column"><div class="fs-sm" style="color:var(--gold);font-weight:600;margin-bottom:8px">DESTINATION GUIDE</div><h3 style="font-size:1.15rem;margin-bottom:10px;color:var(--green)">The Best Golf Courses in the Algarve</h3><p class="fs-sm text-muted">An honest rundown from someone who's been going six years running — what's worth the money and what isn't.</p></div>
           </div>
         </a>
@@ -2205,7 +2281,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 
 <div id="page-blog-article-5" class="page">
   <div style="height:280px;overflow:hidden;position:relative">
-    <img src="/blog-manchester.jpg" alt="Golf courses in the Algarve" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75) contrast(1.02)">
+    <img src="/blog-costadelsol-algarve.jpg" alt="Golf courses in the Algarve" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75) contrast(1.02)">
     <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,35,24,.2) 0%,rgba(15,35,24,.75) 100%)"></div>
     <div class="container" style="position:absolute;bottom:0;left:0;right:0;max-width:780px;padding-bottom:28px">
       <div class="section-label">DESTINATION GUIDE</div>
@@ -2584,6 +2660,21 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
       <button class="btn btn-primary" style="width:100%" onclick="sendPasswordReset()">Send Reset Link</button>
       <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="switchAuthTab('signin')">Back to Sign In</button>
     </div>
+  </div>
+</div>
+
+<!-- SWIPE-TO-SHORTLIST (B4) — Tinder-style card stack for courses/hotels -->
+<div class="modal-overlay" id="swipe-modal">
+  <div class="modal swipe-modal">
+    <button class="modal-close" onclick="closeSwipeModal()"><i class="ti ti-x"></i></button>
+    <h2 id="swipe-modal-title">Swipe to Shortlist</h2>
+    <p class="swipe-modal-sub" id="swipe-modal-sub">Swipe right to shortlist, left to pass — or use the buttons below.</p>
+    <div class="swipe-stack" id="swipe-stack"></div>
+    <div class="swipe-controls" id="swipe-controls">
+      <button class="swipe-btn swipe-btn-pass" onclick="swipeActive('pass')" aria-label="Pass"><i class="ti ti-thumb-down"></i></button>
+      <button class="swipe-btn swipe-btn-like" onclick="swipeActive('like')" aria-label="Shortlist"><i class="ti ti-thumb-up"></i></button>
+    </div>
+    <p class="swipe-progress" id="swipe-progress"></p>
   </div>
 </div>
 
@@ -3273,6 +3364,69 @@ document.getElementById('date-mode-toggle').addEventListener('click', function(e
   document.getElementById('date-specific').classList.toggle('hidden', m !== 'specific');
 });
 
+/* === ROUNDS OF GOLF STEPPER ===
+   Defaults to (nights - 1), clamped 1-10. Recomputes the default whenever the
+   nights value changes, unless the user has manually clicked +/- themselves —
+   at that point their choice sticks and we stop overriding it. */
+var ROUNDS_MIN = 1, ROUNDS_MAX = 10;
+var roundsOfGolf = 2;
+var roundsOverridden = false;
+
+function computeNightsFromForm() {
+  var modeBtn = document.querySelector('#date-mode-toggle .toggle-btn.active');
+  var mode = modeBtn ? modeBtn.getAttribute('data-mode') : 'flexible';
+  if (mode === 'flexible') {
+    var durStr = document.getElementById('flex-duration').value || '';
+    var n = parseInt(durStr, 10);
+    return isNaN(n) ? 0 : n;
+  }
+  var d1 = document.getElementById('specific-depart').value;
+  var d2 = document.getElementById('specific-return').value;
+  if (d1 && d2) {
+    var diff = Math.round((new Date(d2) - new Date(d1)) / 86400000);
+    return diff > 0 ? diff : 0;
+  }
+  return 0;
+}
+
+function renderRoundsStepper() {
+  var val = document.getElementById('rounds-value');
+  if (val) val.textContent = roundsOfGolf;
+  var minus = document.getElementById('rounds-minus');
+  var plus = document.getElementById('rounds-plus');
+  if (minus) minus.disabled = roundsOfGolf <= ROUNDS_MIN;
+  if (plus) plus.disabled = roundsOfGolf >= ROUNDS_MAX;
+}
+
+function updateRoundsDefault() {
+  if (roundsOverridden) return;
+  var nights = computeNightsFromForm();
+  var def = nights > 0 ? (nights - 1) : 2;
+  roundsOfGolf = Math.max(ROUNDS_MIN, Math.min(ROUNDS_MAX, def));
+  renderRoundsStepper();
+}
+
+(function() {
+  var stepper = document.getElementById('rounds-stepper');
+  if (!stepper) return;
+  document.getElementById('rounds-minus').addEventListener('click', function() {
+    roundsOverridden = true;
+    roundsOfGolf = Math.max(ROUNDS_MIN, roundsOfGolf - 1);
+    renderRoundsStepper();
+  });
+  document.getElementById('rounds-plus').addEventListener('click', function() {
+    roundsOverridden = true;
+    roundsOfGolf = Math.min(ROUNDS_MAX, roundsOfGolf + 1);
+    renderRoundsStepper();
+  });
+  document.getElementById('flex-duration').addEventListener('change', updateRoundsDefault);
+  document.getElementById('specific-depart').addEventListener('change', updateRoundsDefault);
+  document.getElementById('specific-return').addEventListener('change', updateRoundsDefault);
+  document.getElementById('date-mode-toggle').addEventListener('click', updateRoundsDefault);
+  updateRoundsDefault();
+})();
+/* === END ROUNDS OF GOLF STEPPER === */
+
 /* === COMPARE MODE TOGGLE === */
 var compareTier = 'Mid-Range';
 
@@ -3613,6 +3767,7 @@ function getFormData() {
     dates: dates,
     budget: chipSelections.budget || '',
     group_size: document.getElementById('group-size').value || '4',
+    rounds_of_golf: roundsOfGolf || 2,
     handicap: document.getElementById('handicap').value || '',
     compare_mode: compareMode,
     destinations: compareMode === 'tiers' ? [chipSelections.dest || 'Flexible'] : selectedDests,
@@ -3725,6 +3880,7 @@ async function saveTripResults() {
       travel_dates: JSON.stringify({ depart: (qData.dates && qData.dates.depart) || '', returnDate: (qData.dates && qData.dates.returnDate) || '' }),
       budget: qData.budget || 'flexible',
       group_size: qData.group_size || 1,
+      rounds_of_golf: parseInt(qData.rounds_of_golf) || 2,
       destination_type: destLabel,
       trip_style: qData.compare_mode === 'tiers' ? 'tiers' : 'compare',
       notes: qData.notes || ''
@@ -3951,11 +4107,11 @@ function buildPanelSection(section, panel, idx, qData) {
     html += '<div id="section-hotels-' + idx + '">';
     (panel.hotels || []).forEach(function(h) {
       var isVilla = h.villa_rental;
-      var bookUrl = 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest);
+      var bookUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest));
       var groupSize = qData && qData.group_size ? parseInt(qData.group_size) : 8;
       var vrboDestUrl = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(dest) + '&adults=' + groupSize + '&sort=RECOMMENDED';
       var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent(vrboDestUrl);
-      var altUrl = isVilla ? 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest) : vrboUrl;
+      var altUrl = isVilla ? wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest)) : vrboUrl;
       html += '<div class="hotel-card">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="margin:0;flex:1">' + (h.name||'') + '</h4>' +
@@ -4000,9 +4156,12 @@ var currentTripQData = null;
 // ── END SECTION REFRESH ──────────────────────────────────────
 
 // ── TRIP CACHE ──────────────────────────────────────────────
-function buildCacheKey(destination, tier, travelMonth, groupSize) {
+function buildCacheKey(destination, tier, travelMonth, groupSize, numCourses) {
   var sizeBracket = groupSize <= 2 ? 'small' : groupSize <= 6 ? 'medium' : groupSize <= 12 ? 'large' : 'xlarge';
-  return [destination.toLowerCase().trim(), tier.toLowerCase(), (travelMonth || 'any').toLowerCase(), sizeBracket].join('|');
+  // numCourses varies with rounds-of-golf — include it so a cache hit always has
+  // the right number of courses for what this trip actually asked for.
+  var coursesBracket = 'c' + (numCourses || 5);
+  return [destination.toLowerCase().trim(), tier.toLowerCase(), (travelMonth || 'any').toLowerCase(), sizeBracket, coursesBracket].join('|');
 }
 
 async function getCachedPanel(cacheKey) {
@@ -4074,6 +4233,7 @@ async function generateTrip() {
         travel_dates: JSON.stringify(data.dates),
         budget: data.budget,
         group_size: parseInt(data.group_size) || 1,
+        rounds_of_golf: parseInt(data.rounds_of_golf) || 2,
         handicap: data.handicap,
         destination_type: data.destinations.join(', '),
         trip_style: data.trip_style,
@@ -4100,7 +4260,10 @@ async function generateTrip() {
       ? (data.dates.month || 'any month') + ', ' + (data.dates.duration || 'flexible duration')
       : data.dates.depart + ' to ' + data.dates.returnDate;
     var durationNum = parseInt(data.dates.duration || '5') || 5;
-    var numCourses = 5;
+    var roundsOfGolfNum = parseInt(data.rounds_of_golf, 10) || 2;
+    // Recommend a course or two beyond the exact number of rounds so the group has
+    // a genuine choice, but keep it within a sane range regardless of rounds picked.
+    var numCourses = Math.max(3, Math.min(8, roundsOfGolfNum + 1));
 
     // Map selected budget range to per-tier GBP anchors
     var BUDGET_MAP = {
@@ -4132,6 +4295,7 @@ async function generateTrip() {
       ', dates: ' + dateStr +
       ', style: ' + (data.trip_style || 'any') + ', accommodation: ' + (data.accommodation || 'any') +
       ', handicap: ' + (data.handicap || 'mixed') +
+      ', the group plans to play ' + roundsOfGolfNum + ' round' + (roundsOfGolfNum === 1 ? '' : 's') + ' of golf during this trip — recommend a suitable pace across the available days and note which course/tee time suits which round' +
       ', notes: ' + (data.notes || 'none') +
       (data.travel_method && data.travel_method !== 'fly' ? ', travel method: ' + data.travel_method + (data.travel_from ? ' from ' + data.travel_from : '') + ' — include drive time or train routes from this location to the destination in the trip plan.' : '') +
       '.' +
@@ -4158,7 +4322,7 @@ async function generateTrip() {
         (isDomesticNoFly ? ' This is a DOMESTIC UK trip. Do NOT include flights. Focus on ' + travelMethod + ' travel.' : '') +
         ' Return JSON: label,destination,description,weather,best_time,flight_time,total_cost,' +
         costsLabel + ',' +
-        'courses(EXACTLY 5:name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
+        'courses(EXACTLY ' + numCourses + ':name,location,par,yardage,slope_rating,course_rating,green_fee,green_fee_range,designer,difficulty,why_recommended,lat,lng),' +
         'hotels(EXACTLY 3:name,area,description,why_recommended,price_per_night,price_range,lat,lng),' +
         travelSection + '.' +
         ' CRITICAL: every course and hotel MUST have lat and lng as decimal numbers (e.g. lat:37.123, lng:-8.456). These are plotted on a map — use precise real-world GPS coordinates.';
@@ -4215,7 +4379,7 @@ async function generateTrip() {
     var allCalls = [];
     var cacheableLabels = {}; // label -> cacheKey, for panels we should save after generating
     panelDefs.forEach(function(def) {
-      var cacheKey = notesAreGeneric ? buildCacheKey(def.destination, def.tier, travelMonth, groupSizeNum) : null;
+      var cacheKey = notesAreGeneric ? buildCacheKey(def.destination, def.tier, travelMonth, groupSizeNum, numCourses) : null;
 
       if (cacheKey) {
         // Check cache first — if hit, skip both API calls entirely for this panel.
@@ -4436,6 +4600,42 @@ async function generateTrip() {
 }
 
 /* === RESULTS RENDERING === */
+// ── STAY PROVIDER CONFIG ────────────────────────────────
+// Set this once Simon's Expedia affiliate application is approved to switch on
+// the Expedia option in the "Find a Stay" dropdown — no other code changes needed.
+var EXPEDIA_AFFILIATE_ID = '';
+// ── BOOKING.COM CJ AFFILIATE LINKS (per-country) ────────────────────────────
+// Wraps a plain Booking.com URL through Simon's CJ (Commission Junction)
+// tracking link — https://www.<domain>/click-<PID>-<LID>?url=<encoded target> —
+// so clicks earn commission. Each CJ program can use a different redirect
+// domain (kqzyfj.com, dpbolvw.net, anrdoezrs.net etc. are all CJ's own, just
+// rotated per program), so domain + link ID are stored together per country.
+// Deep-link override (?url= landing on the correct destination search page,
+// not just the program's default page) confirmed working live for Spain,
+// Portugal (share one link) and Italy. Note: Italy's CJ program had two
+// different links — a banner-only link (14398479) that does NOT honour
+// ?url= (always lands on Booking.com's generic page), and a proper deep
+// link (15734767, found via CJ's "Deep Linking Only" filter) that DOES
+// honour it — confirmed by a live test landing correctly on Florence. Add a
+// country here once its CJ program gives a working deep link; anything not
+// listed falls back to the plain unaffiliated Booking.com URL so nothing
+// breaks in the meantime.
+var BOOKING_CJ_PID = '101847347';
+var BOOKING_CJ_LINKS = {
+  spain: { domain: 'kqzyfj.com', lid: '17322589' },
+  portugal: { domain: 'kqzyfj.com', lid: '17322589' },
+  italy: { domain: 'jdoqocy.com', lid: '15734767' }
+};
+function wrapBookingUrl(destination, plainUrl) {
+  var destLower = (destination || '').toLowerCase();
+  for (var country in BOOKING_CJ_LINKS) {
+    if (destLower.indexOf(country) !== -1) {
+      var link = BOOKING_CJ_LINKS[country];
+      return 'https://www.' + link.domain + '/click-' + BOOKING_CJ_PID + '-' + link.lid + '?url=' + encodeURIComponent(plainUrl);
+    }
+  }
+  return plainUrl;
+}
 // ── GOLF BOOKING LINK HELPER ────────────────────────────────
 var GOLFNOW_EU_DESTS = ['spain','france','germany','ireland','morocco','belgium','czech','switzerland','bilbao','madrid','barcelona','costa brava','costa del sol','marbella'];
 var GOLFNOW_UK_DESTS = ['scotland','england','wales',' uk','united kingdom','st andrews','ayrshire','east lothian'];
@@ -4722,6 +4922,24 @@ function updateGroupVotesTally() {
     html += '</div>';
   });
   tallyEl.innerHTML = html;
+}
+
+// Renders the editable drag-and-drop schedule (B3) inside the Group & Booking tab,
+// for whichever tier/panel is currently active (defaults to the first one).
+function renderGroupSchedule() {
+  var wrap = document.getElementById('group-schedule-wrap');
+  if (!wrap) return;
+  if (!storedPanels || !storedPanels.length) {
+    wrap.innerHTML = '<p class="fs-sm text-muted">No itinerary available for this trip yet.</p>';
+    return;
+  }
+  var idx = (storedPanels[currentPanelIdx]) ? currentPanelIdx : 0;
+  var panel = storedPanels[idx];
+  if (!panel || !panel.itinerary || !panel.itinerary.length) {
+    wrap.innerHTML = '<p class="fs-sm text-muted">No day-by-day itinerary was saved for this trip.</p>';
+    return;
+  }
+  renderDraggableSchedule(wrap, currentTripRequestId, panel.label || String(idx), panel.itinerary);
 }
 
 function buildVotesSummaryHtml(panelLabel) {
@@ -5035,7 +5253,10 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   html += buildMapSection(panel, idx, mapPrefix);
 
   html += '<div class="section-heading" data-icon="&#9971;">Golf Courses' +
+    '<span style="display:flex;gap:8px;flex-shrink:0">' +
+    '<button class="section-refresh-btn" onclick="openSwipeModal(' + idx + ',\'courses\')"><i class="ti ti-swipe"></i> Swipe to Shortlist</button>' +
     '<button class="section-refresh-btn" data-refresh-section="courses" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '"><i class="ti ti-refresh"></i> Different options</button>' +
+    '</span>' +
   '</div><div class="courses-grid" id="section-courses-' + idx + '">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
@@ -5086,7 +5307,10 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   html += '</div>';
 
   html += '<div class="section-heading" data-icon="&#127968;">Recommended Hotels' +
+    '<span style="display:flex;gap:8px;flex-shrink:0">' +
+    '<button class="section-refresh-btn" onclick="openSwipeModal(' + idx + ',\'hotels\')"><i class="ti ti-swipe"></i> Swipe to Shortlist</button>' +
     '<button class="section-refresh-btn" data-refresh-section="hotels" data-refresh-idx="' + idx + '" data-refresh-dest="' + dest.replace(/"/g,'') + '" data-refresh-tier="' + (panel.label||'').replace(/"/g,'') + '"><i class="ti ti-refresh"></i> Different options</button>' +
+    '</span>' +
   '</div><div class="hotels-grid" id="section-hotels-' + idx + '">';
   if (panel.hotels && panel.hotels.length) {
     panel.hotels.forEach(function(h) {
@@ -5100,15 +5324,15 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         bookUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(hotelEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED') +
           (checkin ? '&startDate=' + checkin : '') +
           (checkout ? '&endDate=' + checkout : '');
-        altUrl = 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
+        altUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
           (checkin ? '&checkin=' + checkin : '') +
-          (checkout ? '&checkout=' + checkout : '');
+          (checkout ? '&checkout=' + checkout : ''));
       } else {
-        bookUrl = 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
+        bookUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
           '&dest_type=property' +
           (checkin ? '&checkin=' + checkin : '') +
           (checkout ? '&checkout=' + checkout : '') +
-          '&group_adults=' + (qData && qData.group_size ? qData.group_size : '2');
+          '&group_adults=' + (qData && qData.group_size ? qData.group_size : '2'));
         altUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(hotelEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED') +
           (checkin ? '&startDate=' + checkin : '') +
           (checkout ? '&endDate=' + checkout : '');
@@ -5220,17 +5444,26 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     '</div>';
 
   if (panel.itinerary && panel.itinerary.length) {
-    html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div><div class="itinerary">';
-    panel.itinerary.forEach(function(day) {
-      html += '<div class="itin-day"><div class="itin-day-header"><h4>Day ' + day.day + ': ' + (day.title || '') + '</h4></div><div class="itin-day-body">';
-      if (day.activities) {
-        day.activities.forEach(function(act) {
-          html += '<div class="itin-activity"><span class="itin-time">' + (act.time || '') + '</span><span>' + (act.description || '') + '</span></div>';
-        });
-      }
-      html += '</div></div>';
-    });
-    html += '</div>';
+    html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div>';
+    if (mapPrefix === 'results') {
+      // Editable drag-and-drop schedule (B3) — first draft auto-populates from the
+      // AI itinerary below, then persists group edits separately to `trip_schedule`
+      // so the original AI suggestion is never overwritten. Rendered async once this
+      // panel is attached to the document — see the setTimeout near the end of buildPanel.
+      html += '<div class="trip-schedule-wrap" id="trip-schedule-' + idx + '"><p class="fs-sm text-muted">Loading schedule&#8230;</p></div>';
+    } else {
+      html += '<div class="itinerary">';
+      panel.itinerary.forEach(function(day) {
+        html += '<div class="itin-day"><div class="itin-day-header"><h4>Day ' + day.day + ': ' + (day.title || '') + '</h4></div><div class="itin-day-body">';
+        if (day.activities) {
+          day.activities.forEach(function(act) {
+            html += '<div class="itin-activity"><span class="itin-time">' + (act.time || '') + '</span><span>' + (act.description || '') + '</span></div>';
+          });
+        }
+        html += '</div></div>';
+      });
+      html += '</div>';
+    }
   }
 
   var costs = panel.costs || {};
@@ -5260,6 +5493,12 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // loadActivities looks up its container via document.getElementById,
   // which fails silently on a still-detached element.
   setTimeout(function() { loadActivities(dest, idx); }, 0);
+  if (mapPrefix === 'results' && panel.itinerary && panel.itinerary.length) {
+    setTimeout(function() {
+      var wrap = document.getElementById('trip-schedule-' + idx);
+      if (wrap) renderDraggableSchedule(wrap, tripId, panelLabel, panel.itinerary);
+    }, 0);
+  }
   return el;
 }
 
@@ -5295,9 +5534,371 @@ async function loadActivities(destination, idx) {
   }
 }
 
+/* === DAY-BY-DAY DRAG-AND-DROP TRIP SCHEDULE (B3) ===
+   First draft auto-populates from the AI's own itinerary (panel.itinerary, built
+   above). From then on, the group's drag-and-drop edits are the source of truth —
+   persisted separately in the `trip_schedule` table (keyed by trip + tier), so the
+   original AI itinerary is never mutated. "Reset to AI Suggestion" just re-clones it.
+   Uses native HTML5 drag-and-drop (no external library) to stay consistent with the
+   rest of this single-file app, which loads nothing but Supabase's JS client. */
+var scheduleCache = {}; // 'tripId|panelLabel' -> live schedule array, avoids refetching on tab switches
+var scheduleSaveTimers = {};
+
+function scheduleKey(tripId, panelLabel) { return (tripId || 'anon') + '|' + (panelLabel || ''); }
+
+function cloneItinerary(itinerary) {
+  return (itinerary || []).map(function(day, i) {
+    return {
+      day: day.day || (i + 1),
+      title: day.title || '',
+      activities: (day.activities || []).map(function(a) {
+        return { time: a.time || '', description: a.description || '' };
+      })
+    };
+  });
+}
+
+async function loadOrInitSchedule(tripId, panelLabel, itinerary) {
+  var key = scheduleKey(tripId, panelLabel);
+  if (scheduleCache[key]) return scheduleCache[key];
+  var schedule = null;
+  if (tripId) {
+    try {
+      var r = await sbClient.from('trip_schedule').select('schedule').eq('trip_request_id', tripId).eq('panel_label', panelLabel).maybeSingle();
+      if (!r.error && r.data && r.data.schedule && r.data.schedule.length) schedule = r.data.schedule;
+    } catch (e) { /* no saved schedule yet, or table not migrated yet — fall through to AI default */ }
+  }
+  if (!schedule) schedule = cloneItinerary(itinerary);
+  scheduleCache[key] = schedule;
+  return schedule;
+}
+
+function saveSchedule(tripId, panelLabel, schedule, noteEl) {
+  scheduleCache[scheduleKey(tripId, panelLabel)] = schedule;
+  if (!tripId) return; // free/unsaved trips have nowhere to persist to yet — in-memory only
+  var key = scheduleKey(tripId, panelLabel);
+  if (scheduleSaveTimers[key]) clearTimeout(scheduleSaveTimers[key]);
+  if (noteEl) { noteEl.textContent = 'Saving…'; noteEl.classList.remove('saved'); }
+  scheduleSaveTimers[key] = setTimeout(function() {
+    sbClient.from('trip_schedule').upsert({
+      trip_request_id: tripId,
+      panel_label: panelLabel,
+      schedule: schedule,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'trip_request_id,panel_label' }).then(function(res) {
+      if (!noteEl) return;
+      if (res && res.error) { noteEl.textContent = 'Could not save — will retry'; noteEl.classList.remove('saved'); }
+      else { noteEl.textContent = 'Saved'; noteEl.classList.add('saved'); }
+    }).catch(function() {
+      if (noteEl) { noteEl.textContent = 'Could not save — will retry'; noteEl.classList.remove('saved'); }
+    });
+  }, 600);
+}
+
+async function renderDraggableSchedule(mountEl, tripId, panelLabel, itinerary) {
+  if (!mountEl || !itinerary || !itinerary.length) { if (mountEl) mountEl.innerHTML = ''; return; }
+  mountEl._origItinerary = itinerary;
+  mountEl._tripId = tripId;
+  mountEl._panelLabel = panelLabel;
+  var schedule = await loadOrInitSchedule(tripId, panelLabel, itinerary);
+  drawSchedule(mountEl, tripId, panelLabel, schedule);
+}
+
+function drawSchedule(mountEl, tripId, panelLabel, schedule) {
+  var html = '<div class="schedule-toolbar">' +
+      '<span class="schedule-hint"><i class="ti ti-arrows-move"></i> Drag days or activities to build your group\'s actual plan — changes save automatically.</span>' +
+      '<div style="display:flex;align-items:center;gap:14px">' +
+        '<span class="schedule-save-note"></span>' +
+        '<button type="button" class="schedule-reset-btn" onclick="resetSchedule(this)">Reset to AI Suggestion</button>' +
+      '</div>' +
+    '</div><div class="itinerary schedule-list">';
+  schedule.forEach(function(day, dIdx) {
+    html += '<div class="itin-day schedule-mode" draggable="true" data-day-idx="' + dIdx + '">' +
+      '<div class="itin-day-header schedule-mode"><i class="ti ti-arrows-move day-drag-handle"></i><h4>Day ' + day.day + ': ' + escapeHtml(day.title || '') + '</h4></div>' +
+      '<div class="itin-day-body" data-day-idx="' + dIdx + '">';
+    (day.activities || []).forEach(function(act, aIdx) {
+      html += '<div class="itin-activity schedule-item" draggable="true" data-day-idx="' + dIdx + '" data-act-idx="' + aIdx + '">' +
+        '<i class="ti ti-arrows-move item-drag-handle"></i>' +
+        '<span class="itin-time">' + escapeHtml(act.time || '') + '</span><span>' + escapeHtml(act.description || '') + '</span>' +
+      '</div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  mountEl.innerHTML = html;
+  mountEl._scheduleData = schedule; // live reference — drag handlers read from this to rebuild after each drop
+  wireScheduleDrag(mountEl);
+}
+
+function getDragAfterElement(container, y, selector) {
+  var els = Array.prototype.slice.call(container.querySelectorAll(selector + ':not(.dragging)'));
+  var closest = null, closestOffset = -Infinity;
+  els.forEach(function(el) {
+    var box = el.getBoundingClientRect();
+    var offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closestOffset) { closestOffset = offset; closest = el; }
+  });
+  return closest;
+}
+
+function wireScheduleDrag(mountEl) {
+  var draggedEl = null, draggedType = null; // draggedType: 'day' | 'activity'
+  var list = mountEl.querySelector('.schedule-list');
+
+  mountEl.querySelectorAll('.schedule-item').forEach(function(item) {
+    item.addEventListener('dragstart', function(e) {
+      draggedEl = item; draggedType = 'activity';
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (err) {} // Firefox requires data to be set
+    });
+    item.addEventListener('dragend', function() {
+      item.classList.remove('dragging');
+      draggedEl = null; draggedType = null;
+    });
+  });
+
+  mountEl.querySelectorAll('.itin-day-body').forEach(function(body) {
+    body.addEventListener('dragover', function(e) {
+      if (draggedType !== 'activity' || !draggedEl) return;
+      e.preventDefault();
+      body.classList.add('drop-target');
+      var after = getDragAfterElement(body, e.clientY, '.schedule-item');
+      if (after == null) body.appendChild(draggedEl);
+      else body.insertBefore(draggedEl, after);
+    });
+    body.addEventListener('dragleave', function() { body.classList.remove('drop-target'); });
+    body.addEventListener('drop', function(e) {
+      e.preventDefault();
+      body.classList.remove('drop-target');
+      if (draggedType === 'activity') commitScheduleFromDOM(mountEl);
+    });
+  });
+
+  mountEl.querySelectorAll('.itin-day.schedule-mode').forEach(function(dayEl) {
+    dayEl.addEventListener('dragstart', function(e) {
+      // dragstart bubbles — ignore it here if it actually started on a nested activity
+      if (e.target.closest('.schedule-item')) return;
+      draggedEl = dayEl; draggedType = 'day';
+      dayEl.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+    });
+    dayEl.addEventListener('dragend', function() {
+      dayEl.classList.remove('dragging');
+      draggedEl = null; draggedType = null;
+    });
+    dayEl.addEventListener('dragover', function(e) {
+      if (draggedType !== 'day' || !draggedEl || draggedEl === dayEl) return;
+      e.preventDefault();
+      var after = getDragAfterElement(list, e.clientY, '.itin-day.schedule-mode');
+      if (after == null) list.appendChild(draggedEl);
+      else list.insertBefore(draggedEl, after);
+    });
+    dayEl.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (draggedType === 'day') commitScheduleFromDOM(mountEl);
+    });
+  });
+}
+
+// Re-reads the current DOM order (after a drop), renumbers days sequentially and
+// rebuilds the schedule array, then re-renders (so data-*-idx attributes stay
+// correct for the next drag) and persists the result.
+function commitScheduleFromDOM(mountEl) {
+  var srcSchedule = mountEl._scheduleData || [];
+  var dayEls = mountEl.querySelectorAll('.itin-day.schedule-mode');
+  var newSchedule = [];
+  dayEls.forEach(function(dayEl, newDayIdx) {
+    var activities = [];
+    dayEl.querySelectorAll('.schedule-item').forEach(function(itemEl) {
+      var oDayIdx = parseInt(itemEl.getAttribute('data-day-idx'), 10);
+      var oActIdx = parseInt(itemEl.getAttribute('data-act-idx'), 10);
+      var srcAct = (srcSchedule[oDayIdx] && srcSchedule[oDayIdx].activities[oActIdx]) || { time: '', description: '' };
+      activities.push({ time: srcAct.time, description: srcAct.description });
+    });
+    var origDayIdx = parseInt(dayEl.getAttribute('data-day-idx'), 10);
+    var srcDay = srcSchedule[origDayIdx] || {};
+    newSchedule.push({ day: newDayIdx + 1, title: srcDay.title || '', activities: activities });
+  });
+  drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, newSchedule);
+  var noteEl = mountEl.querySelector('.schedule-save-note');
+  saveSchedule(mountEl._tripId, mountEl._panelLabel, newSchedule, noteEl);
+}
+
+// "Reset to AI Suggestion" — requires one click to arm, a second to confirm (avoids
+// a native confirm() popup, which this app doesn't use anywhere else).
+function resetSchedule(btnEl) {
+  if (!btnEl.dataset.confirming) {
+    btnEl.dataset.confirming = '1';
+    var origText = btnEl.textContent;
+    btnEl.textContent = 'Click again to confirm';
+    setTimeout(function() { if (btnEl.dataset.confirming) { btnEl.textContent = origText; delete btnEl.dataset.confirming; } }, 3000);
+    return;
+  }
+  delete btnEl.dataset.confirming;
+  var mountEl = btnEl.closest('.trip-schedule-wrap') || btnEl.closest('#group-schedule-wrap');
+  if (!mountEl || !mountEl._origItinerary) return;
+  var fresh = cloneItinerary(mountEl._origItinerary);
+  drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, fresh);
+  var noteEl = mountEl.querySelector('.schedule-save-note');
+  saveSchedule(mountEl._tripId, mountEl._panelLabel, fresh, noteEl);
+  showToast('Schedule reset to the AI\'s original suggestion.');
+}
+
+/* === SWIPE-TO-SHORTLIST (B4) — Tinder-style card stack for courses/hotels ===
+   Cards are built straight from the AI-generated panel.courses / panel.hotels arrays
+   already used for the course/hotel grids — no separate data source. "Shortlist"
+   reuses the existing Trip Cart (addToCart) so it shows up in Group & Booking
+   immediately, with no new Supabase table. "Pass" just discards, no persistence.
+   Pointer Events cover mouse + touch drag in a single code path. */
+var swipeDeck = null; // { kind, idx, panelLabel, cards: [...], cursor }
+
+function buildSwipeCards(idx, kind) {
+  var panel = storedPanels && storedPanels[idx];
+  if (!panel) return [];
+  var items = (kind === 'hotels') ? (panel.hotels || []) : (panel.courses || []);
+  return items.map(function(item) {
+    if (kind === 'hotels') {
+      return {
+        type: 'hotel', name: item.name || '', sub: item.area || '',
+        desc: item.description || item.why_recommended || '',
+        price: 'Est. ' + fmtPrice(item.price_per_night || 0) + '/night',
+        priceNum: item.price_per_night || 0
+      };
+    }
+    return {
+      type: 'course', name: item.name || '', sub: item.location || '',
+      desc: item.description || item.why_recommended || '',
+      price: 'Est. ' + fmtPrice(item.green_fee || 0) + ' green fee',
+      priceNum: item.green_fee || 0
+    };
+  });
+}
+
+function openSwipeModal(idx, kind) {
+  var panel = storedPanels && storedPanels[idx];
+  var cards = buildSwipeCards(idx, kind);
+  swipeDeck = { kind: kind, idx: idx, panelLabel: (panel && panel.label) || String(idx), cards: cards, cursor: 0 };
+  document.getElementById('swipe-modal-title').textContent = 'Swipe to Shortlist — ' + (kind === 'hotels' ? 'Hotels' : 'Golf Courses');
+  drawSwipeStack();
+  document.getElementById('swipe-modal').classList.add('open');
+}
+
+function closeSwipeModal() {
+  var modalEl = document.getElementById('swipe-modal');
+  if (modalEl) modalEl.classList.remove('open');
+  swipeDeck = null;
+}
+document.getElementById('swipe-modal').addEventListener('click', function(e) { if (e.target === this) closeSwipeModal(); });
+
+function drawSwipeStack() {
+  var stackEl = document.getElementById('swipe-stack');
+  var controlsEl = document.getElementById('swipe-controls');
+  var progressEl = document.getElementById('swipe-progress');
+  if (!swipeDeck || !swipeDeck.cards.length) {
+    stackEl.innerHTML = '<p class="swipe-empty">No options to swipe through yet.</p>';
+    controlsEl.style.display = 'none';
+    progressEl.textContent = '';
+    return;
+  }
+  var remaining = swipeDeck.cards.slice(swipeDeck.cursor, swipeDeck.cursor + 3);
+  if (!remaining.length) {
+    stackEl.innerHTML = '<p class="swipe-empty"><i class="ti ti-check" style="font-size:1.6rem;display:block;margin-bottom:8px;color:var(--brass-light)"></i>That’s everything — anything you shortlisted is in your Trip Cart.</p>';
+    controlsEl.style.display = 'none';
+    progressEl.textContent = '';
+    return;
+  }
+  controlsEl.style.display = 'flex';
+  progressEl.textContent = (swipeDeck.cursor + 1) + ' of ' + swipeDeck.cards.length;
+  var html = '';
+  // Render back-to-front so the first (top) card ends up last in the DOM = highest stacking.
+  for (var i = remaining.length - 1; i >= 0; i--) {
+    var c = remaining[i];
+    var isTop = (i === 0);
+    var offset = i * 8;
+    var scale = 1 - i * 0.035;
+    html += '<div class="swipe-card" data-top="' + (isTop ? '1' : '0') + '" style="transform:translateY(' + offset + 'px) scale(' + scale + ');z-index:' + (10 - i) + '">' +
+      '<div class="swipe-stamp swipe-stamp-like">Shortlist</div>' +
+      '<div class="swipe-stamp swipe-stamp-pass">Pass</div>' +
+      '<div class="swipe-card-media"><i class="ti ' + (swipeDeck.kind === 'hotels' ? 'ti-building' : 'ti-golf') + '"></i></div>' +
+      '<div class="swipe-card-body">' +
+        '<h4>' + escapeHtml(c.name) + '</h4>' +
+        '<div class="swipe-card-sub">' + escapeHtml(c.sub) + '</div>' +
+        '<p>' + escapeHtml((c.desc || '').slice(0, 160)) + '</p>' +
+        '<span class="swipe-card-price">' + escapeHtml(c.price) + '</span>' +
+      '</div>' +
+    '</div>';
+  }
+  stackEl.innerHTML = html;
+  var topEl = stackEl.querySelector('.swipe-card[data-top="1"]');
+  if (topEl) wireSwipeCardDrag(topEl);
+}
+
+function wireSwipeCardDrag(cardEl) {
+  var startX = 0, startY = 0, dx = 0, dy = 0, dragging = false;
+  var THRESHOLD = 100;
+
+  cardEl.addEventListener('pointerdown', function(e) {
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    cardEl.classList.add('dragging');
+    try { cardEl.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  cardEl.addEventListener('pointermove', function(e) {
+    if (!dragging) return;
+    dx = e.clientX - startX; dy = e.clientY - startY;
+    var rot = dx / 12;
+    cardEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px) rotate(' + rot + 'deg)';
+    cardEl.classList.toggle('show-like', dx > 30);
+    cardEl.classList.toggle('show-pass', dx < -30);
+  });
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    cardEl.classList.remove('dragging');
+    if (dx > THRESHOLD) commitSwipe('like');
+    else if (dx < -THRESHOLD) commitSwipe('pass');
+    else { cardEl.style.transform = ''; cardEl.classList.remove('show-like', 'show-pass'); }
+    dx = 0; dy = 0;
+  }
+  cardEl.addEventListener('pointerup', endDrag);
+  cardEl.addEventListener('pointercancel', endDrag);
+}
+
+// Explicit like/pass buttons animate the same top card out programmatically,
+// so keyboard/mouse users get the identical result as a drag gesture.
+function swipeActive(action) {
+  if (!swipeDeck || swipeDeck.cursor >= swipeDeck.cards.length) return;
+  commitSwipe(action);
+}
+
+function commitSwipe(action) {
+  if (!swipeDeck) return;
+  var card = swipeDeck.cards[swipeDeck.cursor];
+  var topEl = document.querySelector('#swipe-stack .swipe-card[data-top="1"]');
+  if (topEl) {
+    topEl.style.transform = '';
+    topEl.classList.add(action === 'like' ? 'leaving-like' : 'leaving-pass');
+  }
+  if (action === 'like' && card) {
+    addToCart(card.type, card.name, card.sub, card.price, card.priceNum);
+  }
+  swipeDeck.cursor++;
+  setTimeout(drawSwipeStack, topEl ? 260 : 0);
+}
+
 function buildBTT(panel, idx, qData) {
   var dest = panel.destination || '';
   var destEnc = encodeURIComponent(dest);
+  var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED');
+  var bookingUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + destEnc);
+  var expediaItem = '';
+  if (EXPEDIA_AFFILIATE_ID) {
+    // One-line activation once Simon's Expedia affiliate application is approved.
+    var expediaUrl = 'https://www.expedia.com/Hotel-Search?destination=' + destEnc + '&AID=' + encodeURIComponent(EXPEDIA_AFFILIATE_ID);
+    expediaItem = '<a href="' + expediaUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>';
+  }
   return '<div class="book-this-trip">' +
     '<h3>Book This Trip</h3>' +
     '<p class="btt-sub">Ready to commit? Open each provider with your destination pre-filled.</p>' +
@@ -5306,17 +5907,19 @@ function buildBTT(panel, idx, qData) {
         '<div class="btt-icon"><i class="ti ti-plane-departure"></i></div>' +
         '<div><div class="btt-label">Flights</div><div class="btt-action">Search Google Flights</div></div>' +
       '</a>' +
-      '<a href="https://www.booking.com/searchresults.html?ss=' + destEnc + '" target="_blank" class="btt-btn btt-hotels">' +
+      '<div class="btt-btn btt-findstay" onclick="toggleFindStay(this,event)">' +
         '<div class="btt-icon"><i class="ti ti-bed"></i></div>' +
-        '<div><div class="btt-label">Hotels &amp; Resorts</div><div class="btt-action">Search on Booking.com</div></div>' +
-      '</a>' +
+        '<div><div class="btt-label">Hotels &amp; Villas</div><div class="btt-action">Find a Stay</div></div>' +
+        '<i class="ti ti-chevron-down btt-caret"></i>' +
+        '<div class="btt-findstay-menu">' +
+          '<a href="' + bookingUrl + '" target="_blank"><i class="ti ti-building"></i> Booking.com</a>' +
+          '<a href="' + vrboUrl + '" target="_blank"><i class="ti ti-home"></i> Vrbo (Villas)</a>' +
+          expediaItem +
+        '</div>' +
+      '</div>' +
       '<a href="' + buildDestTeeTimes(panel.destination || dest) + '" target="_blank" class="btt-btn btt-teetimes">' +
         '<div class="btt-icon"><i class="ti ti-golf"></i></div>' +
         '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
-      '</a>' +
-      '<a href="https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED') + '" target="_blank" class="btt-btn btt-villas">' +
-        '<div class="btt-icon"><i class="ti ti-bed"></i></div>' +
-        '<div><div class="btt-label">Villas</div><div class="btt-action">Search on Vrbo</div></div>' +
       '</a>' +
     '</div>' +
     '<div class="btt-total">' +
@@ -5328,6 +5931,21 @@ function buildBTT(panel, idx, qData) {
     '</div>' +
   '</div>';
 }
+
+// Toggles the "Find a Stay" popover (Booking.com / Vrbo / Expedia once live).
+// Closes any other open instance first so only one is ever open at a time.
+function toggleFindStay(el, evt) {
+  if (evt) evt.stopPropagation();
+  var wasOpen = el.classList.contains('open');
+  var all = document.querySelectorAll('.btt-findstay.open');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
+  if (!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('.btt-findstay')) return;
+  var all = document.querySelectorAll('.btt-findstay.open');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
+});
 
 /* === PUTTING MINI-GAME (shown during trip generation) === */
 var puttGame = null;
@@ -6449,7 +7067,7 @@ async function initMap(idx, mapPrefix) {
   (panel.hotels || []).forEach(function(h) {
     toSearch.push({ type: 'hotel', name: h.name, area: h.area,
       detail: (h.description||'').substring(0,100),
-      link: 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||''),
+      link: wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||'')),
       aiLat: h.lat, aiLng: h.lng });
   });
   (panel.courses || []).forEach(function(c) {
@@ -6883,6 +7501,7 @@ function switchTripTab(tab) {
   if (tab === 'group') {
     loadTripCart();
     updateGroupVotesTally();
+    renderGroupSchedule();
     // Inject BTT into group planning if we have a panel
     var bttWrap = document.getElementById('group-btt-wrap');
     if (bttWrap && storedPanels && storedPanels[0]) {
@@ -6903,6 +7522,7 @@ async function openTripDetail(tripId, tripData) {
   document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers • ' + formatBudgetDisplay(tripData.budget);
   document.getElementById('td-dest').textContent = tripData.destination_type || '—';
   document.getElementById('td-golfers').textContent = tripData.group_size || '—';
+  document.getElementById('td-rounds').textContent = tripData.rounds_of_golf || '—';
   document.getElementById('td-budget').textContent = formatBudgetDisplay(tripData.budget) || '—';
   var groupNameInput = document.getElementById('group-name-input');
   if (groupNameInput) groupNameInput.value = tripData.group_name || '';
@@ -6994,6 +7614,7 @@ async function loadTripItinerary(tripId, tripData) {
 
 function renderSavedItinerary(panels, tripData, contentEl) {
   storedPanels = panels; // store for PDF export
+  currentPanelIdx = 0; // reset so the Group tab's schedule/BTT default to the first tier for this trip
   mapInstances = {}; // reset map instances for this trip
   resetMapObserver(); // reset pending inits
   tripVoteCache = {}; // reset vote cache for this trip
@@ -7027,6 +7648,7 @@ function renderSavedItinerary(panels, tripData, contentEl) {
 }
 
 function activateSavedPanel(idx) {
+  currentPanelIdx = idx; // keep in sync so the Group tab's schedule/BTT/PDF export use the right tier
   document.querySelectorAll('#td-result-tabs .results-tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
   document.querySelectorAll('.td-saved-panel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
   document.querySelectorAll('#td-compare-bar .compare-item').forEach(function(c, i) { c.classList.toggle('active-tab', i === idx); });
@@ -7470,7 +8092,7 @@ async function generateSeasonalContent(season) {
       '{"name":"' + destName + '","tagline":"[one line why great this season]","weather":"[temp]","flight_time":"[time]","best_for":"[golfer type]","insider_tip":"[tip]","budget_from":000,"budget_to":000,' +
       '"courses":[{"name":"[real course]","green_fee":00,"why":"[sentence]"},{"name":"[real course]","green_fee":00,"why":"[sentence]"}],' +
       '"hotel":{"name":"[real hotel]","area":"[area]","why":"[sentence]"},' +
-      '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(destName) + '"}}';
+      '"booking":{"flights":"https://www.google.com/travel/flights","hotels":"' + wrapBookingUrl(destName, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(destName)) + '"}}';
   }
 
   try {
@@ -7535,7 +8157,7 @@ function renderSeasonalContent(data, season, generatedAt) {
   destinations.forEach(function(dest) {
     var destEnc = encodeURIComponent(dest.name || '');
     var flightsUrl = 'https://www.google.com/travel/flights?q=' + encodeURIComponent('flights to ' + (dest.name || '') + ' from UK');
-    var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : 'https://www.booking.com/searchresults.html?ss=' + destEnc;
+    var hotelsUrl = dest.booking && dest.booking.hotels ? dest.booking.hotels : wrapBookingUrl(dest.name || '', 'https://www.booking.com/searchresults.html?ss=' + destEnc);
     var golfnowUrl = buildDestTeeTimes(dest.name || '');
     var destNameSafe = (dest.name||'').replace(/'/g, '');
 
