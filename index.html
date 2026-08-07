@@ -9354,3 +9354,187 @@ async function loadSharedTrip(tripId, user) {
   try {
     showPage('trip');
     document.getElementById('td-itinerary-loading').style.display = 'block';
+
+    // Fetch trip request data
+    var tripReq = await sbClient.from('trip_requests')
+      .select('*')
+      .eq('id', tripId)
+      .single();
+
+    // Fetch trip results
+    var tripRes = await sbClient.from('trip_results')
+      .select('ai_response')
+      .eq('trip_request_id', tripId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    document.getElementById('td-itinerary-loading').style.display = 'none';
+
+    if (!tripReq.data) {
+      showToast('Trip not found or no longer available.', true);
+      showPage('landing');
+      return;
+    }
+
+    var tripData = tripReq.data;
+    var aiData = tripRes && tripRes.data ? tripRes.data.ai_response : null;
+
+    // Show public banner if not logged in
+    if (!user) {
+      var banner = document.getElementById('public-trip-banner');
+      var note = document.getElementById('td-public-note');
+      var groupTab = document.getElementById('td-tab-group');
+      if (banner) banner.style.display = 'block';
+      if (note) note.style.display = 'block';
+      if (groupTab) {
+        groupTab.style.opacity = '0.5';
+        groupTab.onclick = function() {
+          showToast('Sign in to access group planning and voting');
+          openAuthModal('signin');
+        };
+      }
+    }
+
+    // Load the trip itinerary
+    await loadTripItinerary(tripId, tripData);
+
+    // If logged in, also load votes
+    if (user) {
+      tripVoteCache = {};
+      await loadVotesForTrip(tripId);
+    }
+
+  } catch(e) {
+    console.error('loadSharedTrip error:', e);
+    document.getElementById('td-itinerary-loading').style.display = 'none';
+    showToast('Could not load trip. Try again.', true);
+    showPage('landing');
+  }
+}
+</script>
+
+<!-- PRICING MODAL -->
+<div id="pricing-modal" class="glass-scrim" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div class="glass" style="max-width:680px;width:100%;max-height:90vh;overflow-y:auto;position:relative;color:#fff">
+    <button onclick="closePricingModal()" style="position:absolute;top:18px;right:18px;background:none;border:none;font-size:1.15rem;cursor:pointer;color:rgba(255,255,255,.6);z-index:1">&#215;</button>
+    <div style="padding:38px 32px 30px;text-align:center;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="color:var(--brass);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px">Upgrade GolfTrip</div>
+      <h2 style="color:#fff;font-family:var(--font-display);font-weight:300;letter-spacing:-.02em;font-size:1.8rem;margin-bottom:10px">Plan more trips. Stress less.</h2>
+      <p style="color:rgba(255,255,255,.6);font-size:.88rem">Start free. Upgrade when you're ready.</p>
+    </div>
+    <div class="glass-plan-grid">
+
+      <!-- Pro Plan -->
+      <div style="padding:28px 26px;position:relative;background:rgba(15,35,24,.28)">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.55);margin-bottom:12px">Pro</div>
+        <div style="font-family:var(--font-display);font-size:2.1rem;font-weight:300;letter-spacing:-.025em;color:#fff;margin-bottom:4px">£49<span style="font-family:var(--font-body);font-size:.82rem;font-weight:400;color:rgba(255,255,255,.5);letter-spacing:0">/year</span></div>
+        <div style="font-size:.76rem;color:rgba(255,255,255,.45);margin-bottom:20px">That's £4.08/month</div>
+        <ul class="glass-features" style="list-style:none;margin-bottom:22px;font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.9">
+          <li>Unlimited trip generations</li>
+          <li>Budget, Mid &amp; Luxury comparisons</li>
+          <li>Save &amp; share trips</li>
+          <li>Group voting tools</li>
+          <li>PDF export</li>
+          <li>All booking links</li>
+        </ul>
+        <button class="btn" style="width:100%;padding:12px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)" onclick="startCheckout('pro')" id="checkout-btn-pro">Get Pro</button>
+      </div>
+
+      <!-- Society Plan -->
+      <div style="padding:28px 26px;position:relative;background:rgba(15,35,24,.28)">
+        <div style="position:absolute;top:14px;right:26px;color:var(--brass);font-size:.62rem;font-weight:600;letter-spacing:.16em;white-space:nowrap">MOST POPULAR</div>
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--brass);margin-bottom:12px">Society</div>
+        <div style="font-family:var(--font-display);font-size:2.1rem;font-weight:300;letter-spacing:-.025em;color:#fff;margin-bottom:4px">£99<span style="font-family:var(--font-body);font-size:.82rem;font-weight:400;color:rgba(255,255,255,.5);letter-spacing:0">/year</span></div>
+        <div style="font-size:.76rem;color:rgba(255,255,255,.45);margin-bottom:20px">That's £8.25/month</div>
+        <ul class="glass-features" style="list-style:none;margin-bottom:22px;font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.9">
+          <li>Everything in Pro</li>
+          <li>Invite your whole group</li>
+          <li>Group chat per trip</li>
+          <li>Shared trip cart</li>
+          <li>Share trip via link</li>
+          <li>Perfect for 8+ players</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;padding:12px" onclick="startCheckout('society')" id="checkout-btn-society">Get Society</button>
+      </div>
+
+    </div>
+    <div style="padding:0 30px 26px;text-align:center;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.4)">
+      Secure payment via Stripe &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; 7-day money back guarantee
+    </div>
+  </div>
+</div>
+
+<!-- FEEDBACK WIDGET -->
+<button id="feedback-fab" onclick="openFeedbackModal()" style="position:fixed;bottom:22px;right:22px;z-index:900;background:var(--moss-dark);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:11px 18px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;box-shadow:none;font-family:inherit;display:inline-flex;align-items:center;gap:8px"><i class="ti ti-message-circle" style="font-size:1.1em"></i> Feedback</button>
+
+<div id="feedback-modal" class="glass-scrim" style="display:none;position:fixed;inset:0;z-index:1001;align-items:center;justify-content:center;padding:20px">
+  <div class="glass" style="max-width:440px;width:100%;padding:32px;position:relative;color:#fff">
+    <button onclick="closeFeedbackModal()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.15rem;cursor:pointer;color:rgba(255,255,255,.6)">&#215;</button>
+    <h2 style="color:#fff;font-family:var(--font-display);font-weight:300;letter-spacing:-.02em;font-size:1.5rem;margin-bottom:8px">Got feedback?</h2>
+    <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:20px">We're in early access — tell us what's working, what's not, or what you'd like to see next.</p>
+    <div style="display:flex;gap:8px;margin-bottom:18px" id="feedback-rating">
+      <button class="fb-star" data-val="1" onclick="setFeedbackRating(1)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
+      <button class="fb-star" data-val="2" onclick="setFeedbackRating(2)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
+      <button class="fb-star" data-val="3" onclick="setFeedbackRating(3)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
+      <button class="fb-star" data-val="4" onclick="setFeedbackRating(4)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
+      <button class="fb-star" data-val="5" onclick="setFeedbackRating(5)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
+    </div>
+    <textarea id="feedback-message" placeholder="What's on your mind?" rows="4" style="width:100%;border:1px solid rgba(255,255,255,.28);border-radius:var(--r);background:rgba(255,255,255,.08);color:#fff;padding:11px;font-family:inherit;font-size:.9rem;resize:vertical;margin-bottom:12px"></textarea>
+    <input id="feedback-email" type="email" placeholder="Email (optional — if you'd like a reply)" style="width:100%;border:1px solid rgba(255,255,255,.28);border-radius:var(--r);background:rgba(255,255,255,.08);color:#fff;padding:11px;font-family:inherit;font-size:.85rem;margin-bottom:18px">
+    <button class="btn btn-primary" style="width:100%;padding:12px" onclick="submitFeedback()" id="feedback-submit-btn">Send Feedback</button>
+  </div>
+</div>
+
+<script>
+var feedbackRatingVal = 0;
+function openFeedbackModal() {
+  var m = document.getElementById('feedback-modal');
+  if (m) m.style.display = 'flex';
+}
+function closeFeedbackModal() {
+  var m = document.getElementById('feedback-modal');
+  if (m) m.style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('feedback-modal');
+  if (m && e.target === m) closeFeedbackModal();
+});
+function setFeedbackRating(val) {
+  feedbackRatingVal = val;
+  document.querySelectorAll('.fb-star').forEach(function(s) {
+    s.style.opacity = parseInt(s.getAttribute('data-val')) <= val ? '1' : '.35';
+  });
+}
+async function submitFeedback() {
+  var msgEl = document.getElementById('feedback-message');
+  var emailEl = document.getElementById('feedback-email');
+  var msg = msgEl.value.trim();
+  var email = emailEl.value.trim();
+  if (!msg) { showToast('Please add a message before sending.', true); return; }
+  var btn = document.getElementById('feedback-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    await sbClient.from('feedback').insert({
+      user_id: currentUser ? currentUser.id : null,
+      email: email || (currentUser ? currentUser.email : null),
+      rating: feedbackRatingVal || null,
+      message: msg,
+      page: window.location.pathname + window.location.search,
+      plan: userPlan
+    });
+    showToast('Thanks — feedback sent!');
+    msgEl.value = ''; emailEl.value = ''; feedbackRatingVal = 0;
+    document.querySelectorAll('.fb-star').forEach(function(s) { s.style.opacity = '.35'; });
+    closeFeedbackModal();
+  } catch (e) {
+    showToast('Could not send feedback — please try again.', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Feedback'; }
+  }
+}
+</script>
+<!-- END FEEDBACK WIDGET -->
+
+</body>
+</html>
