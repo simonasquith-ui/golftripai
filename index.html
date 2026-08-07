@@ -482,6 +482,10 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .courses-grid,.hotels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:36px}
 .course-card,.hotel-card{background:var(--surface);border-radius:var(--rl);border:1px solid var(--line);box-shadow:none;padding:24px;display:flex;flex-direction:column;gap:9px}
 .course-card h4,.hotel-card h4{color:var(--moss);font-family:var(--font-display);font-weight:500;font-size:1.05rem}
+/* Real-photo preview thumbnail — shows a soft placeholder + icon until the
+   Google Places lookup resolves, then swaps in the actual venue photo */
+.card-photo{width:100%;height:140px;border-radius:var(--r);overflow:hidden;margin:-4px 0 4px;background:linear-gradient(135deg,var(--paper) 0%,var(--line) 100%);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.7rem;flex-shrink:0}
+.card-photo img{width:100%;height:100%;object-fit:cover;display:block}
 /* Course stats read as a quiet hairline-divided row rather than filled chips */
 .course-stats{display:flex;gap:0;flex-wrap:wrap;margin:6px 0}
 .course-stat{background:none;color:var(--muted);padding:0 12px;border-radius:0;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;border-left:1px solid var(--line)}
@@ -976,7 +980,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
         <div class="feature-card"><div class="feature-icon"><i class="ti ti-users"></i></div><h3>Group Planning Tools</h3><p>Invite society members, share the itinerary, vote on options and coordinate via the built-in group chat.</p></div>
         <div class="feature-card accent" onclick="showPage('venue')"><div class="feature-icon"><i class="ti ti-golf"></i></div><h3>Build Around a Course</h3><p>Already found a course you want to play? Drop in the name or link — AI finds nearby hotels, restaurants and flights and builds the trip around it.</p><span class="quiet-link">Try it &#8594;</span></div>
         <div class="feature-card"><div class="feature-icon"><i class="ti ti-calendar-event"></i></div><h3>Seasonal Recommendations</h3><p>Get advice on the best time to visit each destination based on weather, course conditions and pricing windows.</p></div>
-        <div class="feature-card"><div class="feature-icon"><i class="ti ti-link"></i></div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to Google Flights, Booking.com and GolfNow so you can book in one click.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="ti ti-link"></i></div><h3>Direct Booking Links</h3><p>Every course, hotel and flight links directly to Expedia, Booking.com and GolfNow so you can book in one click.</p></div>
       </div>
     </div>
   </section>
@@ -4056,6 +4060,7 @@ async function refreshSection(section, idx, dest, tier, btn) {
     var newSection = tempPanel.querySelector('#section-' + section + '-' + idx);
     if (newSection) {
       sectionEl.innerHTML = newSection.innerHTML;
+      hydrateCardPhotos(sectionEl);
     }
 
     btn.classList.remove('loading');
@@ -4085,6 +4090,7 @@ function buildPanelSection(section, panel, idx, qData) {
       var gn = gnData.url; var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
+        '<div class="card-photo" data-photo-q="'+(c.name||'').replace(/"/g,'&quot;')+' '+(c.location||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-golf"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="margin:0;flex:1">' + (c.name||'') + '</h4>' +
           '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
@@ -4107,12 +4113,16 @@ function buildPanelSection(section, panel, idx, qData) {
     html += '<div id="section-hotels-' + idx + '">';
     (panel.hotels || []).forEach(function(h) {
       var isVilla = h.villa_rental;
-      var bookUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest));
+      var psCheckin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+      var psCheckout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+      var bookUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest) + (psCheckin?'&checkin='+psCheckin:'') + (psCheckout?'&checkout='+psCheckout:''));
       var groupSize = qData && qData.group_size ? parseInt(qData.group_size) : 8;
-      var vrboDestUrl = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(dest) + '&adults=' + groupSize + '&sort=RECOMMENDED';
+      var vrboDestUrl = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(dest) + '&adults=' + groupSize + '&sort=RECOMMENDED' + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:'');
       var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent(vrboDestUrl);
-      var altUrl = isVilla ? wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest)) : vrboUrl;
+      var altUrl = isVilla ? wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest) + (psCheckin?'&checkin='+psCheckin:'') + (psCheckout?'&checkout='+psCheckout:'')) : vrboUrl;
+      var expediaUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + encodeURIComponent(h.name||dest) + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:''));
       html += '<div class="hotel-card">' +
+        '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="margin:0;flex:1">' + (h.name||'') + '</h4>' +
           makeVoteBtn(tripId,'hotel',h.name||'',panelLabel) +
@@ -4123,6 +4133,7 @@ function buildPanelSection(section, panel, idx, qData) {
         '<div class="card-links">' +
           '<a href="'+bookUrl+'" target="_blank" class="card-link">'+(isVilla?'Search Vrbo':'Check on Booking.com')+'</a>' +
           '<a href="'+altUrl+'" target="_blank" class="card-link">'+(isVilla?'Try Booking.com':'Try Vrbo')+'</a>' +
+          (expediaUrl ? '<a href="'+expediaUrl+'" target="_blank" class="card-link">Try Expedia</a>' : '') +
           '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" data-cart-type="hotel" data-cart-name="'+(h.name||'').replace(/"/g,'&quot;')+'" data-cart-sub="'+(h.area||'').replace(/"/g,'&quot;')+'" data-cart-price="Est. '+fmtPrice(h.price_per_night||0)+'/night" data-cart-pricenum="'+(h.price_per_night||0)+'">&#43; Cart</button>' +
         '</div>' +
       '</div>';
@@ -4134,6 +4145,7 @@ function buildPanelSection(section, panel, idx, qData) {
       var gMaps = r.google_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent((r.name||'') + ' ' + dest));
       var ot = r.opentable_available ? 'https://www.opentable.co.uk/s?covers=4&term=' + encodeURIComponent(r.name||'') : null;
       html += '<div class="restaurant-card">' +
+        '<div class="card-photo" data-photo-q="'+(r.name||'').replace(/"/g,'&quot;')+' '+dest.replace(/"/g,'&quot;')+'"><i class="ti ti-tools-kitchen-2"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">' +
           '<h4 style="margin:0;flex:1">' + (r.name||'') + '</h4>' +
           makeVoteBtn(tripId,'restaurant',r.name||'',panelLabel) +
@@ -4457,6 +4469,7 @@ async function generateTrip() {
           if (mapInstances[oldMapId]) { delete mapInstances[oldMapId]; }
           var newEl = buildPanel(merged, idx, data, 'results');
           existing.replaceWith(newEl);
+          hydrateCardPhotos(newEl);
           var capturedIdx = idx;
           var capturedMerged = merged;
           var capturedData = data;
@@ -4601,9 +4614,27 @@ async function generateTrip() {
 
 /* === RESULTS RENDERING === */
 // ── STAY PROVIDER CONFIG ────────────────────────────────
-// Set this once Simon's Expedia affiliate application is approved to switch on
-// the Expedia option in the "Find a Stay" dropdown — no other code changes needed.
-var EXPEDIA_AFFILIATE_ID = '';
+// Expedia links go through Simon's own Expedia Group Travel Creator Program
+// account (creator.expediagroup.com), NOT CJ. That program's link format is
+// a direct deep-link wrapper: https://expedia.com/affiliate?siteid=1&landingPage=
+// <encoded destination URL>&camref=...&creativeref=...&adref=... — confirmed
+// live-generated via their Link Builder tool. siteid=1 is Expedia's US site;
+// landingPage carries the real destination + dates we build per search, same
+// as Booking.com's deep-link override.
+var EXPEDIA_AFF = {
+  siteid: '1',
+  camref: '1011l5Pacu',
+  creativeref: '1100l68075',
+  adref: 'PZBsL83EPo'
+};
+function wrapExpediaUrl(plainUrl) {
+  if (!plainUrl) return null;
+  return 'https://expedia.com/affiliate?siteid=' + EXPEDIA_AFF.siteid +
+    '&landingPage=' + encodeURIComponent(plainUrl) +
+    '&camref=' + EXPEDIA_AFF.camref +
+    '&creativeref=' + EXPEDIA_AFF.creativeref +
+    '&adref=' + EXPEDIA_AFF.adref;
+}
 // ── BOOKING.COM CJ AFFILIATE LINKS (per-country) ────────────────────────────
 // Wraps a plain Booking.com URL through Simon's CJ (Commission Junction)
 // tracking link — https://www.<domain>/click-<PID>-<LID>?url=<encoded target> —
@@ -4635,6 +4666,49 @@ function wrapBookingUrl(destination, plainUrl) {
     }
   }
   return plainUrl;
+}
+
+// ── VENUE PHOTO PREVIEWS (Google Places) ────────────────────────────────
+// Course/hotel/restaurant cards render a ".card-photo" placeholder div with
+// data-photo-q="<name> <area/location>" (see buildPanel/buildPanelSection).
+// hydrateCardPhotos() finds any not-yet-loaded placeholders, asks the
+// existing /geocode function (which now also returns a Places photo
+// reference) for a real photo, and swaps it in via the /place-photo proxy —
+// which keeps the Google API key server-side. Failed/missing lookups just
+// leave the icon placeholder in place, so nothing ever shows a broken image.
+// Call this any time new cards are added to the DOM — it's safe/idempotent
+// to call repeatedly since it skips anything already marked data-photo-done.
+var venuePhotoCache = {}; // query string -> photo_reference (or null if none found)
+function hydrateCardPhotos(scopeEl) {
+  var root = scopeEl || document;
+  var nodes = root.querySelectorAll('.card-photo[data-photo-q]:not([data-photo-done])');
+  nodes.forEach(function(node) {
+    node.setAttribute('data-photo-done', '1');
+    var q = node.getAttribute('data-photo-q');
+    if (!q) return;
+    if (venuePhotoCache.hasOwnProperty(q)) {
+      applyCardPhoto(node, venuePhotoCache[q]);
+      return;
+    }
+    fetch('/.netlify/functions/geocode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q })
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        var ref = (data && data.photo_reference) || null;
+        venuePhotoCache[q] = ref;
+        applyCardPhoto(node, ref);
+      })
+      .catch(function() { venuePhotoCache[q] = null; });
+  });
+}
+function applyCardPhoto(node, photoRef) {
+  if (!node || !document.body.contains(node)) return; // card may have been replaced/removed by the time this resolves
+  if (photoRef) {
+    node.innerHTML = '<img loading="lazy" src="/.netlify/functions/place-photo?ref=' + encodeURIComponent(photoRef) + '&maxwidth=400" alt="">';
+  }
+  // else: leave the icon placeholder as-is — no photo available for this venue
 }
 // ── GOLF BOOKING LINK HELPER ────────────────────────────────
 var GOLFNOW_EU_DESTS = ['spain','france','germany','ireland','morocco','belgium','czech','switzerland','bilbao','madrid','barcelona','costa brava','costa del sol','marbella'];
@@ -5025,6 +5099,7 @@ function renderResults(aiData, qData) {
 
     panelsEl.appendChild(buildPanel(panel, i, qData, 'results'));
   });
+  hydrateCardPhotos(panelsEl);
 
   // Show nav arrows if more than 1 panel
   var navWrap = document.getElementById('results-nav-wrap');
@@ -5121,27 +5196,32 @@ function buildSkyscannerUrl(panel, qData) {
     if (!destCode && dest.toLowerCase().indexOf(k.toLowerCase()) !== -1) destCode = DEST_CODES[k];
   });
 
-  // Build Google Flights deep link — pre-populated with origin, destination, dates and pax
-  // Format: google.com/travel/flights/search?tfs=encoded_params
-  // Simpler format that always works:
+  // Build an Expedia Flights deep link — pre-populated with origin, destination,
+  // dates and pax — wrapped through Simon's Expedia Travel Creator Program
+  // tracking (wrapExpediaUrl) so a booking made from this link earns commission,
+  // same mechanism used for hotel links throughout the app.
+  var departUS = isoToUSDate(depart);
+  var retUS = isoToUSDate(ret);
   if (originCode && destCode) {
-    var params = new URLSearchParams();
-    params.set('q', 'flights from ' + originCode + ' to ' + destCode);
-    if (depart) params.set('outboundDate', depart);
-    if (ret) params.set('returnDate', ret);
-    params.set('adults', adults);
-    params.set('curr', 'GBP');
-    params.set('gl', 'uk');
-    params.set('hl', 'en-GB');
-    return 'https://www.google.com/travel/flights?' + params.toString();
+    var leg1 = 'from:' + originCode + ',to:' + destCode + (departUS ? ',departure:' + departUS + 'TANYT' : '');
+    var flightsPlainUrl;
+    if (retUS) {
+      var leg2 = 'from:' + destCode + ',to:' + originCode + ',departure:' + retUS + 'TANYT';
+      flightsPlainUrl = 'https://www.expedia.com/Flights-Search?trip=roundtrip&leg1=' + encodeURIComponent(leg1) + '&leg2=' + encodeURIComponent(leg2) + '&passengers=adults:' + adults + '&mode=search';
+    } else {
+      flightsPlainUrl = 'https://www.expedia.com/Flights-Search?trip=oneway&leg1=' + encodeURIComponent(leg1) + '&passengers=adults:' + adults + '&mode=search';
+    }
+    return wrapExpediaUrl(flightsPlainUrl);
   }
-  // Fallback — Google Flights generic search for destination
-  var fallback = new URLSearchParams();
-  fallback.set('q', 'flights to ' + dest + ' from UK');
-  fallback.set('curr', 'GBP');
-  fallback.set('gl', 'uk');
-  fallback.set('hl', 'en-GB');
-  return 'https://www.google.com/travel/flights?' + fallback.toString();
+  // Fallback — generic Expedia flights search for the destination name
+  return wrapExpediaUrl('https://www.expedia.com/Flights-Search?destination=' + encodeURIComponent(dest) + '&mode=search');
+}
+// Converts an ISO 'YYYY-MM-DD' date into Expedia's expected 'M/D/YYYY' format.
+function isoToUSDate(iso) {
+  if (!iso) return '';
+  var parts = iso.split('-');
+  if (parts.length !== 3) return '';
+  return parseInt(parts[1], 10) + '/' + parseInt(parts[2], 10) + '/' + parts[0];
 }
 
 function buildPanel(panel, idx, qData, mapPrefix) {
@@ -5265,6 +5345,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
+        '<div class="card-photo" data-photo-q="'+(c.name||'').replace(/"/g,'&quot;')+' '+(c.location||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-golf"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="margin:0;flex:1">' + (c.name || '') + '</h4>' +
           '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
@@ -5337,7 +5418,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
           (checkin ? '&startDate=' + checkin : '') +
           (checkout ? '&endDate=' + checkout : '');
       }
+      var expediaHotelUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + hotelEnc + (checkin ? '&startDate=' + checkin : '') + (checkout ? '&endDate=' + checkout : ''));
       html += '<div class="hotel-card">' +
+        '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
           '<h4 style="margin:0">' + (h.name || '') + '</h4>' +
           makeVoteBtn(tripId, 'hotel', h.name || '', panelLabel) +
@@ -5349,6 +5432,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '<div class="card-links">' +
           '<a href="' + bookUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Search Vrbo' : 'Check on Booking.com') + '</a>' +
           '<a href="' + altUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Try Booking.com' : 'Try Vrbo') + '</a>' +
+          (expediaHotelUrl ? '<a href="' + expediaHotelUrl + '" target="_blank" class="card-link">Try Expedia</a>' : '') +
           '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
             'data-cart-type="hotel" ' +
             'data-cart-name="' + (h.name||'').replace(/"/g,'&quot;') + '" ' +
@@ -5419,6 +5503,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       var rating = r.rating ? r.rating : null;
       var openTableUrl = 'https://www.opentable.com/s?covers=2&term=' + encodeURIComponent(r.name || '') + '&metroName=' + encodeURIComponent(dest);
       html += '<div class="card" style="padding:16px">' +
+        '<div class="card-photo" data-photo-q="'+(r.name||'').replace(/"/g,'&quot;')+' '+dest.replace(/"/g,'&quot;')+'"><i class="ti ti-tools-kitchen-2"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
           '<h4 style="color:var(--green);font-size:.95rem;margin:0">' + (r.name || '') + '</h4>' +
           '<div style="display:flex;align-items:center;gap:8px">' +
@@ -5821,7 +5906,7 @@ function drawSwipeStack() {
     html += '<div class="swipe-card" data-top="' + (isTop ? '1' : '0') + '" style="transform:translateY(' + offset + 'px) scale(' + scale + ');z-index:' + (10 - i) + '">' +
       '<div class="swipe-stamp swipe-stamp-like">Shortlist</div>' +
       '<div class="swipe-stamp swipe-stamp-pass">Pass</div>' +
-      '<div class="swipe-card-media"><i class="ti ' + (swipeDeck.kind === 'hotels' ? 'ti-building' : 'ti-golf') + '"></i></div>' +
+      '<div class="swipe-card-media card-photo" data-photo-q="' + escapeHtml(c.name) + ' ' + escapeHtml(c.sub) + '"><i class="ti ' + (swipeDeck.kind === 'hotels' ? 'ti-building' : 'ti-golf') + '"></i></div>' +
       '<div class="swipe-card-body">' +
         '<h4>' + escapeHtml(c.name) + '</h4>' +
         '<div class="swipe-card-sub">' + escapeHtml(c.sub) + '</div>' +
@@ -5831,6 +5916,7 @@ function drawSwipeStack() {
     '</div>';
   }
   stackEl.innerHTML = html;
+  hydrateCardPhotos(stackEl);
   var topEl = stackEl.querySelector('.swipe-card[data-top="1"]');
   if (topEl) wireSwipeCardDrag(topEl);
 }
@@ -5891,13 +5977,14 @@ function commitSwipe(action) {
 function buildBTT(panel, idx, qData) {
   var dest = panel.destination || '';
   var destEnc = encodeURIComponent(dest);
-  var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED');
-  var bookingUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + destEnc);
+  var bttCheckin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+  var bttCheckout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+  var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED' + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
+  var bookingUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + destEnc + (bttCheckin?'&checkin='+bttCheckin:'') + (bttCheckout?'&checkout='+bttCheckout:''));
   var expediaItem = '';
-  if (EXPEDIA_AFFILIATE_ID) {
-    // One-line activation once Simon's Expedia affiliate application is approved.
-    var expediaUrl = 'https://www.expedia.com/Hotel-Search?destination=' + destEnc + '&AID=' + encodeURIComponent(EXPEDIA_AFFILIATE_ID);
-    expediaItem = '<a href="' + expediaUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>';
+  var expediaBttUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + destEnc + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
+  if (expediaBttUrl) {
+    expediaItem = '<a href="' + expediaBttUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>';
   }
   return '<div class="book-this-trip">' +
     '<h3>Book This Trip</h3>' +
@@ -5905,7 +5992,7 @@ function buildBTT(panel, idx, qData) {
     '<div class="btt-grid">' +
       '<a href="' + buildSkyscannerUrl(panel, qData) + '" target="_blank" class="btt-btn btt-flights">' +
         '<div class="btt-icon"><i class="ti ti-plane-departure"></i></div>' +
-        '<div><div class="btt-label">Flights</div><div class="btt-action">Search Google Flights</div></div>' +
+        '<div><div class="btt-label">Flights</div><div class="btt-action">Search Expedia Flights</div></div>' +
       '</a>' +
       '<div class="btt-btn btt-findstay" onclick="toggleFindStay(this,event)">' +
         '<div class="btt-icon"><i class="ti ti-bed"></i></div>' +
@@ -6831,7 +6918,7 @@ function exportPDF(panelIdx) {
     '<div class="total-box"><span class="lbl">Total Estimate Per Person</span><span class="val">' + p(panel.total_cost||0) + '</span></div>' +
     '</div>' +
 
-    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Google Flights, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
+    '<div class="disclaimer">All prices are AI-estimated and for planning purposes only. Always check current pricing on Expedia, Booking.com and GolfNow before booking. GolfTrip accepts no liability for price differences. &bull; Generated by GolfTrip.ai</div>' +
     '</div></body></html>');
   printWin.document.close();
   printWin.focus();
@@ -7053,6 +7140,9 @@ async function initMap(idx, mapPrefix) {
   var dest = panel.destination || '';
   var colors = { hotel: '#1B3524', course: '#B08D52', restaurant: '#8C4A34' };
   var typeLabels = { hotel: 'Hotel', course: 'Golf Course', restaurant: 'Restaurant / Bar' };
+  var mmQData = currentTripQData || {};
+  var mmCheckin = (mmQData.dates && mmQData.dates.depart) ? mmQData.dates.depart : '';
+  var mmCheckout = (mmQData.dates && mmQData.dates.returnDate) ? mmQData.dates.returnDate : '';
 
   // By the time initMap runs, Maps is guaranteed ready (gated by queueMapInit/onMapsReady)
   // No need to wait again — just check directly
@@ -7067,7 +7157,7 @@ async function initMap(idx, mapPrefix) {
   (panel.hotels || []).forEach(function(h) {
     toSearch.push({ type: 'hotel', name: h.name, area: h.area,
       detail: (h.description||'').substring(0,100),
-      link: wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||'')),
+      link: wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||'') + (mmCheckin?'&checkin='+mmCheckin:'') + (mmCheckout?'&checkout='+mmCheckout:'')),
       aiLat: h.lat, aiLng: h.lng });
   });
   (panel.courses || []).forEach(function(c) {
@@ -7645,6 +7735,7 @@ function renderSavedItinerary(panels, tripData, contentEl) {
     panelEl.classList.add('td-saved-panel');
     panelsEl.appendChild(panelEl);
   });
+  hydrateCardPhotos(panelsEl);
 }
 
 function activateSavedPanel(idx) {
@@ -8449,15 +8540,20 @@ function renderVenueResults(venues) {
 
   var html = '';
 
-  // Flights card — shown if airport was selected
+  // Flights card — shown if airport was selected. venueFlightsUrl is wrapped
+  // through Expedia's affiliate tracking (wrapExpediaUrl) — this button was
+  // previously broken (the href was literal unevaluated JS text, not a real
+  // link) and pointed at Google Flights with no commission anyway.
   if (airport) {
+    var venueFlightsPlain = 'https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:' + encodeURIComponent(airport) + '&mode=search';
+    var venueFlightsUrl = wrapExpediaUrl(venueFlightsPlain);
     html += '<div class="card" style="padding:16px 20px;margin-bottom:20px;border:1.5px solid var(--gold)">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
         '<div>' +
           '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:3px"><i class="ti ti-plane-departure"></i> Flights</div>' +
           '<div style="font-size:.92rem;font-weight:500;color:var(--green)">' + airportName + ' → ' + (currentVenue ? currentVenue.location || currentVenue.name : 'Destination') + '</div>' +
         '</div>' +
-        '<a href="https://www.google.com/travel/flights?q=" + encodeURIComponent("flights from " + airportName + " to " + (currentVenue ? currentVenue.location||currentVenue.name : "destination")) + "" target="_blank" class="btn btn-primary btn-sm">Search Flights</a>' +
+        '<a href="' + venueFlightsUrl + '" target="_blank" class="btn btn-primary btn-sm">Search Flights</a>' +
       '</div>' +
       '<p class="fs-sm text-muted" style="margin:0">Find and book the best fares from ' + airportName + ' via GolfTrip — 5% markup included, booked securely.</p>' +
     '</div>';
