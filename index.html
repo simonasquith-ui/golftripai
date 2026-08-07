@@ -494,6 +494,18 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .card-links{display:flex;gap:8px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
 .card-link{font-size:.68rem;color:var(--brass);text-decoration:none;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:7px 13px;border:1px solid currentColor;border-radius:var(--r);transition:color var(--tr)}
 .card-link:hover{background:none;color:var(--moss)}
+/* "Find a Stay" dropdown on hotel cards — merges Booking.com/Vrbo/Expedia into
+   one card-link-styled button, same pattern as the dark "Find a Stay" cell in
+   Book This Trip (.btt-findstay), just themed for light card surfaces. */
+.stay-dropdown{position:relative;cursor:pointer;display:inline-flex;align-items:center;gap:6px;user-select:none}
+.stay-dropdown .ti-chevron-down{font-size:.6rem;transition:transform var(--tr)}
+.stay-dropdown.open .ti-chevron-down{transform:rotate(180deg)}
+.stay-dropdown-menu{display:none;position:absolute;left:0;top:100%;margin-top:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 26px rgba(27,42,32,.16);z-index:20;overflow:hidden;min-width:170px}
+.stay-dropdown.open .stay-dropdown-menu{display:block}
+.stay-dropdown-menu a{display:flex;align-items:center;gap:9px;padding:10px 16px;text-decoration:none;color:var(--ink);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;transition:background var(--tr)}
+.stay-dropdown-menu a:hover{background:var(--paper)}
+.stay-dropdown-menu a+a{border-top:1px solid var(--line)}
+.stay-dropdown-menu .ti{color:var(--brass);font-size:.9rem;width:16px;text-align:center;flex-shrink:0}
 .cost-breakdown{background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);box-shadow:none;padding:28px;margin:28px 0}
 .cost-breakdown h3{color:var(--moss);margin-bottom:18px;font-family:var(--font-display);font-weight:500;font-size:1.15rem}
 .cost-row{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -523,6 +535,10 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .itin-activity.schedule-item.dragging{opacity:.4}
 .itin-activity.schedule-item .item-drag-handle{color:var(--muted);padding-top:3px}
 .itin-day-body.drop-target{background:var(--paper-deep);outline:1px dashed var(--brass);outline-offset:-4px}
+.schedule-empty-hint{font-size:.78rem;color:var(--muted);font-style:italic;margin:0;padding:4px 0}
+.cart-item{cursor:grab;position:relative}
+.cart-item.dragging{opacity:.4}
+.cart-drag-handle{color:var(--muted);font-size:.85rem;flex-shrink:0;padding-top:3px;align-self:flex-start}
 .booking-links-section{background:var(--moss-dark);border-radius:var(--rl);padding:28px;margin:28px 0}
 .booking-links-section h3{color:var(--brass);margin-bottom:18px;font-family:var(--font-display);font-weight:500;font-size:1.15rem}
 .booking-btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -1765,7 +1781,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
       <!-- TRIP SCHEDULE — full width -->
       <div class="card" style="margin-bottom:20px">
         <div class="gp-section-head"><i class="ti ti-calendar-event"></i> Trip Schedule</div>
-        <p class="fs-sm text-muted" style="margin:0 0 14px">Drag days and activities to turn the AI's suggested itinerary into your group's actual plan.</p>
+        <p class="fs-sm text-muted" style="margin:0 0 14px">Drag days and activities to reorder, or drag items from your Trip Cart straight into a day, to turn this into your group's actual plan.</p>
         <div id="group-schedule-wrap"><p class="fs-sm text-muted">Select a trip option above to see its schedule.</p></div>
       </div>
 
@@ -3989,6 +4005,7 @@ document.addEventListener('click', function(e) {
   var btn = e.target.closest('.section-refresh-btn');
   if (!btn) return;
   var section = btn.getAttribute('data-refresh-section');
+  if (!section) return; // not a real refresh button — e.g. "Swipe to Shortlist" shares this class purely for styling
   var idx = parseInt(btn.getAttribute('data-refresh-idx'));
   var dest = btn.getAttribute('data-refresh-dest');
   var tier = btn.getAttribute('data-refresh-tier');
@@ -4131,9 +4148,14 @@ function buildPanelSection(section, panel, idx, qData) {
         (h.why_recommended?'<p class="fs-sm" style="margin-top:8px">'+h.why_recommended+'</p>':'') +
         '<div class="price-badge">'+fmtPrice(h.price_per_night||0)+'/night</div>' +
         '<div class="card-links">' +
-          '<a href="'+bookUrl+'" target="_blank" class="card-link">'+(isVilla?'Search Vrbo':'Check on Booking.com')+'</a>' +
-          '<a href="'+altUrl+'" target="_blank" class="card-link">'+(isVilla?'Try Booking.com':'Try Vrbo')+'</a>' +
-          (expediaUrl ? '<a href="'+expediaUrl+'" target="_blank" class="card-link">Try Expedia</a>' : '') +
+          '<div class="card-link stay-dropdown" onclick="toggleStayMenu(this,event)">' +
+            '<i class="ti ti-bed"></i> Find a Stay <i class="ti ti-chevron-down"></i>' +
+            '<div class="stay-dropdown-menu">' +
+              '<a href="'+bookUrl+'" target="_blank"><i class="ti ti-building"></i> '+(isVilla?'Search Vrbo':'Booking.com')+'</a>' +
+              '<a href="'+altUrl+'" target="_blank"><i class="ti ti-home"></i> '+(isVilla?'Booking.com':'Vrbo')+'</a>' +
+              (expediaUrl ? '<a href="'+expediaUrl+'" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>' : '') +
+            '</div>' +
+          '</div>' +
           '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" data-cart-type="hotel" data-cart-name="'+(h.name||'').replace(/"/g,'&quot;')+'" data-cart-sub="'+(h.area||'').replace(/"/g,'&quot;')+'" data-cart-price="Est. '+fmtPrice(h.price_per_night||0)+'/night" data-cart-pricenum="'+(h.price_per_night||0)+'">&#43; Cart</button>' +
         '</div>' +
       '</div>';
@@ -4720,7 +4742,12 @@ function buildTeeTimes(courseName, destination) {
   var query = encodeURIComponent((courseName || '') + ' ' + (destination || ''));
   for (var i = 0; i < LEADING_COURSES_DESTS.length; i++) {
     if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) {
-      return { url: 'https://www.leadingcourses.com/golf-courses?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
+      // NOTE: leadingcourses.com's real search page is /search?q= — the old
+      // /golf-courses?q= path 404s (confirmed directly against the live site).
+      // This has no affiliate tracking yet since Simon isn't approved on their
+      // partner program — it's a plain working search link for now; once
+      // approved, add the tracking param here the same way Expedia/CJ do below.
+      return { url: 'https://www.leadingcourses.com/search?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
     }
   }
   for (var j = 0; j < GOLFNOW_UK_DESTS.length; j++) {
@@ -4750,6 +4777,20 @@ function fmtPrice(gbp) {
 
 // ── TRIP CART ───────────────────────────────────────────────
 var tripCart = []; // { id, type, name, sub, price, priceNum, status, votes }
+var draggedCartItemId = null; // set while a .cart-item is being dragged toward the Trip Schedule — read by wireScheduleDrag's drop-target handlers
+
+// Cart items are draggable straight into a Trip Schedule day (see renderCart's
+// draggable attribute + these two handlers, and addCartItemToScheduleDay below).
+function handleCartDragStart(e, id) {
+  draggedCartItemId = id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'copy';
+  try { e.dataTransfer.setData('text/plain', 'cartitem:' + id); } catch (err) {}
+}
+function handleCartDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  draggedCartItemId = null;
+}
 
 function addToCart(type, name, sub, price, priceNum) {
   var existing = tripCart.find(function(i) { return i.id === type + '|' + name; });
@@ -4804,7 +4845,7 @@ function renderCart() {
   if (!list) return;
 
   if (!tripCart.length) {
-    list.innerHTML = '<p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Use "Add to cart" on hotels, courses and flights from the trip itinerary.</p>';
+    list.innerHTML = '<p class="fs-sm text-muted" style="padding:12px 0">No items added yet. Use "Add to cart" on hotels, courses and flights from the trip itinerary — then drag them into the Trip Schedule below to build your day-by-day plan.</p>';
     if (totalsEl) totalsEl.style.display = 'none';
     if (countEl) countEl.textContent = '0 items';
     return;
@@ -4828,7 +4869,8 @@ function renderCart() {
       '<button class="cart-vote-btn" style="margin-left:auto;color:#a13b32;border-color:currentColor" onclick="removeFromCart(\'' + safeId + '\')">Remove</button>' +
       '</div>' : '';
 
-    return '<div class="cart-item">' +
+    return '<div class="cart-item" draggable="true" data-cart-id="' + safeId + '" ondragstart="handleCartDragStart(event,\'' + safeId + '\')" ondragend="handleCartDragEnd(event)" title="Drag into the Trip Schedule below to add it to a day">' +
+      '<i class="ti ti-grip-vertical cart-drag-handle"></i>' +
       '<div class="cart-icon" style="background:' + (typeBg[item.type] || 'transparent') + '">' + (typeIcons[item.type] || '<i class="ti ti-map-pin"></i>') + '</div>' +
       '<div class="cart-body">' +
         '<div class="cart-name">' + item.name + '</div>' +
@@ -5009,11 +5051,13 @@ function renderGroupSchedule() {
   }
   var idx = (storedPanels[currentPanelIdx]) ? currentPanelIdx : 0;
   var panel = storedPanels[idx];
-  if (!panel || !panel.itinerary || !panel.itinerary.length) {
-    wrap.innerHTML = '<p class="fs-sm text-muted">No day-by-day itinerary was saved for this trip.</p>';
+  if (!panel) {
+    wrap.innerHTML = '<p class="fs-sm text-muted">No itinerary available for this trip yet.</p>';
     return;
   }
-  renderDraggableSchedule(wrap, currentTripRequestId, panel.label || String(idx), panel.itinerary);
+  // Always render an editable schedule, even with no AI itinerary — it starts
+  // with one empty day the group can build on by dragging Trip Cart items in.
+  renderDraggableSchedule(wrap, currentTripRequestId, panel.label || String(idx), panel.itinerary || []);
 }
 
 function buildVotesSummaryHtml(panelLabel) {
@@ -5430,9 +5474,14 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '<p class="fs-sm text-muted"><strong>Why recommended:</strong> ' + (h.why_recommended || '') + '</p>' +
         (h.price_per_night ? '<p class="fs-sm" style="color:var(--gold);font-weight:600">Est. ' + fmtPrice(h.price_per_night) + '/night' + (h.price_range ? ' · ' + h.price_range : '') + '<span class="cost-note" style="display:block;margin-top:2px">Estimate for ' + (travelMonth || 'your travel dates') + ' — check Booking.com for live rates</span></p>' : '') +
         '<div class="card-links">' +
-          '<a href="' + bookUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Search Vrbo' : 'Check on Booking.com') + '</a>' +
-          '<a href="' + altUrl + '" target="_blank" class="card-link">' + (isVilla ? 'Try Booking.com' : 'Try Vrbo') + '</a>' +
-          (expediaHotelUrl ? '<a href="' + expediaHotelUrl + '" target="_blank" class="card-link">Try Expedia</a>' : '') +
+          '<div class="card-link stay-dropdown" onclick="toggleStayMenu(this,event)">' +
+            '<i class="ti ti-bed"></i> Find a Stay <i class="ti ti-chevron-down"></i>' +
+            '<div class="stay-dropdown-menu">' +
+              '<a href="' + bookUrl + '" target="_blank"><i class="ti ti-building"></i> ' + (isVilla ? 'Search Vrbo' : 'Booking.com') + '</a>' +
+              '<a href="' + altUrl + '" target="_blank"><i class="ti ti-home"></i> ' + (isVilla ? 'Booking.com' : 'Vrbo') + '</a>' +
+              (expediaHotelUrl ? '<a href="' + expediaHotelUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>' : '') +
+            '</div>' +
+          '</div>' +
           '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
             'data-cart-type="hotel" ' +
             'data-cart-name="' + (h.name||'').replace(/"/g,'&quot;') + '" ' +
@@ -5528,27 +5577,28 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       '<p class="fs-sm text-muted" style="grid-column:1/-1">Loading nearby activities…</p>' +
     '</div>';
 
-  if (panel.itinerary && panel.itinerary.length) {
-    html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div>';
-    if (mapPrefix === 'results') {
-      // Editable drag-and-drop schedule (B3) — first draft auto-populates from the
-      // AI itinerary below, then persists group edits separately to `trip_schedule`
-      // so the original AI suggestion is never overwritten. Rendered async once this
-      // panel is attached to the document — see the setTimeout near the end of buildPanel.
-      html += '<div class="trip-schedule-wrap" id="trip-schedule-' + idx + '"><p class="fs-sm text-muted">Loading schedule&#8230;</p></div>';
-    } else {
-      html += '<div class="itinerary">';
-      panel.itinerary.forEach(function(day) {
-        html += '<div class="itin-day"><div class="itin-day-header"><h4>Day ' + day.day + ': ' + (day.title || '') + '</h4></div><div class="itin-day-body">';
-        if (day.activities) {
-          day.activities.forEach(function(act) {
-            html += '<div class="itin-activity"><span class="itin-time">' + (act.time || '') + '</span><span>' + (act.description || '') + '</span></div>';
-          });
-        }
-        html += '</div></div>';
-      });
-      html += '</div>';
-    }
+  if (mapPrefix === 'results') {
+    // Editable drag-and-drop schedule (B3) — always rendered (even with no AI
+    // itinerary) so the group can still build a plan by dragging Trip Cart items
+    // straight into a day. First draft auto-populates from the AI itinerary below
+    // when there is one, then persists group edits separately to `trip_schedule`
+    // so the original AI suggestion is never overwritten. Rendered async once this
+    // panel is attached to the document — see the setTimeout near the end of buildPanel.
+    html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div>' +
+      '<div class="trip-schedule-wrap" id="trip-schedule-' + idx + '"><p class="fs-sm text-muted">Loading schedule&#8230;</p></div>';
+  } else if (panel.itinerary && panel.itinerary.length) {
+    html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div>' +
+      '<div class="itinerary">';
+    panel.itinerary.forEach(function(day) {
+      html += '<div class="itin-day"><div class="itin-day-header"><h4>Day ' + day.day + ': ' + (day.title || '') + '</h4></div><div class="itin-day-body">';
+      if (day.activities) {
+        day.activities.forEach(function(act) {
+          html += '<div class="itin-activity"><span class="itin-time">' + (act.time || '') + '</span><span>' + (act.description || '') + '</span></div>';
+        });
+      }
+      html += '</div></div>';
+    });
+    html += '</div>';
   }
 
   var costs = panel.costs || {};
@@ -5578,10 +5628,10 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // loadActivities looks up its container via document.getElementById,
   // which fails silently on a still-detached element.
   setTimeout(function() { loadActivities(dest, idx); }, 0);
-  if (mapPrefix === 'results' && panel.itinerary && panel.itinerary.length) {
+  if (mapPrefix === 'results') {
     setTimeout(function() {
       var wrap = document.getElementById('trip-schedule-' + idx);
-      if (wrap) renderDraggableSchedule(wrap, tripId, panelLabel, panel.itinerary);
+      if (wrap) renderDraggableSchedule(wrap, tripId, panelLabel, panel.itinerary || []);
     }, 0);
   }
   return el;
@@ -5654,6 +5704,7 @@ async function loadOrInitSchedule(tripId, panelLabel, itinerary) {
     } catch (e) { /* no saved schedule yet, or table not migrated yet — fall through to AI default */ }
   }
   if (!schedule) schedule = cloneItinerary(itinerary);
+  if (!schedule.length) schedule = [{ day: 1, title: 'Day 1', activities: [] }]; // no AI itinerary either — start with one empty day the group can build on by dragging Trip Cart items in
   scheduleCache[key] = schedule;
   return schedule;
 }
@@ -5681,8 +5732,8 @@ function saveSchedule(tripId, panelLabel, schedule, noteEl) {
 }
 
 async function renderDraggableSchedule(mountEl, tripId, panelLabel, itinerary) {
-  if (!mountEl || !itinerary || !itinerary.length) { if (mountEl) mountEl.innerHTML = ''; return; }
-  mountEl._origItinerary = itinerary;
+  if (!mountEl) return;
+  mountEl._origItinerary = itinerary || [];
   mountEl._tripId = tripId;
   mountEl._panelLabel = panelLabel;
   var schedule = await loadOrInitSchedule(tripId, panelLabel, itinerary);
@@ -5691,9 +5742,10 @@ async function renderDraggableSchedule(mountEl, tripId, panelLabel, itinerary) {
 
 function drawSchedule(mountEl, tripId, panelLabel, schedule) {
   var html = '<div class="schedule-toolbar">' +
-      '<span class="schedule-hint"><i class="ti ti-arrows-move"></i> Drag days or activities to build your group\'s actual plan — changes save automatically.</span>' +
+      '<span class="schedule-hint"><i class="ti ti-arrows-move"></i> Drag days/activities to reorder, or drag items straight from your Trip Cart below into a day — changes save automatically.</span>' +
       '<div style="display:flex;align-items:center;gap:14px">' +
         '<span class="schedule-save-note"></span>' +
+        '<button type="button" class="schedule-reset-btn" onclick="addScheduleDay(this)"><i class="ti ti-plus"></i> Add Day</button>' +
         '<button type="button" class="schedule-reset-btn" onclick="resetSchedule(this)">Reset to AI Suggestion</button>' +
       '</div>' +
     '</div><div class="itinerary schedule-list">';
@@ -5707,8 +5759,12 @@ function drawSchedule(mountEl, tripId, panelLabel, schedule) {
         '<span class="itin-time">' + escapeHtml(act.time || '') + '</span><span>' + escapeHtml(act.description || '') + '</span>' +
       '</div>';
     });
+    if (!day.activities || !day.activities.length) {
+      html += '<p class="schedule-empty-hint">Drag items from your Trip Cart here</p>';
+    }
     html += '</div></div>';
   });
+  if (!schedule.length) html += '<p class="fs-sm text-muted">No days yet — click "Add Day" to start building your plan.</p>';
   html += '</div>';
   mountEl.innerHTML = html;
   mountEl._scheduleData = schedule; // live reference — drag handlers read from this to rebuild after each drop
@@ -5745,6 +5801,10 @@ function wireScheduleDrag(mountEl) {
 
   mountEl.querySelectorAll('.itin-day-body').forEach(function(body) {
     body.addEventListener('dragover', function(e) {
+      // A Trip Cart item being dragged in — draggedCartItemId is set globally by
+      // handleCartDragStart (the cart lives outside this mountEl, so it can't be
+      // tracked by the local draggedEl/draggedType closure above).
+      if (draggedCartItemId) { e.preventDefault(); body.classList.add('drop-target'); return; }
       if (draggedType !== 'activity' || !draggedEl) return;
       e.preventDefault();
       body.classList.add('drop-target');
@@ -5756,6 +5816,10 @@ function wireScheduleDrag(mountEl) {
     body.addEventListener('drop', function(e) {
       e.preventDefault();
       body.classList.remove('drop-target');
+      if (draggedCartItemId) {
+        addCartItemToScheduleDay(mountEl, parseInt(body.getAttribute('data-day-idx'), 10), draggedCartItemId);
+        return;
+      }
       if (draggedType === 'activity') commitScheduleFromDOM(mountEl);
     });
   });
@@ -5823,12 +5887,38 @@ function resetSchedule(btnEl) {
   }
   delete btnEl.dataset.confirming;
   var mountEl = btnEl.closest('.trip-schedule-wrap') || btnEl.closest('#group-schedule-wrap');
-  if (!mountEl || !mountEl._origItinerary) return;
+  if (!mountEl) return;
   var fresh = cloneItinerary(mountEl._origItinerary);
+  if (!fresh.length) fresh = [{ day: 1, title: 'Day 1', activities: [] }]; // no AI itinerary to reset to — just clear back to one empty day
   drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, fresh);
   var noteEl = mountEl.querySelector('.schedule-save-note');
   saveSchedule(mountEl._tripId, mountEl._panelLabel, fresh, noteEl);
-  showToast('Schedule reset to the AI\'s original suggestion.');
+  showToast(mountEl._origItinerary && mountEl._origItinerary.length ? 'Schedule reset to the AI\'s original suggestion.' : 'Schedule cleared.');
+}
+
+// "+ Add Day" — appends a new empty day the group can drag Trip Cart items into.
+function addScheduleDay(btnEl) {
+  var mountEl = btnEl.closest('.trip-schedule-wrap') || btnEl.closest('#group-schedule-wrap');
+  if (!mountEl) return;
+  var schedule = (mountEl._scheduleData || []).concat([{ day: (mountEl._scheduleData || []).length + 1, title: 'New Day', activities: [] }]);
+  drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, schedule);
+  var noteEl = mountEl.querySelector('.schedule-save-note');
+  saveSchedule(mountEl._tripId, mountEl._panelLabel, schedule, noteEl);
+}
+
+// Drops a Trip Cart item (hotel/course/flight/etc) into a specific schedule day as
+// a new activity. Called from the .itin-day-body drop handler in wireScheduleDrag.
+function addCartItemToScheduleDay(mountEl, dayIdx, cartId) {
+  var item = tripCart.find(function(i) { return i.id === cartId; });
+  if (!item || !mountEl._scheduleData || !mountEl._scheduleData[dayIdx]) return;
+  var timeLabels = { hotel: 'Check-in', course: 'Tee time', flight: 'Flight', car: 'Car pickup', restaurant: 'Dinner' };
+  var day = mountEl._scheduleData[dayIdx];
+  day.activities = day.activities || [];
+  day.activities.push({ time: timeLabels[item.type] || '', description: item.name + (item.sub ? ' — ' + item.sub : '') });
+  drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, mountEl._scheduleData);
+  var noteEl = mountEl.querySelector('.schedule-save-note');
+  saveSchedule(mountEl._tripId, mountEl._panelLabel, mountEl._scheduleData, noteEl);
+  showToast(item.name + ' added to Day ' + day.day);
 }
 
 /* === SWIPE-TO-SHORTLIST (B4) — Tinder-style card stack for courses/hotels ===
@@ -5889,6 +5979,12 @@ function drawSwipeStack() {
   }
   var remaining = swipeDeck.cards.slice(swipeDeck.cursor, swipeDeck.cursor + 3);
   if (!remaining.length) {
+    // Ran out of cards — ask the AI for more in the same destination before
+    // giving up, unless we already tried that and it came back empty.
+    if (!swipeDeck.loadingMore && !swipeDeck.noMoreAvailable) {
+      loadMoreSwipeCards();
+      return;
+    }
     stackEl.innerHTML = '<p class="swipe-empty"><i class="ti ti-check" style="font-size:1.6rem;display:block;margin-bottom:8px;color:var(--brass-light)"></i>That’s everything — anything you shortlisted is in your Trip Cart.</p>';
     controlsEl.style.display = 'none';
     progressEl.textContent = '';
@@ -5919,6 +6015,78 @@ function drawSwipeStack() {
   hydrateCardPhotos(stackEl);
   var topEl = stackEl.querySelector('.swipe-card[data-top="1"]');
   if (topEl) wireSwipeCardDrag(topEl);
+}
+
+// Called when the swipe deck runs dry — asks the AI for more courses/hotels
+// in the same destination + budget tier, explicitly excluding everything
+// already shown, then appends them to the live deck and keeps swiping.
+// Uses the same /.netlify/functions/generate-trip endpoint and prompt style
+// as the "Different options" section-refresh buttons elsewhere in the app.
+async function loadMoreSwipeCards() {
+  if (!swipeDeck || swipeDeck.loadingMore) return;
+  swipeDeck.loadingMore = true;
+
+  var stackEl = document.getElementById('swipe-stack');
+  var controlsEl = document.getElementById('swipe-controls');
+  var progressEl = document.getElementById('swipe-progress');
+  controlsEl.style.display = 'none';
+  progressEl.textContent = '';
+  stackEl.innerHTML = '<p class="swipe-empty"><span class="spin"><i class="ti ti-refresh"></i></span> Finding more options nearby...</p>';
+
+  var panel = storedPanels && storedPanels[swipeDeck.idx];
+  var dest = (panel && panel.destination) || '';
+  var tier = swipeDeck.panelLabel || (panel && panel.label) || '';
+  var kind = swipeDeck.kind;
+  var seenNames = swipeDeck.cards.map(function(c) { return c.name; }).filter(Boolean);
+
+  var prompt = (kind === 'hotels')
+    ? ('Suggest 4 MORE hotels in ' + dest + ' for ' + tier + ' budget UK golfers on a golf trip, different from these already shown: ' + seenNames.join(', ') + '. Do NOT repeat any of those. Return JSON: {"hotels":[{"name","area","description","why_recommended","price_per_night","price_range","lat","lng","villa_rental"}]}. Real hotels only. Accurate GPS.')
+    : ('Suggest 4 MORE golf courses in ' + dest + ' for ' + tier + ' budget UK golfers, different from these already shown: ' + seenNames.join(', ') + '. Do NOT repeat any of those. Return JSON: {"courses":[{"name","location","par","yardage","slope_rating","course_rating","green_fee","green_fee_range","designer","difficulty","why_recommended","lat","lng"}]}. Real courses only. Include accurate GPS coordinates.');
+
+  try {
+    var res = await fetch('/.netlify/functions/generate-trip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, tier: tier, part: 'refresh' })
+    });
+    var data = await res.json();
+    var parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+    var newItems = (kind === 'hotels') ? (parsed.hotels || []) : (parsed.courses || []);
+
+    if (newItems.length) {
+      // Keep the underlying panel data in sync so the main (non-swipe) list
+      // also picks up these newly-found options.
+      if (panel) {
+        if (kind === 'hotels') panel.hotels = (panel.hotels || []).concat(newItems);
+        else panel.courses = (panel.courses || []).concat(newItems);
+      }
+      var newCards = newItems.map(function(item) {
+        if (kind === 'hotels') {
+          return {
+            type: 'hotel', name: item.name || '', sub: item.area || '',
+            desc: item.description || item.why_recommended || '',
+            price: 'Est. ' + fmtPrice(item.price_per_night || 0) + '/night',
+            priceNum: item.price_per_night || 0
+          };
+        }
+        return {
+          type: 'course', name: item.name || '', sub: item.location || '',
+          desc: item.description || item.why_recommended || '',
+          price: 'Est. ' + fmtPrice(item.green_fee || 0) + ' green fee',
+          priceNum: item.green_fee || 0
+        };
+      });
+      swipeDeck.cards = swipeDeck.cards.concat(newCards);
+    } else {
+      swipeDeck.noMoreAvailable = true;
+    }
+  } catch (e) {
+    console.warn('Could not load more swipe cards:', e);
+    swipeDeck.noMoreAvailable = true;
+  }
+
+  swipeDeck.loadingMore = false;
+  drawSwipeStack();
 }
 
 function wireSwipeCardDrag(cardEl) {
@@ -6031,6 +6199,22 @@ function toggleFindStay(el, evt) {
 document.addEventListener('click', function(e) {
   if (e.target.closest && e.target.closest('.btt-findstay')) return;
   var all = document.querySelectorAll('.btt-findstay.open');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
+});
+
+// Same toggle pattern as toggleFindStay above, but for the light-themed
+// "Find a Stay" dropdown on individual hotel cards (.stay-dropdown) — kept
+// separate so opening one never affects the dark Book-This-Trip version.
+function toggleStayMenu(el, evt) {
+  if (evt) evt.stopPropagation();
+  var wasOpen = el.classList.contains('open');
+  var all = document.querySelectorAll('.stay-dropdown.open');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
+  if (!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('.stay-dropdown')) return;
+  var all = document.querySelectorAll('.stay-dropdown.open');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
 });
 
@@ -9170,187 +9354,3 @@ async function loadSharedTrip(tripId, user) {
   try {
     showPage('trip');
     document.getElementById('td-itinerary-loading').style.display = 'block';
-
-    // Fetch trip request data
-    var tripReq = await sbClient.from('trip_requests')
-      .select('*')
-      .eq('id', tripId)
-      .single();
-
-    // Fetch trip results
-    var tripRes = await sbClient.from('trip_results')
-      .select('ai_response')
-      .eq('trip_request_id', tripId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    document.getElementById('td-itinerary-loading').style.display = 'none';
-
-    if (!tripReq.data) {
-      showToast('Trip not found or no longer available.', true);
-      showPage('landing');
-      return;
-    }
-
-    var tripData = tripReq.data;
-    var aiData = tripRes && tripRes.data ? tripRes.data.ai_response : null;
-
-    // Show public banner if not logged in
-    if (!user) {
-      var banner = document.getElementById('public-trip-banner');
-      var note = document.getElementById('td-public-note');
-      var groupTab = document.getElementById('td-tab-group');
-      if (banner) banner.style.display = 'block';
-      if (note) note.style.display = 'block';
-      if (groupTab) {
-        groupTab.style.opacity = '0.5';
-        groupTab.onclick = function() {
-          showToast('Sign in to access group planning and voting');
-          openAuthModal('signin');
-        };
-      }
-    }
-
-    // Load the trip itinerary
-    await loadTripItinerary(tripId, tripData);
-
-    // If logged in, also load votes
-    if (user) {
-      tripVoteCache = {};
-      await loadVotesForTrip(tripId);
-    }
-
-  } catch(e) {
-    console.error('loadSharedTrip error:', e);
-    document.getElementById('td-itinerary-loading').style.display = 'none';
-    showToast('Could not load trip. Try again.', true);
-    showPage('landing');
-  }
-}
-</script>
-
-<!-- PRICING MODAL -->
-<div id="pricing-modal" class="glass-scrim" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:20px">
-  <div class="glass" style="max-width:680px;width:100%;max-height:90vh;overflow-y:auto;position:relative;color:#fff">
-    <button onclick="closePricingModal()" style="position:absolute;top:18px;right:18px;background:none;border:none;font-size:1.15rem;cursor:pointer;color:rgba(255,255,255,.6);z-index:1">&#215;</button>
-    <div style="padding:38px 32px 30px;text-align:center;border-bottom:1px solid rgba(255,255,255,.16)">
-      <div style="color:var(--brass);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px">Upgrade GolfTrip</div>
-      <h2 style="color:#fff;font-family:var(--font-display);font-weight:300;letter-spacing:-.02em;font-size:1.8rem;margin-bottom:10px">Plan more trips. Stress less.</h2>
-      <p style="color:rgba(255,255,255,.6);font-size:.88rem">Start free. Upgrade when you're ready.</p>
-    </div>
-    <div class="glass-plan-grid">
-
-      <!-- Pro Plan -->
-      <div style="padding:28px 26px;position:relative;background:rgba(15,35,24,.28)">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.55);margin-bottom:12px">Pro</div>
-        <div style="font-family:var(--font-display);font-size:2.1rem;font-weight:300;letter-spacing:-.025em;color:#fff;margin-bottom:4px">£49<span style="font-family:var(--font-body);font-size:.82rem;font-weight:400;color:rgba(255,255,255,.5);letter-spacing:0">/year</span></div>
-        <div style="font-size:.76rem;color:rgba(255,255,255,.45);margin-bottom:20px">That's £4.08/month</div>
-        <ul class="glass-features" style="list-style:none;margin-bottom:22px;font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.9">
-          <li>Unlimited trip generations</li>
-          <li>Budget, Mid &amp; Luxury comparisons</li>
-          <li>Save &amp; share trips</li>
-          <li>Group voting tools</li>
-          <li>PDF export</li>
-          <li>All booking links</li>
-        </ul>
-        <button class="btn" style="width:100%;padding:12px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)" onclick="startCheckout('pro')" id="checkout-btn-pro">Get Pro</button>
-      </div>
-
-      <!-- Society Plan -->
-      <div style="padding:28px 26px;position:relative;background:rgba(15,35,24,.28)">
-        <div style="position:absolute;top:14px;right:26px;color:var(--brass);font-size:.62rem;font-weight:600;letter-spacing:.16em;white-space:nowrap">MOST POPULAR</div>
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--brass);margin-bottom:12px">Society</div>
-        <div style="font-family:var(--font-display);font-size:2.1rem;font-weight:300;letter-spacing:-.025em;color:#fff;margin-bottom:4px">£99<span style="font-family:var(--font-body);font-size:.82rem;font-weight:400;color:rgba(255,255,255,.5);letter-spacing:0">/year</span></div>
-        <div style="font-size:.76rem;color:rgba(255,255,255,.45);margin-bottom:20px">That's £8.25/month</div>
-        <ul class="glass-features" style="list-style:none;margin-bottom:22px;font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.9">
-          <li>Everything in Pro</li>
-          <li>Invite your whole group</li>
-          <li>Group chat per trip</li>
-          <li>Shared trip cart</li>
-          <li>Share trip via link</li>
-          <li>Perfect for 8+ players</li>
-        </ul>
-        <button class="btn btn-primary" style="width:100%;padding:12px" onclick="startCheckout('society')" id="checkout-btn-society">Get Society</button>
-      </div>
-
-    </div>
-    <div style="padding:0 30px 26px;text-align:center;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.4)">
-      Secure payment via Stripe &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; 7-day money back guarantee
-    </div>
-  </div>
-</div>
-
-<!-- FEEDBACK WIDGET -->
-<button id="feedback-fab" onclick="openFeedbackModal()" style="position:fixed;bottom:22px;right:22px;z-index:900;background:var(--moss-dark);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:11px 18px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;box-shadow:none;font-family:inherit;display:inline-flex;align-items:center;gap:8px"><i class="ti ti-message-circle" style="font-size:1.1em"></i> Feedback</button>
-
-<div id="feedback-modal" class="glass-scrim" style="display:none;position:fixed;inset:0;z-index:1001;align-items:center;justify-content:center;padding:20px">
-  <div class="glass" style="max-width:440px;width:100%;padding:32px;position:relative;color:#fff">
-    <button onclick="closeFeedbackModal()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.15rem;cursor:pointer;color:rgba(255,255,255,.6)">&#215;</button>
-    <h2 style="color:#fff;font-family:var(--font-display);font-weight:300;letter-spacing:-.02em;font-size:1.5rem;margin-bottom:8px">Got feedback?</h2>
-    <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:20px">We're in early access — tell us what's working, what's not, or what you'd like to see next.</p>
-    <div style="display:flex;gap:8px;margin-bottom:18px" id="feedback-rating">
-      <button class="fb-star" data-val="1" onclick="setFeedbackRating(1)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
-      <button class="fb-star" data-val="2" onclick="setFeedbackRating(2)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
-      <button class="fb-star" data-val="3" onclick="setFeedbackRating(3)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
-      <button class="fb-star" data-val="4" onclick="setFeedbackRating(4)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
-      <button class="fb-star" data-val="5" onclick="setFeedbackRating(5)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;opacity:.35;color:var(--brass);line-height:1"><i class="ti ti-star-filled"></i></button>
-    </div>
-    <textarea id="feedback-message" placeholder="What's on your mind?" rows="4" style="width:100%;border:1px solid rgba(255,255,255,.28);border-radius:var(--r);background:rgba(255,255,255,.08);color:#fff;padding:11px;font-family:inherit;font-size:.9rem;resize:vertical;margin-bottom:12px"></textarea>
-    <input id="feedback-email" type="email" placeholder="Email (optional — if you'd like a reply)" style="width:100%;border:1px solid rgba(255,255,255,.28);border-radius:var(--r);background:rgba(255,255,255,.08);color:#fff;padding:11px;font-family:inherit;font-size:.85rem;margin-bottom:18px">
-    <button class="btn btn-primary" style="width:100%;padding:12px" onclick="submitFeedback()" id="feedback-submit-btn">Send Feedback</button>
-  </div>
-</div>
-
-<script>
-var feedbackRatingVal = 0;
-function openFeedbackModal() {
-  var m = document.getElementById('feedback-modal');
-  if (m) m.style.display = 'flex';
-}
-function closeFeedbackModal() {
-  var m = document.getElementById('feedback-modal');
-  if (m) m.style.display = 'none';
-}
-document.addEventListener('click', function(e) {
-  var m = document.getElementById('feedback-modal');
-  if (m && e.target === m) closeFeedbackModal();
-});
-function setFeedbackRating(val) {
-  feedbackRatingVal = val;
-  document.querySelectorAll('.fb-star').forEach(function(s) {
-    s.style.opacity = parseInt(s.getAttribute('data-val')) <= val ? '1' : '.35';
-  });
-}
-async function submitFeedback() {
-  var msgEl = document.getElementById('feedback-message');
-  var emailEl = document.getElementById('feedback-email');
-  var msg = msgEl.value.trim();
-  var email = emailEl.value.trim();
-  if (!msg) { showToast('Please add a message before sending.', true); return; }
-  var btn = document.getElementById('feedback-submit-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-  try {
-    await sbClient.from('feedback').insert({
-      user_id: currentUser ? currentUser.id : null,
-      email: email || (currentUser ? currentUser.email : null),
-      rating: feedbackRatingVal || null,
-      message: msg,
-      page: window.location.pathname + window.location.search,
-      plan: userPlan
-    });
-    showToast('Thanks — feedback sent!');
-    msgEl.value = ''; emailEl.value = ''; feedbackRatingVal = 0;
-    document.querySelectorAll('.fb-star').forEach(function(s) { s.style.opacity = '.35'; });
-    closeFeedbackModal();
-  } catch (e) {
-    showToast('Could not send feedback — please try again.', true);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Send Feedback'; }
-  }
-}
-</script>
-<!-- END FEEDBACK WIDGET -->
-
-</body>
-</html>
