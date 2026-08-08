@@ -4263,7 +4263,7 @@ function buildPanelSection(section, panel, idx, qData) {
   if (section === 'courses') {
     html += '<div id="section-courses-' + idx + '">';
     (panel.courses || []).forEach(function(c) {
-      var gnData = buildTeeTimes(c.name||'', c.location ? (c.location + ', ' + dest) : dest);
+      var gnData = buildTeeTimes(c.name||'', c.location || dest);
       var gn = gnData.url; var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
@@ -4297,7 +4297,7 @@ function buildPanelSection(section, panel, idx, qData) {
       var vrboDestUrl = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(dest) + '&adults=' + groupSize + '&sort=RECOMMENDED' + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:'');
       var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent(vrboDestUrl);
       var altUrl = isVilla ? wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest) + (psCheckin?'&checkin='+psCheckin:'') + (psCheckout?'&checkout='+psCheckout:'')) : vrboUrl;
-      var expediaUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + encodeURIComponent(h.name||dest) + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:''));
+      var expediaUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + encodeURIComponent(h.name||dest) + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:''));
       html += '<div class="hotel-card">' +
         '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
@@ -4750,11 +4750,22 @@ async function generateTrip() {
 // account (creator.expediagroup.com), NOT CJ. That program's link format is
 // a direct deep-link wrapper: https://expedia.com/affiliate?siteid=1&landingPage=
 // <encoded destination URL>&camref=...&creativeref=...&adref=... — confirmed
-// live-generated via their Link Builder tool. siteid=1 is Expedia's US site;
-// landingPage carries the real destination + dates we build per search, same
-// as Booking.com's deep-link override.
+// live-generated via their Link Builder tool.
+//
+// CORRECTION (previously wrong in this comment): siteid=1 does NOT mean
+// "Expedia's US site" — it's Simon's own affiliate account/site ID assigned
+// by Expedia when he registered, and stays "1" no matter which Expedia
+// locale the traffic lands on. The outer "expedia.com/affiliate" redirector
+// domain also always stays .com — that's just Expedia's tracking-redirect
+// endpoint, it 302s onward to whatever landingPage says. Confirmed via a
+// real generated example found live: siteid=1 combined with a landingPage of
+// www.expedia.co.uk/... and &langid=2057 (Microsoft locale ID for en-GB).
+// So the actual locale is controlled by (a) which domain the landingPage URL
+// itself points to, and (b) the langid param — both of which we now set to
+// UK. This is what fixes users landing on the US site with US-only fares.
 var EXPEDIA_AFF = {
   siteid: '1',
+  langid: '2057', // en-GB
   camref: '1011l5Pacu',
   creativeref: '1100l68075',
   adref: 'PZBsL83EPo'
@@ -4763,6 +4774,7 @@ function wrapExpediaUrl(plainUrl) {
   if (!plainUrl) return null;
   return 'https://expedia.com/affiliate?siteid=' + EXPEDIA_AFF.siteid +
     '&landingPage=' + encodeURIComponent(plainUrl) +
+    '&langid=' + EXPEDIA_AFF.langid +
     '&camref=' + EXPEDIA_AFF.camref +
     '&creativeref=' + EXPEDIA_AFF.creativeref +
     '&adref=' + EXPEDIA_AFF.adref;
@@ -4871,6 +4883,17 @@ var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai',
 // location. Scoped across all three GolfNow properties at once (rather than
 // guessing which regional site indexes a given course) since a course can
 // turn up under golfnow.com even outside the US.
+//
+// IMPORTANT — keep the destination hint to ONE short term, or omit it. DDG
+// treats every unquoted word as a required AND term, on top of the exact
+// quoted course-name phrase and the site: restriction. Confirmed live: "Golf
+// de Saint-Cloud" genuinely IS on GolfNow (golfnow.com/tee-times/facility/
+// 18601-golf-de-saint-cloud/search), but a call site briefly passed a
+// concatenated "Garches, France, Paris region, France" (course location +
+// trip destination, duplicating "France") — those extra required words don't
+// all appear together on the real GolfNow page, so DDG returned zero results
+// even though the course is indexed. Callers should pass at most one plain
+// location string (e.g. c.location OR dest, never both joined together).
 function buildGolfNowCourseSearchUrl(courseName, destination) {
   var name = (courseName || '').replace(/"/g, '');
   var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) "' + name + '" tee times';
@@ -5415,14 +5438,14 @@ function buildExpediaFlightsUrl(originCode, destCode, departIso, returnIso, adul
     var flightsPlainUrl;
     if (retUS) {
       var leg2 = 'from:' + destCode + ',to:' + originCode + ',departure:' + retUS + 'TANYT';
-      flightsPlainUrl = 'https://www.expedia.com/Flights-Search?trip=roundtrip&leg1=' + encodeURIComponent(leg1) + '&leg2=' + encodeURIComponent(leg2) + '&passengers=adults:' + adults + '&mode=search';
+      flightsPlainUrl = 'https://www.expedia.co.uk/Flights-Search?trip=roundtrip&leg1=' + encodeURIComponent(leg1) + '&leg2=' + encodeURIComponent(leg2) + '&passengers=adults:' + adults + '&mode=search';
     } else {
-      flightsPlainUrl = 'https://www.expedia.com/Flights-Search?trip=oneway&leg1=' + encodeURIComponent(leg1) + '&passengers=adults:' + adults + '&mode=search';
+      flightsPlainUrl = 'https://www.expedia.co.uk/Flights-Search?trip=oneway&leg1=' + encodeURIComponent(leg1) + '&passengers=adults:' + adults + '&mode=search';
     }
     return wrapExpediaUrl(flightsPlainUrl);
   }
   // Fallback — generic Expedia flights search for the destination name
-  return wrapExpediaUrl('https://www.expedia.com/Flights-Search?destination=' + encodeURIComponent(destNameFallback || '') + '&mode=search');
+  return wrapExpediaUrl('https://www.expedia.co.uk/Flights-Search?destination=' + encodeURIComponent(destNameFallback || '') + '&mode=search');
 }
 
 function buildSkyscannerUrl(panel, qData) {
@@ -5562,7 +5585,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   '</div><div class="courses-grid" id="section-courses-' + idx + '">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
-      var gnData = buildTeeTimes(c.name || '', c.location ? (c.location + ', ' + dest) : dest);
+      var gnData = buildTeeTimes(c.name || '', c.location || dest);
       var gn = gnData.url;
       var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
@@ -5640,7 +5663,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
           (checkin ? '&startDate=' + checkin : '') +
           (checkout ? '&endDate=' + checkout : '');
       }
-      var expediaHotelUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + hotelEnc + (checkin ? '&startDate=' + checkin : '') + (checkout ? '&endDate=' + checkout : ''));
+      var expediaHotelUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + hotelEnc + (checkin ? '&startDate=' + checkin : '') + (checkout ? '&endDate=' + checkout : ''));
       html += '<div class="hotel-card">' +
         '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
@@ -6331,7 +6354,7 @@ function buildBTT(panel, idx, qData) {
   var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED' + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
   var bookingUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + destEnc + (bttCheckin?'&checkin='+bttCheckin:'') + (bttCheckout?'&checkout='+bttCheckout:''));
   var expediaItem = '';
-  var expediaBttUrl = wrapExpediaUrl('https://www.expedia.com/Hotel-Search?destination=' + destEnc + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
+  var expediaBttUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + destEnc + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
   if (expediaBttUrl) {
     expediaItem = '<a href="' + expediaBttUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>';
   }
@@ -7528,7 +7551,7 @@ async function initMap(idx, mapPrefix) {
   (panel.courses || []).forEach(function(c) {
     toSearch.push({ type: 'course', name: c.name, area: c.location,
       detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: buildTeeTimes(c.name||'', c.location ? (c.location + ', ' + dest) : dest).url,
+      link: buildTeeTimes(c.name||'', c.location || dest).url,
       aiLat: c.lat, aiLng: c.lng });
   });
   (panel.restaurants || []).forEach(function(r) {
@@ -8910,7 +8933,7 @@ function renderVenueResults(venues) {
   // previously broken (the href was literal unevaluated JS text, not a real
   // link) and pointed at Google Flights with no commission anyway.
   if (airport) {
-    var venueFlightsPlain = 'https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:' + encodeURIComponent(airport) + '&mode=search';
+    var venueFlightsPlain = 'https://www.expedia.co.uk/Flights-Search?trip=oneway&leg1=from:' + encodeURIComponent(airport) + '&mode=search';
     var venueFlightsUrl = wrapExpediaUrl(venueFlightsPlain);
     html += '<div class="card" style="padding:16px 20px;margin-bottom:20px;border:1.5px solid var(--gold)">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
