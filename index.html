@@ -4874,31 +4874,47 @@ var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai',
 // (not self-serve, no instant API key). Until/unless that's set up, we can't
 // build that exact URL directly.
 //
-// So for a *specific course*, we instead build a DuckDuckGo search scoped to
-// GolfNow's own domains via `site:` — confirmed live this reliably surfaces
-// the correct GolfNow facility page as the top result (tested against
-// "Alhaurin Golf Club" in Spain and got the right page first try), which
-// GolfNow's own search parameter does not. It's one extra click for the
-// user, but lands on the actual right course instead of a wrong default
-// location. Scoped across all three GolfNow properties at once (rather than
-// guessing which regional site indexes a given course) since a course can
-// turn up under golfnow.com even outside the US.
+// So for a *specific course*, we instead build a site-scoped search that
+// jumps straight to the right page — no facility ID needed.
 //
-// IMPORTANT — keep the destination hint to ONE short term, or omit it. DDG
-// treats every unquoted word as a required AND term, on top of the exact
-// quoted course-name phrase and the site: restriction. Confirmed live: "Golf
-// de Saint-Cloud" genuinely IS on GolfNow (golfnow.com/tee-times/facility/
-// 18601-golf-de-saint-cloud/search), but a call site briefly passed a
-// concatenated "Garches, France, Paris region, France" (course location +
-// trip destination, duplicating "France") — those extra required words don't
-// all appear together on the real GolfNow page, so DDG returned zero results
-// even though the course is indexed. Callers should pass at most one plain
-// location string (e.g. c.location OR dest, never both joined together).
+// First tried DuckDuckGo's `site:` search as a plain link (a results page,
+// one extra click to the actual course). That had two problems, both
+// confirmed live: (1) DDG treats every unquoted word as a required AND term
+// on top of the exact quoted course-name phrase and the site: restriction —
+// pass it a redundant multi-word location string and it returns zero results
+// even for a course that IS genuinely indexed (confirmed with "Golf de
+// Saint-Cloud", which really is on GolfNow, but zero-worded out); and (2) it
+// lands on a search RESULTS page, not the course itself — not "seamless".
+//
+// Switched to Google's "I'm Feeling Lucky" redirect (`&btnI=1`) instead —
+// confirmed live via curl that this returns a plain HTTP 302 straight to the
+// top-ranked matching page, with the site: restriction still applied and no
+// intermediate results page ever shown to the user:
+//   - "Alhaurin Golf" (Spain)         -> golfnow.co.uk/courses/.../details
+//   - "Golf de Saint-Cloud" (France)  -> golfnow.co.uk/tee-times/facility/18601-golf-de-saint-cloud/search
+//   - "Praia D'El Rey Golf" (Portugal, via leadingcourses.com) -> leadingcourses.com/clubs/.../praia-d-el-rey-golf-beach-resort
+// This is a genuine, real Google Search feature (not a bot-detection
+// bypass) — a normal signed-out redirect any browser gets from that param.
+function buildGoogleLuckySearchUrl(query) {
+  return 'https://www.google.com/search?q=' + encodeURIComponent(query) + '&btnI=1';
+}
+
 function buildGolfNowCourseSearchUrl(courseName, destination) {
   var name = (courseName || '').replace(/"/g, '');
-  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) "' + name + '" tee times';
+  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) "' + name + '" book tee times';
   if (destination) q += ' ' + destination;
-  return 'https://duckduckgo.com/?q=' + encodeURIComponent(q);
+  return buildGoogleLuckySearchUrl(q);
+}
+
+// Same "jump straight to the course page" trick, scoped to leadingcourses.com
+// instead of GolfNow — used for destinations where GolfNow has little/no
+// coverage (Portugal, Italy, Greece, etc. — see LEADING_COURSES_DESTS).
+// leadingcourses.com's own /search?q= page (used below for destination-only,
+// no-course-name searches) is a results list, not a direct club page, so a
+// specific course still needs this same lucky-redirect treatment.
+function buildLeadingCoursesSearchUrl(courseName) {
+  var name = (courseName || '').replace(/"/g, '');
+  return buildGoogleLuckySearchUrl('site:leadingcourses.com "' + name + '"');
 }
 
 function buildTeeTimes(courseName, destination) {
@@ -4906,18 +4922,23 @@ function buildTeeTimes(courseName, destination) {
   var hasCourse = !!(courseName && courseName.trim());
   var query = encodeURIComponent((courseName || '') + ' ' + (destination || ''));
 
+  var isLeadingCoursesDest = false;
   for (var i = 0; i < LEADING_COURSES_DESTS.length; i++) {
-    if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) {
-      // NOTE: leadingcourses.com's real search page is /search?q= — the old
-      // /golf-courses?q= path 404s (confirmed directly against the live site).
-      // This has no affiliate tracking yet since Simon isn't approved on their
-      // partner program — it's a plain working search link for now; once
-      // approved, add the tracking param here the same way Expedia/CJ do below.
-      return { url: 'https://www.leadingcourses.com/search?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
+    if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) { isLeadingCoursesDest = true; break; }
+  }
+  if (isLeadingCoursesDest) {
+    if (hasCourse) {
+      return { url: buildLeadingCoursesSearchUrl(courseName), label: 'Book Tee Time', provider: 'Leading Courses' };
     }
+    // No specific course — leadingcourses.com's own /search?q= is a fine
+    // place-name search page (no facility-ID problem for a destination-wide
+    // search). NOTE: no affiliate tracking yet since Simon isn't approved on
+    // their partner program — once approved, add the tracking param here the
+    // same way Expedia/CJ do below.
+    return { url: 'https://www.leadingcourses.com/search?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
   }
 
-  // A specific course — use the DuckDuckGo site-search fix above rather than
+  // A specific course — use the Google lucky-redirect fix above rather than
   // GolfNow's own broken free-text search (see comment above this function).
   if (hasCourse) {
     return { url: buildGolfNowCourseSearchUrl(courseName, destination), label: 'Book on GolfNow', provider: 'GolfNow' };
@@ -5430,21 +5451,38 @@ function resolveFlightAirportCodes(panel, qData) {
 // specific origin/destination IATA pair and specific dates. Used both by
 // buildSkyscannerUrl (the questionnaire's chosen dates) and by the live
 // flight calendar (a specific day the user clicked on).
+//
+// Uses Expedia Group's officially documented "/go/flight/search/" deep-link
+// format (developers.expediagroup.com — white-label-travel-platform /
+// traffic-growth / deeplinking / flight-deeplinks), NOT the older
+// "Flights-Search?leg1=from:X,to:Y,departure:M/D/YYYY" query format we used
+// before. That older format encodes dates as ambiguous, locale-dependent
+// M/D/YYYY text baked into a comma-separated string — it happened to work on
+// expedia.com (US locale assumed) but broke once we switched the domain to
+// expedia.co.uk (UK locale), which is exactly the "date params don't carry
+// over, shows no results" bug reported live. The documented /go/ deep link
+// takes dates as plain YYYY-MM-DD path segments (verified verbatim against
+// Expedia's own docs, e.g. .../go/flight/search/Roundtrip/2022-12-27/2023-01-01
+// ?load=1&FromAirport=SEA&ToAirport=SFO&FromTime=362&ToTime=362&NumAdult=2),
+// which is unambiguous regardless of which Expedia Group site domain it
+// resolves on — {TemplateSiteDomain} in their docs is explicitly generic
+// across all their locale sites, not just .com. One-way links repeat the
+// same date in both path slots (confirmed via their own one-way example
+// using matching start/end dates) since there's no return leg to encode.
 function buildExpediaFlightsUrl(originCode, destCode, departIso, returnIso, adults, destNameFallback) {
-  var departUS = isoToUSDate(departIso);
-  var retUS = isoToUSDate(returnIso);
-  if (originCode && destCode) {
-    var leg1 = 'from:' + originCode + ',to:' + destCode + (departUS ? ',departure:' + departUS + 'TANYT' : '');
-    var flightsPlainUrl;
-    if (retUS) {
-      var leg2 = 'from:' + destCode + ',to:' + originCode + ',departure:' + retUS + 'TANYT';
-      flightsPlainUrl = 'https://www.expedia.co.uk/Flights-Search?trip=roundtrip&leg1=' + encodeURIComponent(leg1) + '&leg2=' + encodeURIComponent(leg2) + '&passengers=adults:' + adults + '&mode=search';
-    } else {
-      flightsPlainUrl = 'https://www.expedia.co.uk/Flights-Search?trip=oneway&leg1=' + encodeURIComponent(leg1) + '&passengers=adults:' + adults + '&mode=search';
-    }
+  if (originCode && destCode && departIso) {
+    var isRoundTrip = !!returnIso;
+    var tripType = isRoundTrip ? 'Roundtrip' : 'Oneway';
+    var endSeg = returnIso || departIso;
+    var flightsPlainUrl = 'https://www.expedia.co.uk/go/flight/search/' + tripType + '/' + departIso + '/' + endSeg +
+      '?load=1&FromAirport=' + encodeURIComponent(originCode) + '&ToAirport=' + encodeURIComponent(destCode) +
+      '&FromTime=362' + (isRoundTrip ? '&ToTime=362' : '') +
+      '&NumAdult=' + encodeURIComponent(adults || '2');
     return wrapExpediaUrl(flightsPlainUrl);
   }
-  // Fallback — generic Expedia flights search for the destination name
+  // Fallback — no resolved IATA codes, so the airport-based deep link above
+  // isn't possible. Falls back to a plain destination-name search instead
+  // (no date params involved here, so the locale/date bug above doesn't apply).
   return wrapExpediaUrl('https://www.expedia.co.uk/Flights-Search?destination=' + encodeURIComponent(destNameFallback || '') + '&mode=search');
 }
 
@@ -5460,14 +5498,6 @@ function buildSkyscannerUrl(panel, qData) {
   // same mechanism used for hotel links throughout the app.
   return buildExpediaFlightsUrl(codes.originCode, codes.destCode, depart, ret, adults, codes.destName);
 }
-// Converts an ISO 'YYYY-MM-DD' date into Expedia's expected 'M/D/YYYY' format.
-function isoToUSDate(iso) {
-  if (!iso) return '';
-  var parts = iso.split('-');
-  if (parts.length !== 3) return '';
-  return parseInt(parts[1], 10) + '/' + parseInt(parts[2], 10) + '/' + parts[0];
-}
-
 function buildPanel(panel, idx, qData, mapPrefix) {
   mapPrefix = mapPrefix || 'map';
   var el = document.createElement('div');
