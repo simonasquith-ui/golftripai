@@ -4261,9 +4261,10 @@ function buildPanelSection(section, panel, idx, qData) {
   var html = '';
 
   if (section === 'courses') {
+    var courseSectionPlayDate = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
     html += '<div id="section-courses-' + idx + '">';
     (panel.courses || []).forEach(function(c) {
-      var gnData = buildTeeTimes(c.name||'', c.location || dest);
+      var gnData = buildTeeTimes(c.name||'', c.location || dest, courseSectionPlayDate);
       var gn = gnData.url; var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
@@ -4907,103 +4908,79 @@ var GOLFNOW_EU_DESTS = ['spain','france','germany','ireland','morocco','belgium'
 var GOLFNOW_UK_DESTS = ['scotland','england','wales',' uk','united kingdom','st andrews','ayrshire','east lothian'];
 var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai','abu dhabi','bulgaria','algarve','lisbon','porto','madeira','costa navarino','rhodes','crete','athens','tenerife','mallorca','sicily','tuscany','florence','rome','antalya','belek','istanbul','marrakech','agadir','black sea'];
 
-// GolfNow's own /tee-times/search?searchText= endpoint only reliably
-// resolves real place names (cities/regions/postcodes) via its internal
-// geocoder — it does NOT fuzzy-match golf course names. Pass it a specific
-// course name (e.g. "Alhaurin Golf Resort") and the geocoder fails to match
-// anything, silently falling back to a default US location — confirmed live,
-// it always lands on generic Orlando, FL tee times regardless of what was
-// actually searched for.
+// GolfNow's own /tee-times/search?searchText= endpoint resolves real place
+// names (cities/regions/postcodes) via its internal geocoder, and ALSO
+// accepts a &searchDate= param (confirmed live — both echo back correctly
+// into the rendered page for e.g. "La Cala Golf, Mijas, Spain" +
+// searchDate=2026-09-10, on all three golfnow.co.uk / .eu / .com domains).
 //
-// GolfNow DOES have real, working per-course pages — e.g.
-// golfnow.com/tee-times/facility/19714-alhaurin-golf-club/search — but the
-// numeric facility ID can't be derived from a course name without GolfNow's
-// partner API, which is gated behind a business-partnership application
-// (not self-serve, no instant API key). Until/unless that's set up, we can't
-// build that exact URL directly.
+// We PREVIOUSLY tried to jump straight to a specific course's own page via a
+// site-scoped Google search using the "I'm Feeling Lucky" redirect param
+// (&btnI=1), reasoning that a plain HTTP 302 would land the user directly on
+// the course with no results page in between. That worked when tested via
+// curl — but curl has no real Google session/cookies. Re-tested by following
+// the FULL redirect chain (not just the first hop): Google's &btnI=1 302
+// actually points to a second URL, google.com/url?q=<target>, which for a
+// cookie-less/session-less request (any real user in a private/incognito
+// tab, a browser with third-party cookies blocked, or simply not signed into
+// Google — which is most people) serves its own "Redirect Notice"
+// interstitial page instead of auto-following through. That's a genuine,
+// confirmed-live explanation for "still not seamless" reports even though
+// the underlying site: search match itself was correct. Google's redirector
+// is fundamentally not reliable enough for an unattended one-click link.
 //
-// So for a *specific course*, we instead build a site-scoped search that
-// jumps straight to the right page — no facility ID needed.
-//
-// First tried DuckDuckGo's `site:` search as a plain link (a results page,
-// one extra click to the actual course). That had two problems, both
-// confirmed live: (1) DDG treats every unquoted word as a required AND term
-// on top of the exact quoted course-name phrase and the site: restriction —
-// pass it a redundant multi-word location string and it returns zero results
-// even for a course that IS genuinely indexed (confirmed with "Golf de
-// Saint-Cloud", which really is on GolfNow, but zero-worded out); and (2) it
-// lands on a search RESULTS page, not the course itself — not "seamless".
-//
-// Switched to Google's "I'm Feeling Lucky" redirect (`&btnI=1`) instead —
-// confirmed live via curl that this returns a plain HTTP 302 straight to the
-// top-ranked matching page, with the site: restriction still applied and no
-// intermediate results page ever shown to the user. This is a genuine, real
-// Google Search feature (not a bot-detection bypass) — a normal signed-out
-// redirect any browser gets from that param.
-//
-// IMPORTANT — do NOT wrap the course name in quotes. An exact-phrase match
-// is fragile against AI-generated course names, which often include a
-// secondary descriptor after a dash that doesn't appear verbatim on the
-// booking site (e.g. "La Cala Golf Resort - Campo America" — GolfNow lists
-// this course as "La Cala Golf Recorrido Asia", so the quoted AI name never
-// matches anything and Google shows its own "did not match any documents"
-// page instead of redirecting — confirmed live, this is exactly the bug
-// reported). Dropping quotes lets Google fuzzy/semantically match instead of
-// requiring the literal string, AND tends to land closer to the actual
-// booking page rather than just a course-details page. Confirmed live for
-// all of these, unquoted:
-//   - "La Cala Golf Resort" (Spain)   -> golfnow.co.uk/tee-times/facility/19926-la-cala-golf-recorrido-asia/search
-//   - "Golf de Saint-Cloud" (France)  -> golfnow.co.uk/tee-times/facility/18601-golf-de-saint-cloud/search
-//   - "Alhaurin Golf" (Spain)         -> golfnow.co.uk/courses/.../details
-//   - "Praia D'El Rey Golf" (Portugal, via leadingcourses.com) -> leadingcourses.com/clubs/.../praia-d-el-rey-golf-beach-resort
-function buildGoogleLuckySearchUrl(query) {
-  return 'https://www.google.com/search?q=' + encodeURIComponent(query) + '&btnI=1';
+// So: dropped Google entirely. GolfNow can't fuzzy-match a bare course name
+// on its own (confirmed — searchText="Alhaurin Golf Resort" alone falls back
+// to a default Orlando, FL location), but a *combined* "course name,
+// destination" string still carries a real, geocodable place name inside it,
+// and GolfNow's own search page is what actually opens (single hop, no
+// intermediary, no interstitial risk) — the tradeoff is it shows GolfNow's
+// results/tee-times for that area+date rather than guaranteeing the exact
+// course is the top hit, but the course name is still visible right there in
+// the trip plan card for the golfer to match up, and every hit is a REAL,
+// bookable GolfNow page. Reliability over precision.
+var GOLFNOW_DOMAINS = { uk: 'golfnow.co.uk', eu: 'golfnow.eu', com: 'golfnow.com' };
+
+function golfNowDomainFor(dest) {
+  var d = (dest || '').toLowerCase();
+  for (var j = 0; j < GOLFNOW_UK_DESTS.length; j++) {
+    if (d.indexOf(GOLFNOW_UK_DESTS[j]) !== -1) return GOLFNOW_DOMAINS.uk;
+  }
+  for (var k = 0; k < GOLFNOW_EU_DESTS.length; k++) {
+    if (d.indexOf(GOLFNOW_EU_DESTS[k]) !== -1) return GOLFNOW_DOMAINS.eu;
+  }
+  return GOLFNOW_DOMAINS.com;
 }
 
-// Strips quotes (which we deliberately never want in these queries) and
-// anything from a " - " / " – " / " — " separator onward — AI-generated
-// course names sometimes append a secondary descriptor there (e.g. a
-// specific course within a multi-course resort) that real booking sites
-// often don't repeat verbatim, and it only adds noise to the search.
+// Strips quotes and anything from a " - " / " – " / " — " separator onward —
+// AI-generated course names sometimes append a secondary descriptor there
+// (e.g. a specific course within a multi-course resort), which only adds
+// noise to a search/geocoder rather than helping it.
 function simplifyCourseNameForSearch(courseName) {
   return (courseName || '').replace(/"/g, '').split(/\s+[-–—]\s+/)[0].trim();
 }
 
-function buildGolfNowCourseSearchUrl(courseName, destination) {
-  var name = simplifyCourseNameForSearch(courseName);
-  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) ' + name + ' book tee times';
-  if (destination) q += ' ' + destination;
-  return buildGoogleLuckySearchUrl(q);
+function buildGolfNowSearchUrl(courseName, destination, playDate) {
+  var domain = golfNowDomainFor(destination);
+  var text = (simplifyCourseNameForSearch(courseName) + ' ' + (destination || '')).trim();
+  return 'https://www.' + domain + '/tee-times/search?searchText=' + encodeURIComponent(text) +
+    (playDate ? '&searchDate=' + encodeURIComponent(playDate) : '');
 }
 
-// Same "jump straight to the course page" trick, scoped to leadingcourses.com
-// instead of GolfNow — used for destinations where GolfNow has little/no
-// coverage (Portugal, Italy, Greece, etc. — see LEADING_COURSES_DESTS).
-// leadingcourses.com's own /search?q= page (used below for destination-only,
-// no-course-name searches) is a results list, not a direct club page, so a
-// specific course still needs this same lucky-redirect treatment.
-function buildLeadingCoursesSearchUrl(courseName) {
-  var name = simplifyCourseNameForSearch(courseName);
-  return buildGoogleLuckySearchUrl('site:leadingcourses.com ' + name);
-}
-
-// OpenTable fix — same lucky-redirect trick as GolfNow. The old links (plain
-// /s?covers=...&term=... search, inconsistently on .com in one call site and
-// .co.uk in another) had no location context at all, so a common restaurant
-// name could land on the wrong city, and OpenTable's search page itself sits
-// behind heavy bot-detection (curl gets a 403; a real signed-out browser is
-// fine, but there's no way to verify the exact match from here). Site-scoping
-// both domains + adding the destination to the query and using btnI=1 jumps
-// straight to the specific restaurant's page — confirmed live, e.g. "El Faro
-// Marbella" -> opentable.com/r/la-esquinita-del-faro-marbella. Falls back
-// gracefully to a normal results page for restaurant names OpenTable doesn't
-// have an exact match for (nothing "did not match any documents"-style breaks
-// — Google just shows its best guess).
+// OpenTable fix — the old links (plain /s?covers=...&term=... search,
+// inconsistently on .com in one call site and .co.uk in another) had no
+// destination context at all, so a common restaurant name could match the
+// wrong city. We first tried the same Google site:-scoped "lucky redirect"
+// trick used for GolfNow above, but that has the exact same reliability
+// problem confirmed there (Google's redirector shows a manual "Redirect
+// Notice" interstitial for any signed-out/cookie-less request instead of
+// auto-following through) — so dropped Google entirely here too. Goes
+// straight to OpenTable's own UK search with both the restaurant name AND
+// destination in the search term, which at minimum guarantees landing on
+// OpenTable itself, in the right area, in one hop.
 function buildOpenTableSearchUrl(restaurantName, destination) {
   var name = simplifyCourseNameForSearch(restaurantName);
-  var q = '(site:opentable.com OR site:opentable.co.uk) ' + name + ' restaurant reserve';
-  if (destination) q += ' ' + destination;
-  return buildGoogleLuckySearchUrl(q);
+  return 'https://www.opentable.co.uk/s?covers=4&term=' + encodeURIComponent((name + ' ' + (destination || '')).trim());
 }
 
 // Golf club hire fix — "Golf Club Hire World" (golfclubhireworld.com) turned
@@ -5011,21 +4988,16 @@ function buildOpenTableSearchUrl(restaurantName, destination) {
 // and "Golf Breaks" is actually a UK golf tour/package operator (flights +
 // hotel + golf), not a club-hire company at all — wrong category, and its
 // URL 404s anyway. Unlike GolfNow there's no single dominant club-hire
-// provider that covers every destination, so instead of guessing one
-// wrong domain we lean on the plain (non-lucky, already-confirmed-working
-// per Simon's own audit) Google search as the base, and ALSO offer the
-// lucky-redirect as a shortcut straight to whichever real local provider
-// ranks top for that destination — confirmed live it lands on genuine,
-// relevant, existing businesses every time, e.g.:
-//   - Algarve, Portugal   -> acegolfclubhire.com
-//   - St Andrews, Scotland -> shop.standrews.com/club_hire_request_form
-//   - Costa del Sol, Spain -> clubstohire.com/locations/malaga
-//   - Dubai                -> clubstohire.com/locations/dubai
-function buildClubHireLuckySearchUrl(destination) {
-  return buildGoogleLuckySearchUrl('golf club hire ' + (destination || ''));
+// provider that covers every destination, so (per the Google-redirect
+// reliability problem above) we don't try to guess/redirect to one specific
+// local company — a plain Google results page (already confirmed working,
+// per Simon's own audit) is the reliable option: no interstitial risk, and
+// the golfer picks whichever local option suits them.
+function buildClubHireSearchUrl(destination) {
+  return 'https://www.google.com/search?q=golf+club+hire+' + encodeURIComponent(destination || '');
 }
 
-function buildTeeTimes(courseName, destination) {
+function buildTeeTimes(courseName, destination, playDate) {
   var dest = (destination || '').toLowerCase();
   var hasCourse = !!(courseName && courseName.trim());
   var query = encodeURIComponent((courseName || '') + ' ' + (destination || ''));
@@ -5035,42 +5007,20 @@ function buildTeeTimes(courseName, destination) {
     if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) { isLeadingCoursesDest = true; break; }
   }
   if (isLeadingCoursesDest) {
-    if (hasCourse) {
-      return { url: buildLeadingCoursesSearchUrl(courseName), label: 'Book Tee Time', provider: 'Leading Courses' };
-    }
-    // No specific course — leadingcourses.com's own /search?q= is a fine
-    // place-name search page (no facility-ID problem for a destination-wide
-    // search). NOTE: no affiliate tracking yet since Simon isn't approved on
-    // their partner program — once approved, add the tracking param here the
-    // same way Expedia/CJ do below.
+    // leadingcourses.com's own /search?q= is a real place/course-name search
+    // page (no Google intermediary, no facility-ID problem) — used for both
+    // a specific course and a destination-wide search alike. NOTE: no
+    // affiliate tracking yet since Simon isn't approved on their partner
+    // program — once approved, add the tracking param here the same way
+    // Expedia/CJ do below.
     return { url: 'https://www.leadingcourses.com/search?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
   }
 
-  // A specific course — use the Google lucky-redirect fix above rather than
-  // GolfNow's own broken free-text search (see comment above this function).
-  if (hasCourse) {
-    return { url: buildGolfNowCourseSearchUrl(courseName, destination), label: 'Book on GolfNow', provider: 'GolfNow' };
-  }
-
-  // No specific course — this is a plain place-name search (e.g. a
-  // destination-level "Tee Times near here" button), which GolfNow's own
-  // searchText param handles fine, so link straight to the right regional
-  // GolfNow site.
-  for (var j = 0; j < GOLFNOW_UK_DESTS.length; j++) {
-    if (dest.indexOf(GOLFNOW_UK_DESTS[j]) !== -1) {
-      return { url: 'https://www.golfnow.co.uk/tee-times/search?searchText=' + query, label: 'Book on GolfNow', provider: 'GolfNow UK' };
-    }
-  }
-  for (var k = 0; k < GOLFNOW_EU_DESTS.length; k++) {
-    if (dest.indexOf(GOLFNOW_EU_DESTS[k]) !== -1) {
-      return { url: 'https://www.golfnow.eu/tee-times/search?searchText=' + query, label: 'Book on GolfNow', provider: 'GolfNow EU' };
-    }
-  }
-  return { url: 'https://www.golfnow.com/tee-times/search?searchText=' + query, label: 'Book Tee Time', provider: 'GolfNow' };
+  return { url: buildGolfNowSearchUrl(courseName, destination, playDate), label: 'Book on GolfNow', provider: 'GolfNow' };
 }
 
-function buildDestTeeTimes(destination) {
-  return buildTeeTimes('', destination).url;
+function buildDestTeeTimes(destination, playDate) {
+  return buildTeeTimes('', destination, playDate).url;
 }
 // ── END GOLF BOOKING LINK HELPER ────────────────────────────
 
@@ -5722,8 +5672,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     '</span>' +
   '</div><div class="courses-grid" id="section-courses-' + idx + '">';
   if (panel.courses && panel.courses.length) {
+    var coursesPlayDate = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
     panel.courses.forEach(function(c) {
-      var gnData = buildTeeTimes(c.name || '', c.location || dest);
+      var gnData = buildTeeTimes(c.name || '', c.location || dest, coursesPlayDate);
       var gn = gnData.url;
       var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
@@ -5837,8 +5788,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       '<div class="card" style="padding:20px;margin-bottom:24px">' +
         '<p>Club hire is available at most courses in ' + dest + '. Typical cost: ' + fmtPrice(panel.club_hire_cost || 45) + ' per set per round.</p>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">' +
-          '<a href="' + buildClubHireLuckySearchUrl(dest) + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-golf"></i> Find a Hire Company</a>' +
-          '<a href="https://www.google.com/search?q=golf+club+hire+' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">More Options</a>' +
+          '<a href="' + buildClubHireSearchUrl(dest) + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-golf"></i> Find a Hire Company</a>' +
         '</div>' +
       '</div>';
   }
@@ -6520,7 +6470,7 @@ function buildBTT(panel, idx, qData) {
           expediaItem +
         '</div>' +
       '</div>' +
-      '<a href="' + buildDestTeeTimes(panel.destination || dest) + '" target="_blank" class="btt-btn btt-teetimes">' +
+      '<a href="' + buildDestTeeTimes(panel.destination || dest, bttCheckin) + '" target="_blank" class="btt-btn btt-teetimes">' +
         '<div class="btt-icon"><i class="ti ti-golf"></i></div>' +
         '<div><div class="btt-label">Tee Times</div><div class="btt-action">Book on GolfNow</div></div>' +
       '</a>' +
@@ -7695,7 +7645,7 @@ async function initMap(idx, mapPrefix) {
   (panel.courses || []).forEach(function(c) {
     toSearch.push({ type: 'course', name: c.name, area: c.location,
       detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: buildTeeTimes(c.name||'', c.location || dest).url,
+      link: buildTeeTimes(c.name||'', c.location || dest, mmCheckin).url,
       aiLat: c.lat, aiLng: c.lng });
   });
   (panel.restaurants || []).forEach(function(r) {
