@@ -506,6 +506,22 @@ label{display:block;font-size:.8rem;font-weight:500;color:var(--ink);margin-bott
 .stay-dropdown-menu a:hover{background:var(--paper)}
 .stay-dropdown-menu a+a{border-top:1px solid var(--line)}
 .stay-dropdown-menu .ti{color:var(--brass);font-size:.9rem;width:16px;text-align:center;flex-shrink:0}
+/* Live flight calendar strip — real per-day fares from Travelpayouts, shown
+   under the Flight Overview card. Each day is a mini click-through card to
+   Expedia; the cheapest day in the strip gets a gold "Cheapest" badge. */
+.flight-cal-wrap{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.flight-cal-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.flight-cal-label .ti{color:var(--brass)}
+.flight-cal-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.flight-cal-day{position:relative;flex:0 0 auto;min-width:84px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;text-decoration:none;text-align:center;transition:border-color var(--tr),transform var(--tr)}
+.flight-cal-day:hover{border-color:var(--brass);transform:translateY(-2px)}
+.flight-cal-day.cheapest{border-color:var(--brass);background:rgba(180,140,60,.07)}
+.flight-cal-badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--brass);color:#fff;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.flight-cal-date{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.flight-cal-price{font-family:var(--font-display);font-size:1.1rem;font-weight:500;color:var(--moss)}
+.flight-cal-direct{font-size:.6rem;color:var(--brass);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.flight-cal-note{margin-top:10px;line-height:1.5}
+.flight-cal-empty{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
 .cost-breakdown{background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);box-shadow:none;padding:28px;margin:28px 0}
 .cost-breakdown h3{color:var(--moss);margin-bottom:18px;font-family:var(--font-display);font-weight:500;font-size:1.15rem}
 .cost-row{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -1335,8 +1351,8 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
       </div>
       <div id="date-specific" class="hidden">
         <div class="form-row">
-          <div class="form-group"><label>Departure Date</label><input type="date" id="specific-depart"></div>
-          <div class="form-group"><label>Return Date</label><input type="date" id="specific-return"></div>
+          <div class="form-group" onclick="var i=this.querySelector('input[type=date]');if(i&&i.showPicker){try{i.showPicker()}catch(e){}}else if(i){i.focus()}"><label>Departure Date</label><input type="date" id="specific-depart"></div>
+          <div class="form-group" onclick="var i=this.querySelector('input[type=date]');if(i&&i.showPicker){try{i.showPicker()}catch(e){}}else if(i){i.focus()}"><label>Return Date</label><input type="date" id="specific-return"></div>
         </div>
       </div>
       <div class="form-group" style="margin-top:6px;max-width:280px">
@@ -3944,61 +3960,146 @@ async function saveTripResults() {
 }
 // ── END SAVE TRIP RESULTS ─────────────────────────────────────
 
-// ── LIVE FLIGHTS ─────────────────────────────────────────────
-var liveFlightsCache = {}; // keyed by origin|dest|date
+// ── LIVE FLIGHT CALENDAR ─────────────────────────────────────
+// Real day-by-day round-trip fares from Travelpayouts (via our
+// /.netlify/functions/flights-calendar proxy), shown as a strip of priced
+// dates the user can click straight through to book on Expedia. This
+// replaces an earlier "Live Flights" attempt that assumed an Amadeus-style
+// specific-flight-listing API — that endpoint was never actually built, so
+// this whole block previously failed silently on every page load.
+//
+// Honest limitation: Travelpayouts' data is "fares it has actually seen
+// recently for this route" — not exhaustive for every single day. We fetch
+// two consecutive months and merge them to give a fuller picture, and say so
+// plainly in the UI rather than implying full coverage.
+var flightCalendarCache = {};
 
-async function fetchLiveFlights(originCode, destCode, departDate, returnDate, groupSize) {
-  if (!originCode || !destCode || !departDate) return null;
-  var cacheKey = [originCode, destCode, departDate, returnDate||''].join('|');
-  if (liveFlightsCache[cacheKey]) return liveFlightsCache[cacheKey];
-
-  try {
-    var res = await fetch('/.netlify/functions/flights', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        origin: originCode,
-        destination: destCode,
-        departDate: departDate,
-        returnDate: returnDate || null,
-        adults: 1 // price per person — multiply by group size for total
-      })
-    });
-    var data = await res.json();
-    if (data.flights && data.flights.length) {
-      liveFlightsCache[cacheKey] = data.flights;
-      return data.flights;
-    }
-  } catch(e) { console.warn('Live flights fetch failed:', e.message); }
-  return null;
+function monthStartIso(year, monthIndexZeroBased) {
+  var y = year, m = monthIndexZeroBased;
+  if (m > 11) { y += Math.floor(m / 12); m = m % 12; }
+  if (m < 0) { var borrow = Math.ceil(-m / 12); y -= borrow; m += borrow * 12; }
+  return y + '-' + String(m + 1).padStart(2, '0') + '-01';
 }
 
-function renderLiveFlights(flights, groupSize) {
-  if (!flights || !flights.length) return '';
-  var html = '<div class="live-flights-wrap">';
-  html += '<div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px"><i class="ti ti-plane-departure"></i> Live Flight Prices</div>';
-  flights.slice(0, 3).forEach(function(f) {
-    var stops = f.stops === 0 ? 'Direct' : f.stops + ' stop' + (f.stops > 1 ? 's' : '');
-    var total = f.pricePerPerson * (groupSize || 1);
-    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">' +
-      '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:.88rem;font-weight:500;color:var(--text)">' + f.airline + ' ' + f.flightNumber + '</div>' +
-        '<div style="font-size:.78rem;color:var(--text-muted);margin-top:2px">' +
-          f.departureTime + ' → ' + f.arrivalTime + ' &nbsp;·&nbsp; ' + f.duration + ' &nbsp;·&nbsp; ' + stops +
-        '</div>' +
-      '</div>' +
-      '<div style="text-align:right;flex-shrink:0">' +
-        '<div style="font-size:.95rem;font-weight:700;color:var(--gold)">' + f.priceDisplay + '</div>' +
-        (groupSize > 1 ? '<div style="font-size:.72rem;color:var(--text-muted)">£' + total.toFixed(0) + ' total</div>' : '') +
-      '</div>' +
-      '<a href="' + f.bookingUrl + '" target="_blank" class="btn btn-primary btn-sm" style="flex-shrink:0;font-size:.78rem;padding:6px 12px">Book</a>' +
-    '</div>';
+// Works out which month + trip length to query, from the questionnaire's
+// chosen dates (specific or flexible).
+function deriveFlightCalendarQuery(qData) {
+  var nights = 5;
+  var monthIso;
+  var d = qData && qData.dates;
+  if (d && d.type === 'specific' && d.depart) {
+    var dp = new Date(d.depart);
+    monthIso = monthStartIso(dp.getFullYear(), dp.getMonth());
+    if (d.returnDate) {
+      var diff = Math.round((new Date(d.returnDate) - dp) / 86400000);
+      if (diff > 0) nights = diff;
+    }
+  } else {
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var today = new Date();
+    if (d && d.duration) {
+      var n = parseInt(d.duration, 10);
+      if (!isNaN(n) && n > 0) nights = n;
+    }
+    if (d && d.month) {
+      var idx = monthNames.indexOf(d.month);
+      if (idx !== -1) {
+        var year = today.getFullYear();
+        if (idx < today.getMonth()) year += 1; // that month's already passed this year — assume next year
+        monthIso = monthStartIso(year, idx);
+      }
+    }
+    if (!monthIso) monthIso = monthStartIso(today.getFullYear(), today.getMonth() + 1); // default: next month
+  }
+  return { month: monthIso, nights: nights };
+}
+
+async function fetchFlightCalendarMonth(originCode, destCode, month, nights, currency) {
+  var cacheKey = [originCode, destCode, month, nights, currency].join('|');
+  if (flightCalendarCache[cacheKey]) return flightCalendarCache[cacheKey];
+  try {
+    var url = '/.netlify/functions/flights-calendar?origin=' + encodeURIComponent(originCode) +
+      '&destination=' + encodeURIComponent(destCode) +
+      '&month=' + encodeURIComponent(month) +
+      '&nights=' + encodeURIComponent(nights) +
+      '&currency=' + encodeURIComponent(currency || 'gbp');
+    var res = await fetch(url);
+    var data = await res.json();
+    var prices = (data && data.prices) || [];
+    flightCalendarCache[cacheKey] = prices;
+    return prices;
+  } catch (e) {
+    console.warn('Flight calendar fetch failed:', e.message);
+    return [];
+  }
+}
+
+async function fetchFlightCalendar(originCode, destCode, month, nights, currency) {
+  var parts = month.split('-');
+  var nextMonth = monthStartIso(parseInt(parts[0], 10), parseInt(parts[1], 10)); // zero-based next month
+  var results = await Promise.all([
+    fetchFlightCalendarMonth(originCode, destCode, month, nights, currency),
+    fetchFlightCalendarMonth(originCode, destCode, nextMonth, nights, currency)
+  ]);
+  var merged = results[0].concat(results[1]);
+  merged.sort(function(a, b) { return a.date < b.date ? -1 : 1; });
+  return merged;
+}
+
+function formatCalDate(iso) {
+  var d = new Date(iso + 'T00:00:00');
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function addDaysIso(iso, days) {
+  var d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function renderFlightCalendarHtml(prices, originCode, destCode, qData, destNameFallback, nights) {
+  if (!prices || !prices.length) {
+    return '<div class="flight-cal-empty fs-sm text-muted">No cached fares found yet for this route — use "Search Flights" above to check live prices on Expedia.</div>';
+  }
+  var adults = (qData && qData.group_size) ? String(qData.group_size) : '2';
+  var cheapest = prices.reduce(function(min, p) { return (!min || p.price < min.price) ? p : min; }, null);
+  var html = '<div class="flight-cal-wrap">';
+  html += '<div class="flight-cal-label"><i class="ti ti-calendar-stats"></i> Real fares found for this route &middot; round trip, ' + nights + ' nights</div>';
+  html += '<div class="flight-cal-strip">';
+  prices.slice(0, 12).forEach(function(p) {
+    var isCheapest = cheapest && p.date === cheapest.date;
+    var ret = p.returnDate || addDaysIso(p.date, nights);
+    var url = buildExpediaFlightsUrl(originCode, destCode, p.date, ret, adults, destNameFallback);
+    html += '<a href="' + url + '" target="_blank" class="flight-cal-day' + (isCheapest ? ' cheapest' : '') + '">' +
+      (isCheapest ? '<span class="flight-cal-badge">Cheapest</span>' : '') +
+      '<div class="flight-cal-date">' + formatCalDate(p.date) + '</div>' +
+      '<div class="flight-cal-price">&#163;' + Math.round(p.price) + '</div>' +
+      (p.directOnly ? '<div class="flight-cal-direct">Direct</div>' : '') +
+    '</a>';
   });
-  html += '<div style="font-size:.72rem;color:var(--text-muted);margin-top:8px;text-align:right">Live prices from Amadeus · Updates daily</div>';
+  html += '</div>';
+  html += '<div class="flight-cal-note fs-sm text-muted">Real fares recently found for this route — not every date is priced, and fares move fast. Click any date to check live availability and book on Expedia.</div>';
   html += '</div>';
   return html;
 }
-// ── END LIVE FLIGHTS ──────────────────────────────────────────
+
+async function mountFlightCalendar(mountId, panel, qData) {
+  var mountEl = document.getElementById(mountId);
+  if (!mountEl) return;
+  var codes = resolveFlightAirportCodes(panel, qData);
+  if (!codes.originCode || !codes.destCode) { mountEl.innerHTML = ''; return; }
+  var calQuery = deriveFlightCalendarQuery(qData);
+  try {
+    var prices = await fetchFlightCalendar(codes.originCode, codes.destCode, calQuery.month, calQuery.nights, 'gbp');
+    mountEl.innerHTML = renderFlightCalendarHtml(prices, codes.originCode, codes.destCode, qData, codes.destName, calQuery.nights);
+  } catch (e) {
+    console.warn('Flight calendar mount failed:', e.message);
+    mountEl.innerHTML = '';
+  }
+}
+// ── END LIVE FLIGHT CALENDAR ─────────────────────────────────
 
 // ── SECTION REFRESH ─────────────────────────────────────────
 document.addEventListener('click', function(e) {
@@ -4493,62 +4594,12 @@ async function generateTrip() {
           existing.replaceWith(newEl);
           hydrateCardPhotos(newEl);
           var capturedIdx = idx;
-          var capturedMerged = merged;
-          var capturedData = data;
           requestAnimationFrame(function() {
             requestAnimationFrame(function() {
               // Extra delay for the map container to be measurable in the DOM
               setTimeout(function() { initMap(capturedIdx, 'results'); }, 200);
             });
           });
-          // Fetch live flight prices and inject into panel after render
-          (async function() {
-            try {
-              var DEST_CODES = {
-                'algarve':'FAO','lisbon':'LIS','porto':'OPO','madeira':'FNC',
-                'costa del sol':'AGP','mallorca':'PMI','tenerife':'TFS',
-                'bilbao':'BIO','madrid':'MAD','barcelona':'BCN','costa brava':'BCN',
-                'marrakech':'RAK','agadir':'AGA','morocco':'RAK',
-                'dublin':'DUB','ireland':'DUB',
-                'nice':'NCE','france':'CDG','paris':'CDG',
-                'florence':'FLR','italy':'FCO','rome':'FCO','sicily':'CTA',
-                'antalya':'AYT','turkey':'AYT','istanbul':'IST',
-                'dubai':'DXB','uae':'DXB','abu dhabi':'AUH',
-                'greece':'ATH','athens':'ATH','rhodes':'RHO','crete':'HER',
-                'costa navarino':'KLX','bulgaria':'SOF','black sea':'VAR',
-                'scotland':'EDI','england':'LHR'
-              };
-              var airports = capturedData && capturedData.airports ? capturedData.airports : [];
-              var originCode = airports[0] ? (airports[0].airport || '').slice(0,3).toUpperCase() : '';
-              var destStr = (capturedMerged.destination || '').toLowerCase();
-              var destCode = '';
-              Object.keys(DEST_CODES).forEach(function(k) {
-                if (!destCode && destStr.indexOf(k) !== -1) destCode = DEST_CODES[k];
-              });
-              if (!originCode || !destCode) return;
-              var departDate = capturedData && capturedData.dates ? capturedData.dates.depart : '';
-              var returnDate = capturedData && capturedData.dates ? capturedData.dates.returnDate : '';
-              var groupSize = capturedData ? parseInt(capturedData.group_size) || 1 : 1;
-              var flights = await fetchLiveFlights(originCode, destCode, departDate, returnDate, groupSize);
-              if (!flights || !flights.length) return;
-              // Find the flights section in this panel and inject live data above it
-              var panels = document.querySelectorAll('.result-panel');
-              var panelEl = panels[capturedIdx];
-              if (!panelEl) return;
-              var flightSection = panelEl.querySelector('.section-heading[data-icon="✈️"], [data-section="flights"]');
-              if (!flightSection) {
-                // Insert before the first section heading as a live flights banner
-                var firstSection = panelEl.querySelector('.section-heading');
-                if (firstSection) {
-                  var liveDiv = document.createElement('div');
-                  liveDiv.className = 'card';
-                  liveDiv.style.cssText = 'margin-bottom:20px;padding:16px 20px;background:var(--white);border:1.5px solid var(--gold)';
-                  liveDiv.innerHTML = renderLiveFlights(flights, groupSize);
-                  firstSection.parentNode.insertBefore(liveDiv, firstSection);
-                }
-              }
-            } catch(e) { console.warn('Live flights injection failed:', e.message); }
-          })();
         }
       }
       // Update compare bar price
@@ -5203,49 +5254,59 @@ function showPanelSwitchHint(count) {
   }, 3000);
 }
 
-function buildSkyscannerUrl(panel, qData) {
+// Map common UK airport names/codes to IATA. Hoisted to module scope so both
+// the Expedia link-builder below and the live flight calendar (search "LIVE
+// FLIGHT CALENDAR") share one consistent list instead of drifting copies.
+var AIRPORT_CODES = {
+  'LHR':'LHR','LGW':'LGW','MAN':'MAN','EDI':'EDI','BHX':'BHX','BRS':'BRS',
+  'GLA':'GLA','NCL':'NCL','LPL':'LPL','STN':'STN','LTN':'LTN','EMA':'EMA',
+  'ABZ':'ABZ','BFS':'BFS','Heathrow':'LHR','Gatwick':'LGW','Stansted':'STN',
+  'Luton':'LTN','Manchester':'MAN','Edinburgh':'EDI','Birmingham':'BHX',
+  'Bristol':'BRS','Glasgow':'GLA','Newcastle':'NCL','Liverpool':'LPL',
+  'East Midlands':'EMA','Aberdeen':'ABZ','Belfast':'BFS'
+};
+// Destination city/region → nearest airport IATA. Best-effort single nearest
+// airport per destination — some regions genuinely have more than one viable
+// airport (e.g. Algarve via FAO vs Seville via SVQ for western Algarve) and
+// this doesn't attempt to pick the cheapest of several yet — parked as a
+// known future improvement rather than solved here.
+var DEST_CODES = {
+  'Algarve':'FAO','Lisbon':'LIS','Porto':'OPO','Madeira':'FNC',
+  'Costa del Sol':'AGP','Malaga':'AGP','Mallorca':'PMI','Tenerife':'TFS',
+  'Bilbao':'BIO','Madrid':'MAD','Barcelona':'BCN','Costa Brava':'BCN',
+  'Marrakech':'RAK','Agadir':'AGA','Casablanca':'CMN','Morocco':'RAK',
+  'Dublin':'DUB','Cork':'ORK','Kerry':'KIR','Ireland':'DUB',
+  'Paris':'CDG','Nice':'NCE','Bordeaux':'BOD','Biarritz':'BIQ','France':'CDG',
+  'Florence':'FLR','Tuscany':'FLR','Rome':'FCO','Sicily':'CTA','Milan':'MXP','Italy':'FCO',
+  'Antalya':'AYT','Belek':'AYT','Istanbul':'IST','Bodrum':'BJV','Turkey':'AYT',
+  'Dubai':'DXB','Abu Dhabi':'AUH','UAE':'DXB',
+  'Faro':'FAO','Seville':'SVQ','Valencia':'VLC','Ibiza':'IBZ',
+  'Greece':'ATH','Athens':'ATH','Rhodes':'RHO','Crete':'HER',
+  'Costa Navarino':'KLX','Bulgaria':'SOF','Black Sea':'VAR',
+  'Scotland':'EDI','England':'LHR'
+};
+
+// Resolves {originCode, destCode} IATA codes from the questionnaire's chosen
+// departure airport + a panel's destination name, using the shared maps
+// above. Shared by the Expedia link-builder and the live flight calendar.
+function resolveFlightAirportCodes(panel, qData) {
   var origin = (qData && qData.airports && qData.airports[0]) ? qData.airports[0].airport : '';
-  var dest = (panel.destination || '').split(',')[0].trim();
-  var depart = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
-  var ret = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
-  var adults = (qData && qData.group_size) ? String(qData.group_size) : '2';
-
-  // Map common UK airport names/codes to IATA
-  var AIRPORT_CODES = {
-    'LHR':'LHR','LGW':'LGW','MAN':'MAN','EDI':'EDI','BHX':'BHX','BRS':'BRS',
-    'GLA':'GLA','NCL':'NCL','LPL':'LPL','STN':'STN','LTN':'LTN','EMA':'EMA',
-    'ABZ':'ABZ','BFS':'BFS','Heathrow':'LHR','Gatwick':'LGW','Stansted':'STN',
-    'Luton':'LTN','Manchester':'MAN','Edinburgh':'EDI','Birmingham':'BHX',
-    'Bristol':'BRS','Glasgow':'GLA','Newcastle':'NCL','Liverpool':'LPL',
-    'East Midlands':'EMA','Aberdeen':'ABZ','Belfast':'BFS'
-  };
-  // Destination city → nearest airport IATA
-  var DEST_CODES = {
-    'Algarve':'FAO','Lisbon':'LIS','Porto':'OPO','Madeira':'FNC',
-    'Costa del Sol':'AGP','Malaga':'AGP','Mallorca':'PMI','Tenerife':'TFS',
-    'Bilbao':'BIO','Madrid':'MAD','Barcelona':'BCN','Costa Brava':'BCN',
-    'Marrakech':'RAK','Agadir':'AGA','Casablanca':'CMN',
-    'Dublin':'DUB','Cork':'ORK','Kerry':'KIR',
-    'Paris':'CDG','Nice':'NCE','Bordeaux':'BOD','Biarritz':'BIQ',
-    'Florence':'FLR','Tuscany':'FLR','Rome':'FCO','Sicily':'CTA','Milan':'MXP',
-    'Antalya':'AYT','Belek':'AYT','Istanbul':'IST','Bodrum':'BJV',
-    'Dubai':'DXB','Abu Dhabi':'AUH',
-    'Faro':'FAO','Seville':'SVQ','Valencia':'VLC','Ibiza':'IBZ'
-  };
-
+  var dest = (panel && panel.destination || '').split(',')[0].trim();
   var originCode = AIRPORT_CODES[origin] || (origin.length === 3 ? origin.toUpperCase() : '');
-  // Find dest airport code — check each key against dest string
   var destCode = '';
   Object.keys(DEST_CODES).forEach(function(k) {
     if (!destCode && dest.toLowerCase().indexOf(k.toLowerCase()) !== -1) destCode = DEST_CODES[k];
   });
+  return { originCode: originCode, destCode: destCode, destName: dest };
+}
 
-  // Build an Expedia Flights deep link — pre-populated with origin, destination,
-  // dates and pax — wrapped through Simon's Expedia Travel Creator Program
-  // tracking (wrapExpediaUrl) so a booking made from this link earns commission,
-  // same mechanism used for hotel links throughout the app.
-  var departUS = isoToUSDate(depart);
-  var retUS = isoToUSDate(ret);
+// Builds a wrapped (affiliate-tracked) Expedia flights search URL for a
+// specific origin/destination IATA pair and specific dates. Used both by
+// buildSkyscannerUrl (the questionnaire's chosen dates) and by the live
+// flight calendar (a specific day the user clicked on).
+function buildExpediaFlightsUrl(originCode, destCode, departIso, returnIso, adults, destNameFallback) {
+  var departUS = isoToUSDate(departIso);
+  var retUS = isoToUSDate(returnIso);
   if (originCode && destCode) {
     var leg1 = 'from:' + originCode + ',to:' + destCode + (departUS ? ',departure:' + departUS + 'TANYT' : '');
     var flightsPlainUrl;
@@ -5258,7 +5319,20 @@ function buildSkyscannerUrl(panel, qData) {
     return wrapExpediaUrl(flightsPlainUrl);
   }
   // Fallback — generic Expedia flights search for the destination name
-  return wrapExpediaUrl('https://www.expedia.com/Flights-Search?destination=' + encodeURIComponent(dest) + '&mode=search');
+  return wrapExpediaUrl('https://www.expedia.com/Flights-Search?destination=' + encodeURIComponent(destNameFallback || '') + '&mode=search');
+}
+
+function buildSkyscannerUrl(panel, qData) {
+  var depart = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
+  var ret = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
+  var adults = (qData && qData.group_size) ? String(qData.group_size) : '2';
+  var codes = resolveFlightAirportCodes(panel, qData);
+
+  // Build an Expedia Flights deep link — pre-populated with origin, destination,
+  // dates and pax — wrapped through Simon's Expedia Travel Creator Program
+  // tracking (wrapExpediaUrl) so a booking made from this link earns commission,
+  // same mechanism used for hotel links throughout the app.
+  return buildExpediaFlightsUrl(codes.originCode, codes.destCode, depart, ret, adults, codes.destName);
 }
 // Converts an ISO 'YYYY-MM-DD' date into Expedia's expected 'M/D/YYYY' format.
 function isoToUSDate(iso) {
@@ -5370,6 +5444,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         '</div>' +
         '<a href="' + skyUrl + '" target="_blank" class="btn btn-primary btn-sm" style="white-space:nowrap">Search Flights &#8594;</a>' +
       '</div>' +
+      '<div id="flight-cal-' + idx + '" class="flight-cal-mount"></div>' +
     '</div>';
   }
 
@@ -5628,6 +5703,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // loadActivities looks up its container via document.getElementById,
   // which fails silently on a still-detached element.
   setTimeout(function() { loadActivities(dest, idx); }, 0);
+  if (!travelData && panel.flights) {
+    setTimeout(function() { mountFlightCalendar('flight-cal-' + idx, panel, qData); }, 0);
+  }
   if (mapPrefix === 'results') {
     setTimeout(function() {
       var wrap = document.getElementById('trip-schedule-' + idx);
