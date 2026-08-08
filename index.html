@@ -3961,18 +3961,44 @@ async function saveTripResults() {
 // ── END SAVE TRIP RESULTS ─────────────────────────────────────
 
 // ── LIVE FLIGHT CALENDAR ─────────────────────────────────────
-// Real day-by-day round-trip fares from Travelpayouts (via our
-// /.netlify/functions/flights-calendar proxy), shown as a strip of priced
-// dates the user can click straight through to book on Expedia. This
-// replaces an earlier "Live Flights" attempt that assumed an Amadeus-style
-// specific-flight-listing API — that endpoint was never actually built, so
-// this whole block previously failed silently on every page load.
+// Day-by-day fares from Travelpayouts (via our /.netlify/functions/flights-calendar
+// proxy), shown as a strip of priced dates the user can click straight
+// through to book on Expedia. This replaces an earlier "Live Flights"
+// attempt that assumed an Amadeus-style specific-flight-listing API — that
+// endpoint was never actually built, so this whole block previously failed
+// silently on every page load.
+//
+// IMPORTANT — confirmed against Travelpayouts' own API docs: the
+// month-matrix endpoint we use has NO round-trip mode at all. Every price it
+// returns is a ONE-WAY fare, full stop — there's no parameter that changes
+// that. (We tried one_way=false/trip_duration; Travelpayouts silently
+// ignores both on this endpoint.) The endpoint that DOES do real round-trip
+// pricing (v2/prices/latest) has essentially no UK-outbound route coverage —
+// tested live against London/Manchester → Spain/Portugal routes and got zero
+// results every time; that data set is overwhelmingly Russia/CIS-market.
+//
+// So instead of mislabelling a one-way fare as "round trip" (which is what
+// caused prices to look roughly half — or more — of the real fare), we query
+// BOTH directions — origin→destination for the outbound leg, and
+// destination→origin for the return leg — and add together an outbound
+// one-way fare for that specific date + a typical (median) return one-way
+// fare for the route, to build an honest round-trip estimate. If we can't
+// find any return-leg data at all for a route, we fall back to doubling the
+// outbound fare and say so in the UI, rather than pretending it's precise.
 //
 // Honest limitation: Travelpayouts' data is "fares it has actually seen
-// recently for this route" — not exhaustive for every single day. We fetch
-// two consecutive months and merge them to give a fuller picture, and say so
-// plainly in the UI rather than implying full coverage.
+// recently for this route" — not exhaustive for every single day, and not
+// live. We fetch two consecutive months per direction to give a fuller
+// picture, and say so plainly in the UI rather than implying full coverage
+// or a live quote.
 var flightCalendarCache = {};
+
+function medianOfPrices(list) {
+  if (!list || !list.length) return null;
+  var sorted = list.slice().sort(function(a, b) { return a - b; });
+  var mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+}
 
 function monthStartIso(year, monthIndexZeroBased) {
   var y = year, m = monthIndexZeroBased;
@@ -4014,14 +4040,16 @@ function deriveFlightCalendarQuery(qData) {
   return { month: monthIso, nights: nights };
 }
 
-async function fetchFlightCalendarMonth(originCode, destCode, month, nights, currency) {
-  var cacheKey = [originCode, destCode, month, nights, currency].join('|');
+// One-way fares only — month-matrix has no round-trip mode (see note above).
+// `originCode`/`destCode` are passed in whichever order the caller wants: as
+// booked (outbound leg) or swapped (return leg).
+async function fetchFlightCalendarMonth(originCode, destCode, month, currency) {
+  var cacheKey = [originCode, destCode, month, currency].join('|');
   if (flightCalendarCache[cacheKey]) return flightCalendarCache[cacheKey];
   try {
     var url = '/.netlify/functions/flights-calendar?origin=' + encodeURIComponent(originCode) +
       '&destination=' + encodeURIComponent(destCode) +
       '&month=' + encodeURIComponent(month) +
-      '&nights=' + encodeURIComponent(nights) +
       '&currency=' + encodeURIComponent(currency || 'gbp');
     var res = await fetch(url);
     var data = await res.json();
@@ -4034,16 +4062,40 @@ async function fetchFlightCalendarMonth(originCode, destCode, month, nights, cur
   }
 }
 
+// Builds an honest round-trip estimate from two one-way legs: the specific
+// outbound date's fare (real, date-matched) + a typical return fare for the
+// route (median of whatever return-leg data we found — not date-matched,
+// since return-leg coverage is usually too sparse to pair up by exact date).
+// Falls back to doubling the outbound fare if we have zero return-leg data
+// at all, and flags that fallback so the UI can be honest about it.
 async function fetchFlightCalendar(originCode, destCode, month, nights, currency) {
   var parts = month.split('-');
   var nextMonth = monthStartIso(parseInt(parts[0], 10), parseInt(parts[1], 10)); // zero-based next month
+
   var results = await Promise.all([
-    fetchFlightCalendarMonth(originCode, destCode, month, nights, currency),
-    fetchFlightCalendarMonth(originCode, destCode, nextMonth, nights, currency)
+    fetchFlightCalendarMonth(originCode, destCode, month, currency),       // outbound leg
+    fetchFlightCalendarMonth(originCode, destCode, nextMonth, currency),   // outbound leg
+    fetchFlightCalendarMonth(destCode, originCode, month, currency),       // return leg (swapped)
+    fetchFlightCalendarMonth(destCode, originCode, nextMonth, currency)    // return leg (swapped)
   ]);
-  var merged = results[0].concat(results[1]);
-  merged.sort(function(a, b) { return a.date < b.date ? -1 : 1; });
-  return merged;
+
+  var outbound = results[0].concat(results[1]);
+  outbound.sort(function(a, b) { return a.date < b.date ? -1 : 1; });
+
+  var inboundPrices = results[2].concat(results[3]).map(function(p) { return p.price; });
+  var typicalReturn = medianOfPrices(inboundPrices);
+
+  return outbound.map(function(p) {
+    var estimated = typicalReturn != null ? (p.price + typicalReturn) : (p.price * 2);
+    return {
+      date: p.date,
+      oneWayPrice: p.price,
+      price: Math.round(estimated),
+      returnEstimateBasis: typicalReturn != null ? 'typical-return' : 'doubled-outbound',
+      directOnly: p.directOnly,
+      foundAt: p.foundAt
+    };
+  });
 }
 
 function formatCalDate(iso) {
@@ -4065,12 +4117,15 @@ function renderFlightCalendarHtml(prices, originCode, destCode, qData, destNameF
   }
   var adults = (qData && qData.group_size) ? String(qData.group_size) : '2';
   var cheapest = prices.reduce(function(min, p) { return (!min || p.price < min.price) ? p : min; }, null);
+  // returnEstimateBasis is the same for every entry in this list (it's a
+  // route-level fallback, not per-date), so just check the first one.
+  var usedFallback = prices[0] && prices[0].returnEstimateBasis === 'doubled-outbound';
   var html = '<div class="flight-cal-wrap">';
-  html += '<div class="flight-cal-label"><i class="ti ti-calendar-stats"></i> Real fares found for this route &middot; round trip, ' + nights + ' nights</div>';
+  html += '<div class="flight-cal-label"><i class="ti ti-calendar-stats"></i> Est. round trip &middot; ' + nights + ' nights, based on fares recently seen</div>';
   html += '<div class="flight-cal-strip">';
   prices.slice(0, 12).forEach(function(p) {
     var isCheapest = cheapest && p.date === cheapest.date;
-    var ret = p.returnDate || addDaysIso(p.date, nights);
+    var ret = addDaysIso(p.date, nights);
     var url = buildExpediaFlightsUrl(originCode, destCode, p.date, ret, adults, destNameFallback);
     html += '<a href="' + url + '" target="_blank" class="flight-cal-day' + (isCheapest ? ' cheapest' : '') + '">' +
       (isCheapest ? '<span class="flight-cal-badge">Cheapest</span>' : '') +
@@ -4080,7 +4135,11 @@ function renderFlightCalendarHtml(prices, originCode, destCode, qData, destNameF
     '</a>';
   });
   html += '</div>';
-  html += '<div class="flight-cal-note fs-sm text-muted">Real fares recently found for this route — not every date is priced, and fares move fast. Click any date to check live availability and book on Expedia.</div>';
+  html += '<div class="flight-cal-note fs-sm text-muted">' +
+    (usedFallback
+      ? 'Estimate: outbound fare recently seen for this date, doubled for the return leg — no separate return-leg data was found for this route, so treat this as a rough guide.'
+      : 'Estimate: outbound fare recently seen for this date + a typical return fare for this route — not every date is priced, and fares move fast.') +
+    ' Click any date to check the live, accurate price on Expedia.</div>';
   html += '</div>';
   return html;
 }
@@ -4204,7 +4263,7 @@ function buildPanelSection(section, panel, idx, qData) {
   if (section === 'courses') {
     html += '<div id="section-courses-' + idx + '">';
     (panel.courses || []).forEach(function(c) {
-      var gnData = buildTeeTimes(c.name||'', c.location||dest);
+      var gnData = buildTeeTimes(c.name||'', c.location ? (c.location + ', ' + dest) : dest);
       var gn = gnData.url; var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
       html += '<div class="course-card">' +
@@ -4788,9 +4847,42 @@ var GOLFNOW_EU_DESTS = ['spain','france','germany','ireland','morocco','belgium'
 var GOLFNOW_UK_DESTS = ['scotland','england','wales',' uk','united kingdom','st andrews','ayrshire','east lothian'];
 var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai','abu dhabi','bulgaria','algarve','lisbon','porto','madeira','costa navarino','rhodes','crete','athens','tenerife','mallorca','sicily','tuscany','florence','rome','antalya','belek','istanbul','marrakech','agadir','black sea'];
 
+// GolfNow's own /tee-times/search?searchText= endpoint only reliably
+// resolves real place names (cities/regions/postcodes) via its internal
+// geocoder — it does NOT fuzzy-match golf course names. Pass it a specific
+// course name (e.g. "Alhaurin Golf Resort") and the geocoder fails to match
+// anything, silently falling back to a default US location — confirmed live,
+// it always lands on generic Orlando, FL tee times regardless of what was
+// actually searched for.
+//
+// GolfNow DOES have real, working per-course pages — e.g.
+// golfnow.com/tee-times/facility/19714-alhaurin-golf-club/search — but the
+// numeric facility ID can't be derived from a course name without GolfNow's
+// partner API, which is gated behind a business-partnership application
+// (not self-serve, no instant API key). Until/unless that's set up, we can't
+// build that exact URL directly.
+//
+// So for a *specific course*, we instead build a DuckDuckGo search scoped to
+// GolfNow's own domains via `site:` — confirmed live this reliably surfaces
+// the correct GolfNow facility page as the top result (tested against
+// "Alhaurin Golf Club" in Spain and got the right page first try), which
+// GolfNow's own search parameter does not. It's one extra click for the
+// user, but lands on the actual right course instead of a wrong default
+// location. Scoped across all three GolfNow properties at once (rather than
+// guessing which regional site indexes a given course) since a course can
+// turn up under golfnow.com even outside the US.
+function buildGolfNowCourseSearchUrl(courseName, destination) {
+  var name = (courseName || '').replace(/"/g, '');
+  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) "' + name + '" tee times';
+  if (destination) q += ' ' + destination;
+  return 'https://duckduckgo.com/?q=' + encodeURIComponent(q);
+}
+
 function buildTeeTimes(courseName, destination) {
   var dest = (destination || '').toLowerCase();
+  var hasCourse = !!(courseName && courseName.trim());
   var query = encodeURIComponent((courseName || '') + ' ' + (destination || ''));
+
   for (var i = 0; i < LEADING_COURSES_DESTS.length; i++) {
     if (dest.indexOf(LEADING_COURSES_DESTS[i]) !== -1) {
       // NOTE: leadingcourses.com's real search page is /search?q= — the old
@@ -4801,6 +4893,17 @@ function buildTeeTimes(courseName, destination) {
       return { url: 'https://www.leadingcourses.com/search?q=' + query, label: 'Book Tee Time', provider: 'Leading Courses' };
     }
   }
+
+  // A specific course — use the DuckDuckGo site-search fix above rather than
+  // GolfNow's own broken free-text search (see comment above this function).
+  if (hasCourse) {
+    return { url: buildGolfNowCourseSearchUrl(courseName, destination), label: 'Book on GolfNow', provider: 'GolfNow' };
+  }
+
+  // No specific course — this is a plain place-name search (e.g. a
+  // destination-level "Tee Times near here" button), which GolfNow's own
+  // searchText param handles fine, so link straight to the right regional
+  // GolfNow site.
   for (var j = 0; j < GOLFNOW_UK_DESTS.length; j++) {
     if (dest.indexOf(GOLFNOW_UK_DESTS[j]) !== -1) {
       return { url: 'https://www.golfnow.co.uk/tee-times/search?searchText=' + query, label: 'Book on GolfNow', provider: 'GolfNow UK' };
@@ -5459,7 +5562,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   '</div><div class="courses-grid" id="section-courses-' + idx + '">';
   if (panel.courses && panel.courses.length) {
     panel.courses.forEach(function(c) {
-      var gnData = buildTeeTimes(c.name || '', c.location || dest);
+      var gnData = buildTeeTimes(c.name || '', c.location ? (c.location + ', ' + dest) : dest);
       var gn = gnData.url;
       var gnLabel = gnData.label;
       var hire = 'https://www.google.com/search?q=golf+club+hire+' + destEnc;
@@ -7425,7 +7528,7 @@ async function initMap(idx, mapPrefix) {
   (panel.courses || []).forEach(function(c) {
     toSearch.push({ type: 'course', name: c.name, area: c.location,
       detail: 'Par ' + (c.par||72) + ' • ' + (c.yardage ? c.yardage+' yds' : '') + ' • Green fee: ' + (c.green_fee ? '£'+c.green_fee : 'see site'),
-      link: buildTeeTimes(c.name||'', dest).url,
+      link: buildTeeTimes(c.name||'', c.location ? (c.location + ', ' + dest) : dest).url,
       aiLat: c.lat, aiLng: c.lng });
   });
   (panel.restaurants || []).forEach(function(r) {
