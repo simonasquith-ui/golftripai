@@ -4294,10 +4294,9 @@ function buildPanelSection(section, panel, idx, qData) {
       var psCheckout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
       var bookUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + encodeURIComponent(h.name||dest) + (psCheckin?'&checkin='+psCheckin:'') + (psCheckout?'&checkout='+psCheckout:''));
       var groupSize = qData && qData.group_size ? parseInt(qData.group_size) : 8;
-      var vrboDestUrl = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(dest) + '&adults=' + groupSize + '&sort=RECOMMENDED' + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:'');
-      var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent(vrboDestUrl);
+      var vrboUrl = buildVrboUrl(dest, groupSize, psCheckin, psCheckout);
       var altUrl = isVilla ? wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest) + (psCheckin?'&checkin='+psCheckin:'') + (psCheckout?'&checkout='+psCheckout:'')) : vrboUrl;
-      var expediaUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + encodeURIComponent(h.name||dest) + (psCheckin?'&startDate='+psCheckin:'') + (psCheckout?'&endDate='+psCheckout:''));
+      var expediaUrl = buildExpediaHotelUrl(dest, h.name || '', psCheckin, psCheckout, groupSize);
       html += '<div class="hotel-card">' +
         '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
@@ -4325,7 +4324,7 @@ function buildPanelSection(section, panel, idx, qData) {
     html += '<div id="section-restaurants-' + idx + '" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px">';
     (panel.restaurants || []).forEach(function(r) {
       var gMaps = r.google_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent((r.name||'') + ' ' + dest));
-      var ot = r.opentable_available ? 'https://www.opentable.co.uk/s?covers=4&term=' + encodeURIComponent(r.name||'') : null;
+      var ot = r.opentable_available ? buildOpenTableSearchUrl(r.name||'', dest) : null;
       html += '<div class="restaurant-card">' +
         '<div class="card-photo" data-photo-q="'+(r.name||'').replace(/"/g,'&quot;')+' '+dest.replace(/"/g,'&quot;')+'"><i class="ti ti-tools-kitchen-2"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">' +
@@ -4779,6 +4778,55 @@ function wrapExpediaUrl(plainUrl) {
     '&creativeref=' + EXPEDIA_AFF.creativeref +
     '&adref=' + EXPEDIA_AFF.adref;
 }
+
+// Expedia Stays fix — same root cause as the flights fix above: the old
+// "Hotel-Search?destination=X&startDate=Y&endDate=Z" is a legacy query
+// format, not part of Expedia Group's documented white-label deep-link API,
+// and isn't guaranteed to carry through correctly (this is exactly the class
+// of bug that broke flights before switching to the official format).
+// Switched to the same documented "/go/hotel/search/{SearchType}/{startDate}/
+// {endDate}" path (developers.expediagroup.com — same doc as flights) with
+// CityName (place search) + ChainName (text search for a specific
+// hotel/property name when we have one) + NumAdult-Room1. Per Expedia's own
+// examples, missing dates should use 0000-00-00 rather than omitting the path
+// segments entirely (omitting -> 404; 0000-00-00 -> a normal "enter your
+// dates" page, so it degrades gracefully instead of breaking).
+function buildExpediaHotelUrl(destination, hotelName, checkinIso, checkoutIso, adults) {
+  var startSeg = checkinIso || '0000-00-00';
+  var endSeg = checkoutIso || '0000-00-00';
+  var url = 'https://www.expedia.co.uk/go/hotel/search/Destination/' + startSeg + '/' + endSeg +
+    '?CityName=' + encodeURIComponent(destination || '') +
+    (hotelName ? '&ChainName=' + encodeURIComponent(hotelName) : '') +
+    '&NumAdult-Room1=' + encodeURIComponent(adults || '2');
+  return wrapExpediaUrl(url);
+}
+
+// ── VRBO CJ AFFILIATE LINK ───────────────────────────────────────────────
+// Vrbo (owned by Expedia Group) is promoted via a separate CJ Affiliate
+// program/link (tkqlhce.com, lid 14347549) rather than through the Expedia
+// Travel Creator Program used for wrapExpediaUrl above. Confirmed this CJ
+// redirect is alive — curl gets a real 302 through cj.dotomi.com — but
+// vrbo.com itself sits behind Expedia Group's shared bot-detection wall
+// (a flat 429 "captcha-pwa" response on every direct request, even with a
+// real browser user-agent string), so the final landing page can't be
+// verified from here. The destination/startDate/endDate/adults query params
+// used below ARE confirmed correct against current real vrbo.com/search
+// examples. If Vrbo links are still not landing correctly after this,
+// the CJ program/link ID itself is the most likely remaining culprit —
+// worth checking it shows "Active" (not "Pending") in the CJ dashboard, or
+// switching Vrbo over to the Expedia Travel Creator Program (the one
+// already used for wrapExpediaUrl) if that's what's actually approved.
+var VRBO_CJ = { domain: 'tkqlhce.com', pid: '101847347', lid: '14347549' };
+function wrapVrboUrl(plainUrl) {
+  return 'https://www.' + VRBO_CJ.domain + '/click-' + VRBO_CJ.pid + '-' + VRBO_CJ.lid + '?url=' + encodeURIComponent(plainUrl);
+}
+function buildVrboUrl(destination, adults, checkinIso, checkoutIso) {
+  var plain = 'https://www.vrbo.com/search?destination=' + encodeURIComponent(destination || '') +
+    '&adults=' + (adults || 8) + '&sort=RECOMMENDED' +
+    (checkinIso ? '&startDate=' + checkinIso : '') +
+    (checkoutIso ? '&endDate=' + checkoutIso : '');
+  return wrapVrboUrl(plain);
+}
 // ── BOOKING.COM CJ AFFILIATE LINKS (per-country) ────────────────────────────
 // Wraps a plain Booking.com URL through Simon's CJ (Commission Junction)
 // tracking link — https://www.<domain>/click-<PID>-<LID>?url=<encoded target> —
@@ -4889,19 +4937,41 @@ var LEADING_COURSES_DESTS = ['portugal','italy','turkey','greece','uae','dubai',
 // Switched to Google's "I'm Feeling Lucky" redirect (`&btnI=1`) instead —
 // confirmed live via curl that this returns a plain HTTP 302 straight to the
 // top-ranked matching page, with the site: restriction still applied and no
-// intermediate results page ever shown to the user:
-//   - "Alhaurin Golf" (Spain)         -> golfnow.co.uk/courses/.../details
+// intermediate results page ever shown to the user. This is a genuine, real
+// Google Search feature (not a bot-detection bypass) — a normal signed-out
+// redirect any browser gets from that param.
+//
+// IMPORTANT — do NOT wrap the course name in quotes. An exact-phrase match
+// is fragile against AI-generated course names, which often include a
+// secondary descriptor after a dash that doesn't appear verbatim on the
+// booking site (e.g. "La Cala Golf Resort - Campo America" — GolfNow lists
+// this course as "La Cala Golf Recorrido Asia", so the quoted AI name never
+// matches anything and Google shows its own "did not match any documents"
+// page instead of redirecting — confirmed live, this is exactly the bug
+// reported). Dropping quotes lets Google fuzzy/semantically match instead of
+// requiring the literal string, AND tends to land closer to the actual
+// booking page rather than just a course-details page. Confirmed live for
+// all of these, unquoted:
+//   - "La Cala Golf Resort" (Spain)   -> golfnow.co.uk/tee-times/facility/19926-la-cala-golf-recorrido-asia/search
 //   - "Golf de Saint-Cloud" (France)  -> golfnow.co.uk/tee-times/facility/18601-golf-de-saint-cloud/search
+//   - "Alhaurin Golf" (Spain)         -> golfnow.co.uk/courses/.../details
 //   - "Praia D'El Rey Golf" (Portugal, via leadingcourses.com) -> leadingcourses.com/clubs/.../praia-d-el-rey-golf-beach-resort
-// This is a genuine, real Google Search feature (not a bot-detection
-// bypass) — a normal signed-out redirect any browser gets from that param.
 function buildGoogleLuckySearchUrl(query) {
   return 'https://www.google.com/search?q=' + encodeURIComponent(query) + '&btnI=1';
 }
 
+// Strips quotes (which we deliberately never want in these queries) and
+// anything from a " - " / " – " / " — " separator onward — AI-generated
+// course names sometimes append a secondary descriptor there (e.g. a
+// specific course within a multi-course resort) that real booking sites
+// often don't repeat verbatim, and it only adds noise to the search.
+function simplifyCourseNameForSearch(courseName) {
+  return (courseName || '').replace(/"/g, '').split(/\s+[-–—]\s+/)[0].trim();
+}
+
 function buildGolfNowCourseSearchUrl(courseName, destination) {
-  var name = (courseName || '').replace(/"/g, '');
-  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) "' + name + '" book tee times';
+  var name = simplifyCourseNameForSearch(courseName);
+  var q = '(site:golfnow.com OR site:golfnow.co.uk OR site:golfnow.eu) ' + name + ' book tee times';
   if (destination) q += ' ' + destination;
   return buildGoogleLuckySearchUrl(q);
 }
@@ -4913,8 +4983,46 @@ function buildGolfNowCourseSearchUrl(courseName, destination) {
 // no-course-name searches) is a results list, not a direct club page, so a
 // specific course still needs this same lucky-redirect treatment.
 function buildLeadingCoursesSearchUrl(courseName) {
-  var name = (courseName || '').replace(/"/g, '');
-  return buildGoogleLuckySearchUrl('site:leadingcourses.com "' + name + '"');
+  var name = simplifyCourseNameForSearch(courseName);
+  return buildGoogleLuckySearchUrl('site:leadingcourses.com ' + name);
+}
+
+// OpenTable fix — same lucky-redirect trick as GolfNow. The old links (plain
+// /s?covers=...&term=... search, inconsistently on .com in one call site and
+// .co.uk in another) had no location context at all, so a common restaurant
+// name could land on the wrong city, and OpenTable's search page itself sits
+// behind heavy bot-detection (curl gets a 403; a real signed-out browser is
+// fine, but there's no way to verify the exact match from here). Site-scoping
+// both domains + adding the destination to the query and using btnI=1 jumps
+// straight to the specific restaurant's page — confirmed live, e.g. "El Faro
+// Marbella" -> opentable.com/r/la-esquinita-del-faro-marbella. Falls back
+// gracefully to a normal results page for restaurant names OpenTable doesn't
+// have an exact match for (nothing "did not match any documents"-style breaks
+// — Google just shows its best guess).
+function buildOpenTableSearchUrl(restaurantName, destination) {
+  var name = simplifyCourseNameForSearch(restaurantName);
+  var q = '(site:opentable.com OR site:opentable.co.uk) ' + name + ' restaurant reserve';
+  if (destination) q += ' ' + destination;
+  return buildGoogleLuckySearchUrl(q);
+}
+
+// Golf club hire fix — "Golf Club Hire World" (golfclubhireworld.com) turned
+// out to be a dead domain (doesn't even resolve via DNS — confirmed live),
+// and "Golf Breaks" is actually a UK golf tour/package operator (flights +
+// hotel + golf), not a club-hire company at all — wrong category, and its
+// URL 404s anyway. Unlike GolfNow there's no single dominant club-hire
+// provider that covers every destination, so instead of guessing one
+// wrong domain we lean on the plain (non-lucky, already-confirmed-working
+// per Simon's own audit) Google search as the base, and ALSO offer the
+// lucky-redirect as a shortcut straight to whichever real local provider
+// ranks top for that destination — confirmed live it lands on genuine,
+// relevant, existing businesses every time, e.g.:
+//   - Algarve, Portugal   -> acegolfclubhire.com
+//   - St Andrews, Scotland -> shop.standrews.com/club_hire_request_form
+//   - Costa del Sol, Spain -> clubstohire.com/locations/malaga
+//   - Dubai                -> clubstohire.com/locations/dubai
+function buildClubHireLuckySearchUrl(destination) {
+  return buildGoogleLuckySearchUrl('golf club hire ' + (destination || ''));
 }
 
 function buildTeeTimes(courseName, destination) {
@@ -5676,10 +5784,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       var hotelEnc = encodeURIComponent(h.name || dest);
       var destEncH = encodeURIComponent(dest);
       var bookUrl, altUrl;
+      var vrboGroupSize = qData && qData.group_size ? parseInt(qData.group_size) : 8;
       if (isVilla) {
-        bookUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(hotelEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED') +
-          (checkin ? '&startDate=' + checkin : '') +
-          (checkout ? '&endDate=' + checkout : '');
+        bookUrl = buildVrboUrl(h.name || dest, vrboGroupSize, checkin, checkout);
         altUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + hotelEnc +
           (checkin ? '&checkin=' + checkin : '') +
           (checkout ? '&checkout=' + checkout : ''));
@@ -5689,11 +5796,9 @@ function buildPanel(panel, idx, qData, mapPrefix) {
           (checkin ? '&checkin=' + checkin : '') +
           (checkout ? '&checkout=' + checkout : '') +
           '&group_adults=' + (qData && qData.group_size ? qData.group_size : '2'));
-        altUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(hotelEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED') +
-          (checkin ? '&startDate=' + checkin : '') +
-          (checkout ? '&endDate=' + checkout : '');
+        altUrl = buildVrboUrl(h.name || dest, vrboGroupSize, checkin, checkout);
       }
-      var expediaHotelUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + hotelEnc + (checkin ? '&startDate=' + checkin : '') + (checkout ? '&endDate=' + checkout : ''));
+      var expediaHotelUrl = buildExpediaHotelUrl(dest, h.name || '', checkin, checkout, qData && qData.group_size ? qData.group_size : '2');
       html += '<div class="hotel-card">' +
         '<div class="card-photo" data-photo-q="'+(h.name||'').replace(/"/g,'&quot;')+' '+(h.area||dest).replace(/"/g,'&quot;')+'"><i class="ti ti-building-skyscraper"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
@@ -5732,9 +5837,8 @@ function buildPanel(panel, idx, qData, mapPrefix) {
       '<div class="card" style="padding:20px;margin-bottom:24px">' +
         '<p>Club hire is available at most courses in ' + dest + '. Typical cost: ' + fmtPrice(panel.club_hire_cost || 45) + ' per set per round.</p>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">' +
-          '<a href="https://www.golfclubhireworld.com/search?destination=' + destEnc + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-golf"></i> Golf Club Hire World</a>' +
-          '<a href="https://www.golfbreaks.com/en-gb/golf-holidays/?destination=' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">Golf Breaks</a>' +
-          '<a href="https://www.google.com/search?q=golf+club+hire+' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">Search Google</a>' +
+          '<a href="' + buildClubHireLuckySearchUrl(dest) + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-golf"></i> Find a Hire Company</a>' +
+          '<a href="https://www.google.com/search?q=golf+club+hire+' + destEnc + '" target="_blank" class="btn btn-ghost btn-sm">More Options</a>' +
         '</div>' +
       '</div>';
   }
@@ -5743,13 +5847,24 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     var ch = panel.car_hire;
     var checkin = (qData.dates && qData.dates.depart) ? qData.dates.depart : '';
     var checkout = (qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
-    var rentalcarsUrl = 'https://www.rentalcars.com/search?' +
-      'cor=gb&pickup=' + destEnc +
-      (checkin ? '&puDay=' + checkin.split('-')[2] + '&puMonth=' + checkin.split('-')[1] + '&puYear=' + checkin.split('-')[0] : '') +
-      (checkout ? '&doDay=' + checkout.split('-')[2] + '&doMonth=' + checkout.split('-')[1] + '&doYear=' + checkout.split('-')[0] : '') +
-      '&puHour=10&puMinute=0&doHour=10&doMinute=0&driverAge=30';
-    var kayakCarUrl = 'https://www.kayak.co.uk/cars/' + destEnc +
-      (checkin && checkout ? '/' + checkin + '/' + checkout : '') + '/';
+    // Rentalcars.com's old /search? path 404s (the brand now folds into
+    // Booking.com's own car-hire product) and Kayak's /cars/{place} path
+    // silently drops the destination entirely (confirmed live — redirects to
+    // the generic homepage) — both were landing users on the wrong page.
+    // Booking.com Cars (booking.com/cars) is confirmed live to accept the
+    // same `ss=` destination param as Booking.com's hotel search (which is
+    // already the one proven-working stay provider on this site), so we
+    // route through the exact same wrapBookingUrl() affiliate mechanism
+    // instead of a separate, unverified car-specific tracking link — same
+    // country-gated commission where Simon's CJ program covers it, plain
+    // (still fully functional) URL everywhere else. Date params are
+    // best-effort: Booking.com Cars is a JS-hydrated page so the exact
+    // pickup/dropoff param names couldn't be confirmed via curl, but an
+    // unrecognised param is harmless (silently ignored, not an error).
+    var carsPlainUrl = 'https://www.booking.com/cars/index.html?ss=' + destEnc +
+      (checkin ? '&pickupDate=' + checkin : '') +
+      (checkout ? '&dropoffDate=' + checkout : '');
+    var bookingCarsUrl = wrapBookingUrl(dest, carsPlainUrl);
     var carOptions = (ch.options && ch.options.length) ? ch.options : [];
     var carHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px">';
     carOptions.forEach(function(opt) {
@@ -5768,8 +5883,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
         (ch.pickup_location ? '<p class="fs-sm text-muted" style="margin-bottom:12px"><i class="ti ti-map-pin"></i> Pickup: ' + ch.pickup_location + '</p>' : '') +
         carHtml +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">' +
-          '<a href="' + rentalcarsUrl + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-car"></i> Search Rentalcars.com</a>' +
-          '<a href="' + kayakCarUrl + '" target="_blank" class="btn btn-ghost btn-sm">Compare on Kayak</a>' +
+          '<a href="' + bookingCarsUrl + '" target="_blank" class="btn btn-primary btn-sm"><i class="ti ti-car"></i> Search on Booking.com</a>' +
         '</div>' +
       '</div>';
   }
@@ -5781,7 +5895,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     panel.restaurants.forEach(function(r) {
       var mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent((r.name || '') + ' ' + dest);
       var rating = r.rating ? r.rating : null;
-      var openTableUrl = 'https://www.opentable.com/s?covers=2&term=' + encodeURIComponent(r.name || '') + '&metroName=' + encodeURIComponent(dest);
+      var openTableUrl = buildOpenTableSearchUrl(r.name || '', dest);
       html += '<div class="card" style="padding:16px">' +
         '<div class="card-photo" data-photo-q="'+(r.name||'').replace(/"/g,'&quot;')+' '+dest.replace(/"/g,'&quot;')+'"><i class="ti ti-tools-kitchen-2"></i></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
@@ -6381,10 +6495,10 @@ function buildBTT(panel, idx, qData) {
   var destEnc = encodeURIComponent(dest);
   var bttCheckin = (qData && qData.dates && qData.dates.depart) ? qData.dates.depart : '';
   var bttCheckout = (qData && qData.dates && qData.dates.returnDate) ? qData.dates.returnDate : '';
-  var vrboUrl = 'https://www.tkqlhce.com/click-101847347-14347549?url=' + encodeURIComponent('https://www.vrbo.com/search?destination=' + decodeURIComponent(destEnc) + '&adults=' + (qData && qData.group_size ? parseInt(qData.group_size) : 8) + '&sort=RECOMMENDED' + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
+  var vrboUrl = buildVrboUrl(dest, qData && qData.group_size ? parseInt(qData.group_size) : 8, bttCheckin, bttCheckout);
   var bookingUrl = wrapBookingUrl(dest, 'https://www.booking.com/searchresults.html?ss=' + destEnc + (bttCheckin?'&checkin='+bttCheckin:'') + (bttCheckout?'&checkout='+bttCheckout:''));
   var expediaItem = '';
-  var expediaBttUrl = wrapExpediaUrl('https://www.expedia.co.uk/Hotel-Search?destination=' + destEnc + (bttCheckin?'&startDate='+bttCheckin:'') + (bttCheckout?'&endDate='+bttCheckout:''));
+  var expediaBttUrl = buildExpediaHotelUrl(dest, '', bttCheckin, bttCheckout, qData && qData.group_size ? qData.group_size : '2');
   if (expediaBttUrl) {
     expediaItem = '<a href="' + expediaBttUrl + '" target="_blank"><i class="ti ti-building-skyscraper"></i> Expedia</a>';
   }
