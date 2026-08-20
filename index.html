@@ -2052,8 +2052,8 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
     </div>
 
     <div class="results-tabs" style="margin-bottom:28px">
-      <button class="results-tab active" id="td-tab-itinerary" onclick="switchTripTab('itinerary')"><i class="ti ti-golf"></i> Trip Itinerary</button>
-      <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')"><i class="ti ti-users"></i> Group &amp; Booking</button>
+      <button class="results-tab active" id="td-tab-itinerary" onclick="switchTripTab('itinerary')"><i class="ti ti-list-search"></i> Trip Details</button>
+      <button class="results-tab" id="td-tab-group" onclick="switchTripTab('group')"><i class="ti ti-calendar-event"></i> Itinerary &amp; Group</button>
       <div id="td-public-note" style="display:none;font-size:.75rem;color:var(--text-muted);padding:8px 0 0;width:100%"><i class="ti ti-lock"></i> Sign in to access group planning, voting and the trip cart</div>
     </div>
 
@@ -3867,8 +3867,12 @@ async function loadUserDisplayInfo() {
   } catch (e) { console.warn('[auth] loadUserDisplayInfo failed:', e && e.message); }
 }
 
-function isPaid() { return userPlan === 'pro' || userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
-function isSociety() { return userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
+// Platform admins bypass the plan gates entirely. Without this you cannot
+// test a paid feature without giving yourself a paid subscription, and the
+// first thing that breaks is you thinking the feature is broken.
+function isPlatformAdmin() { return !!(currentUser && currentUser.is_admin); }
+function isPaid() { return isPlatformAdmin() || userPlan === 'pro' || userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
+function isSociety() { return isPlatformAdmin() || userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
 
 // Free tier: 1 lifetime trip generation. Logged-in free users are checked
 // against trip_requests; signed-out visitors are checked against localStorage.
@@ -3985,6 +3989,11 @@ document.addEventListener('click', function(e) {
     return;
   }
   castVote(effectiveTripId, itemType, itemName, panelLabel, btn);
+  // Starring is the organiser saying "this is a contender", so it goes
+  // straight onto the shortlist for the group to vote on.
+  if (typeof syncStarToShortlist === 'function') {
+    syncStarToShortlist(effectiveTripId, itemType, itemName, btn);
+  }
 });
 
 // ── NOTIFICATION SYSTEM ────────────────────────────────────
@@ -12723,9 +12732,9 @@ function renderShortlist() {
         '<span class="no" style="width:' + pct(no) + '%"></span>' +
       '</div>' +
       '<div class="sl-vote-row">' +
-        '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
-        '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
-        '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
+        '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
+        '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
+        '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
         '<div class="sl-tally"><span><b>' + yes + '</b> yes</span><span>' + meh + ' don\'t mind</span><span>' + no + ' no</span>' +
           '<span>' + c.votes.length + '/' + memberCount + ' voted</span></div>' +
       '</div>' +
@@ -12739,7 +12748,11 @@ function renderShortlist() {
   }
 }
 
-async function castVote(candidateId, vote) {
+/* NOTE: named castShortlistVote, not castVote. There is already a
+   castVote() for the star buttons on course/hotel cards. Naming this one
+   castVote silently replaced it — the stars kept rendering and did nothing,
+   because the later definition won and got called with the wrong arguments. */
+async function castShortlistVote(candidateId, vote) {
   if (!currentUser) { openAuthModal('signin'); return; }
   var c = tripPlan.candidates.filter(function(x) { return x.id === candidateId; })[0];
   if (!c) return;
@@ -12863,7 +12876,11 @@ async function candidateToBasket(candidateId) {
     tripPlan.members.forEach(function(m) { ins.data.shares[m.user_id] = { included: true, share_override: null }; });
     tripPlan.basket.push(ins.data);
     renderShortlist(); renderSplit(); renderLedger();
-    showToast('Added to the basket.');
+    // Agreed and costed, so it belongs in the actual plan too.
+    var onSchedule = (typeof addItemToSchedule === 'function') && addItemToSchedule(ins.data);
+    showToast(onSchedule
+      ? 'Added to the basket and dropped into Day 1 — drag it to the right day.'
+      : 'Added to the basket.');
   } catch (e) { showToast('Could not add to basket: ' + (e.message || e), true); }
 }
 
@@ -13137,6 +13154,121 @@ function copySplitSummary() {
   navigator.clipboard.writeText(text)
     .then(function() { showToast('Copied — paste it into your group chat.'); })
     .catch(function() { showToast('Could not copy.', true); });
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE PIPELINE: star → shortlist → vote → basket → schedule
+
+   Each stage feeds the next, so the organiser never re-types anything the
+   AI already produced or the group has already agreed on.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// Prices live on the "+ Cart" button next to the star, not on the star
+// itself. Read them off the surrounding card rather than making the user
+// type a number they can already see on screen.
+function starContext(btn) {
+  var card = btn.closest('.course-card, .card, .dest-rec-course, .trip-card') || btn.parentElement;
+  var out = { price: null, sub: '', description: '' };
+  if (!card) return out;
+  var cartBtn = card.querySelector('.add-to-cart-btn');
+  if (cartBtn) {
+    var p = parseFloat(cartBtn.getAttribute('data-cart-pricenum'));
+    if (!isNaN(p) && p > 0) out.price = p;
+    out.sub = cartBtn.getAttribute('data-cart-sub') || '';
+  }
+  var desc = card.querySelector('p');
+  if (desc) out.description = (desc.textContent || '').trim().slice(0, 300);
+  return out;
+}
+
+function starCategoryFor(itemType) {
+  var map = { course: 'golf', hotel: 'accommodation', restaurant: 'restaurant',
+              flight: 'flight', activity: 'activity', car: 'carhire' };
+  return map[String(itemType || '').toLowerCase()] || 'other';
+}
+
+async function syncStarToShortlist(tripId, itemType, itemName, btn) {
+  if (!tripId || !currentUser || !itemName) return;
+  try {
+    // Only the organiser's stars create shortlist entries — otherwise every
+    // member's favourites end up on the ballot and nothing gets decided.
+    var tr = await sbClient.from('trip_requests').select('user_id').eq('id', tripId).maybeSingle();
+    if (!tr.data || tr.data.user_id !== currentUser.id) return;
+
+    var existing = await sbClient.from('trip_candidates')
+      .select('id, status').eq('trip_request_id', tripId).ilike('title', itemName).maybeSingle();
+
+    // The click toggles the star, and castVote has already flipped it, so
+    // read the resulting state rather than assuming.
+    var nowStarred = btn.classList.contains('voted');
+
+    if (nowStarred && !existing.data) {
+      var ctx = starContext(btn);
+      var ins = await sbClient.from('trip_candidates').insert({
+        trip_request_id: tripId,
+        title: itemName,
+        description: ctx.description || ctx.sub || null,
+        category: starCategoryFor(itemType),
+        price: ctx.price,
+        source: 'star',
+        added_by: currentUser.id,
+        sort_order: (tripPlan.candidates || []).length
+      }).select('*').single();
+      if (!ins.error && ins.data) {
+        ins.data.votes = [];
+        if (tripPlan.tripId === tripId) { tripPlan.candidates.push(ins.data); renderShortlist(); }
+        showToast('"' + itemName + '" added to the shortlist for the group to vote on.');
+      }
+    } else if (!nowStarred && existing.data && existing.data.status !== 'won') {
+      // Un-starring pulls it back off the shortlist — but only if nobody has
+      // voted yet and it isn't already in the basket. Deleting an option
+      // people have already voted on would throw their votes away silently.
+      var votes = await sbClient.from('trip_candidate_votes')
+        .select('id', { count: 'exact', head: true }).eq('candidate_id', existing.data.id);
+      if ((votes.count || 0) === 0) {
+        await sbClient.from('trip_candidates').delete().eq('id', existing.data.id);
+        if (tripPlan.tripId === tripId) {
+          tripPlan.candidates = tripPlan.candidates.filter(function(c) { return c.id !== existing.data.id; });
+          renderShortlist();
+        }
+      } else {
+        showToast('Left on the shortlist — people have already voted on it.');
+      }
+    }
+  } catch (e) {
+    console.warn('syncStarToShortlist:', e && e.message);
+  }
+}
+
+/* Basket → schedule. Once the group has chosen something and it's costed,
+   it belongs in the actual day-by-day plan. */
+function addItemToSchedule(item) {
+  var mount = document.getElementById('group-schedule-wrap');
+  if (!mount || !mount._scheduleData) return false;
+  var sched = mount._scheduleData;
+  if (!sched.length) {
+    sched.push({ day: 1, title: '', activities: [] });
+  }
+  var title = item.title || '';
+  var already = sched.some(function(d) {
+    return (d.activities || []).some(function(a) {
+      return (a.title || '').toLowerCase() === title.toLowerCase();
+    });
+  });
+  if (already) return false;
+
+  sched[0].activities.push({
+    time: '',
+    title: title,
+    description: item.notes || '',
+    category: item.category || 'other',
+    price: (item.unit_price === 0 || item.unit_price) ? Number(item.unit_price) : null
+  });
+  drawSchedule(mount, mount._tripId, mount._panelLabel, sched);
+  var note = mount.querySelector('.schedule-save-note');
+  saveSchedule(mount._tripId, mount._panelLabel, sched, note);
+  return true;
 }
 
 </script>
