@@ -866,6 +866,142 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   .btn-lg{padding:14px 20px;font-size:.9rem}
   .chip{padding:6px 12px;font-size:.8rem}
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   CLUB PORTAL
+   Uses the existing Quiet Fairway tokens throughout — no new colours.
+   ═══════════════════════════════════════════════════════════════════════ */
+.club-shell{padding:0 0 90px}
+.club-header{background:var(--moss-dark);padding:38px 0 0;position:relative;overflow:hidden}
+.club-header:after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(176,141,82,.10),transparent 60%);pointer-events:none}
+.club-header-inner{display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:relative;z-index:1}
+.club-crest{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.5rem;color:var(--brass);overflow:hidden;flex-shrink:0}
+.club-crest img{width:100%;height:100%;object-fit:cover}
+.club-header h1{color:#fff;font-family:var(--font-display);font-weight:400;font-size:1.85rem;margin:0 0 2px;letter-spacing:-.01em}
+.club-header .club-sub{color:rgba(255,255,255,.55);font-size:.86rem}
+.club-role-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(176,141,82,.16);border:1px solid rgba(176,141,82,.42);color:var(--brass-light);padding:4px 11px;border-radius:100px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.11em}
+
+/* Tab bar */
+.club-tabs{display:flex;gap:2px;margin-top:26px;overflow-x:auto;position:relative;z-index:1;scrollbar-width:none}
+.club-tabs::-webkit-scrollbar{display:none}
+.club-tab{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.5);padding:13px 18px;font-family:inherit;font-size:.86rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:color var(--tr),border-color var(--tr);display:flex;align-items:center;gap:7px}
+.club-tab:hover{color:rgba(255,255,255,.85)}
+.club-tab.active{color:var(--brass);border-bottom-color:var(--brass)}
+.club-tab i{font-size:1rem}
+.club-tab-panel{display:none;padding-top:34px}
+.club-tab-panel.active{display:block}
+
+/* Impersonation banner — deliberately loud. You should never be unsure
+   whether you are looking at your own data or someone else's. */
+.club-impersonate-bar{background:#7c2d12;color:#fff;padding:11px 0;font-size:.84rem;position:sticky;top:0;z-index:120}
+.club-impersonate-bar .container{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.club-impersonate-bar strong{color:#fed7aa}
+
+/* Stat tiles */
+.club-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.club-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);padding:20px}
+.club-stat .v{font-family:var(--font-display);font-size:1.85rem;color:var(--moss);line-height:1.1;font-weight:400}
+.club-stat .l{font-size:.7rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);margin-top:7px;font-weight:600}
+.club-stat .d{font-size:.75rem;color:var(--muted);margin-top:6px}
+.club-stat.accent{background:var(--moss-dark);border-color:var(--moss-dark)}
+.club-stat.accent .v{color:var(--brass)}
+.club-stat.accent .l,.club-stat.accent .d{color:rgba(255,255,255,.6)}
+
+/* Panels */
+.club-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);padding:26px;margin-bottom:22px}
+.club-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.club-panel h3{font-family:var(--font-display);font-weight:500;color:var(--moss);font-size:1.14rem;margin:0}
+.club-panel .hint{font-size:.83rem;color:var(--muted);margin:6px 0 18px;max-width:70ch;line-height:1.6}
+.club-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+
+/* Tables */
+.club-table{width:100%;border-collapse:collapse;font-size:.87rem}
+.club-table th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper-deep);white-space:nowrap}
+.club-table td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.club-table tr:last-child td{border-bottom:none}
+.club-table tr.is-removed{opacity:.45}
+.club-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.club-table-wrap{overflow-x:auto;margin:0 -26px;padding:0 26px}
+
+.club-avatar{width:32px;height:32px;border-radius:50%;background:var(--moss);color:var(--brass);display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;overflow:hidden;flex-shrink:0}
+.club-avatar img{width:100%;height:100%;object-fit:cover}
+.club-person{display:flex;align-items:center;gap:10px}
+.club-person .nm{font-weight:600;color:var(--ink);line-height:1.3}
+.club-person .ttl{font-size:.74rem;color:var(--muted)}
+
+.role-badge{display:inline-block;padding:3px 9px;border-radius:100px;font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;border:1px solid}
+.role-secretary{background:rgba(176,141,82,.14);color:#8a6d3b;border-color:rgba(176,141,82,.45)}
+.role-manager{background:rgba(27,53,36,.10);color:var(--moss);border-color:rgba(27,53,36,.3)}
+.role-organiser{background:rgba(42,74,51,.09);color:var(--moss-mid);border-color:rgba(42,74,51,.28)}
+.role-committee{background:var(--paper-deep);color:var(--muted);border-color:var(--line)}
+.role-member{background:transparent;color:var(--muted);border-color:var(--line)}
+.pill-pending{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;padding:2px 8px;border-radius:100px;font-size:.66rem;font-weight:600}
+.pill-active{background:rgba(27,53,36,.09);color:var(--moss);border:1px solid rgba(27,53,36,.25);padding:2px 8px;border-radius:100px;font-size:.66rem;font-weight:600}
+.pill-removed{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:2px 8px;border-radius:100px;font-size:.66rem;font-weight:600}
+
+/* Toolbar */
+.club-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.club-search{flex:1;min-width:190px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:inherit;font-size:.87rem;background:#fff}
+.club-select{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:inherit;font-size:.85rem;background:#fff;color:var(--ink)}
+
+/* Charts — plain SVG/divs, no library */
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:170px;padding-top:20px}
+.chart-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;min-width:0}
+.chart-bar{width:100%;background:linear-gradient(180deg,var(--moss-mid),var(--moss));border-radius:2px 2px 0 0;min-height:2px;position:relative;transition:opacity var(--tr)}
+.chart-col:hover .chart-bar{opacity:.78}
+.chart-bar.peak{background:linear-gradient(180deg,var(--brass-light),var(--brass))}
+.chart-val{font-size:.7rem;font-weight:600;color:var(--moss);font-variant-numeric:tabular-nums}
+.chart-lbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:170px;color:var(--muted);font-size:.86rem;background:var(--paper-deep);border-radius:var(--r)}
+
+.bar-row{display:grid;grid-template-columns:minmax(90px,130px) 1fr 62px;gap:12px;align-items:center;margin-bottom:9px;font-size:.84rem}
+.bar-row .nm{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{background:var(--paper-deep);border-radius:100px;height:9px;overflow:hidden}
+.bar-fill{height:100%;background:var(--brass);border-radius:100px}
+.bar-row .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+
+/* Star ratings */
+.stars{display:inline-flex;gap:1px;color:var(--brass);font-size:.9rem;letter-spacing:1px}
+.stars .off{color:var(--line)}
+.rating-big{font-family:var(--font-display);font-size:2.6rem;color:var(--moss);line-height:1}
+.fb-item{border-bottom:1px solid var(--line);padding:15px 0}
+.fb-item:last-child{border-bottom:none}
+.fb-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.fb-item p{font-size:.87rem;color:var(--muted);line-height:1.65;margin:0}
+
+/* Campaign builder */
+.camp-layout{display:grid;grid-template-columns:1fr 400px;gap:22px;align-items:start}
+.camp-preview{position:sticky;top:80px;background:var(--paper-deep);border:1px solid var(--line);border-radius:var(--rl);padding:16px}
+.camp-preview-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between}
+.camp-frame{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;font-size:.8rem;max-height:560px;overflow-y:auto}
+.camp-status{display:inline-block;padding:3px 9px;border-radius:100px;font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.camp-draft{background:var(--paper-deep);color:var(--muted)}
+.camp-sent{background:rgba(27,53,36,.1);color:var(--moss)}
+.camp-failed{background:#fee2e2;color:#991b1b}
+.rich-toolbar{display:flex;gap:4px;flex-wrap:wrap;padding:7px;background:var(--paper-deep);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0}
+.rich-toolbar button{background:#fff;border:1px solid var(--line);border-radius:2px;width:30px;height:28px;cursor:pointer;font-size:.8rem;color:var(--ink);display:flex;align-items:center;justify-content:center}
+.rich-toolbar button:hover{border-color:var(--brass);color:var(--brass)}
+.rich-body{min-height:190px;border:1px solid var(--line);border-radius:0 0 var(--r) var(--r);padding:14px;background:#fff;font-size:.88rem;line-height:1.65;outline:none}
+.rich-body:focus{border-color:var(--brass)}
+.rich-body img{max-width:100%;height:auto}
+
+/* Club login */
+.club-login-wrap{max-width:430px;margin:70px auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--rl);padding:38px}
+.club-login-wrap h2{font-family:var(--font-display);font-weight:400;color:var(--moss);font-size:1.5rem;margin-bottom:8px}
+
+@media(max-width:1000px){
+  .club-stats{grid-template-columns:1fr 1fr}
+  .camp-layout{grid-template-columns:1fr}
+  .camp-preview{position:static}
+  .club-grid-2{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .club-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .club-panel{padding:18px}
+  .club-table-wrap{margin:0 -18px;padding:0 18px}
+  .bar-row{grid-template-columns:96px 1fr 44px}
+  .club-header h1{font-size:1.4rem}
+}
+
 </style>
 </head>
 <body>
@@ -897,6 +1033,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
         </div>
       </div>
       <a href="#" class="nav-link" id="nav-my-trips" onclick="showPage('profile');return false;" style="display:none">My Trips</a>
+      <a href="#" class="nav-link" id="nav-club-link" onclick="showPage('club');return false;" style="display:none">Club Portal</a>
       <a href="#" class="nav-link" id="nav-admin-link" onclick="showPage('admin');return false;" style="display:none">Admin</a>
       <button id="nav-upgrade-btn" onclick="openPricingModal()" style="display:none;background:none;border:1px solid var(--brass);color:var(--brass);padding:6px 13px;border-radius:var(--r);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;margin-right:4px">Upgrade</button>
       <div id="nav-auth-btns" class="flex gap-8">
@@ -940,6 +1077,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   <a href="#" class="nav-mobile-link" onclick="showPage('venue');closeMobileMenu();return false;">Build Around a Course</a>
   <a href="https://gogolftrip.co.uk/blog/" class="nav-mobile-link">Blog</a>
   <a href="#" class="nav-mobile-link" onclick="showPage('about');closeMobileMenu();return false;">About Us</a>
+  <a href="#" class="nav-mobile-link" id="nav-mobile-club-link" onclick="showPage('club');closeMobileMenu();return false;" style="display:none;color:var(--brass)">Club Portal</a>
   <a href="#" class="nav-mobile-link" id="nav-mobile-trips" onclick="showPage('profile');closeMobileMenu();return false;" style="display:none">My Trips</a>
   <div class="nav-mobile-divider"></div>
   <div class="nav-mobile-auth" id="nav-mobile-auth">
@@ -950,7 +1088,7 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
     <div style="display:flex;align-items:center;gap:10px">
       <div class="nav-avatar" id="nav-mobile-avatar">?</div>
       <span id="nav-mobile-username" style="color:rgba(255,255,255,.8);font-size:.9rem"></span>
-      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="handleSignOut();closeMobileMenu()">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="signOut();closeMobileMenu()">Sign Out</button>
     </div>
   </div>
 </div>
@@ -2622,6 +2760,491 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 </div>
 
 <!-- ADMIN -->
+<!-- ══════════════════════════════════════════════════════════════════════
+     CLUB LOGIN — /club-login
+     A dedicated front door a club secretary can be sent to. Same Supabase
+     auth as everything else; this page only frames it differently and
+     routes into the portal on success.
+     ══════════════════════════════════════════════════════════════════ -->
+<div id="page-club-login" class="page">
+  <div class="page-header" style="background:var(--moss-dark)">
+    <div class="container">
+      <div class="section-label" style="color:var(--brass)">For Golf Clubs</div>
+      <h1 style="color:#fff">Club Portal</h1>
+      <p style="color:rgba(255,255,255,.6)">Manage your members, see what your club is planning, and send trip adverts to your membership.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="club-login-wrap">
+      <div id="cl-signed-out">
+        <h2>Sign in to your club</h2>
+        <p class="fs-sm text-muted" style="margin-bottom:22px;line-height:1.65">Use your normal GolfTrip account. If your club has given you a role, you'll land straight in the portal.</p>
+        <div class="form-group"><label>Email</label><input type="email" id="cl-email" placeholder="secretary@yourclub.co.uk" autocomplete="email"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="cl-password" autocomplete="current-password"></div>
+        <div class="auth-msg" id="cl-msg" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="clubLogin()" id="cl-submit-btn">Sign In</button>
+        <div style="text-align:center;margin-top:16px">
+          <a href="#" class="forgot-link" onclick="openAuthModal('reset');return false;">Forgot your password?</a>
+        </div>
+        <div style="border-top:1px solid var(--line);margin-top:24px;padding-top:20px;text-align:center">
+          <p class="fs-sm text-muted" style="margin-bottom:10px">Club not set up on GolfTrip yet?</p>
+          <a class="btn btn-ghost btn-sm" href="mailto:hello@gogolftrip.co.uk?subject=GolfTrip%20for%20our%20golf%20club">Talk to us about your club</a>
+        </div>
+      </div>
+
+      <!-- Signed in but with no club role — the most confusing state, so it
+           gets a real explanation rather than a blank page. -->
+      <div id="cl-no-club" style="display:none">
+        <h2>No club access on this account</h2>
+        <p class="fs-sm text-muted" style="line-height:1.7;margin-bottom:20px">You're signed in as <strong id="cl-current-email"></strong>, but this account doesn't have a role at any golf club yet.</p>
+        <p class="fs-sm text-muted" style="line-height:1.7;margin-bottom:22px">If your club has invited you, open the invite link they sent. If you administer the club, ask whoever set it up to give this email address a role from Members &rarr; Add member.</p>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('landing')">Back to GolfTrip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     CLUB PORTAL — /club
+     Tabbed. Every tab is permission-gated: the tab button itself is hidden
+     when the role can't use it, AND the loader re-checks before fetching,
+     so hiding a button is never the only thing standing between a member
+     and the data.
+     ══════════════════════════════════════════════════════════════════ -->
+<div id="page-club" class="page">
+
+  <!-- Shown only when a platform admin is viewing someone else's club -->
+  <div class="club-impersonate-bar" id="club-impersonate-bar" style="display:none">
+    <div class="container">
+      <span>Viewing <strong id="club-imp-name">a club</strong> as a platform admin. This is read-only &mdash; changes are blocked.</span>
+      <button class="btn btn-sm" style="background:#fff;color:#7c2d12;border:none;font-weight:600" onclick="exitClubImpersonation()">Exit</button>
+    </div>
+  </div>
+
+  <div class="club-header">
+    <div class="container">
+      <div class="club-header-inner">
+        <div class="club-crest" id="club-crest">?</div>
+        <div style="flex:1;min-width:200px">
+          <h1 id="club-name">Your Club</h1>
+          <div class="club-sub"><span id="club-plan-line">&mdash;</span></div>
+        </div>
+        <div style="text-align:right">
+          <span class="club-role-pill" id="club-role-pill"><i class="ti ti-shield-check"></i> <span id="club-role-label">Member</span></span>
+          <div class="club-sub" id="club-title-line" style="margin-top:7px"></div>
+        </div>
+      </div>
+      <div class="club-tabs" id="club-tabs">
+        <button class="club-tab active" data-tab="overview" onclick="switchClubTab('overview')"><i class="ti ti-layout-dashboard"></i> Overview</button>
+        <button class="club-tab" data-tab="members" onclick="switchClubTab('members')" data-perm="members"><i class="ti ti-users"></i> Members</button>
+        <button class="club-tab" data-tab="reports" onclick="switchClubTab('reports')" data-perm="reports"><i class="ti ti-chart-histogram"></i> Reports</button>
+        <button class="club-tab" data-tab="campaigns" onclick="switchClubTab('campaigns')" data-perm="campaigns"><i class="ti ti-mail-forward"></i> Campaigns</button>
+        <button class="club-tab" data-tab="settings" onclick="switchClubTab('settings')" data-perm="members"><i class="ti ti-settings"></i> Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="club-shell"><div class="container">
+
+    <!-- ───────────── OVERVIEW ───────────── -->
+    <div class="club-tab-panel active" id="club-panel-overview">
+      <div class="club-stats">
+        <div class="club-stat"><div class="v" id="co-members">&mdash;</div><div class="l">Members</div><div class="d" id="co-members-sub">&nbsp;</div></div>
+        <div class="club-stat"><div class="v" id="co-trips">&mdash;</div><div class="l">Trips Planned</div><div class="d" id="co-trips-sub">&nbsp;</div></div>
+        <div class="club-stat"><div class="v" id="co-engaged">&mdash;</div><div class="l">Members On A Trip</div><div class="d" id="co-engaged-sub">&nbsp;</div></div>
+        <div class="club-stat accent"><div class="v" id="co-clicks">&mdash;</div><div class="l">Booking Clicks</div><div class="d" id="co-clicks-sub">&nbsp;</div></div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Invite your members</h3>
+            <p class="hint">Anyone who signs up through this link joins your club automatically and gets full GolfTrip access free &mdash; no card details, no per-member charge.</p>
+          </div>
+        </div>
+        <div class="invite-link-box">
+          <input type="text" id="club-invite-link" readonly>
+          <button class="btn btn-ghost btn-sm" onclick="copyClubInviteLink()">Copy</button>
+        </div>
+      </div>
+
+      <div class="club-grid-2">
+        <div class="club-panel">
+          <h3>Trips planned per month</h3>
+          <p class="hint">When your members are doing their planning.</p>
+          <div id="co-trips-chart" class="chart-bars"></div>
+        </div>
+        <div class="club-panel">
+          <h3>Recent activity</h3>
+          <p class="hint">The last things to happen in your club.</p>
+          <div id="co-activity"><div class="empty-state" style="padding:20px 0"><p>Loading&hellip;</p></div></div>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <h3>Trips your members are planning</h3>
+        </div>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Destination</th><th>Organised by</th><th class="num">Group</th><th class="num">Joined</th><th>Created</th></tr></thead>
+            <tbody id="co-trips-table"><tr><td colspan="5">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────── MEMBERS ───────────── -->
+    <div class="club-tab-panel" id="club-panel-members">
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Add members</h3>
+            <p class="hint">Add one person, or paste a whole membership list. Anyone who doesn't have a GolfTrip account yet sits as <em>pending</em> until they accept &mdash; they still appear on your roster.</p>
+          </div>
+        </div>
+
+        <div class="club-grid-2" style="gap:26px">
+          <div>
+            <h4 style="font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px">One at a time</h4>
+            <div class="form-group"><label>Email address</label><input type="email" id="cm-add-email" placeholder="member@example.com"></div>
+            <div class="form-group"><label>Name (optional)</label><input type="text" id="cm-add-name" placeholder="Tom Wilson"></div>
+            <div style="display:flex;gap:12px">
+              <div class="form-group" style="flex:1"><label>Role</label>
+                <select id="cm-add-role" class="club-select" style="width:100%">
+                  <option value="member">Member</option>
+                  <option value="committee">Committee</option>
+                  <option value="organiser">Trip Organiser</option>
+                  <option value="manager">Club Manager</option>
+                  <option value="secretary">Club Secretary</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1"><label>Title (optional)</label><input type="text" id="cm-add-title" placeholder="Ladies' Captain"></div>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);margin-bottom:14px;cursor:pointer">
+              <input type="checkbox" id="cm-add-send-invite" checked style="width:auto;margin:0"> Email them an invite now
+            </label>
+            <button class="btn btn-primary btn-sm" onclick="clubAddMember()" id="cm-add-btn">Add Member</button>
+          </div>
+
+          <div>
+            <h4 style="font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px">Import a list</h4>
+            <p class="fs-sm text-muted" style="margin-bottom:10px;line-height:1.6">Paste emails, or upload a CSV straight from your membership system. We pull out anything that looks like an email address and ignore the rest, so a full export works fine.</p>
+            <textarea id="cm-import-input" rows="6" placeholder="jane@example.com, tom@example.com&#10;or paste a whole column from a spreadsheet…" style="width:100%;font-family:inherit;padding:11px;border:1px solid var(--line);border-radius:var(--r);margin-bottom:11px;font-size:.87rem"></textarea>
+            <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:11px">
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer" for="cm-import-file">Upload CSV</label>
+              <input type="file" id="cm-import-file" accept=".csv,text/csv,.txt" style="display:none">
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);cursor:pointer">
+                <input type="checkbox" id="cm-import-send" checked style="width:auto;margin:0"> Send invites
+              </label>
+              <button class="btn btn-primary btn-sm" onclick="clubImportMembers()" id="cm-import-btn">Import</button>
+            </div>
+            <div class="fs-sm" id="cm-import-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Membership</h3>
+            <p class="hint">Removing someone revokes their free access but keeps their trip history, so your reporting stays accurate.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportClubMembers()">Export CSV</button>
+        </div>
+        <div class="club-toolbar">
+          <input type="text" class="club-search" id="cm-search" placeholder="Search name or email…" oninput="renderClubMembers()">
+          <select class="club-select" id="cm-filter-role" onchange="renderClubMembers()">
+            <option value="">All roles</option>
+            <option value="secretary">Club Secretary</option>
+            <option value="manager">Club Manager</option>
+            <option value="organiser">Trip Organiser</option>
+            <option value="committee">Committee</option>
+            <option value="member">Member</option>
+          </select>
+          <select class="club-select" id="cm-filter-status" onchange="renderClubMembers()">
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="removed">Removed</option>
+            <option value="">All</option>
+          </select>
+          <span class="fs-sm text-muted" id="cm-count"></span>
+        </div>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th style="width:1%"></th></tr></thead>
+            <tbody id="cm-table"><tr><td colspan="6">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <h3>Invites sent</h3>
+        <p class="hint">Who's been invited and whether it landed.</p>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Email</th><th>Sent</th><th>Status</th></tr></thead>
+            <tbody id="cm-invites-table"><tr><td colspan="3">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────── REPORTS ───────────── -->
+    <div class="club-tab-panel" id="club-panel-reports">
+      <div class="club-stats">
+        <div class="club-stat"><div class="v" id="cr-bookings">&mdash;</div><div class="l">Booking Clicks</div><div class="d">All time</div></div>
+        <div class="club-stat"><div class="v" id="cr-bookings-month">&mdash;</div><div class="l">This Month</div><div class="d" id="cr-bookings-trend">&nbsp;</div></div>
+        <div class="club-stat"><div class="v" id="cr-avg-group">&mdash;</div><div class="l">Avg Group Size</div><div class="d">Members per trip</div></div>
+        <div class="club-stat"><div class="v" id="cr-satisfaction">&mdash;</div><div class="l">Trip Rating</div><div class="d" id="cr-satisfaction-sub">&nbsp;</div></div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>When your members actually travel</h3>
+            <p class="hint">Departure month across every trip your members have planned. This is the one to look at before you decide when to run a club trip &mdash; it tells you when your membership is already going, rather than when you assume they are.</p>
+          </div>
+        </div>
+        <div id="cr-season-chart" class="chart-bars"></div>
+        <p class="fs-sm text-muted" id="cr-season-note" style="margin-top:14px"></p>
+      </div>
+
+      <div class="club-grid-2">
+        <div class="club-panel">
+          <h3>Most-clicked booking partners</h3>
+          <p class="hint">Where your members go to book. Partners we earn commission on are marked &mdash; that's what your revenue share is calculated from.</p>
+          <div id="cr-affiliate-bars"></div>
+          <div class="club-table-wrap" style="margin-top:18px">
+            <table class="club-table">
+              <thead><tr><th>Partner</th><th class="num">Clicks</th><th>Revenue share</th></tr></thead>
+              <tbody id="cr-affiliate-table"><tr><td colspan="3">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="club-panel">
+          <h3>Where your members go</h3>
+          <p class="hint">Destinations by number of trips planned.</p>
+          <div id="cr-dest-bars"></div>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <h3>Members per trip</h3>
+        </div>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Destination</th><th>Organiser</th><th class="num">Planned for</th><th class="num">Actually joined</th><th class="num">Take-up</th><th>Created</th></tr></thead>
+            <tbody id="cr-participation-table"><tr><td colspan="6">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Trip feedback</h3>
+            <p class="hint">What members said after they got back. Send the feedback link from a trip's page to collect it.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="copyFeedbackLink()">Copy feedback link</button>
+        </div>
+        <div class="club-grid-2" style="align-items:start">
+          <div>
+            <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
+              <div class="rating-big" id="cf-avg">&mdash;</div>
+              <div>
+                <div class="stars" id="cf-stars"></div>
+                <div class="fs-sm text-muted" id="cf-count">No responses yet</div>
+              </div>
+            </div>
+            <div id="cf-breakdown" style="margin-top:18px"></div>
+          </div>
+          <div id="cf-list"><div class="empty-state" style="padding:20px 0"><p>No written feedback yet.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────── CAMPAIGNS ───────────── -->
+    <div class="club-tab-panel" id="club-panel-campaigns">
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Trip adverts</h3>
+            <p class="hint">Email your membership about a trip you're running. Write it once, see exactly what lands in their inbox, then send.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="newCampaign()">New campaign</button>
+        </div>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Campaign</th><th>Subject</th><th>Status</th><th class="num">Recipients</th><th class="num">Sent</th><th>When</th><th style="width:1%"></th></tr></thead>
+            <tbody id="cc-table"><tr><td colspan="7">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="club-panel" id="cc-editor" style="display:none">
+        <div class="club-panel-head">
+          <h3 id="cc-editor-title">New campaign</h3>
+          <button class="btn btn-ghost btn-sm" onclick="closeCampaignEditor()">Close</button>
+        </div>
+        <div class="camp-layout">
+          <div>
+            <div class="form-group"><label>Campaign name <span class="fs-sm text-muted">(internal only)</span></label><input type="text" id="cc-name" placeholder="Algarve October 2027"></div>
+            <div class="form-group"><label>Subject line</label><input type="text" id="cc-subject" placeholder="Club trip to the Algarve — October 2027" oninput="renderCampaignPreview()"></div>
+            <div class="form-group"><label>Preview text <span class="fs-sm text-muted">(the grey line after the subject in an inbox)</span></label><input type="text" id="cc-preheader" placeholder="4 nights, 3 rounds, from £745pp" oninput="renderCampaignPreview()"></div>
+            <div class="form-group"><label>Header image URL <span class="fs-sm text-muted">(optional)</span></label><input type="url" id="cc-hero" placeholder="https://…" oninput="renderCampaignPreview()"></div>
+            <div class="form-group"><label>Headline</label><input type="text" id="cc-headline" placeholder="Algarve 2027 — places still available" oninput="renderCampaignPreview()"></div>
+
+            <div class="form-group">
+              <label>Message</label>
+              <div class="rich-toolbar">
+                <button type="button" onclick="richCmd('bold')" title="Bold"><strong>B</strong></button>
+                <button type="button" onclick="richCmd('italic')" title="Italic"><em>I</em></button>
+                <button type="button" onclick="richCmd('insertUnorderedList')" title="Bullet list"><i class="ti ti-list"></i></button>
+                <button type="button" onclick="richLink()" title="Insert link"><i class="ti ti-link"></i></button>
+                <button type="button" onclick="richImage()" title="Insert image"><i class="ti ti-photo"></i></button>
+                <button type="button" onclick="richCmd('removeFormat')" title="Clear formatting"><i class="ti ti-eraser"></i></button>
+              </div>
+              <div class="rich-body" id="cc-body" contenteditable="true" oninput="renderCampaignPreview()"></div>
+            </div>
+
+            <div class="club-grid-2" style="gap:14px">
+              <div class="form-group"><label>Button text</label><input type="text" id="cc-cta-label" placeholder="See the itinerary" oninput="renderCampaignPreview()"></div>
+              <div class="form-group"><label>Button link</label><input type="url" id="cc-cta-url" placeholder="https://gogolftrip.co.uk/?trip=…" oninput="renderCampaignPreview()"></div>
+            </div>
+
+            <div style="border-top:1px solid var(--line);padding-top:18px;margin-top:6px">
+              <h4 style="font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px">Trip details <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional — shown as a table)</span></h4>
+              <div class="club-grid-2" style="gap:14px">
+                <div class="form-group"><label>Destination</label><input type="text" id="cc-trip-dest" placeholder="Vilamoura, Algarve" oninput="renderCampaignPreview()"></div>
+                <div class="form-group"><label>Dates</label><input type="text" id="cc-trip-dates" placeholder="12–16 October 2027" oninput="renderCampaignPreview()"></div>
+                <div class="form-group"><label>Price from</label><input type="text" id="cc-trip-price" placeholder="£745 per person" oninput="renderCampaignPreview()"></div>
+                <div class="form-group"><label>Places</label><input type="text" id="cc-trip-places" placeholder="24 places" oninput="renderCampaignPreview()"></div>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--line);padding-top:18px">
+              <h4 style="font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px">Who gets it</h4>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0">
+                  <select id="cc-audience" class="club-select" style="width:100%" onchange="updateCampaignAudience()">
+                    <option value="all">Every active member</option>
+                    <option value="role">Members with a specific role</option>
+                    <option value="trip">People on a particular trip</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;display:none" id="cc-audience-role-wrap">
+                  <select id="cc-audience-role" class="club-select" style="width:100%" onchange="updateCampaignAudience()">
+                    <option value="member">Member</option>
+                    <option value="committee">Committee</option>
+                    <option value="organiser">Trip Organiser</option>
+                    <option value="manager">Club Manager</option>
+                    <option value="secretary">Club Secretary</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;display:none" id="cc-audience-trip-wrap">
+                  <select id="cc-audience-trip" class="club-select" style="width:100%" onchange="updateCampaignAudience()"></select>
+                </div>
+              </div>
+              <p class="fs-sm text-muted" id="cc-audience-count" style="margin-top:11px">&nbsp;</p>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px">
+              <button class="btn btn-ghost btn-sm" onclick="saveCampaign(false)" id="cc-save-btn">Save draft</button>
+              <button class="btn btn-ghost btn-sm" onclick="sendCampaignTest()" id="cc-test-btn">Send test to me</button>
+              <button class="btn btn-primary btn-sm" onclick="sendCampaign()" id="cc-send-btn">Send to members</button>
+            </div>
+            <div class="fs-sm" id="cc-send-status" style="margin-top:12px"></div>
+          </div>
+
+          <div class="camp-preview">
+            <div class="camp-preview-label"><span>Inbox preview</span><span id="cc-preview-size"></span></div>
+            <div class="camp-frame" id="cc-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────── SETTINGS ───────────── -->
+    <div class="club-tab-panel" id="club-panel-settings">
+      <div class="club-panel">
+        <div class="club-panel-head">
+          <div>
+            <h3>Club profile</h3>
+            <p class="hint">This is what members and prospective members see on your public club page.</p>
+          </div>
+          <a href="#" id="cs-public-link" target="_blank" class="fs-sm" style="color:var(--brass);font-weight:600">View public page <i class="ti ti-external-link"></i></a>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:16px">
+          <div class="club-crest" id="cs-logo-preview" style="width:64px;height:64px;background:var(--moss)">?</div>
+          <div>
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-block" for="cs-logo-input">Upload club crest</label>
+            <input type="file" id="cs-logo-input" accept="image/*" style="display:none" onchange="uploadClubLogo(this.files[0])">
+            <div class="fs-sm text-muted" id="cs-logo-status" style="margin-top:5px"></div>
+          </div>
+        </div>
+        <div class="form-group"><label>Club name</label><input type="text" id="cs-name"></div>
+        <div class="form-group"><label>Tagline</label><input type="text" id="cs-tagline" placeholder="Golf travel, sorted"></div>
+        <div class="form-group"><label>Description</label><textarea id="cs-description" rows="3" placeholder="A short line about your club for visitors to your public page."></textarea></div>
+        <div style="display:flex;gap:20px">
+          <div class="form-group" style="flex:1"><label>Primary colour</label><input type="color" id="cs-primary" style="width:100%;height:40px;padding:2px;cursor:pointer"></div>
+          <div class="form-group" style="flex:1"><label>Secondary colour</label><input type="color" id="cs-secondary" style="width:100%;height:40px;padding:2px;cursor:pointer"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveClubSettings()" id="cs-save-btn">Save changes</button>
+      </div>
+
+      <div class="club-panel" id="cs-billing-panel">
+        <h3>Subscription</h3>
+        <p class="hint">One flat fee for the whole club. Only a Club Secretary can change this.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px;background:var(--paper-deep);border-radius:var(--r)">
+          <div>
+            <div style="font-weight:600;color:var(--moss)" id="cs-plan-name">&mdash;</div>
+            <div class="fs-sm text-muted" id="cs-plan-detail">&mdash;</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="openClubBillingPortal()" id="cs-billing-btn">Manage billing</button>
+        </div>
+      </div>
+
+      <div class="club-panel">
+        <h3>Who can do what</h3>
+        <p class="hint">Roles control permissions. Titles are display only &mdash; give someone the title "Ladies' Captain" and the role that matches what they actually need to do.</p>
+        <div class="club-table-wrap">
+          <table class="club-table">
+            <thead><tr><th>Role</th><th>Billing</th><th>Members &amp; roles</th><th>Trips</th><th>Campaigns</th><th>Reports</th></tr></thead>
+            <tbody>
+              <tr><td><span class="role-badge role-secretary">Club Secretary</span></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+              <tr><td><span class="role-badge role-manager">Club Manager</span></td><td>&mdash;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+              <tr><td><span class="role-badge role-organiser">Trip Organiser</span></td><td>&mdash;</td><td>&mdash;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+              <tr><td><span class="role-badge role-committee">Committee</span></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&#10003;</td></tr>
+              <tr><td><span class="role-badge role-member">Member</span></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div></div>
+</div>
+
+
+<!-- Club member removal confirm — a destructive action gets a real
+     confirmation, not a browser confirm() -->
+<div id="club-remove-modal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" onclick="closeRemoveMemberModal()">&times;</button>
+    <h3 style="font-family:var(--font-display);font-weight:500;color:var(--moss);margin-bottom:10px">Remove <span id="crm-name">this member</span>?</h3>
+    <p class="fs-sm text-muted" style="line-height:1.7;margin-bottom:8px">They'll lose free access through the club immediately. Their account and any trips they've saved stay with them.</p>
+    <p class="fs-sm text-muted" style="line-height:1.7;margin-bottom:20px">Their past trips stay in your reporting, so your numbers don't change retrospectively.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeRemoveMemberModal()">Cancel</button>
+      <button class="btn btn-sm" style="background:#991b1b;color:#fff;border:1px solid #991b1b" onclick="confirmRemoveMember()" id="crm-confirm-btn">Remove member</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="page-admin" class="page">
   <div class="page-header" style="background:var(--green-dark)">
     <div class="container">
@@ -2630,14 +3253,24 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
     </div>
   </div>
   <div class="admin-body"><div class="container">
-    <div class="admin-login" id="admin-login-form">
-      <h2>Admin Login</h2>
-      <div class="form-group"><label>Email</label><input type="email" id="admin-email" value="admin@golftrip.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="admin-password"></div>
-      <div id="admin-login-msg" class="auth-msg" style="display:none"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="adminLogin()">Login</button>
+    <!-- Admin access is gated on public.users.is_admin, checked server-side
+         on every visit. This replaced a hardcoded email/password pair that
+         was sitting in plain text in this file on the live site. -->
+    <div class="admin-login" id="admin-signin-prompt" style="display:none">
+      <h2>Sign In Required</h2>
+      <p class="fs-sm text-muted" style="margin-bottom:16px">Sign in with your GolfTrip account to access the admin dashboard.</p>
+      <button class="btn btn-primary" style="width:100%" onclick="openAuthModal('signin')">Sign In</button>
+    </div>
+    <div class="admin-login" id="admin-denied" style="display:none">
+      <h2>Not Authorized</h2>
+      <p class="fs-sm text-muted">This account doesn't have admin access.</p>
+      <p class="fs-sm" id="admin-denied-reason" style="display:none;margin-top:14px;padding:12px;background:var(--paper-deep);border-radius:var(--r);color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;word-break:break-word"></p>
+      <p class="fs-sm text-muted" id="admin-denied-uid" style="display:none;margin-top:8px;font-size:.72rem"></p>
     </div>
     <div id="admin-dashboard" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="btn btn-ghost btn-sm" onclick="openClubPicker()"><i class="ti ti-eye"></i> View as a club</button>
+      </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="sc-val" id="as-users">&#8212;</div><div class="sc-lbl">Total Users</div></div>
         <div class="stat-card"><div class="sc-val" id="as-trips">&#8212;</div><div class="sc-lbl">Trips Generated</div></div>
@@ -2808,7 +3441,12 @@ function buildAirportOptions() {
 // since those are logged-in/tool views with no public SEO value.
 var ROUTED_PAGES = {
   landing: { path: '/', title: 'GolfTrip — Build Your Perfect Golf Holiday in 60 Seconds', desc: 'Plan the perfect golf holiday in 60 seconds. AI-powered itineraries with courses, hotels and flights compared across Budget, Mid-Range and Luxury. Built for UK golf societies.' },
-  seasonal: { path: '/destinations', title: 'Best Golf Destinations by Season | GolfTrip', desc: 'Hand-picked golf destinations for every season — courses, hotels and typical budgets for UK golfers, updated throughout the year.' }
+  seasonal: { path: '/destinations', title: 'Best Golf Destinations by Season | GolfTrip', desc: 'Hand-picked golf destinations for every season — courses, hotels and typical budgets for UK golfers, updated throughout the year.' },
+  // Club portal routes. Both need a matching rewrite in netlify.toml or a
+  // direct visit / refresh returns Netlify's 404 instead of the app.
+  'club-login': { path: '/club-login', title: 'Club Portal Sign In | GolfTrip', desc: 'Sign in to manage your golf club on GolfTrip.' },
+  club: { path: '/club', title: 'Club Portal | GolfTrip', desc: 'Manage your golf club members, trips, reporting and campaigns.' },
+  admin: { path: '/admin', title: 'Admin | GolfTrip', desc: 'GolfTrip internal admin.' }
 };
 
 function setPageMeta(name) {
@@ -2851,7 +3489,9 @@ function showPage(name, skipHistory) {
     var season = getCurrentSeason();
     initSeasonalPage(season);
   }
-  if (name === 'admin') { document.getElementById('admin-login-form').style.display = 'block'; document.getElementById('admin-dashboard').style.display = 'none'; }
+  if (name === 'admin') { checkAdminAccess(); }
+  if (name === 'club' && typeof initClubPortal === 'function') { initClubPortal(); }
+  if (name === 'club-login' && typeof initClubLoginPage === 'function') { initClubLoginPage(); }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
 
   // Give routed pages a real URL and working back button
@@ -2955,15 +3595,18 @@ async function signOut() {
 
 // ── PLAN GATING ──────────────────────────────────────────────
 async function loadUserPlan() {
-  if (!currentUser) { userPlan = 'free'; return; }
+  if (!currentUser) { userPlan = 'free'; userClub = null; return; }
+  userPlan = 'free';
   try {
-    var r = await sbClient.from('user_plans').select('plan,status').eq('user_id', currentUser.id).single();
-    if (r.data && r.data.status === 'active' && (r.data.plan === 'pro' || r.data.plan === 'society')) {
+    var r = await sbClient.from('user_plans').select('plan,status').eq('user_id', currentUser.id).maybeSingle();
+    if (r.data && r.data.status === 'active' && (r.data.plan === 'pro' || r.data.plan === 'society' || r.data.plan === 'individual')) {
       userPlan = r.data.plan;
-    } else {
-      userPlan = 'free';
     }
-  } catch (e) { userPlan = 'free'; }
+  } catch (e) { /* personal plan is optional */ }
+
+  // Club membership is checked after, and wins: a member whose club pays
+  // should never be shown an upgrade prompt for access they already have.
+  if (typeof loadUserClub === 'function') await loadUserClub();
 }
 
 // Loads the current user's name + avatar so the nav, chat, and leaderboard
@@ -2971,16 +3614,24 @@ async function loadUserPlan() {
 async function loadUserDisplayInfo() {
   if (!currentUser) return;
   try {
-    var r = await sbClient.from('users').select('name, avatar_url').eq('id', currentUser.id).single();
-    if (r.data) {
+    // maybeSingle(), not single(): single() throws when zero rows come back,
+    // which is indistinguishable from a real failure once it hits a bare
+    // catch. That swallowed error is how is_admin silently never gets set.
+    var r = await sbClient.from('users').select('name, avatar_url, is_admin').eq('id', currentUser.id).maybeSingle();
+    if (r.error) {
+      console.warn('[auth] users row lookup failed:', r.error.code, r.error.message);
+    } else if (r.data) {
       currentUser.display_name = r.data.name || null;
       currentUser.avatar_url = r.data.avatar_url || null;
+      currentUser.is_admin = !!r.data.is_admin;
+    } else {
+      console.warn('[auth] no public.users row for', currentUser.id);
     }
-  } catch (e) { /* fall back silently to email/initials */ }
+  } catch (e) { console.warn('[auth] loadUserDisplayInfo failed:', e && e.message); }
 }
 
-function isPaid() { return userPlan === 'pro' || userPlan === 'society'; }
-function isSociety() { return userPlan === 'society'; }
+function isPaid() { return userPlan === 'pro' || userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
+function isSociety() { return userPlan === 'society' || userPlan === 'individual' || userPlan === 'club'; }
 
 // Free tier: 1 lifetime trip generation. Logged-in free users are checked
 // against trip_requests; signed-out visitors are checked against localStorage.
@@ -3012,11 +3663,13 @@ function requireSociety(message) {
 
 function updateNav(user) {
   var upgradeBtn = document.getElementById('nav-upgrade-btn');
-  if (upgradeBtn) upgradeBtn.style.display = user ? 'inline-block' : 'none';
+  var onClubPlan = (typeof isClubMember === 'function') && isClubMember();
+  if (upgradeBtn) upgradeBtn.style.display = (user && !onClubPlan) ? 'inline-block' : 'none';
   var authBtns = document.getElementById('nav-auth-btns');
   var navUser = document.getElementById('nav-user');
   var myTrips = document.getElementById('nav-my-trips');
   var adminLink = document.getElementById('nav-admin-link');
+  if (typeof updateClubNav === 'function') updateClubNav();
   var mobileAuth = document.getElementById('nav-mobile-auth');
   var mobileUser = document.getElementById('nav-mobile-user');
   var mobileTrips = document.getElementById('nav-mobile-trips');
@@ -3315,6 +3968,11 @@ sbClient.auth.onAuthStateChange(async function(event, session) {
     if (pendingJoinId) {
       processJoin(pendingJoinId, currentUser);
     }
+    if (pendingJoinClubId) {
+      joinClub(pendingJoinClubId, currentUser);
+      pendingJoinClubId = null;
+    }
+    if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains('active')) checkAdminAccess();
     // If signing in while viewing a shared public trip — unlock full access
     var banner = document.getElementById('public-trip-banner');
     if (banner && banner.style.display !== 'none') {
@@ -8488,19 +9146,52 @@ document.getElementById('copy-link-btn').addEventListener('click', function() {
 });
 
 /* === ADMIN === */
-function adminLogin() {
-  var email = document.getElementById('admin-email').value;
-  var pass = document.getElementById('admin-password').value;
-  var msgEl = document.getElementById('admin-login-msg');
-  if (email === 'admin@golftrip.com' && pass === 'admin123') {
-    document.getElementById('admin-login-form').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'block';
-    loadAdminStats();
-  } else {
-    msgEl.textContent = 'Invalid credentials.';
-    msgEl.className = 'auth-msg error';
-    msgEl.style.display = 'block';
+/* Admin access, gated on public.users.is_admin.
+
+   This function used to be:
+       if (email === 'admin@golftrip.com' && pass === 'admin123')
+   ...in a public JS file on a live site. Anyone who opened View Source had
+   the admin dashboard. It is now a server-side check, re-read on every
+   visit so revoking the flag takes effect immediately, and it reports the
+   real reason for a refusal instead of a blank "no". */
+async function checkAdminAccess() {
+  var signinEl = document.getElementById('admin-signin-prompt');
+  var deniedEl = document.getElementById('admin-denied');
+  var dashEl = document.getElementById('admin-dashboard');
+  var reasonEl = document.getElementById('admin-denied-reason');
+  var uidEl = document.getElementById('admin-denied-uid');
+  if (!signinEl || !deniedEl || !dashEl) return;
+  signinEl.style.display = 'none';
+  deniedEl.style.display = 'none';
+  dashEl.style.display = 'none';
+  if (reasonEl) { reasonEl.style.display = 'none'; reasonEl.textContent = ''; }
+  if (uidEl) { uidEl.style.display = 'none'; uidEl.textContent = ''; }
+  if (!currentUser) { signinEl.style.display = 'block'; return; }
+
+  function deny(reason) {
+    deniedEl.style.display = 'block';
+    if (reasonEl && reason) { reasonEl.textContent = reason; reasonEl.style.display = 'block'; }
+    if (uidEl) { uidEl.textContent = 'Your user id: ' + currentUser.id; uidEl.style.display = 'block'; }
+    console.warn('[admin] denied -', reason, '| uid:', currentUser.id);
   }
+
+  var r;
+  try {
+    r = await sbClient.from('users').select('is_admin').eq('id', currentUser.id).maybeSingle();
+  } catch (e) { deny('Query threw: ' + (e && e.message ? e.message : String(e))); return; }
+  if (r.error) {
+    deny('Supabase error ' + (r.error.code || '?') + ': ' + r.error.message +
+      (/column .*is_admin.* does not exist/i.test(r.error.message || '')
+        ? ' - the is_admin column is missing; run 004_admin_flag.sql.' : ''));
+    return;
+  }
+  if (!r.data) {
+    deny('No row in public.users for this account. Either it was never created, or an RLS policy is hiding it.');
+    return;
+  }
+  if (!r.data.is_admin) { deny('Row found, but is_admin is ' + JSON.stringify(r.data.is_admin) + '.'); return; }
+  dashEl.style.display = 'block';
+  loadAdminStats();
 }
 
 async function loadAdminStats() {
@@ -8800,6 +9491,48 @@ function planSeasonalTrip(destName) {
 
 /* === URL PARAMS & JOIN FLOW === */
 var pendingJoinId = null;
+var pendingJoinClubId = null;
+
+/* Joining a club from an invite link (?join_club=<id>). Idempotent — a
+   member who clicks the link twice does not end up on the roster twice,
+   and someone the secretary already added by email gets their pending row
+   claimed rather than a duplicate created. */
+async function joinClub(clubId, user) {
+  if (!clubId || !user) return;
+  try {
+    var club = await sbClient.from('clubs').select('id, name, plan_status').eq('id', clubId).maybeSingle();
+    if (!club.data) { showToast('That club invite link is not valid.', true); return; }
+
+    var existing = await sbClient.from('club_members')
+      .select('id, status').eq('club_id', clubId).eq('user_id', user.id).maybeSingle();
+    if (existing.data) {
+      if (existing.data.status !== 'active') {
+        await sbClient.from('club_members').update({ status: 'active', removed_at: null, removed_by: null }).eq('id', existing.data.id);
+      }
+    } else {
+      // The secretary may have added this address before the person signed
+      // up. Claim that pending row instead of creating a second one.
+      var pending = null;
+      if (user.email) {
+        var pr = await sbClient.from('club_members')
+          .select('id').eq('club_id', clubId).is('user_id', null).ilike('email', user.email).maybeSingle();
+        pending = pr.data;
+      }
+      if (pending) {
+        await sbClient.from('club_members').update({ user_id: user.id, status: 'active' }).eq('id', pending.id);
+      } else {
+        await sbClient.from('club_members').insert({ club_id: clubId, user_id: user.id, role: 'member', status: 'active' });
+      }
+    }
+    await loadUserPlan();
+    updateNav(currentUser);
+    showToast('You have joined ' + club.data.name + ' - full GolfTrip access is on the club.');
+    window.history.replaceState({}, '', window.location.pathname);
+  } catch (e) {
+    console.error('joinClub:', e);
+    showToast('Could not join that club. Please try the link again.', true);
+  }
+}
 
 async function processJoin(tripId, user) {
   if (!tripId || !user) return;
@@ -8825,6 +9558,8 @@ async function processJoin(tripId, user) {
 (function handleUrlParams() {
   var params = new URLSearchParams(window.location.search);
   var joinId = params.get('join');
+  var joinClubId = params.get('join_club');
+  if (joinClubId) pendingJoinClubId = joinClubId;
   var tripId = params.get('trip');
   var booking = params.get('booking');
   if (joinId) pendingJoinId = joinId;
@@ -9200,8 +9935,11 @@ function prefillVenueSearch(name) {
 
 // Load community venues when venue page opens
 var _origShowPage = showPage;
-showPage = function(name) {
-  _origShowPage(name);
+// Was `function(name)` — it swallowed the second argument, so every
+// showPage(name, true) call meant to SKIP a history entry pushed one
+// anyway. That's why the back button behaved oddly on routed pages.
+showPage = function(name, skipHistory) {
+  _origShowPage(name, skipHistory);
   if (name === 'venue') {
     loadCommunityVenues();
   } else {
@@ -9831,6 +10569,1384 @@ async function submitFeedback() {
     if (btn) { btn.disabled = false; btn.textContent = 'Send Feedback'; }
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CLUB PLATFORM
+   Roles, member management, reporting and campaigns.
+
+   Permission model — the single most important thing in this block:
+   the matrix below is a MIRROR of public.club_can() in the database
+   (supabase-migrations/005_club_platform.sql). It exists to decide what
+   to show. It is NOT the security boundary — RLS is. If you change one,
+   change the other, and assume anything gated only here is reachable by
+   anyone who opens the console.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var CLUB_ROLES = {
+  secretary: { label: 'Club Secretary', rank: 5, perms: ['billing','members','trips','campaigns','reports'] },
+  manager:   { label: 'Club Manager',   rank: 4, perms: ['members','trips','campaigns','reports'] },
+  organiser: { label: 'Trip Organiser', rank: 3, perms: ['trips','campaigns','reports'] },
+  committee: { label: 'Committee',      rank: 2, perms: ['reports'] },
+  member:    { label: 'Member',         rank: 1, perms: [] }
+};
+
+var userClub = null;          // { id, name, slug, role, title, plan_status, ... }
+var clubImpersonating = false; // platform admin viewing someone else's club
+var clubMembersCache = [];
+var clubTripsCache = [];
+var clubActiveTab = 'overview';
+var pendingRemoveMemberId = null;
+var editingCampaignId = null;
+
+function clubRoleLabel(role) {
+  return (CLUB_ROLES[role] && CLUB_ROLES[role].label) || 'Member';
+}
+
+/* Can the current user do `perm` in the current club?
+   Platform admins get read permissions everywhere so Simon can inspect a
+   club, but NOT write permissions — see clubCanWrite(). */
+function clubCan(perm) {
+  if (!userClub) return false;
+  if (clubImpersonating) return perm === 'reports' || perm === 'members' || perm === 'campaigns';
+  var r = CLUB_ROLES[userClub.role];
+  return !!(r && r.perms.indexOf(perm) !== -1);
+}
+
+/* Writes are blocked outright while impersonating. Read-only means
+   read-only — otherwise "let me just check what they see" becomes
+   "why did the secretary's roster change overnight". */
+function clubCanWrite(perm) {
+  if (clubImpersonating) return false;
+  return clubCan(perm);
+}
+
+/* ── LOADING THE USER'S CLUB ──────────────────────────────────────────── */
+// Called from loadUserPlan(). Club membership beats a personal subscription:
+// a member whose club pays should never see an upgrade prompt.
+async function loadUserClub() {
+  userClub = null;
+  clubImpersonating = false;
+  if (!currentUser) return;
+  try {
+    var r = await sbClient
+      .from('club_members')
+      .select('club_id, role, title, status, clubs!inner(id, name, slug, plan_status, logo_url, tagline, description, primary_color, secondary_color)')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'active')
+      .order('role', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (r.error) { console.warn('[club] membership lookup failed:', r.error.message); return; }
+    if (r.data && r.data.clubs) {
+      var c = r.data.clubs;
+      userClub = {
+        id: c.id, name: c.name, slug: c.slug, plan_status: c.plan_status,
+        logo_url: c.logo_url, tagline: c.tagline, description: c.description,
+        primary_color: c.primary_color, secondary_color: c.secondary_color,
+        role: r.data.role || 'member', title: r.data.title || ''
+      };
+      if (c.plan_status === 'active') userPlan = 'club';
+    }
+  } catch (e) { console.warn('[club] loadUserClub threw:', e && e.message); }
+}
+
+function isClubMember() { return userPlan === 'club' && !!userClub; }
+function hasClubPortalAccess() {
+  return !!(userClub && userClub.role && userClub.role !== 'member');
+}
+
+/* ── NAV ──────────────────────────────────────────────────────────────── */
+function updateClubNav() {
+  var link = document.getElementById('nav-club-link');
+  var mob = document.getElementById('nav-mobile-club-link');
+  var show = hasClubPortalAccess() || (currentUser && currentUser.is_admin);
+  if (link) link.style.display = show ? 'flex' : 'none';
+  if (mob) mob.style.display = show ? 'block' : 'none';
+}
+
+/* ── CLUB LOGIN PAGE ──────────────────────────────────────────────────── */
+async function clubLogin() {
+  var email = (document.getElementById('cl-email').value || '').trim();
+  var pass = document.getElementById('cl-password').value;
+  var msg = document.getElementById('cl-msg');
+  var btn = document.getElementById('cl-submit-btn');
+  function fail(t) { msg.textContent = t; msg.className = 'auth-msg error'; msg.style.display = 'block'; }
+  if (!email || !pass) { fail('Please enter your email and password.'); return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    var r = await sbClient.auth.signInWithPassword({ email: email, password: pass });
+    if (r.error) throw r.error;
+    // onAuthStateChange repopulates userClub; give it a moment, then route.
+    await new Promise(function(res) { setTimeout(res, 400); });
+    await loadUserPlan();
+    updateNav(currentUser);
+    routeAfterClubLogin();
+  } catch (e) {
+    fail(e.message || 'Sign in failed.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+function routeAfterClubLogin() {
+  if (hasClubPortalAccess() || (currentUser && currentUser.is_admin)) {
+    showPage('club');
+    return;
+  }
+  // Signed in fine, but nothing to show them. Say so plainly.
+  document.getElementById('cl-signed-out').style.display = 'none';
+  var noClub = document.getElementById('cl-no-club');
+  noClub.style.display = 'block';
+  document.getElementById('cl-current-email').textContent = (currentUser && currentUser.email) || '';
+}
+
+function initClubLoginPage() {
+  var out = document.getElementById('cl-signed-out');
+  var no = document.getElementById('cl-no-club');
+  if (!out || !no) return;
+  if (!currentUser) { out.style.display = 'block'; no.style.display = 'none'; return; }
+  if (hasClubPortalAccess() || currentUser.is_admin) { showPage('club'); return; }
+  routeAfterClubLogin();
+}
+
+/* ── PORTAL SHELL ─────────────────────────────────────────────────────── */
+async function initClubPortal() {
+  if (!currentUser) { showPage('club-login'); return; }
+  if (!userClub && currentUser.is_admin) { openClubPicker(); return; }
+  if (!hasClubPortalAccess()) { showPage('club-login'); initClubLoginPage(); return; }
+
+  // Header
+  document.getElementById('club-name').textContent = userClub.name || 'Your Club';
+  var crest = document.getElementById('club-crest');
+  crest.innerHTML = userClub.logo_url
+    ? '<img src="' + escAttr(userClub.logo_url) + '" alt="">'
+    : (userClub.name || '?').charAt(0).toUpperCase();
+  document.getElementById('club-role-label').textContent = clubRoleLabel(userClub.role);
+  document.getElementById('club-title-line').textContent = userClub.title || '';
+  document.getElementById('club-plan-line').textContent =
+    userClub.plan_status === 'active' ? 'Subscription active · every member included'
+                                      : 'Subscription ' + (userClub.plan_status || 'pending');
+  document.getElementById('club-impersonate-bar').style.display = clubImpersonating ? 'block' : 'none';
+  if (clubImpersonating) document.getElementById('club-imp-name').textContent = userClub.name;
+
+  var link = document.getElementById('club-invite-link');
+  if (link) link.value = window.location.origin + '/?join_club=' + userClub.id;
+
+  // Hide tabs this role can't use, and make sure we're not sitting on one.
+  var firstVisible = null;
+  document.querySelectorAll('#club-tabs .club-tab').forEach(function(btn) {
+    var perm = btn.getAttribute('data-perm');
+    var ok = !perm || clubCan(perm);
+    btn.style.display = ok ? 'flex' : 'none';
+    if (ok && !firstVisible) firstVisible = btn.getAttribute('data-tab');
+  });
+  var current = document.querySelector('#club-tabs .club-tab[data-tab="' + clubActiveTab + '"]');
+  if (!current || current.style.display === 'none') clubActiveTab = firstVisible || 'overview';
+
+  // Billing panel is secretary-only.
+  var billing = document.getElementById('cs-billing-panel');
+  if (billing) billing.style.display = clubCan('billing') ? 'block' : 'none';
+
+  switchClubTab(clubActiveTab);
+}
+
+function switchClubTab(tab) {
+  clubActiveTab = tab;
+  document.querySelectorAll('#club-tabs .club-tab').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+  });
+  document.querySelectorAll('.club-tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'club-panel-' + tab);
+  });
+  if (tab === 'overview') loadClubOverview();
+  if (tab === 'members') loadClubMembers();
+  if (tab === 'reports') loadClubReports();
+  if (tab === 'campaigns') loadClubCampaigns();
+  if (tab === 'settings') loadClubSettings();
+}
+
+/* ── HELPERS ──────────────────────────────────────────────────────────── */
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escAttr(s) { return esc(s); }
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  catch (e) { return '—'; }
+}
+function initialsOf(name, email) {
+  var s = (name || email || '?').trim();
+  var parts = s.split(/[\s@.]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return s.charAt(0).toUpperCase();
+}
+function tbodyMessage(id, cols, msg) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = '<tr><td colspan="' + cols + '" style="color:var(--muted)">' + esc(msg) + '</td></tr>';
+}
+
+/* Renders a vertical bar chart into a .chart-bars container.
+   items: [{label, value, peak}] */
+function renderBarChart(containerId, items, opts) {
+  opts = opts || {};
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length || items.every(function(i) { return !i.value; })) {
+    el.className = 'chart-empty';
+    el.innerHTML = esc(opts.empty || 'Not enough data yet.');
+    return;
+  }
+  el.className = 'chart-bars';
+  var max = Math.max.apply(null, items.map(function(i) { return i.value; })) || 1;
+  el.innerHTML = items.map(function(i) {
+    var h = Math.max(2, Math.round((i.value / max) * 118));
+    return '<div class="chart-col" title="' + escAttr(i.label + ': ' + i.value) + '">' +
+             '<div class="chart-val">' + (i.value || '') + '</div>' +
+             '<div class="chart-bar' + (i.peak ? ' peak' : '') + '" style="height:' + h + 'px"></div>' +
+             '<div class="chart-lbl">' + esc(i.label) + '</div>' +
+           '</div>';
+  }).join('');
+}
+
+/* Horizontal bars, for leaderboards. */
+function renderBarRows(containerId, items, opts) {
+  opts = opts || {};
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) {
+    el.innerHTML = '<p class="fs-sm text-muted">' + esc(opts.empty || 'Nothing recorded yet.') + '</p>';
+    return;
+  }
+  var max = Math.max.apply(null, items.map(function(i) { return i.value; })) || 1;
+  el.innerHTML = items.map(function(i) {
+    return '<div class="bar-row">' +
+             '<div class="nm" title="' + escAttr(i.label) + '">' + esc(i.label) + '</div>' +
+             '<div class="bar-track"><div class="bar-fill" style="width:' + Math.round((i.value / max) * 100) + '%"></div></div>' +
+             '<div class="num">' + i.value + '</div>' +
+           '</div>';
+  }).join('');
+}
+
+function starsHtml(rating) {
+  var out = '';
+  for (var i = 1; i <= 5; i++) out += '<span class="' + (i <= Math.round(rating) ? '' : 'off') + '">&#9733;</span>';
+  return out;
+}
+
+/* trip_requests.travel_dates is a JSON *string* like
+   {"depart":"2027-10-12","returnDate":"2027-10-16"}. It can also be null,
+   empty, or malformed on older rows — parse defensively and fall back to
+   the row's created_at month so a bad row doesn't vanish from the chart. */
+function departMonthOf(row) {
+  var raw = row && row.travel_dates;
+  if (raw) {
+    try {
+      var o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      var d = o && (o.depart || o.departure || o.departDate || o.start);
+      if (d) {
+        var dt = new Date(d);
+        if (!isNaN(dt.getTime()) && dt.getFullYear() > 2000 && dt.getFullYear() < 2100) {
+          return { month: dt.getMonth(), real: true };
+        }
+      }
+    } catch (e) { /* fall through */ }
+  }
+  if (row && row.created_at) {
+    var c = new Date(row.created_at);
+    if (!isNaN(c.getTime())) return { month: c.getMonth(), real: false };
+  }
+  return null;
+}
+
+/* ── OVERVIEW ─────────────────────────────────────────────────────────── */
+async function loadClubOverview() {
+  if (!userClub) return;
+  var cid = userClub.id;
+  try {
+    var mem = await sbClient.from('club_members').select('user_id, status').eq('club_id', cid);
+    var all = mem.data || [];
+    var active = all.filter(function(m) { return m.status === 'active'; });
+    var pending = active.filter(function(m) { return !m.user_id; });
+    document.getElementById('co-members').textContent = active.length;
+    document.getElementById('co-members-sub').textContent = pending.length
+      ? pending.length + ' not signed up yet' : 'All signed up';
+
+    var trips = await sbClient.from('trip_requests')
+      .select('id, destination_type, group_size, user_id, created_at, travel_dates')
+      .eq('club_id', cid).order('created_at', { ascending: false });
+    clubTripsCache = trips.data || [];
+    document.getElementById('co-trips').textContent = clubTripsCache.length;
+    var thisYear = clubTripsCache.filter(function(t) {
+      return new Date(t.created_at).getFullYear() === new Date().getFullYear();
+    }).length;
+    document.getElementById('co-trips-sub').textContent = thisYear + ' this year';
+
+    // Engagement: distinct members who have joined at least one club trip.
+    var tripIds = clubTripsCache.map(function(t) { return t.id; });
+    var engaged = 0;
+    if (tripIds.length) {
+      var tm = await sbClient.from('trip_members').select('user_id, trip_request_id').in('trip_request_id', tripIds);
+      var set = {};
+      (tm.data || []).forEach(function(r) { if (r.user_id) set[r.user_id] = 1; });
+      engaged = Object.keys(set).length;
+    }
+    document.getElementById('co-engaged').textContent = engaged;
+    document.getElementById('co-engaged-sub').textContent = active.length
+      ? Math.round((engaged / active.length) * 100) + '% of members' : ' ';
+
+    var clicks = await sbClient.from('affiliate_clicks').select('id', { count: 'exact', head: true }).eq('club_id', cid);
+    document.getElementById('co-clicks').textContent = (clicks.count || 0).toLocaleString();
+    document.getElementById('co-clicks-sub').textContent = 'Counts toward revenue share';
+
+    // Trips created per month, last 6 months
+    var months = [];
+    for (var i = 5; i >= 0; i--) {
+      var d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i);
+      months.push({ key: d.getFullYear() + '-' + d.getMonth(),
+                    label: d.toLocaleDateString('en-GB', { month: 'short' }), value: 0 });
+    }
+    clubTripsCache.forEach(function(t) {
+      var d = new Date(t.created_at);
+      var k = d.getFullYear() + '-' + d.getMonth();
+      var m = months.filter(function(x) { return x.key === k; })[0];
+      if (m) m.value++;
+    });
+    renderBarChart('co-trips-chart', months, { empty: 'No trips planned yet.' });
+
+    renderClubTripsTable();
+    renderClubActivity(all, clubTripsCache);
+  } catch (e) {
+    console.error('loadClubOverview:', e);
+    showToast('Could not load club overview.', true);
+  }
+}
+
+async function renderClubTripsTable() {
+  var rows = clubTripsCache.slice(0, 12);
+  if (!rows.length) { tbodyMessage('co-trips-table', 5, 'No trips planned yet.'); return; }
+  var names = await lookupUserNames(rows.map(function(r) { return r.user_id; }));
+  var counts = await lookupTripJoinCounts(rows.map(function(r) { return r.id; }));
+  document.getElementById('co-trips-table').innerHTML = rows.map(function(t) {
+    return '<tr>' +
+      '<td><strong>' + esc(t.destination_type || 'Not set') + '</strong></td>' +
+      '<td>' + esc(names[t.user_id] || 'Unknown') + '</td>' +
+      '<td class="num">' + (t.group_size || '—') + '</td>' +
+      '<td class="num">' + (counts[t.id] || 0) + '</td>' +
+      '<td>' + fmtDate(t.created_at) + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderClubActivity(members, trips) {
+  var items = [];
+  trips.slice(0, 5).forEach(function(t) {
+    items.push({ when: t.created_at, icon: 'ti-golf',
+                 text: 'Trip to <strong>' + esc(t.destination_type || 'somewhere') + '</strong> planned' });
+  });
+  var el = document.getElementById('co-activity');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:20px 0"><p>Nothing yet. Invite some members to get started.</p></div>';
+    return;
+  }
+  items.sort(function(a, b) { return new Date(b.when) - new Date(a.when); });
+  el.innerHTML = items.map(function(i) {
+    return '<div style="display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)">' +
+      '<i class="ti ' + i.icon + '" style="color:var(--brass);margin-top:2px"></i>' +
+      '<div style="flex:1"><div style="font-size:.87rem">' + i.text + '</div>' +
+      '<div class="fs-sm text-muted" style="font-size:.75rem">' + fmtDate(i.when) + '</div></div></div>';
+  }).join('');
+}
+
+async function lookupUserNames(ids) {
+  var out = {};
+  var uniq = ids.filter(function(v, i, a) { return v && a.indexOf(v) === i; });
+  if (!uniq.length) return out;
+  try {
+    var r = await sbClient.from('users').select('id, name, email').in('id', uniq);
+    (r.data || []).forEach(function(u) { out[u.id] = u.name || (u.email || '').split('@')[0]; });
+  } catch (e) { /* names are cosmetic — never block a table on them */ }
+  return out;
+}
+
+async function lookupTripJoinCounts(tripIds) {
+  var out = {};
+  if (!tripIds.length) return out;
+  try {
+    var r = await sbClient.from('trip_members').select('trip_request_id').in('trip_request_id', tripIds);
+    (r.data || []).forEach(function(m) { out[m.trip_request_id] = (out[m.trip_request_id] || 0) + 1; });
+  } catch (e) { /* ignore */ }
+  return out;
+}
+
+/* ── MEMBERS ──────────────────────────────────────────────────────────── */
+async function loadClubMembers() {
+  if (!userClub || !clubCan('members')) return;
+  tbodyMessage('cm-table', 6, 'Loading…');
+  try {
+    var r = await sbClient.from('club_members')
+      .select('id, user_id, email, role, title, status, joined_at')
+      .eq('club_id', userClub.id).order('joined_at', { ascending: true });
+    if (r.error) throw r.error;
+    var rows = r.data || [];
+    var names = await lookupUserNames(rows.map(function(m) { return m.user_id; }));
+    var emails = {};
+    var uids = rows.map(function(m) { return m.user_id; }).filter(Boolean);
+    if (uids.length) {
+      var ur = await sbClient.from('users').select('id, email, avatar_url').in('id', uids);
+      (ur.data || []).forEach(function(u) { emails[u.id] = u; });
+    }
+    clubMembersCache = rows.map(function(m) {
+      var u = m.user_id ? emails[m.user_id] : null;
+      return {
+        id: m.id, user_id: m.user_id, role: m.role || 'member', title: m.title || '',
+        status: m.status || 'active', joined_at: m.joined_at,
+        name: names[m.user_id] || '',
+        email: (u && u.email) || m.email || '',
+        avatar_url: u && u.avatar_url,
+        pending: !m.user_id
+      };
+    });
+    renderClubMembers();
+    loadClubInvites();
+  } catch (e) {
+    console.error('loadClubMembers:', e);
+    tbodyMessage('cm-table', 6, 'Could not load members: ' + (e.message || e));
+  }
+}
+
+function renderClubMembers() {
+  var q = (document.getElementById('cm-search').value || '').toLowerCase().trim();
+  var roleF = document.getElementById('cm-filter-role').value;
+  var statusF = document.getElementById('cm-filter-status').value;
+
+  var rows = clubMembersCache.filter(function(m) {
+    if (roleF && m.role !== roleF) return false;
+    if (statusF === 'pending' && !(m.pending && m.status === 'active')) return false;
+    if (statusF === 'active' && (m.status !== 'active' || m.pending)) return false;
+    if (statusF === 'removed' && m.status !== 'removed') return false;
+    if (q && (m.name + ' ' + m.email + ' ' + m.title).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+
+  document.getElementById('cm-count').textContent =
+    rows.length + ' of ' + clubMembersCache.length + ' shown';
+
+  if (!rows.length) { tbodyMessage('cm-table', 6, 'No members match those filters.'); return; }
+
+  var canWrite = clubCanWrite('members');
+  document.getElementById('cm-table').innerHTML = rows.map(function(m) {
+    var statusPill = m.status === 'removed'
+      ? '<span class="pill-removed">Removed</span>'
+      : (m.pending ? '<span class="pill-pending">Pending</span>' : '<span class="pill-active">Active</span>');
+
+    var roleCell = canWrite && m.status !== 'removed'
+      ? '<select class="club-select" style="padding:4px 8px;font-size:.78rem" onchange="changeMemberRole(\'' + m.id + '\',this.value)">' +
+          Object.keys(CLUB_ROLES).sort(function(a,b){return CLUB_ROLES[b].rank-CLUB_ROLES[a].rank;}).map(function(k) {
+            return '<option value="' + k + '"' + (k === m.role ? ' selected' : '') + '>' + esc(CLUB_ROLES[k].label) + '</option>';
+          }).join('') +
+        '</select>'
+      : '<span class="role-badge role-' + esc(m.role) + '">' + esc(clubRoleLabel(m.role)) + '</span>';
+
+    var actions = '';
+    if (canWrite && m.status !== 'removed') {
+      actions = '<button class="btn btn-ghost btn-sm" style="padding:4px 9px;font-size:.72rem;color:#991b1b;border-color:#fca5a5" ' +
+                'onclick="openRemoveMemberModal(\'' + m.id + '\',\'' + escAttr((m.name || m.email).replace(/'/g, "\\'")) + '\')">Remove</button>';
+    } else if (canWrite && m.status === 'removed') {
+      actions = '<button class="btn btn-ghost btn-sm" style="padding:4px 9px;font-size:.72rem" onclick="restoreMember(\'' + m.id + '\')">Restore</button>';
+    }
+
+    return '<tr class="' + (m.status === 'removed' ? 'is-removed' : '') + '">' +
+      '<td><div class="club-person"><div class="club-avatar">' +
+        (m.avatar_url ? '<img src="' + escAttr(m.avatar_url) + '" alt="">' : esc(initialsOf(m.name, m.email))) +
+      '</div><div><div class="nm">' + esc(m.name || '—') + '</div>' +
+      (m.title ? '<div class="ttl">' + esc(m.title) + '</div>' : '') + '</div></div></td>' +
+      '<td>' + esc(m.email || '—') + '</td>' +
+      '<td>' + roleCell + '</td>' +
+      '<td>' + statusPill + '</td>' +
+      '<td>' + fmtDate(m.joined_at) + '</td>' +
+      '<td>' + actions + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function clubAddMember() {
+  if (!clubCanWrite('members')) { showToast('You do not have permission to add members.', true); return; }
+  var email = (document.getElementById('cm-add-email').value || '').trim().toLowerCase();
+  var name = (document.getElementById('cm-add-name').value || '').trim();
+  var role = document.getElementById('cm-add-role').value;
+  var title = (document.getElementById('cm-add-title').value || '').trim();
+  var sendInvite = document.getElementById('cm-add-send-invite').checked;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showToast('Please enter a valid email address.', true); return; }
+
+  var btn = document.getElementById('cm-add-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  try {
+    // If they already have a GolfTrip account, link the row to it straight
+    // away so they get access the moment they next sign in.
+    var existing = await sbClient.from('users').select('id').eq('email', email).maybeSingle();
+    var payload = {
+      club_id: userClub.id, role: role, title: title || null,
+      status: 'active', added_by: currentUser.id
+    };
+    if (existing.data && existing.data.id) payload.user_id = existing.data.id;
+    else payload.email = email;
+
+    var ins = await sbClient.from('club_members').insert(payload);
+    if (ins.error) throw ins.error;
+
+    if (sendInvite) await sendClubInviteEmail(email, name);
+
+    showToast(existing.data ? 'Member added.' : 'Member added — they will get access when they sign up.');
+    document.getElementById('cm-add-email').value = '';
+    document.getElementById('cm-add-name').value = '';
+    document.getElementById('cm-add-title').value = '';
+    loadClubMembers();
+  } catch (e) {
+    var m = e.message || String(e);
+    showToast(/duplicate|unique/i.test(m) ? 'That person is already on your roster.' : 'Could not add member: ' + m, true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Member';
+  }
+}
+
+async function clubImportMembers() {
+  if (!clubCanWrite('members')) { showToast('You do not have permission to add members.', true); return; }
+  var raw = document.getElementById('cm-import-input').value || '';
+  var send = document.getElementById('cm-import-send').checked;
+  var status = document.getElementById('cm-import-status');
+  // Pull anything email-shaped out of arbitrary text — a pasted CSV row, a
+  // spreadsheet column, a comma list. Everything else is ignored, so a full
+  // membership export works without the secretary having to tidy it first.
+  var emails = (raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [])
+    .map(function(e) { return e.toLowerCase(); })
+    .filter(function(e, i, a) { return a.indexOf(e) === i; });
+
+  if (!emails.length) { status.innerHTML = '<span style="color:#991b1b">No email addresses found in that text.</span>'; return; }
+
+  var existingEmails = {};
+  clubMembersCache.forEach(function(m) { if (m.email) existingEmails[m.email.toLowerCase()] = 1; });
+  var fresh = emails.filter(function(e) { return !existingEmails[e]; });
+  var skipped = emails.length - fresh.length;
+
+  if (!fresh.length) {
+    status.innerHTML = '<span style="color:var(--muted)">All ' + emails.length + ' addresses are already on your roster.</span>';
+    return;
+  }
+
+  var btn = document.getElementById('cm-import-btn');
+  btn.disabled = true; btn.textContent = 'Importing…';
+  var added = 0, failed = 0;
+  try {
+    var accounts = {};
+    // Chunk the lookup — a 400-member club would blow a single .in() query.
+    for (var i = 0; i < fresh.length; i += 100) {
+      var chunk = fresh.slice(i, i + 100);
+      var ur = await sbClient.from('users').select('id, email').in('email', chunk);
+      (ur.data || []).forEach(function(u) { if (u.email) accounts[u.email.toLowerCase()] = u.id; });
+    }
+
+    for (var j = 0; j < fresh.length; j += 50) {
+      var batch = fresh.slice(j, j + 50).map(function(e) {
+        var row = { club_id: userClub.id, role: 'member', status: 'active', added_by: currentUser.id };
+        if (accounts[e]) row.user_id = accounts[e]; else row.email = e;
+        return row;
+      });
+      var r = await sbClient.from('club_members').insert(batch);
+      if (r.error) failed += batch.length; else added += batch.length;
+      status.innerHTML = 'Importing… ' + (added + failed) + ' of ' + fresh.length;
+    }
+
+    var sent = 0;
+    if (send) {
+      for (var k = 0; k < fresh.length; k++) {
+        var ok = await sendClubInviteEmail(fresh[k], '');
+        if (ok) sent++;
+        if (k % 10 === 0) status.innerHTML = 'Sending invites… ' + sent + ' of ' + fresh.length;
+      }
+    }
+
+    status.innerHTML = '<span style="color:var(--moss)"><strong>' + added + '</strong> added' +
+      (skipped ? ', ' + skipped + ' already on the roster' : '') +
+      (failed ? ', <span style="color:#991b1b">' + failed + ' failed</span>' : '') +
+      (send ? ', ' + sent + ' invites sent' : '') + '.</span>';
+    document.getElementById('cm-import-input').value = '';
+    loadClubMembers();
+  } catch (e) {
+    status.innerHTML = '<span style="color:#991b1b">Import failed: ' + esc(e.message || e) + '</span>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Import';
+  }
+}
+
+async function sendClubInviteEmail(email, name) {
+  try {
+    var res = await fetch('/.netlify/functions/send-club-invite', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toEmail: email,
+        clubName: userClub.name,
+        inviterName: (currentUser && currentUser.display_name) || '',
+        inviteUrl: window.location.origin + '/?join_club=' + userClub.id,
+        clubLogoUrl: userClub.logo_url || '',
+        primaryColor: userClub.primary_color || '',
+        tagline: userClub.tagline || ''
+      })
+    });
+    var ok = res.ok;
+    await sbClient.from('club_invites').insert({
+      club_id: userClub.id, email: email, status: ok ? 'sent' : 'failed'
+    });
+    return ok;
+  } catch (e) {
+    try { await sbClient.from('club_invites').insert({ club_id: userClub.id, email: email, status: 'failed' }); } catch (e2) {}
+    return false;
+  }
+}
+
+async function loadClubInvites() {
+  try {
+    var r = await sbClient.from('club_invites').select('email, status, created_at')
+      .eq('club_id', userClub.id).order('created_at', { ascending: false }).limit(200);
+    var rows = r.data || [];
+    if (!rows.length) { tbodyMessage('cm-invites-table', 3, 'No invites sent yet.'); return; }
+    document.getElementById('cm-invites-table').innerHTML = rows.map(function(i) {
+      return '<tr><td>' + esc(i.email) + '</td><td>' + fmtDate(i.created_at) + '</td><td>' +
+        (i.status === 'sent' ? '<span class="pill-active">Sent</span>' : '<span class="pill-removed">Failed</span>') +
+        '</td></tr>';
+    }).join('');
+  } catch (e) { tbodyMessage('cm-invites-table', 3, 'Could not load invites.'); }
+}
+
+async function changeMemberRole(memberRowId, newRole) {
+  if (!clubCanWrite('members')) { showToast('You do not have permission to change roles.', true); loadClubMembers(); return; }
+  var m = clubMembersCache.filter(function(x) { return x.id === memberRowId; })[0];
+  // Don't let a club strand itself with no secretary — someone has to own
+  // billing, and there is no way back through the UI once it's gone.
+  if (m && m.role === 'secretary' && newRole !== 'secretary') {
+    var secs = clubMembersCache.filter(function(x) { return x.role === 'secretary' && x.status === 'active'; });
+    if (secs.length <= 1) {
+      showToast('Your club needs at least one Club Secretary. Promote someone else first.', true);
+      loadClubMembers();
+      return;
+    }
+  }
+  try {
+    var r = await sbClient.from('club_members').update({ role: newRole }).eq('id', memberRowId);
+    if (r.error) throw r.error;
+    showToast('Role updated to ' + clubRoleLabel(newRole) + '.');
+    if (m) m.role = newRole;
+    if (m && m.user_id === currentUser.id) { await loadUserPlan(); initClubPortal(); }
+  } catch (e) {
+    showToast('Could not change role: ' + (e.message || e), true);
+    loadClubMembers();
+  }
+}
+
+function openRemoveMemberModal(id, name) {
+  pendingRemoveMemberId = id;
+  document.getElementById('crm-name').textContent = name || 'this member';
+  document.getElementById('club-remove-modal').style.display = 'flex';
+}
+function closeRemoveMemberModal() {
+  pendingRemoveMemberId = null;
+  document.getElementById('club-remove-modal').style.display = 'none';
+}
+
+async function confirmRemoveMember() {
+  if (!pendingRemoveMemberId) return;
+  if (!clubCanWrite('members')) { showToast('You do not have permission to remove members.', true); return; }
+  var m = clubMembersCache.filter(function(x) { return x.id === pendingRemoveMemberId; })[0];
+  if (m && m.role === 'secretary') {
+    var secs = clubMembersCache.filter(function(x) { return x.role === 'secretary' && x.status === 'active'; });
+    if (secs.length <= 1) {
+      showToast('You cannot remove the only Club Secretary. Promote someone else first.', true);
+      closeRemoveMemberModal();
+      return;
+    }
+  }
+  var btn = document.getElementById('crm-confirm-btn');
+  btn.disabled = true; btn.textContent = 'Removing…';
+  try {
+    // Soft delete. A hard delete would orphan trip history and silently
+    // change past reporting numbers, which is worse than a greyed-out row.
+    var r = await sbClient.from('club_members').update({
+      status: 'removed', removed_at: new Date().toISOString(), removed_by: currentUser.id
+    }).eq('id', pendingRemoveMemberId);
+    if (r.error) throw r.error;
+    try {
+      await sbClient.from('club_audit_log').insert({
+        club_id: userClub.id, actor_user_id: currentUser.id, action: 'member_removed',
+        detail: { member_row: pendingRemoveMemberId, email: m && m.email }
+      });
+    } catch (e2) { /* audit is best-effort */ }
+    showToast('Member removed.');
+    closeRemoveMemberModal();
+    loadClubMembers();
+  } catch (e) {
+    showToast('Could not remove member: ' + (e.message || e), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Remove member';
+  }
+}
+
+async function restoreMember(id) {
+  if (!clubCanWrite('members')) return;
+  try {
+    await sbClient.from('club_members').update({ status: 'active', removed_at: null, removed_by: null }).eq('id', id);
+    showToast('Member restored.');
+    loadClubMembers();
+  } catch (e) { showToast('Could not restore member.', true); }
+}
+
+function exportClubMembers() {
+  var rows = [['Name', 'Email', 'Role', 'Title', 'Status', 'Joined']];
+  clubMembersCache.forEach(function(m) {
+    rows.push([m.name, m.email, clubRoleLabel(m.role), m.title,
+               m.status === 'removed' ? 'Removed' : (m.pending ? 'Pending' : 'Active'),
+               m.joined_at ? new Date(m.joined_at).toISOString().slice(0, 10) : '']);
+  });
+  var csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (userClub.slug || 'club') + '-members.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function copyClubInviteLink() {
+  var inp = document.getElementById('club-invite-link');
+  inp.select();
+  navigator.clipboard.writeText(inp.value)
+    .then(function() { showToast('Invite link copied.'); })
+    .catch(function() { document.execCommand('copy'); showToast('Invite link copied.'); });
+}
+
+/* ── REPORTS ──────────────────────────────────────────────────────────── */
+async function loadClubReports() {
+  if (!userClub || !clubCan('reports')) return;
+  var cid = userClub.id;
+  try {
+    var trips = clubTripsCache.length ? clubTripsCache : (await sbClient.from('trip_requests')
+      .select('id, destination_type, group_size, user_id, created_at, travel_dates')
+      .eq('club_id', cid).order('created_at', { ascending: false })).data || [];
+    clubTripsCache = trips;
+
+    /* Seasonality — the headline report. */
+    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var buckets = MONTHS.map(function(m) { return { label: m, value: 0 }; });
+    var realCount = 0;
+    trips.forEach(function(t) {
+      var d = departMonthOf(t);
+      if (!d) return;
+      buckets[d.month].value++;
+      if (d.real) realCount++;
+    });
+    var peak = Math.max.apply(null, buckets.map(function(b) { return b.value; }));
+    buckets.forEach(function(b) { b.peak = peak > 0 && b.value === peak; });
+    renderBarChart('cr-season-chart', buckets, { empty: 'No trips with travel dates yet.' });
+    var note = document.getElementById('cr-season-note');
+    if (trips.length) {
+      var best = buckets.filter(function(b) { return b.value === peak; }).map(function(b) { return b.label; });
+      note.innerHTML = peak > 0
+        ? 'Busiest month: <strong>' + esc(best.join(' and ')) + '</strong>. Based on ' + trips.length +
+          ' trip' + (trips.length === 1 ? '' : 's') + ', of which ' + realCount +
+          ' had a departure date set — the rest are counted by the month they were planned.'
+        : '';
+    } else { note.textContent = ''; }
+
+    /* Bookings */
+    var clicks = await sbClient.from('affiliate_clicks').select('partner, created_at').eq('club_id', cid);
+    var cl = clicks.data || [];
+    document.getElementById('cr-bookings').textContent = cl.length.toLocaleString();
+    var now = new Date();
+    var thisMonth = cl.filter(function(c) {
+      var d = new Date(c.created_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+    document.getElementById('cr-bookings-month').textContent = thisMonth.toLocaleString();
+    var lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var lastMonth = cl.filter(function(c) {
+      var d = new Date(c.created_at);
+      return d.getMonth() === lastMonthDate.getMonth() && d.getFullYear() === lastMonthDate.getFullYear();
+    }).length;
+    document.getElementById('cr-bookings-trend').textContent = lastMonth
+      ? (thisMonth >= lastMonth ? '+' : '') + Math.round(((thisMonth - lastMonth) / lastMonth) * 100) + '% vs last month'
+      : ' ';
+
+    /* Affiliate leaderboard. Partners we actually earn on — keep this list in
+       step with reality; showing a club revenue share on a partner we have no
+       deal with is the fastest way to lose their trust. */
+    var REVENUE_SHARE = { 'Booking.com': true, 'Expedia': true, 'Rentalcars': true, 'Skyscanner': true };
+    var byPartner = {};
+    cl.forEach(function(c) { var p = c.partner || 'Other'; byPartner[p] = (byPartner[p] || 0) + 1; });
+    var partners = Object.keys(byPartner).map(function(p) { return { label: p, value: byPartner[p] }; })
+      .sort(function(a, b) { return b.value - a.value; });
+    renderBarRows('cr-affiliate-bars', partners.slice(0, 8), { empty: 'No booking clicks recorded yet.' });
+    document.getElementById('cr-affiliate-table').innerHTML = partners.length
+      ? partners.map(function(p) {
+          return '<tr><td>' + esc(p.label) + '</td><td class="num">' + p.value + '</td><td>' +
+            (REVENUE_SHARE[p.label] ? '<span class="pill-active">Yes</span>'
+                                    : '<span class="fs-sm text-muted">Not yet</span>') + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="3" style="color:var(--muted)">No booking clicks recorded yet.</td></tr>';
+
+    /* Destinations */
+    var byDest = {};
+    trips.forEach(function(t) { var d = t.destination_type || 'Not set'; byDest[d] = (byDest[d] || 0) + 1; });
+    renderBarRows('cr-dest-bars', Object.keys(byDest).map(function(d) { return { label: d, value: byDest[d] }; })
+      .sort(function(a, b) { return b.value - a.value; }).slice(0, 8), { empty: 'No trips planned yet.' });
+
+    /* Participation */
+    var counts = await lookupTripJoinCounts(trips.map(function(t) { return t.id; }));
+    var names = await lookupUserNames(trips.map(function(t) { return t.user_id; }));
+    var sizes = trips.map(function(t) { return counts[t.id] || 0; }).filter(function(n) { return n > 0; });
+    document.getElementById('cr-avg-group').textContent = sizes.length
+      ? (sizes.reduce(function(a, b) { return a + b; }, 0) / sizes.length).toFixed(1) : '—';
+    document.getElementById('cr-participation-table').innerHTML = trips.length
+      ? trips.slice(0, 20).map(function(t) {
+          var joined = counts[t.id] || 0;
+          var planned = t.group_size || 0;
+          var pct = planned ? Math.round((joined / planned) * 100) + '%' : '—';
+          return '<tr><td><strong>' + esc(t.destination_type || 'Not set') + '</strong></td>' +
+            '<td>' + esc(names[t.user_id] || 'Unknown') + '</td>' +
+            '<td class="num">' + (planned || '—') + '</td>' +
+            '<td class="num">' + joined + '</td>' +
+            '<td class="num">' + pct + '</td>' +
+            '<td>' + fmtDate(t.created_at) + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" style="color:var(--muted)">No trips yet.</td></tr>';
+
+    loadClubFeedback();
+  } catch (e) {
+    console.error('loadClubReports:', e);
+    showToast('Could not load reports.', true);
+  }
+}
+
+async function loadClubFeedback() {
+  try {
+    var r = await sbClient.from('club_trip_feedback')
+      .select('rating, courses_rating, accommodation_rating, value_rating, organisation_rating, comment, created_at, user_id, trip_request_id')
+      .eq('club_id', userClub.id).order('created_at', { ascending: false }).limit(100);
+    if (r.error) throw r.error;
+    var fb = r.data || [];
+    if (!fb.length) {
+      document.getElementById('cf-avg').textContent = '—';
+      document.getElementById('cf-stars').innerHTML = starsHtml(0);
+      document.getElementById('cf-count').textContent = 'No responses yet';
+      document.getElementById('cr-satisfaction').textContent = '—';
+      document.getElementById('cr-satisfaction-sub').textContent = 'No responses yet';
+      return;
+    }
+    var avg = fb.reduce(function(a, f) { return a + f.rating; }, 0) / fb.length;
+    document.getElementById('cf-avg').textContent = avg.toFixed(1);
+    document.getElementById('cf-stars').innerHTML = starsHtml(avg);
+    document.getElementById('cf-count').textContent = fb.length + ' response' + (fb.length === 1 ? '' : 's');
+    document.getElementById('cr-satisfaction').textContent = avg.toFixed(1);
+    document.getElementById('cr-satisfaction-sub').textContent = 'from ' + fb.length + ' response' + (fb.length === 1 ? '' : 's');
+
+    var dims = [
+      ['Courses', 'courses_rating'], ['Accommodation', 'accommodation_rating'],
+      ['Value for money', 'value_rating'], ['Organisation', 'organisation_rating']
+    ];
+    document.getElementById('cf-breakdown').innerHTML = dims.map(function(d) {
+      var vals = fb.map(function(f) { return f[d[1]]; }).filter(function(v) { return v; });
+      if (!vals.length) return '';
+      var a = vals.reduce(function(x, y) { return x + y; }, 0) / vals.length;
+      return '<div class="bar-row"><div class="nm">' + d[0] + '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + (a / 5 * 100) + '%"></div></div>' +
+        '<div class="num">' + a.toFixed(1) + '</div></div>';
+    }).join('');
+
+    var withComments = fb.filter(function(f) { return f.comment && f.comment.trim(); });
+    var names = await lookupUserNames(withComments.map(function(f) { return f.user_id; }));
+    document.getElementById('cf-list').innerHTML = withComments.length
+      ? withComments.slice(0, 8).map(function(f) {
+          return '<div class="fb-item"><div class="fb-head">' +
+            '<div class="stars">' + starsHtml(f.rating) + '</div>' +
+            '<span class="fs-sm text-muted" style="font-size:.74rem">' + esc(names[f.user_id] || 'A member') +
+            ' · ' + fmtDate(f.created_at) + '</span></div>' +
+            '<p>' + esc(f.comment) + '</p></div>';
+        }).join('')
+      : '<div class="empty-state" style="padding:20px 0"><p>Ratings in, but nobody has written anything yet.</p></div>';
+  } catch (e) {
+    console.warn('loadClubFeedback:', e && e.message);
+  }
+}
+
+function copyFeedbackLink() {
+  var url = window.location.origin + '/?club_feedback=' + userClub.id;
+  navigator.clipboard.writeText(url)
+    .then(function() { showToast('Feedback link copied — send it to members after a trip.'); })
+    .catch(function() { showToast('Could not copy link.', true); });
+}
+
+/* ── CAMPAIGNS ────────────────────────────────────────────────────────── */
+async function loadClubCampaigns() {
+  if (!userClub || !clubCan('campaigns')) return;
+  tbodyMessage('cc-table', 7, 'Loading…');
+  try {
+    var r = await sbClient.from('club_campaigns')
+      .select('id, name, subject, status, recipient_count, sent_count, created_at, sent_at')
+      .eq('club_id', userClub.id).order('created_at', { ascending: false });
+    if (r.error) throw r.error;
+    var rows = r.data || [];
+    if (!rows.length) { tbodyMessage('cc-table', 7, 'No campaigns yet. Create one to advertise a trip to your members.'); return; }
+    document.getElementById('cc-table').innerHTML = rows.map(function(c) {
+      var cls = c.status === 'sent' ? 'camp-sent' : (c.status === 'failed' ? 'camp-failed' : 'camp-draft');
+      return '<tr>' +
+        '<td><strong>' + esc(c.name || 'Untitled') + '</strong></td>' +
+        '<td>' + esc(c.subject || '—') + '</td>' +
+        '<td><span class="camp-status ' + cls + '">' + esc(c.status) + '</span></td>' +
+        '<td class="num">' + (c.recipient_count || 0) + '</td>' +
+        '<td class="num">' + (c.sent_count || 0) + '</td>' +
+        '<td>' + fmtDate(c.sent_at || c.created_at) + '</td>' +
+        '<td><button class="btn btn-ghost btn-sm" style="padding:4px 9px;font-size:.72rem" onclick="editCampaign(\'' + c.id + '\')">' +
+          (c.status === 'sent' ? 'View' : 'Edit') + '</button></td>' +
+      '</tr>';
+    }).join('');
+  } catch (e) {
+    tbodyMessage('cc-table', 7, 'Could not load campaigns: ' + (e.message || e));
+  }
+}
+
+function newCampaign() {
+  editingCampaignId = null;
+  document.getElementById('cc-editor-title').textContent = 'New campaign';
+  ['cc-name','cc-subject','cc-preheader','cc-hero','cc-headline','cc-cta-label','cc-cta-url',
+   'cc-trip-dest','cc-trip-dates','cc-trip-price','cc-trip-places'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('cc-body').innerHTML = '';
+  document.getElementById('cc-send-status').innerHTML = '';
+  document.getElementById('cc-editor').style.display = 'block';
+  populateCampaignTripOptions();
+  updateCampaignAudience();
+  renderCampaignPreview();
+  document.getElementById('cc-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function editCampaign(id) {
+  try {
+    var r = await sbClient.from('club_campaigns').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var c = r.data;
+    editingCampaignId = c.id;
+    document.getElementById('cc-editor-title').textContent = c.status === 'sent' ? 'Campaign (sent)' : 'Edit campaign';
+    document.getElementById('cc-name').value = c.name || '';
+    document.getElementById('cc-subject').value = c.subject || '';
+    document.getElementById('cc-preheader').value = c.preheader || '';
+    document.getElementById('cc-hero').value = c.hero_image_url || '';
+    document.getElementById('cc-cta-label').value = c.cta_label || '';
+    document.getElementById('cc-cta-url').value = c.cta_url || '';
+    var blocks = c.body_blocks || {};
+    document.getElementById('cc-headline').value = blocks.headline || '';
+    document.getElementById('cc-body').innerHTML = c.body_html || '';
+    document.getElementById('cc-trip-dest').value = (blocks.trip && blocks.trip.destination) || '';
+    document.getElementById('cc-trip-dates').value = (blocks.trip && blocks.trip.dates) || '';
+    document.getElementById('cc-trip-price').value = (blocks.trip && blocks.trip.priceFrom) || '';
+    document.getElementById('cc-trip-places').value = (blocks.trip && blocks.trip.groupSize) || '';
+    document.getElementById('cc-audience').value = c.audience || 'all';
+    document.getElementById('cc-editor').style.display = 'block';
+    populateCampaignTripOptions();
+    updateCampaignAudience();
+    renderCampaignPreview();
+    var sent = c.status === 'sent';
+    document.getElementById('cc-send-btn').disabled = sent;
+    document.getElementById('cc-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) { showToast('Could not open campaign.', true); }
+}
+
+function closeCampaignEditor() {
+  document.getElementById('cc-editor').style.display = 'none';
+  editingCampaignId = null;
+}
+
+function populateCampaignTripOptions() {
+  var sel = document.getElementById('cc-audience-trip');
+  if (!sel) return;
+  sel.innerHTML = clubTripsCache.length
+    ? clubTripsCache.map(function(t) {
+        return '<option value="' + t.id + '">' + esc(t.destination_type || 'Trip') + ' — ' + fmtDate(t.created_at) + '</option>';
+      }).join('')
+    : '<option value="">No trips yet</option>';
+}
+
+function richCmd(cmd) { document.execCommand(cmd, false, null); document.getElementById('cc-body').focus(); renderCampaignPreview(); }
+function richLink() {
+  var url = prompt('Link URL (must start with https://)');
+  if (!url) return;
+  if (!/^https:\/\//i.test(url)) { showToast('Links must start with https://', true); return; }
+  document.execCommand('createLink', false, url);
+  renderCampaignPreview();
+}
+function richImage() {
+  var url = prompt('Image URL (must start with https://)');
+  if (!url) return;
+  if (!/^https:\/\//i.test(url)) { showToast('Image URLs must start with https://', true); return; }
+  document.execCommand('insertImage', false, url);
+  renderCampaignPreview();
+}
+
+function campaignPayload() {
+  return {
+    name: document.getElementById('cc-name').value.trim(),
+    subject: document.getElementById('cc-subject').value.trim(),
+    preheader: document.getElementById('cc-preheader').value.trim(),
+    heroImageUrl: document.getElementById('cc-hero').value.trim(),
+    headline: document.getElementById('cc-headline').value.trim(),
+    bodyHtml: document.getElementById('cc-body').innerHTML,
+    ctaLabel: document.getElementById('cc-cta-label').value.trim(),
+    ctaUrl: document.getElementById('cc-cta-url').value.trim(),
+    trip: {
+      destination: document.getElementById('cc-trip-dest').value.trim(),
+      dates: document.getElementById('cc-trip-dates').value.trim(),
+      priceFrom: document.getElementById('cc-trip-price').value.trim(),
+      groupSize: document.getElementById('cc-trip-places').value.trim()
+    }
+  };
+}
+
+function renderCampaignPreview() {
+  var p = campaignPayload();
+  var primary = userClub && userClub.primary_color ? userClub.primary_color : '#1a3a2a';
+  var tripRows = ['destination','dates','priceFrom','groupSize'].map(function(k) {
+    if (!p.trip[k]) return '';
+    var labels = { destination: 'Destination', dates: 'Dates', priceFrom: 'From', groupSize: 'Places' };
+    return '<tr><td style="padding:7px 0;color:#6b7280;font-size:12px">' + labels[k] +
+           '</td><td style="padding:7px 0;font-weight:600;font-size:12px;text-align:right">' + esc(p.trip[k]) + '</td></tr>';
+  }).join('');
+
+  document.getElementById('cc-preview').innerHTML =
+    '<div style="background:' + esc(primary) + ';padding:16px;text-align:center">' +
+      (userClub && userClub.logo_url
+        ? '<img src="' + escAttr(userClub.logo_url) + '" style="height:38px;border-radius:50%">'
+        : '<div style="color:#fff;font-family:Georgia,serif;font-size:16px">' + esc(userClub ? userClub.name : 'Your Club') + '</div>') +
+    '</div>' +
+    (p.heroImageUrl ? '<img src="' + escAttr(p.heroImageUrl) + '" style="width:100%;max-height:130px;object-fit:cover;display:block">' : '') +
+    '<div style="padding:18px">' +
+      (p.headline ? '<div style="font-family:Georgia,serif;font-size:16px;color:#1a3a2a;margin-bottom:9px">' + esc(p.headline) + '</div>' : '') +
+      '<div style="font-size:12px;line-height:1.65;color:#374151">' + (p.bodyHtml || '<span style="color:#9ca3af">Your message will appear here…</span>') + '</div>' +
+      (tripRows ? '<table style="width:100%;margin:14px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb">' + tripRows + '</table>' : '') +
+      (p.ctaLabel ? '<div style="text-align:center;margin:16px 0"><span style="background:#c9a84c;color:#0f2318;padding:9px 18px;border-radius:4px;font-weight:700;font-size:12px;display:inline-block">' + esc(p.ctaLabel) + '</span></div>' : '') +
+      '<div style="border-top:1px solid #e5e7eb;margin-top:14px;padding-top:10px;color:#9ca3af;font-size:10px;text-align:center">You are receiving this because you are a member of ' + esc(userClub ? userClub.name : 'your club') + '.</div>' +
+    '</div>';
+
+  var size = new Blob([document.getElementById('cc-preview').innerHTML]).size;
+  document.getElementById('cc-preview-size').textContent = Math.round(size / 1024) + ' KB';
+}
+
+function updateCampaignAudience() {
+  var a = document.getElementById('cc-audience').value;
+  document.getElementById('cc-audience-role-wrap').style.display = a === 'role' ? 'block' : 'none';
+  document.getElementById('cc-audience-trip-wrap').style.display = a === 'trip' ? 'block' : 'none';
+  campaignRecipients().then(function(list) {
+    document.getElementById('cc-audience-count').innerHTML = list.length
+      ? '<strong>' + list.length + '</strong> recipient' + (list.length === 1 ? '' : 's') + ' will receive this.'
+      : '<span style="color:#991b1b">No recipients match — nobody would receive this.</span>';
+  });
+}
+
+async function campaignRecipients() {
+  if (!userClub) return [];
+  var mode = document.getElementById('cc-audience').value;
+  var active = clubMembersCache.length ? clubMembersCache : ((await sbClient.from('club_members')
+      .select('id, user_id, email, role, status').eq('club_id', userClub.id)).data || []).map(function(m) {
+        return { id: m.id, user_id: m.user_id, email: m.email, role: m.role, status: m.status, name: '' };
+      });
+
+  // Members added by email who never signed up still have an address, so
+  // they can be advertised to — that is half the point of the roster.
+  var pool = active.filter(function(m) { return m.status === 'active' && m.email; });
+
+  if (mode === 'role') {
+    var role = document.getElementById('cc-audience-role').value;
+    pool = pool.filter(function(m) { return m.role === role; });
+  } else if (mode === 'trip') {
+    var tripId = document.getElementById('cc-audience-trip').value;
+    if (!tripId) return [];
+    var tm = await sbClient.from('trip_members').select('user_id').eq('trip_request_id', tripId);
+    var ids = {}; (tm.data || []).forEach(function(r) { if (r.user_id) ids[r.user_id] = 1; });
+    pool = pool.filter(function(m) { return m.user_id && ids[m.user_id]; });
+  }
+  return pool.map(function(m) { return { email: m.email, name: m.name || '' }; });
+}
+
+async function saveCampaign(silent) {
+  if (!clubCanWrite('campaigns')) { showToast('You do not have permission to send campaigns.', true); return null; }
+  var p = campaignPayload();
+  if (!p.subject) { showToast('Give the campaign a subject line.', true); return null; }
+  var recipients = await campaignRecipients();
+  var row = {
+    club_id: userClub.id,
+    name: p.name || p.subject,
+    subject: p.subject,
+    preheader: p.preheader || null,
+    hero_image_url: p.heroImageUrl || null,
+    body_html: p.bodyHtml,
+    body_blocks: { headline: p.headline, trip: p.trip },
+    cta_label: p.ctaLabel || null,
+    cta_url: p.ctaUrl || null,
+    audience: document.getElementById('cc-audience').value,
+    audience_filter: {
+      role: document.getElementById('cc-audience-role').value,
+      trip: document.getElementById('cc-audience-trip').value
+    },
+    recipient_count: recipients.length,
+    created_by: currentUser.id,
+    updated_at: new Date().toISOString()
+  };
+  try {
+    var res;
+    if (editingCampaignId) {
+      res = await sbClient.from('club_campaigns').update(row).eq('id', editingCampaignId).select('id').single();
+    } else {
+      row.status = 'draft';
+      res = await sbClient.from('club_campaigns').insert(row).select('id').single();
+    }
+    if (res.error) throw res.error;
+    editingCampaignId = res.data.id;
+    if (!silent) showToast('Draft saved.');
+    loadClubCampaigns();
+    return res.data.id;
+  } catch (e) {
+    showToast('Could not save campaign: ' + (e.message || e), true);
+    return null;
+  }
+}
+
+async function sendCampaignTest() {
+  if (!currentUser || !currentUser.email) { showToast('No email address on your account.', true); return; }
+  var p = campaignPayload();
+  if (!p.subject) { showToast('Give the campaign a subject line first.', true); return; }
+  var btn = document.getElementById('cc-test-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    var r = await postCampaign([{ email: currentUser.email, name: currentUser.display_name || '' }], p, null);
+    showToast(r && r.sent ? 'Test sent to ' + currentUser.email : 'Test send failed.', !(r && r.sent));
+  } catch (e) {
+    showToast('Test send failed: ' + (e.message || e), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send test to me';
+  }
+}
+
+async function sendCampaign() {
+  if (!clubCanWrite('campaigns')) { showToast('You do not have permission to send campaigns.', true); return; }
+  var p = campaignPayload();
+  if (!p.subject) { showToast('Give the campaign a subject line.', true); return; }
+  var recipients = await campaignRecipients();
+  if (!recipients.length) { showToast('There are no recipients for this audience.', true); return; }
+  if (!confirm('Send "' + p.subject + '" to ' + recipients.length + ' member' + (recipients.length === 1 ? '' : 's') + '? This cannot be undone.')) return;
+
+  var id = await saveCampaign(true);
+  var btn = document.getElementById('cc-send-btn');
+  var status = document.getElementById('cc-send-status');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    if (id) await sbClient.from('club_campaigns').update({ status: 'sending' }).eq('id', id);
+    // The function caps each call at 500 addresses, so batch above that.
+    var sent = 0, failed = 0, results = [];
+    for (var i = 0; i < recipients.length; i += 400) {
+      var chunk = recipients.slice(i, i + 400);
+      status.textContent = 'Sending ' + Math.min(i + chunk.length, recipients.length) + ' of ' + recipients.length + '…';
+      var r = await postCampaign(chunk, p, id);
+      sent += (r && r.sent) || 0;
+      failed += (r && r.failed) || 0;
+      if (r && r.results) results = results.concat(r.results);
+    }
+    if (id) {
+      await sbClient.from('club_campaigns').update({
+        status: failed && !sent ? 'failed' : 'sent',
+        sent_count: sent, failed_count: failed, sent_at: new Date().toISOString()
+      }).eq('id', id);
+      // Record per-recipient outcomes so a failed address is visible later
+      // rather than disappearing into a toast.
+      try {
+        for (var j = 0; j < results.length; j += 100) {
+          await sbClient.from('club_campaign_recipients').insert(results.slice(j, j + 100).map(function(x) {
+            return { campaign_id: id, email: x.email, status: x.status,
+                     provider_message_id: x.id || null, error: x.error || null,
+                     sent_at: x.status === 'sent' ? new Date().toISOString() : null };
+          }));
+        }
+      } catch (e2) { console.warn('recipient log failed:', e2 && e2.message); }
+    }
+    status.innerHTML = '<span style="color:var(--moss)"><strong>' + sent + '</strong> sent' +
+      (failed ? ', <span style="color:#991b1b">' + failed + ' failed</span>' : '') + '.</span>';
+    showToast(sent + ' email' + (sent === 1 ? '' : 's') + ' sent.');
+    loadClubCampaigns();
+  } catch (e) {
+    status.innerHTML = '<span style="color:#991b1b">Send failed: ' + esc(e.message || e) + '</span>';
+    if (id) { try { await sbClient.from('club_campaigns').update({ status: 'failed' }).eq('id', id); } catch (e3) {} }
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send to members';
+  }
+}
+
+async function postCampaign(recipients, p, campaignId) {
+  var res = await fetch('/.netlify/functions/send-club-campaign', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipients: recipients,
+      subject: p.subject,
+      clubName: userClub.name,
+      preheader: p.preheader,
+      heroImageUrl: p.heroImageUrl,
+      headline: p.headline,
+      bodyHtml: p.bodyHtml,
+      ctaLabel: p.ctaLabel,
+      ctaUrl: p.ctaUrl,
+      clubLogoUrl: userClub.logo_url || '',
+      primaryColor: userClub.primary_color || '',
+      replyTo: (currentUser && currentUser.email) || '',
+      tripDetails: p.trip,
+      campaignId: campaignId
+    })
+  });
+  return await res.json();
+}
+
+/* ── SETTINGS ─────────────────────────────────────────────────────────── */
+async function loadClubSettings() {
+  if (!userClub) return;
+  try {
+    var r = await sbClient.from('clubs').select('*').eq('id', userClub.id).single();
+    if (r.error) throw r.error;
+    var c = r.data;
+    document.getElementById('cs-name').value = c.name || '';
+    document.getElementById('cs-tagline').value = c.tagline || '';
+    document.getElementById('cs-description').value = c.description || '';
+    document.getElementById('cs-primary').value = c.primary_color || '#1B3524';
+    document.getElementById('cs-secondary').value = c.secondary_color || '#B08D52';
+    var prev = document.getElementById('cs-logo-preview');
+    prev.innerHTML = c.logo_url ? '<img src="' + escAttr(c.logo_url) + '" alt="">' : (c.name || '?').charAt(0).toUpperCase();
+    document.getElementById('cs-public-link').href = window.location.origin + '/club/' + (c.slug || '');
+    document.getElementById('cs-plan-name').textContent = c.plan_status === 'active' ? 'Club — active' : 'Club — ' + (c.plan_status || 'pending');
+    document.getElementById('cs-plan-detail').textContent = '£1,000/year · unlimited members included';
+
+    var readOnly = !clubCanWrite('members');
+    ['cs-name','cs-tagline','cs-description','cs-primary','cs-secondary'].forEach(function(id) {
+      document.getElementById(id).disabled = readOnly;
+    });
+    document.getElementById('cs-save-btn').style.display = readOnly ? 'none' : 'inline-block';
+  } catch (e) { showToast('Could not load club settings.', true); }
+}
+
+async function saveClubSettings() {
+  if (!clubCanWrite('members')) { showToast('You do not have permission to change club settings.', true); return; }
+  var btn = document.getElementById('cs-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    var r = await sbClient.from('clubs').update({
+      name: document.getElementById('cs-name').value.trim(),
+      tagline: document.getElementById('cs-tagline').value.trim(),
+      description: document.getElementById('cs-description').value.trim(),
+      primary_color: document.getElementById('cs-primary').value,
+      secondary_color: document.getElementById('cs-secondary').value
+    }).eq('id', userClub.id);
+    if (r.error) throw r.error;
+    showToast('Club profile saved.');
+    await loadUserPlan();
+    initClubPortal();
+  } catch (e) {
+    showToast('Could not save: ' + (e.message || e), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save changes';
+  }
+}
+
+async function uploadClubLogo(file) {
+  if (!file || !clubCanWrite('members')) return;
+  var statusEl = document.getElementById('cs-logo-status');
+  statusEl.textContent = 'Uploading…';
+  try {
+    var ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    var path = currentUser.id + '/club-logo-' + userClub.id + '.' + ext;
+    var up = await sbClient.storage.from('avatars').upload(path, file, { upsert: true });
+    if (up.error) throw up.error;
+    var pub = sbClient.storage.from('avatars').getPublicUrl(path);
+    var url = pub.data.publicUrl;
+    var r = await sbClient.from('clubs').update({ logo_url: url }).eq('id', userClub.id);
+    if (r.error) throw r.error;
+    userClub.logo_url = url;
+    document.getElementById('cs-logo-preview').innerHTML = '<img src="' + escAttr(url) + '" alt="">';
+    document.getElementById('club-crest').innerHTML = '<img src="' + escAttr(url) + '" alt="">';
+    statusEl.textContent = 'Crest updated.';
+  } catch (e) {
+    statusEl.textContent = 'Upload failed: ' + (e.message || e);
+  }
+}
+
+async function openClubBillingPortal() {
+  if (!clubCan('billing')) { showToast('Only a Club Secretary can manage billing.', true); return; }
+  try {
+    var res = await fetch('/.netlify/functions/create-portal-session', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser.id, clubId: userClub.id })
+    });
+    var d = await res.json();
+    if (d.url) window.location.href = d.url;
+    else showToast(d.error || 'Could not open the billing portal.', true);
+  } catch (e) { showToast('Could not open the billing portal.', true); }
+}
+
+/* ── VIEW AS CLUB (platform admin) ────────────────────────────────────── */
+// Lets Simon see exactly what a secretary sees without a real club account.
+// Read-only, loudly flagged, and written to the audit log.
+async function openClubPicker() {
+  if (!currentUser || !currentUser.is_admin) { showToast('Platform admin only.', true); return; }
+  try {
+    var r = await sbClient.from('clubs').select('id, name, slug, plan_status').order('created_at', { ascending: false }).limit(200);
+    var clubs = r.data || [];
+    if (!clubs.length) { showToast('No clubs exist yet.', true); showPage('landing'); return; }
+    var names = clubs.map(function(c, i) { return (i + 1) + '. ' + c.name + (c.plan_status !== 'active' ? ' (' + c.plan_status + ')' : ''); }).join('\n');
+    var pick = prompt('View as which club?\n\n' + names + '\n\nEnter a number:');
+    var idx = parseInt(pick, 10) - 1;
+    if (isNaN(idx) || !clubs[idx]) { showPage('landing'); return; }
+    await viewAsClub(clubs[idx].id);
+  } catch (e) { showToast('Could not list clubs.', true); }
+}
+
+async function viewAsClub(clubId) {
+  if (!currentUser || !currentUser.is_admin) return;
+  try {
+    var r = await sbClient.from('clubs').select('*').eq('id', clubId).single();
+    if (r.error) throw r.error;
+    var c = r.data;
+    userClub = {
+      id: c.id, name: c.name, slug: c.slug, plan_status: c.plan_status,
+      logo_url: c.logo_url, tagline: c.tagline, description: c.description,
+      primary_color: c.primary_color, secondary_color: c.secondary_color,
+      role: 'secretary', title: 'Platform admin (read-only)'
+    };
+    clubImpersonating = true;
+    try {
+      await sbClient.from('club_audit_log').insert({
+        club_id: c.id, actor_user_id: currentUser.id, action: 'admin_viewed_club', detail: {}
+      });
+    } catch (e2) {}
+    showPage('club');
+    initClubPortal();
+  } catch (e) { showToast('Could not open that club.', true); }
+}
+
+function exitClubImpersonation() {
+  clubImpersonating = false;
+  userClub = null;
+  loadUserPlan().then(function() {
+    updateNav(currentUser);
+    showPage('admin');
+  });
+}
+
 </script>
 <!-- END FEEDBACK WIDGET -->
 
