@@ -12,3 +12,30 @@
   from = "/destinations"
   to = "/index.html"
   status = 200
+# ═══════════════════════════════════════════════════════════════════════════
+# APPEND this to the BOTTOM of the existing netlify.toml in the INDIVIDUAL
+# repo (the live gogolftrip.co.uk one).
+#
+# Do NOT replace the whole file — just paste this block at the end.
+#
+# Shorter than the club version on purpose: the individual app has no
+# /for-clubs page, no /admin page and no club portals, so rewriting those
+# paths would only serve the homepage at URLs that shouldn't exist.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── SPA ROUTE ──────────────────────────────────────────────────────────────
+# The seasonal destinations guide is pushed to /destinations via
+# history.pushState, so a refresh or a shared link currently 404s.
+#
+# This matches /destinations EXACTLY. The five new destination pages live at
+# /destinations/<country>-golf-trips.html and are real files — Netlify serves
+# real files before consulting redirects, so they are unaffected.
+
+[[redirects]]
+  from = "/destinations"
+  to = "/index.html"
+  status = 200
+
+# If the individual app's nav has a "Destinations" link that pushes a
+# different path, change the `from` to match it. Check with:
+#   grep -n "ROUTED_PAGES" index.html
