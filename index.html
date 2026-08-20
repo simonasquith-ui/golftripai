@@ -1153,6 +1153,16 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   .split-wrap{margin:0 -16px;padding:0 16px}
 }
 
+/* Guest voting mode — strip the nav back to the logo and a way in.
+   A guest is here to answer one question, not to start planning a trip. */
+body.guest-mode .nav-plan-wrap,
+body.guest-mode #nav-my-trips,
+body.guest-mode #nav-club-link,
+body.guest-mode #nav-admin-link,
+body.guest-mode #nav-upgrade-btn,
+body.guest-mode .nav-bell,
+body.guest-mode .nav-links > a.nav-link.always { display:none !important; }
+body.guest-mode .nav-hamburger { display:none !important; }
 </style>
 </head>
 <body>
@@ -2017,6 +2027,78 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 </div>
 
 <!-- TRIP DETAIL -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     GUEST VOTING — /vote?trip=<id>&t=<token>
+     A deliberately separate page rather than a mode on the trip page. The
+     member UI has costs, the ledger and edit controls all over it; sharing a
+     code path would mean one missed `if` leaks money data to a WhatsApp
+     group. This page can only render what it is given.
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="page-guest-vote" class="page">
+  <div style="background:var(--moss-dark);padding:26px 0">
+    <div class="container">
+      <div class="section-label" style="color:var(--brass)">Have your say</div>
+      <h1 style="color:#fff;font-family:var(--font-display);font-weight:400;font-size:1.6rem;margin:0" id="gv-title">Golf trip</h1>
+      <p style="color:rgba(255,255,255,.6);font-size:.86rem;margin:6px 0 0" id="gv-sub"></p>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:720px;padding-top:28px;padding-bottom:70px">
+
+    <div id="gv-loading" style="text-align:center;padding:50px 0">
+      <div class="loading-spinner"></div>
+      <p class="fs-sm text-muted mt-8">Loading&hellip;</p>
+    </div>
+
+    <div id="gv-error" style="display:none">
+      <div class="sv-panel" style="text-align:center">
+        <h3 style="justify-content:center"><i class="ti ti-link-off"></i> Link problem</h3>
+        <p class="sv-hint" style="margin:10px auto 18px" id="gv-error-msg"></p>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('landing')">Go to GolfTrip</button>
+      </div>
+    </div>
+
+    <!-- Name gate. No email, no password — the entire barrier is one field. -->
+    <div id="gv-join" style="display:none">
+      <div class="sv-panel">
+        <h3><i class="ti ti-user-plus"></i> What's your name?</h3>
+        <p class="sv-hint">So the group knows whose vote is whose. No account needed, and we won't email you.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="gv-name" placeholder="e.g. Dave" maxlength="40"
+                 style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter')guestJoin()">
+          <button class="btn btn-primary" onclick="guestJoin()" id="gv-join-btn">Start voting</button>
+        </div>
+        <div class="fs-sm" id="gv-join-msg" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- The vote itself -->
+    <div id="gv-main" style="display:none">
+      <div class="sv-panel">
+        <div class="sv-head">
+          <h3><i class="ti ti-checkbox"></i> What do you fancy?</h3>
+          <span class="fs-sm text-muted" id="gv-me"></span>
+        </div>
+        <p class="sv-hint">Tap once per option. You can change your mind any time — just come back to this link.</p>
+        <div id="gv-list"></div>
+      </div>
+
+      <div class="sv-panel">
+        <h3><i class="ti ti-users"></i> Who's in</h3>
+        <p class="sv-hint">Everyone on the trip so far.</p>
+        <div id="gv-people" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <p class="fs-sm text-muted" style="text-align:center;line-height:1.7">
+        Costs and payments are handled by whoever's organising — you won't see them here.<br>
+        <a href="#" onclick="showPage('landing');return false;" style="color:var(--brass);font-weight:600">What is GolfTrip?</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+
 <div id="page-trip" class="page">
   <!-- Public view banner — shown to non-logged-in users viewing a shared link -->
   <div id="public-trip-banner" style="display:none;background:var(--moss-dark);padding:14px 0;border-bottom:1px solid var(--brass)">
@@ -3681,6 +3763,7 @@ var ROUTED_PAGES = {
   seasonal: { path: '/destinations', title: 'Best Golf Destinations by Season | GolfTrip', desc: 'Hand-picked golf destinations for every season — courses, hotels and typical budgets for UK golfers, updated throughout the year.' },
   // Club portal routes. Both need a matching rewrite in netlify.toml or a
   // direct visit / refresh returns Netlify's 404 instead of the app.
+  'guest-vote': { path: '/vote', title: 'Vote on the trip | GolfTrip', desc: 'Have your say on your group\'s golf trip.' },
   'club-login': { path: '/club-login', title: 'Club Portal Sign In | GolfTrip', desc: 'Sign in to manage your golf club on GolfTrip.' },
   club: { path: '/club', title: 'Club Portal | GolfTrip', desc: 'Manage your golf club members, trips, reporting and campaigns.' },
   admin: { path: '/admin', title: 'Admin | GolfTrip', desc: 'GolfTrip internal admin.' }
@@ -3727,6 +3810,8 @@ function showPage(name, skipHistory) {
     initSeasonalPage(season);
   }
   if (name === 'admin') { checkAdminAccess(); }
+  document.body.classList.toggle('guest-mode', name === 'guest-vote' && !currentUser);
+  if (name === 'guest-vote' && typeof initGuestVote === 'function') { initGuestVote(); }
   if (name === 'club' && typeof initClubPortal === 'function') { initClubPortal(); }
   if (name === 'club-login' && typeof initClubLoginPage === 'function') { initClubLoginPage(); }
   if (name !== 'trip' && chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
@@ -10114,6 +10199,12 @@ async function processJoin(tripId, user) {
 
 (function handleUrlParams() {
   var params = new URLSearchParams(window.location.search);
+  // A voting link goes straight to the guest page when nobody is signed in.
+  // Signed-in members get the full trip instead — same URL, more access.
+  var shareToken = params.get('t');
+  if (shareToken && params.get('trip')) {
+    window.__guestLinkPending = true;
+  }
   var joinId = params.get('join');
   var joinClubId = params.get('join_club');
   if (joinClubId) pendingJoinClubId = joinClubId;
@@ -10928,6 +11019,14 @@ sbClient.auth.getSession().then(async function(r) {
   // If the URL is already /destinations (direct visit, refresh, or a shared
   // link), show that page instead of defaulting to the homepage.
   var initialRouteName = pageNameFromPath(window.location.pathname);
+
+  // A ?t= share token means this is a voting link. Signed-out visitors go to
+  // the guest page; signed-in members fall through to the full trip, because
+  // they should get more access than a guest, not less.
+  if (window.__guestLinkPending && !currentUser) {
+    initialRouteName = 'guest-vote';
+  }
+
   if (initialRouteName !== 'landing') {
     showPage(initialRouteName, true);
   } else {
@@ -13269,6 +13368,166 @@ function addItemToSchedule(item) {
   var note = mount.querySelector('.schedule-save-note');
   saveSchedule(mount._tripId, mount._panelLabel, sched, note);
   return true;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GUEST VOTING
+   Everything here talks to /.netlify/functions/guest-trip and nothing else.
+   The guest has no Supabase credentials, so there is no path from this code
+   to any data the function does not choose to return.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var guestCtx = { tripId: null, token: null, key: null, data: null };
+
+function guestStorageKey(tripId) { return 'golftrip_guest_' + tripId; }
+
+async function guestApi(action, extra) {
+  var res = await fetch('/.netlify/functions/guest-trip', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({
+      action: action, tripId: guestCtx.tripId, token: guestCtx.token, guestKey: guestCtx.key
+    }, extra || {}))
+  });
+  var data = await res.json();
+  if (!res.ok) { var e = new Error(data.error || 'Something went wrong.'); e.status = res.status; throw e; }
+  return data;
+}
+
+function guestShowError(msg) {
+  document.getElementById('gv-loading').style.display = 'none';
+  document.getElementById('gv-join').style.display = 'none';
+  document.getElementById('gv-main').style.display = 'none';
+  document.getElementById('gv-error').style.display = 'block';
+  document.getElementById('gv-error-msg').textContent = msg;
+}
+
+async function initGuestVote() {
+  var params = new URLSearchParams(window.location.search);
+  guestCtx.tripId = params.get('trip');
+  guestCtx.token = params.get('t');
+  if (!guestCtx.tripId || !guestCtx.token) { guestShowError('This link is incomplete. Ask the organiser to send it again.'); return; }
+
+  try { guestCtx.key = localStorage.getItem(guestStorageKey(guestCtx.tripId)); } catch (e) { guestCtx.key = null; }
+
+  try {
+    var data = await guestApi('load');
+    guestCtx.data = data;
+    guestPaintHeader(data);
+    document.getElementById('gv-loading').style.display = 'none';
+    if (data.guest) { guestPaintMain(data); }
+    else { document.getElementById('gv-join').style.display = 'block'; }
+  } catch (e) {
+    guestShowError(e.message);
+  }
+}
+
+function guestPaintHeader(data) {
+  var t = data.trip || {};
+  document.getElementById('gv-title').textContent = t.destination ? ('Golf trip to ' + t.destination) : 'Golf trip';
+  var bits = [];
+  if (t.dates && t.dates.depart) {
+    var d = new Date(t.dates.depart);
+    if (!isNaN(d.getTime())) bits.push(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
+  }
+  if (t.groupSize) bits.push(t.groupSize + ' golfers');
+  document.getElementById('gv-sub').textContent = bits.join('  ·  ');
+}
+
+async function guestJoin() {
+  var name = (document.getElementById('gv-name').value || '').trim();
+  var msg = document.getElementById('gv-join-msg');
+  var btn = document.getElementById('gv-join-btn');
+  if (name.length < 2) { msg.innerHTML = '<span style="color:#991b1b">Please enter your name.</span>'; return; }
+  btn.disabled = true; btn.textContent = 'One moment…';
+  try {
+    var data = await guestApi('join', { name: name });
+    if (data.guestKey) {
+      guestCtx.key = data.guestKey;
+      // Kept so they can change their vote later from the same browser. If
+      // they clear it or switch device they simply enter their name again.
+      try { localStorage.setItem(guestStorageKey(guestCtx.tripId), data.guestKey); } catch (e) {}
+    }
+    guestCtx.data = data;
+    document.getElementById('gv-join').style.display = 'none';
+    guestPaintMain(data);
+  } catch (e) {
+    msg.innerHTML = '<span style="color:#991b1b">' + esc(e.message) + '</span>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Start voting';
+  }
+}
+
+function guestPaintMain(data) {
+  document.getElementById('gv-main').style.display = 'block';
+  document.getElementById('gv-me').textContent = data.guest ? ('Voting as ' + data.guest.name) : '';
+
+  var list = document.getElementById('gv-list');
+  var cands = data.candidates || [];
+  if (!cands.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:22px 0"><p>Nothing to vote on yet. The organiser is still putting options together — check back shortly.</p></div>';
+  } else {
+    list.innerHTML = cands.map(function(c) {
+      var mine = data.myVotes ? data.myVotes[c.id] : undefined;
+      var v = c.votes || { yes: 0, meh: 0, no: 0 };
+      var total = v.yes + v.meh + v.no;
+      return '<div class="sl-item' + (c.status === 'won' ? ' won' : '') + '">' +
+        '<div class="sl-top"><div style="flex:1;min-width:0">' +
+          '<div class="sl-title">' + esc(c.title) +
+            (c.price ? ' <span class="fs-sm text-muted">' + fmtPrice(c.price) + '</span>' : '') +
+            (c.status === 'won' ? ' <span class="led-pill led-settled">Chosen</span>' : '') +
+          '</div>' +
+          (c.description ? '<p class="sl-desc">' + esc(c.description) + '</p>' : '') +
+        '</div></div>' +
+        '<div class="sl-vote-row">' +
+          '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
+          '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
+          '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
+          '<span class="sl-tally"><b>' + v.yes + '</b> yes · ' + v.no + ' no</span>' +
+        '</div>' +
+        (total ? '<div class="sl-bar">' +
+          '<span class="yes" style="width:' + (v.yes / total * 100) + '%"></span>' +
+          '<span class="meh" style="width:' + (v.meh / total * 100) + '%"></span>' +
+          '<span class="no" style="width:' + (v.no / total * 100) + '%"></span></div>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  var people = data.people || [];
+  document.getElementById('gv-people').innerHTML = people.length
+    ? people.map(function(p) {
+        return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--paper-deep);border-radius:100px;padding:5px 12px;font-size:.84rem">' +
+          '<span class="split-av" style="width:20px;height:20px;font-size:.6rem">' + esc((p || '?').charAt(0).toUpperCase()) + '</span>' + esc(p) + '</span>';
+      }).join('')
+    : '<span class="fs-sm text-muted">Just you so far.</span>';
+}
+
+async function guestVote(candidateId, vote) {
+  try {
+    var data = await guestApi('vote', { candidateId: candidateId, vote: vote });
+    guestCtx.data = data;
+    guestPaintMain(data);
+  } catch (e) {
+    showToast(e.message, true);
+  }
+}
+
+/* Organiser side: the shareable voting link. */
+async function copyVotingLink() {
+  if (!tripPlan.tripId) { showToast('Save the trip first.', true); return; }
+  try {
+    var r = await sbClient.from('trip_requests')
+      .select('share_token, share_expires_at, guest_voting').eq('id', tripPlan.tripId).maybeSingle();
+    if (!r.data || !r.data.share_token) {
+      showToast('This trip has no voting link yet — run migration 007.', true); return;
+    }
+    var url = window.location.origin + '/vote?trip=' + tripPlan.tripId + '&t=' + r.data.share_token;
+    await navigator.clipboard.writeText(url);
+    var exp = r.data.share_expires_at ? new Date(r.data.share_expires_at) : null;
+    showToast('Voting link copied' + (exp ? ' — works until ' + exp.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '') + '.');
+  } catch (e) {
+    showToast('Could not create the link: ' + (e.message || e), true);
+  }
 }
 
 </script>
