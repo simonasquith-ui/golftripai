@@ -1079,25 +1079,40 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
 .sv-step{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--moss);color:var(--brass);font-size:.68rem;font-weight:700;flex-shrink:0}
 
 /* Shortlist */
-.sl-item{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px;background:var(--paper)}
-.sl-item.won{border-color:var(--brass);background:rgba(176,141,82,.06)}
-.sl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.sl-title{font-weight:600;font-size:.94rem;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.sl-desc{font-size:.82rem;color:var(--muted);line-height:1.6;margin:5px 0 0}
-.sl-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.sl-vote-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.sl-vbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;gap:5px;transition:all var(--tr)}
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
+.sl-item{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;transition:border-color var(--tr),box-shadow var(--tr)}
+.sl-item:hover{border-color:var(--brass);box-shadow:0 4px 18px rgba(27,42,32,.07)}
+.sl-item.won{border-color:var(--brass);background:rgba(176,141,82,.05)}
+.sl-photo{height:126px;background:var(--paper-deep);position:relative;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.5rem;cursor:pointer;flex-shrink:0}
+.sl-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.sl-photo-tags{position:absolute;left:8px;top:8px;display:flex;gap:5px;flex-wrap:wrap}
+.sl-tag{background:rgba(15,35,24,.78);color:#fff;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:3px 7px;border-radius:100px;backdrop-filter:blur(2px)}
+.sl-tag.won{background:var(--brass);color:var(--moss-dark)}
+.sl-price{position:absolute;right:8px;bottom:8px;background:rgba(15,35,24,.82);color:#fff;font-size:.76rem;font-weight:600;padding:3px 9px;border-radius:100px}
+.sl-admin{position:absolute;right:8px;top:8px;display:flex;gap:5px;opacity:0;transition:opacity var(--tr)}
+.sl-item:hover .sl-admin{opacity:1}
+.sl-admin button{width:26px;height:26px;border-radius:6px;border:none;background:rgba(15,35,24,.8);color:#fff;cursor:pointer;font-size:.78rem;display:flex;align-items:center;justify-content:center}
+.sl-admin button:hover{background:var(--brass);color:var(--moss-dark)}
+.sl-admin button.danger:hover{background:#991b1b;color:#fff}
+.sl-body{padding:12px 13px 13px;display:flex;flex-direction:column;flex:1;min-width:0}
+.sl-title{font-weight:600;font-size:.9rem;color:var(--ink);line-height:1.35;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sl-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin:0 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sl-look{background:none;border:none;color:var(--brass);font-family:inherit;font-size:.74rem;font-weight:600;cursor:pointer;padding:0;text-align:left;margin-bottom:10px}
+.sl-look:hover{text-decoration:underline;text-underline-offset:3px}
+.sl-foot{margin-top:auto}
+.sl-vote-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}
+.sl-vbtn{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 4px;font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;transition:all var(--tr)}
 .sl-vbtn:hover{border-color:var(--brass);color:var(--brass)}
 .sl-vbtn.on{background:var(--moss);border-color:var(--moss);color:#fff}
 .sl-vbtn.on.no{background:#991b1b;border-color:#991b1b}
-.sl-tally{display:flex;gap:12px;align-items:center;margin-left:auto;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.sl-tally{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:7px}
 .sl-tally b{color:var(--ink)}
-.sl-voters{display:flex;gap:-6px;align-items:center}
-.sl-bar{height:5px;border-radius:100px;background:var(--paper-deep);overflow:hidden;margin-top:9px;display:flex}
+.sl-bar{height:4px;border-radius:100px;background:var(--paper-deep);overflow:hidden;display:flex}
 .sl-bar span{height:100%}
 .sl-bar .yes{background:var(--moss)}
 .sl-bar .meh{background:var(--line)}
 .sl-bar .no{background:#c98b8b}
+@media(max-width:520px){.sl-grid{grid-template-columns:1fr 1fr;gap:10px}.sl-photo{height:96px}.sl-vbtn{font-size:.66rem;padding:6px 2px}.sl-vbtn i{display:none}}
 
 /* Split grid */
 .split-wrap{overflow-x:auto;margin:0 -22px;padding:0 22px}
@@ -1164,8 +1179,6 @@ body.guest-mode .nav-bell,
 body.guest-mode .nav-links > a.nav-link.always { display:none !important; }
 body.guest-mode .nav-hamburger { display:none !important; }
 /* Shortlist detail — "look before you vote" */
-.sl-thumb{width:64px;height:64px;border-radius:8px;background:var(--paper-deep);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.2rem}
-.sl-thumb img{width:100%;height:100%;object-fit:cover}
 .sl-look{background:none;border:none;color:var(--brass);font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
 .sl-look:hover{color:var(--moss)}
 
@@ -5951,8 +5964,8 @@ function wrapBookingUrl(destination, plainUrl) {
 var venuePhotoCache = {}; // query string -> photo_reference (or null if none found)
 function hydrateCardPhotos(scopeEl) {
   var root = scopeEl || document;
-  // .sl-thumb are the shortlist thumbnails — same contract, same pipeline.
-  var nodes = root.querySelectorAll('.card-photo[data-photo-q]:not([data-photo-done]), .sl-thumb[data-photo-q]:not([data-photo-done])');
+  // .sl-photo are the shortlist tile images — same contract, same pipeline.
+  var nodes = root.querySelectorAll('.card-photo[data-photo-q]:not([data-photo-done]), .sl-photo[data-photo-q]:not([data-photo-done])');
   nodes.forEach(function(node) {
     node.setAttribute('data-photo-done', '1');
     var q = node.getAttribute('data-photo-q');
@@ -12891,44 +12904,50 @@ function renderShortlist() {
   }
 
   var memberCount = Math.max(tripPlan.members.length, 1);
+  el.className = 'sl-grid';
   el.innerHTML = open.map(function(c) {
     var yes = c.votes.filter(function(v) { return v.vote === 1; }).length;
     var meh = c.votes.filter(function(v) { return v.vote === 0; }).length;
     var no  = c.votes.filter(function(v) { return v.vote === -1; }).length;
     var mine = currentUser ? (c.votes.filter(function(v) { return v.user_id === currentUser.id; })[0] || {}).vote : undefined;
-    var pct = function(n) { return (n / memberCount) * 100; };
+    var total = yes + meh + no;
+    var pct = function(x) { return total ? (x / total) * 100 : 0; };
     var cat = ITIN_CATS[c.category] || ITIN_CATS.other;
-
     var m = c.meta || {};
-    var thumb = '<div class="sl-thumb"' + (m.photoQuery ? ' data-photo-q="' + escapeHtml(m.photoQuery) + '"' : '') + '>' +
-      (m.imageUrl ? '<img src="' + escapeHtml(m.imageUrl) + '" alt="">' : '<i class="ti ' + cat.icon + '"></i>') + '</div>';
 
     return '<div class="sl-item' + (c.status === 'won' ? ' won' : '') + '">' +
-      '<div class="sl-top">' + thumb + '<div style="min-width:0;flex:1">' +
-        '<div class="sl-title">' + escapeHtml(c.title) +
-          '<span class="itin2-chip">' + escapeHtml(cat.label) + '</span>' +
-          (c.price !== null && c.price !== undefined ? '<span class="itin2-price">' + money(c.price) + '</span>' : '') +
-          (c.status === 'won' ? '<span class="itin2-chip" style="border-color:var(--brass);color:var(--brass)">In basket</span>' : '') +
+      // The photo is the tile's main affordance — clicking it opens the full
+      // detail, which is what someone wants before committing to a vote.
+      '<div class="sl-photo" onclick="openCandidateDetail(\'' + c.id + '\')"' +
+        (m.photoQuery && !m.imageUrl ? ' data-photo-q="' + escapeHtml(m.photoQuery) + '"' : '') + '>' +
+        (m.imageUrl ? '<img src="' + escapeHtml(m.imageUrl) + '" alt="">' : '<i class="ti ' + cat.icon + '"></i>') +
+        '<div class="sl-photo-tags">' +
+          '<span class="sl-tag">' + escapeHtml(cat.label) + '</span>' +
+          (c.status === 'won' ? '<span class="sl-tag won">In basket</span>' : '') +
         '</div>' +
+        (c.price !== null && c.price !== undefined ? '<span class="sl-price">' + money(c.price) + '</span>' : '') +
+        (tripPlan.isOrganiser ? '<div class="sl-admin">' +
+          (c.status !== 'won' ? '<button title="Move to basket" onclick="event.stopPropagation();candidateToBasket(\'' + c.id + '\')"><i class="ti ti-shopping-cart-plus"></i></button>' : '') +
+          '<button class="danger" title="Remove from shortlist" onclick="event.stopPropagation();removeCandidate(\'' + c.id + '\')"><i class="ti ti-trash"></i></button>' +
+        '</div>' : '') +
+      '</div>' +
+      '<div class="sl-body">' +
+        '<div class="sl-title">' + escapeHtml(c.title) + '</div>' +
         (c.description ? '<p class="sl-desc">' + escapeHtml(c.description) + '</p>' : '') +
-        '<button class="sl-look" onclick="openCandidateDetail(\'' + c.id + '\')">Take a look before you vote</button>' +
-      '</div>' +
-      (tripPlan.isOrganiser ? '<div class="sl-actions">' +
-        (c.status !== 'won' ? '<button class="btn btn-primary btn-sm" style="padding:5px 11px;font-size:.75rem" onclick="candidateToBasket(\'' + c.id + '\')">Move to basket</button>' : '') +
-        '<button class="itin2-tool danger" title="Remove" onclick="removeCandidate(\'' + c.id + '\')"><i class="ti ti-trash"></i></button>' +
-      '</div>' : '') +
-      '</div>' +
-      '<div class="sl-bar">' +
-        '<span class="yes" style="width:' + pct(yes) + '%"></span>' +
-        '<span class="meh" style="width:' + pct(meh) + '%"></span>' +
-        '<span class="no" style="width:' + pct(no) + '%"></span>' +
-      '</div>' +
-      '<div class="sl-vote-row">' +
-        '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
-        '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
-        '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="castShortlistVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
-        '<div class="sl-tally"><span><b>' + yes + '</b> yes</span><span>' + meh + ' don\'t mind</span><span>' + no + ' no</span>' +
-          '<span>' + c.votes.length + '/' + memberCount + ' voted</span></div>' +
+        '<button class="sl-look" onclick="openCandidateDetail(\'' + c.id + '\')">Take a look &rarr;</button>' +
+        '<div class="sl-foot">' +
+          '<div class="sl-bar">' +
+            '<span class="yes" style="width:' + pct(yes) + '%"></span>' +
+            '<span class="meh" style="width:' + pct(meh) + '%"></span>' +
+            '<span class="no" style="width:' + pct(no) + '%"></span>' +
+          '</div>' +
+          '<div class="sl-tally"><span><b>' + yes + '</b> yes</span><span>' + c.votes.length + '/' + memberCount + ' voted</span></div>' +
+          '<div class="sl-vote-row">' +
+            '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" title="Yes" onclick="castShortlistVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
+            '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" title="Don\'t mind" onclick="castShortlistVote(\'' + c.id + '\',0)">Meh</button>' +
+            '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" title="No" onclick="castShortlistVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -13564,34 +13583,44 @@ function guestPaintMain(data) {
   if (!cands.length) {
     list.innerHTML = '<div class="empty-state" style="padding:22px 0"><p>Nothing to vote on yet. The organiser is still putting options together — check back shortly.</p></div>';
   } else {
+    list.className = 'sl-grid';
     list.innerHTML = cands.map(function(c) {
       var mine = data.myVotes ? data.myVotes[c.id] : undefined;
       var v = c.votes || { yes: 0, meh: 0, no: 0 };
       var total = v.yes + v.meh + v.no;
+      var pct = function(x) { return total ? (x / total) * 100 : 0; };
       var gm = c.meta || {};
-      var gthumb = '<div class="sl-thumb"' + (gm.photoQuery ? ' data-photo-q="' + escAttr(gm.photoQuery) + '"' : '') + '>' +
-        (gm.imageUrl ? '<img src="' + escAttr(gm.imageUrl) + '" alt="">' : '<i class="ti ti-photo"></i>') + '</div>';
       return '<div class="sl-item' + (c.status === 'won' ? ' won' : '') + '">' +
-        '<div class="sl-top">' + gthumb + '<div style="flex:1;min-width:0">' +
-          '<div class="sl-title">' + esc(c.title) +
-            (c.price ? ' <span class="fs-sm text-muted">' + fmtPrice(c.price) + '</span>' : '') +
-            (c.status === 'won' ? ' <span class="led-pill led-settled">Chosen</span>' : '') +
+        '<div class="sl-photo" onclick="openCandidateDetail(\'' + c.id + '\')"' +
+          (gm.photoQuery && !gm.imageUrl ? ' data-photo-q="' + escAttr(gm.photoQuery) + '"' : '') + '>' +
+          (gm.imageUrl ? '<img src="' + escAttr(gm.imageUrl) + '" alt="">' : '<i class="ti ti-photo"></i>') +
+          '<div class="sl-photo-tags">' +
+            '<span class="sl-tag">' + esc(c.category || 'option') + '</span>' +
+            (c.status === 'won' ? '<span class="sl-tag won">Chosen</span>' : '') +
           '</div>' +
-          (c.description ? '<p class="sl-desc">' + esc(c.description) + '</p>' : '') +
-          '<button class="sl-look" onclick="openCandidateDetail(\'' + c.id + '\')">Take a look before you vote</button>' +
-        '</div></div>' +
-        '<div class="sl-vote-row">' +
-          '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
-          '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
-          '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
-          '<span class="sl-tally"><b>' + v.yes + '</b> yes · ' + v.no + ' no</span>' +
+          (c.price ? '<span class="sl-price">' + fmtPrice(c.price) + '</span>' : '') +
         '</div>' +
-        (total ? '<div class="sl-bar">' +
-          '<span class="yes" style="width:' + (v.yes / total * 100) + '%"></span>' +
-          '<span class="meh" style="width:' + (v.meh / total * 100) + '%"></span>' +
-          '<span class="no" style="width:' + (v.no / total * 100) + '%"></span></div>' : '') +
+        '<div class="sl-body">' +
+          '<div class="sl-title">' + esc(c.title) + '</div>' +
+          (c.description ? '<p class="sl-desc">' + esc(c.description) + '</p>' : '') +
+          '<button class="sl-look" onclick="openCandidateDetail(\'' + c.id + '\')">Take a look &rarr;</button>' +
+          '<div class="sl-foot">' +
+            '<div class="sl-bar">' +
+              '<span class="yes" style="width:' + pct(v.yes) + '%"></span>' +
+              '<span class="meh" style="width:' + pct(v.meh) + '%"></span>' +
+              '<span class="no" style="width:' + pct(v.no) + '%"></span>' +
+            '</div>' +
+            '<div class="sl-tally"><span><b>' + v.yes + '</b> yes</span><span>' + v.no + ' no</span></div>' +
+            '<div class="sl-vote-row">' +
+              '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
+              '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',0)">Meh</button>' +
+              '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="guestVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
+    if (typeof hydrateCardPhotos === 'function') hydrateCardPhotos(list);
   }
 
   var people = data.people || [];
