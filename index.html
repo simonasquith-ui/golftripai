@@ -7017,7 +7017,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
   // Defer until after the caller has attached `el` to the document —
   // loadActivities looks up its container via document.getElementById,
   // which fails silently on a still-detached element.
-  setTimeout(function() { loadActivities(dest, idx); }, 0);
+  setTimeout(function() { loadActivities(dest, idx, panel.label || ''); }, 0);
   if (!travelData && panel.flights) {
     setTimeout(function() { mountFlightCalendar('flight-cal-' + idx, panel, qData); }, 0);
   }
@@ -7031,7 +7031,7 @@ function buildPanel(panel, idx, qData, mapPrefix) {
 }
 
 // === THINGS TO DO (VIATOR) ===
-async function loadActivities(destination, idx) {
+async function loadActivities(destination, idx, panelLabel) {
   var container = document.getElementById('activities-' + idx);
   var heading = document.getElementById('activities-heading-' + idx);
   if (!container || !destination) return;
@@ -7051,12 +7051,25 @@ async function loadActivities(destination, idx) {
           (a.rating ? '<span style="color:var(--brass);font-size:.8rem;white-space:nowrap;font-weight:600"><i class="ti ti-star-filled"></i> ' + a.rating + '</span>' : '') +
         '</div>' +
         (a.price ? '<div style="color:var(--gold);font-weight:600;margin-top:6px;font-size:.9rem">From &#163;' + Math.round(a.price) + '</div>' : '') +
-        '<div style="margin-top:10px">' +
+        '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
           '<a href="' + a.url + '" target="_blank" rel="noopener" class="card-link" style="display:inline-flex;align-items:center;gap:5px"><i class="ti ti-beach"></i> View on Viator</a>' +
+          // Star = shortlist it for the group to vote on, same as a course or hotel.
+          makeVoteBtn(currentTripRequestId, 'activity', a.title || 'Activity', panelLabel || '') +
+          '<button class="card-link add-to-cart-btn" style="cursor:pointer;background:none;border:1.5px solid var(--gold);color:var(--gold)" ' +
+            'data-cart-type="activity" ' +
+            'data-cart-name="' + (a.title || '').replace(/"/g, '&quot;') + '" ' +
+            'data-cart-sub="' + (destination || '').replace(/"/g, '&quot;') + '" ' +
+            'data-cart-price="From ' + fmtPrice(a.price || 0) + '" ' +
+            'data-cart-pricenum="' + (a.price || 0) + '">&#43; Cart</button>' +
         '</div>' +
       '</div>';
     });
     container.innerHTML = html;
+    // Repaint star states — a previously-starred activity would otherwise
+    // render unstarred until the page was reloaded.
+    if (typeof refreshVotesSummary === 'function' && currentTripRequestId) {
+      refreshVotesSummary(currentTripRequestId, panelLabel || '');
+    }
   } catch (e) {
     container.innerHTML = ''; if (heading) heading.style.display = 'none'; // fail soft — activities are a nice-to-have, never block the results page
   }
@@ -13721,7 +13734,9 @@ function captureCardMeta(btn, itemName) {
 
   var photoEl = card.querySelector('.card-photo[data-photo-q]');
   if (photoEl) meta.photoQuery = photoEl.getAttribute('data-photo-q');
-  var img = card.querySelector('.card-photo img');
+  // .card-photo first, then any image on the card — Viator activity cards
+  // render a bare <img> rather than using the photo wrapper.
+  var img = card.querySelector('.card-photo img') || card.querySelector('img');
   if (img && img.src) meta.imageUrl = img.src;
 
   // Every outbound link on the card — booking sites, course websites,
