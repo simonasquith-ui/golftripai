@@ -1,3 +1,16 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# netlify.toml — gogolftrip.co.uk
+#
+# This is the COMPLETE file. Replace the whole thing; do not append to it.
+#
+# NOTE ON EDITING THIS FILE LATER:
+#   [[redirects]]  — double brackets. An array. Safe to repeat.
+#   [functions."x"] — single brackets. A table. Declaring the same one TWICE
+#                     is a hard parse error and Netlify will refuse to build.
+# If a deploy suddenly fails with a TOML error, look for a duplicated
+# [functions."..."] block first.
+# ═══════════════════════════════════════════════════════════════════════════
+
 [build]
   publish = "."
 
@@ -5,151 +18,73 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+
+# ── FUNCTION TIMEOUTS ──────────────────────────────────────────────────────
+# Netlify's default is 10 seconds. Only functions that legitimately need
+# longer are listed. Each name must appear exactly once.
+
+# Six parallel OpenAI calls to build the trip panels.
 [functions."generate-trip"]
   timeout = 30
 
-[[redirects]]
-  from = "/destinations"
-  to = "/index.html"
-  status = 200
-# ═══════════════════════════════════════════════════════════════════════════
-# APPEND this to the BOTTOM of the existing netlify.toml in the INDIVIDUAL
-# repo (the live gogolftrip.co.uk one).
-#
-# Do NOT replace the whole file — just paste this block at the end.
-#
-# Shorter than the club version on purpose: the individual app has no
-# /for-clubs page, no /admin page and no club portals, so rewriting those
-# paths would only serve the homepage at URLs that shouldn't exist.
-# ═══════════════════════════════════════════════════════════════════════════
-
-# ── SPA ROUTE ──────────────────────────────────────────────────────────────
-# The seasonal destinations guide is pushed to /destinations via
-# history.pushState, so a refresh or a shared link currently 404s.
-#
-# This matches /destinations EXACTLY. The five new destination pages live at
-# /destinations/<country>-golf-trips.html and are real files — Netlify serves
-# real files before consulting redirects, so they are unaffected.
-
-[[redirects]]
-  from = "/destinations"
-  to = "/index.html"
-  status = 200
-
-# If the individual app's nav has a "Destinations" link that pushes a
-# different path, change the `from` to match it. Check with:
-#   grep -n "ROUTED_PAGES" index.html
-# ═══════════════════════════════════════════════════════════════════════════
-# APPEND this to the BOTTOM of the existing netlify.toml in the
-# gogolftrip.co.uk repo. Do NOT replace the whole file — your existing build
-# and function config must stay.
-# ═══════════════════════════════════════════════════════════════════════════
-
-# ── SPA ROUTES ─────────────────────────────────────────────────────────────
-# index.html pushes real URLs via history.pushState. Netlify knows nothing
-# about them, so a direct visit, a refresh, or a link you send someone
-# returns Netlify's 404 instead of the app. These rewrites (status 200, not
-# 301) serve index.html at those paths and let the app's router pick the
-# page from window.location.pathname.
-#
-# Netlify serves real files before consulting redirects, so these cannot
-# shadow anything in /destinations/ or /blog/. Explicit rather than a
-# catch-all: a catch-all turns every typo into the homepage and hides
-# broken internal links.
-
-# The seasonal destinations guide. Matches /destinations EXACTLY —
-# /destinations/portugal-golf-trips.html is a real file and is served as one.
-[[redirects]]
-  from = "/destinations"
-  to = "/index.html"
-  status = 200
-
-# Club portal. /club-login is the URL you send to a club secretary.
-[[redirects]]
-  from = "/club-login"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/club"
-  to = "/index.html"
-  status = 200
-
-# Public club pages, once you start using them: /club/<slug>
-[[redirects]]
-  from = "/club/*"
-  to = "/index.html"
-  status = 200
-
-# Admin dashboard. Needs a URL of its own so it stays reachable even when the
-# nav link is hidden — otherwise a broken is_admin flag locks you out of the
-# one page that would tell you the flag is broken.
-[[redirects]]
-  from = "/admin"
-  to = "/index.html"
-  status = 200
-
-
-# ── FUNCTION TIMEOUT ───────────────────────────────────────────────────────
-# A 500-recipient campaign is five sequential Resend batch calls and will
-# exceed Netlify's 10-second default. Without this, large sends fail halfway
-# with a timeout and the client records a partial result.
+# A 500-recipient campaign is five sequential Resend batch calls.
 [functions."send-club-campaign"]
   timeout = 26
-# ═══════════════════════════════════════════════════════════════════════════
-# APPEND to the BOTTOM of the existing netlify.toml in the gogolftrip.co.uk
-# repo. Do NOT replace the file — your build and function config must stay.
-#
-# If you already pasted an earlier version of this block, the only NEW entry
-# is /vote at the bottom. Adding a duplicate [[redirects]] is harmless, but
-# you can just add the /vote one on its own if you prefer.
-# ═══════════════════════════════════════════════════════════════════════════
+
+# Calls Viator, and may try a second endpoint if the first returns nothing.
+[functions."get-activities"]
+  timeout = 20
+
 
 # ── SPA ROUTES ─────────────────────────────────────────────────────────────
-# index.html pushes real URLs via history.pushState. Netlify knows nothing
-# about them, so a direct visit, a refresh, or a link you send someone returns
-# Netlify's 404 instead of the app. These rewrites (status 200, not 301) serve
-# index.html at those paths and let the app's router pick the page.
+# index.html pushes real URLs with history.pushState. Netlify knows nothing
+# about those paths, so a direct visit, a refresh, or a link you send someone
+# returns Netlify's 404 before the app ever loads.
 #
-# Netlify serves real files before consulting redirects, so these cannot
+# status = 200 is a rewrite, not a redirect: the URL stays as typed and the
+# app's own router picks the page from window.location.pathname.
+#
+# Netlify serves real files before consulting redirects, so none of these can
 # shadow anything in /destinations/ or /blog/.
+#
+# Deliberately explicit rather than a catch-all /* — a catch-all turns every
+# typo into the homepage and hides broken internal links.
 
+# Seasonal destinations guide. Matches /destinations EXACTLY; the five
+# destination pages are real files at /destinations/*.html and are unaffected.
 [[redirects]]
   from = "/destinations"
   to = "/index.html"
   status = 200
 
-[[redirects]]
-  from = "/club-login"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/club"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/club/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/admin"
-  to = "/index.html"
-  status = 200
-
-# THE GUEST VOTING LINK. Without this, every link you copy from the Voting
-# link button returns Netlify's "Page not found" — the app never even loads,
-# so nothing in index.html can help.
+# Guest voting link. Without this, every link the "Copy voting link" button
+# produces returns Page not found.
 [[redirects]]
   from = "/vote"
   to = "/index.html"
   status = 200
 
+# Club portal.
+[[redirects]]
+  from = "/club-login"
+  to = "/index.html"
+  status = 200
 
-# ── FUNCTION TIMEOUT ───────────────────────────────────────────────────────
-# A 500-recipient campaign is five sequential Resend batch calls and will
-# exceed Netlify's 10-second default.
-[functions."send-club-campaign"]
-  timeout = 26
+[[redirects]]
+  from = "/club"
+  to = "/index.html"
+  status = 200
+
+# Public club pages: /club/<slug>
+[[redirects]]
+  from = "/club/*"
+  to = "/index.html"
+  status = 200
+
+# Admin. Needs its own URL so it stays reachable even when the nav link is
+# hidden — otherwise a broken is_admin flag locks you out of the one page
+# that would tell you the flag is broken.
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
