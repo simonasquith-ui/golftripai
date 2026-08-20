@@ -2239,11 +2239,14 @@ body.guest-mode .nav-hamburger { display:none !important; }
         </div>
       </div>
 
-      <!-- VOTES TALLY — full width -->
-      <div class="card" style="margin-bottom:20px">
-        <h3 style="color:var(--green);font-family:'Fraunces',serif;font-size:1rem;margin:0 0 12px"><i class="ti ti-star-filled"></i> Group Votes</h3>
-        <p class="fs-sm text-muted" style="margin-bottom:14px">Star your preferred courses, hotels and restaurants in the trip panels.</p>
-        <div id="group-votes-tally"><p class="fs-sm text-muted">No votes yet.</p></div>
+      <!-- Superseded by the shortlist below. Starring in Trip Details adds an
+           option to the shortlist; voting happens there, once, where the whole
+           group can see it. This card showed the same stars a second time, so
+           a starred item appeared twice and the organiser's star read as a
+           vote before anyone else had seen it.
+           Kept in the DOM (hidden) because renderVotesTally() writes into it. -->
+      <div class="card" id="legacy-votes-card" style="margin-bottom:20px;display:none">
+        <div id="group-votes-tally"></div>
       </div>
 
 
