@@ -1002,6 +1002,157 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   .club-header h1{font-size:1.4rem}
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ITINERARY v2 — day cards with typed, priced, editable items.
+   Replaces the old .itin-day / .itin-activity presentation.
+   ═══════════════════════════════════════════════════════════════════════ */
+.itin2-head{margin-bottom:22px}
+.itin2-head h2{font-family:var(--font-display);font-weight:500;font-size:1.75rem;color:var(--ink);letter-spacing:-.01em;margin:0 0 8px}
+.itin2-loc{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);margin-bottom:14px}
+.itin2-intro{font-size:.92rem;line-height:1.75;color:var(--muted);max-width:78ch;margin:0}
+
+.itin2-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.itin2-hint{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.itin2-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.itin2-savenote{font-size:.75rem;color:var(--muted);min-width:74px;text-align:right}
+
+.itin2-day{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:16px;padding:20px 22px}
+.itin2-day.dragging{opacity:.4}
+.itin2-day-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.itin2-day-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-bottom:4px}
+.itin2-day-title{font-family:var(--font-display);font-weight:500;font-size:1.18rem;color:var(--ink);margin:0;letter-spacing:-.005em}
+.itin2-day-title[contenteditable="true"]:focus{outline:none;border-bottom:1px dashed var(--brass)}
+.itin2-add{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 13px;font-family:inherit;font-size:.78rem;font-weight:500;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color var(--tr),color var(--tr)}
+.itin2-add:hover{border-color:var(--brass);color:var(--brass)}
+
+.itin2-item{display:grid;grid-template-columns:16px 20px 1fr auto;gap:12px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.itin2-day .itin2-item:first-of-type{border-top:none;padding-top:0}
+.itin2-item.dragging{opacity:.4}
+.itin2-grip{color:#c8cdc9;cursor:grab;font-size:.9rem;line-height:1.5;padding-top:2px}
+.itin2-grip:active{cursor:grabbing}
+.itin2-icon{color:var(--muted);font-size:1rem;line-height:1.5;padding-top:1px;text-align:center}
+.itin2-body{min-width:0}
+.itin2-line1{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px}
+.itin2-time{font-size:.82rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.itin2-title{font-size:.92rem;font-weight:600;color:var(--ink)}
+.itin2-desc{font-size:.83rem;line-height:1.65;color:var(--muted);margin:0}
+.itin2-meta{font-size:.75rem;color:var(--muted);margin-top:5px;display:flex;gap:18px;flex-wrap:wrap}
+.itin2-meta b{font-weight:600;color:var(--muted)}
+
+.itin2-chip{font-size:.68rem;font-weight:500;color:var(--muted);background:var(--paper-deep);border:1px solid var(--line);border-radius:5px;padding:2px 8px;white-space:nowrap}
+.itin2-price{font-size:.68rem;font-weight:600;color:var(--ink);background:var(--paper-deep);border:1px solid var(--line);border-radius:5px;padding:2px 8px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.itin2-price.free{color:var(--muted);font-weight:500}
+
+.itin2-tools{display:flex;align-items:center;gap:2px;opacity:0;transition:opacity var(--tr)}
+.itin2-item:hover .itin2-tools,.itin2-item:focus-within .itin2-tools{opacity:1}
+.itin2-tool{background:none;border:none;color:#a9b1ab;cursor:pointer;padding:5px;border-radius:5px;font-size:.92rem;line-height:1;display:flex}
+.itin2-tool:hover{color:var(--ink);background:var(--paper-deep)}
+.itin2-tool.danger:hover{color:#991b1b;background:#fee2e2}
+@media(hover:none){.itin2-tools{opacity:1}}
+
+.itin2-empty{font-size:.83rem;color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:7px;text-align:center}
+.itin2-day-body.drop-target{background:var(--paper-deep);outline:1px dashed var(--brass);outline-offset:4px;border-radius:6px}
+
+.itin2-total{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 22px;background:var(--paper-deep);border:1px solid var(--line);border-radius:10px;margin-top:4px}
+.itin2-total .l{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;font-weight:600;color:var(--muted)}
+.itin2-total .v{font-family:var(--font-display);font-size:1.5rem;color:var(--ink)}
+.itin2-total .n{font-size:.75rem;color:var(--muted)}
+
+/* Item editor */
+.itin2-edit-grid{display:grid;grid-template-columns:110px 1fr;gap:12px}
+.itin2-edit-grid .full{grid-column:1/-1}
+@media(max-width:560px){
+  .itin2-item{grid-template-columns:16px 1fr;gap:9px}
+  .itin2-icon{display:none}
+  .itin2-tools{grid-column:2;justify-content:flex-end;margin-top:6px}
+  .itin2-edit-grid{grid-template-columns:1fr}
+  .itin2-day{padding:16px}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SHORTLIST → VOTE → BASKET → SPLIT → LEDGER
+   ═══════════════════════════════════════════════════════════════════════ */
+.sv-panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px}
+.sv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+.sv-head h3{font-family:var(--font-display);font-weight:500;color:var(--ink);font-size:1.1rem;margin:0;display:flex;align-items:center;gap:8px}
+.sv-hint{font-size:.82rem;color:var(--muted);line-height:1.6;margin:6px 0 16px;max-width:74ch}
+.sv-step{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--moss);color:var(--brass);font-size:.68rem;font-weight:700;flex-shrink:0}
+
+/* Shortlist */
+.sl-item{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px;background:var(--paper)}
+.sl-item.won{border-color:var(--brass);background:rgba(176,141,82,.06)}
+.sl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sl-title{font-weight:600;font-size:.94rem;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sl-desc{font-size:.82rem;color:var(--muted);line-height:1.6;margin:5px 0 0}
+.sl-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.sl-vote-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.sl-vbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;gap:5px;transition:all var(--tr)}
+.sl-vbtn:hover{border-color:var(--brass);color:var(--brass)}
+.sl-vbtn.on{background:var(--moss);border-color:var(--moss);color:#fff}
+.sl-vbtn.on.no{background:#991b1b;border-color:#991b1b}
+.sl-tally{display:flex;gap:12px;align-items:center;margin-left:auto;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.sl-tally b{color:var(--ink)}
+.sl-voters{display:flex;gap:-6px;align-items:center}
+.sl-bar{height:5px;border-radius:100px;background:var(--paper-deep);overflow:hidden;margin-top:9px;display:flex}
+.sl-bar span{height:100%}
+.sl-bar .yes{background:var(--moss)}
+.sl-bar .meh{background:var(--line)}
+.sl-bar .no{background:#c98b8b}
+
+/* Split grid */
+.split-wrap{overflow-x:auto;margin:0 -22px;padding:0 22px}
+.split-grid{border-collapse:separate;border-spacing:0;width:100%;min-width:520px;font-size:.86rem}
+.split-grid th,.split-grid td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.split-grid thead th{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;background:var(--paper-deep);white-space:nowrap;position:sticky;top:0}
+.split-grid th.person,.split-grid td.person{text-align:center;width:88px;min-width:88px}
+.split-grid td.person{background:rgba(0,0,0,.012)}
+.split-person-head{display:flex;flex-direction:column;align-items:center;gap:4px}
+.split-person-head .nm{font-size:.68rem;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.split-av{width:26px;height:26px;border-radius:50%;background:var(--moss);color:var(--brass);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:600;overflow:hidden}
+.split-av img{width:100%;height:100%;object-fit:cover}
+.split-cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.split-cell input[type=checkbox]{width:17px;height:17px;margin:0;cursor:pointer;accent-color:var(--moss)}
+.split-ovr{width:62px;padding:3px 5px;border:1px solid var(--line);border-radius:4px;font-size:.72rem;text-align:center;font-family:inherit;background:var(--surface);color:var(--ink)}
+.split-ovr::placeholder{color:#b9c0ba}
+.split-ovr:focus{border-color:var(--brass);outline:none}
+.split-item-title{font-weight:600;color:var(--ink)}
+.split-item-sub{font-size:.74rem;color:var(--muted);margin-top:2px}
+.split-price-in{width:78px;padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:.82rem;font-family:inherit;text-align:right;background:var(--surface);color:var(--ink)}
+.split-qty-in{width:52px;padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:.82rem;font-family:inherit;text-align:center;background:var(--surface)}
+.split-grid tfoot td{font-weight:700;background:var(--paper-deep);border-bottom:none;border-top:2px solid var(--line)}
+.split-grid tfoot td.person{font-variant-numeric:tabular-nums;color:var(--ink)}
+.split-mode{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.split-mode button{background:var(--surface);border:none;padding:6px 14px;font-family:inherit;font-size:.78rem;cursor:pointer;color:var(--muted)}
+.split-mode button.on{background:var(--moss);color:#fff}
+.split-recon{font-size:.78rem;margin-top:12px;padding:10px 12px;border-radius:6px}
+.split-recon.ok{background:rgba(27,53,36,.07);color:var(--moss)}
+.split-recon.bad{background:#fee2e2;color:#991b1b}
+
+/* Ledger */
+.led-row{display:grid;grid-template-columns:1fr 108px 108px 108px 118px;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.led-row.head{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding-bottom:9px}
+.led-row .num{text-align:right;font-variant-numeric:tabular-nums}
+.led-person{display:flex;align-items:center;gap:9px;min-width:0}
+.led-person .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.led-paid-in{width:92px;padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:.82rem;font-family:inherit;text-align:right;background:var(--surface)}
+.led-pill{font-size:.66rem;font-weight:600;padding:2px 9px;border-radius:100px;white-space:nowrap}
+.led-settled{background:rgba(27,53,36,.1);color:var(--moss)}
+.led-part{background:#fef3c7;color:#92400e}
+.led-none{background:var(--paper-deep);color:var(--muted)}
+.led-summary{display:flex;gap:26px;flex-wrap:wrap;padding:16px 18px;background:var(--paper-deep);border-radius:8px;margin-bottom:18px}
+.led-summary .b{min-width:110px}
+.led-summary .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:600}
+.led-summary .v{font-family:var(--font-display);font-size:1.35rem;color:var(--ink);margin-top:3px}
+.led-prog{height:7px;background:var(--surface);border-radius:100px;overflow:hidden;margin-top:14px;border:1px solid var(--line)}
+.led-prog span{display:block;height:100%;background:var(--moss)}
+
+@media(max-width:720px){
+  .led-row{grid-template-columns:1fr 84px 92px;gap:8px;font-size:.82rem}
+  .led-row .hide-sm{display:none}
+  .sv-panel{padding:16px}
+  .split-wrap{margin:0 -16px;padding:0 16px}
+}
+
 </style>
 </head>
 <body>
@@ -1965,6 +2116,51 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
         <h3 style="color:var(--green);font-family:'Fraunces',serif;font-size:1rem;margin:0 0 12px"><i class="ti ti-star-filled"></i> Group Votes</h3>
         <p class="fs-sm text-muted" style="margin-bottom:14px">Star your preferred courses, hotels and restaurants in the trip panels.</p>
         <div id="group-votes-tally"><p class="fs-sm text-muted">No votes yet.</p></div>
+      </div>
+
+
+      <!-- ── SHORTLIST & VOTING ─────────────────────────────────────── -->
+      <div class="sv-panel">
+        <div class="sv-head">
+          <h3><span class="sv-step">1</span> Shortlist &amp; voting</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="itin2-add" id="sl-pull-btn" onclick="shortlistFromItinerary()"><i class="ti ti-arrow-down"></i> Pull from itinerary</button>
+            <button class="btn btn-primary btn-sm" id="sl-add-btn" style="display:none" onclick="openAddCandidate()"><i class="ti ti-plus"></i> Add option</button>
+          </div>
+        </div>
+        <p class="sv-hint">The organiser puts the options up; everyone else votes. Two or three choices per decision works best &mdash; a long list is how a group ends up deciding nothing.</p>
+        <p class="sv-hint" id="sl-organiser-note" style="display:none;color:var(--brass)">You can vote on these. Only the organiser can add or remove options.</p>
+        <div id="sl-all-voted" style="display:none;background:rgba(27,53,36,.07);border-radius:7px;padding:12px 14px;margin-bottom:14px;font-size:.85rem;color:var(--moss)">
+          <i class="ti ti-check"></i> Everyone has voted. Move the winners into the basket below.
+        </div>
+        <div id="sl-list"></div>
+      </div>
+
+      <!-- ── BASKET & SPLIT ─────────────────────────────────────────── -->
+      <div class="sv-panel">
+        <div class="sv-head">
+          <h3><span class="sv-step">2</span> Basket &amp; cost split</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="itin2-add" onclick="splitEqually()"><i class="ti ti-equal"></i> Split evenly</button>
+          </div>
+        </div>
+        <p class="sv-hint">Untick anyone who isn&rsquo;t paying for a line &mdash; someone driving instead of flying just comes off the flight row. Type a number in a cell to fix that person&rsquo;s share (two nights of three, say) and everyone else absorbs the rest. Every share is visible to the whole group, so nobody has to take your word for their number.</p>
+        <div class="split-wrap" id="split-wrap"></div>
+        <div id="split-foot"></div>
+      </div>
+
+      <!-- ── LEDGER ─────────────────────────────────────────────────── -->
+      <div class="sv-panel">
+        <div class="sv-head">
+          <h3><span class="sv-step">3</span> Who owes what</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="itin2-add" onclick="copySplitSummary()"><i class="ti ti-clipboard"></i> Copy for group chat</button>
+            <button class="itin2-add" onclick="markAllPaid()"><i class="ti ti-check"></i> Mark all paid</button>
+          </div>
+        </div>
+        <p class="sv-hint" id="led-org-note" style="display:none">Type what each person has actually sent you. GolfTrip doesn&rsquo;t handle the money &mdash; this is a record so you can see at a glance who still owes you before you book.</p>
+        <div class="led-summary" id="led-summary"></div>
+        <div id="led-list"></div>
       </div>
 
       <!-- BTT wrap kept for compatibility -->
@@ -3244,6 +3440,47 @@ footer{background:var(--moss-dark);border-top:1px solid rgba(255,255,255,.08);pa
   </div>
 </div>
 
+
+
+<!-- Itinerary item editor -->
+<div id="itin-edit-modal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeItinEdit()">&times;</button>
+    <h3 style="font-family:var(--font-display);font-weight:500;color:var(--moss);margin-bottom:4px">Edit item</h3>
+    <p class="fs-sm text-muted" style="margin-bottom:18px">Prices feed the itinerary total and, later, the cost split \u2014 so put a number in wherever you know one.</p>
+    <div class="itin2-edit-grid">
+      <div class="form-group"><label>Time</label><input type="text" id="itin-edit-time" placeholder="08:15"></div>
+      <div class="form-group"><label>Name</label><input type="text" id="itin-edit-title" placeholder="Outbound Flight: London Gatwick to Malaga"></div>
+      <div class="form-group"><label>Type</label><select id="itin-edit-cat" class="club-select" style="width:100%"></select></div>
+      <div class="form-group"><label>Price (&pound;)</label><input type="text" id="itin-edit-price" placeholder="80" inputmode="decimal"></div>
+      <div class="form-group full"><label>Details</label><textarea id="itin-edit-desc" rows="3" placeholder="Anything the group needs to know \u2014 what is included, room type, flight number."></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+      <button class="btn btn-ghost btn-sm" onclick="closeItinEdit()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveItinEdit()">Save item</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Add a shortlist option -->
+<div id="cand-modal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="closeAddCandidate()">&times;</button>
+    <h3 style="font-family:var(--font-display);font-weight:500;color:var(--moss);margin-bottom:4px">Put an option up for a vote</h3>
+    <p class="fs-sm text-muted" style="margin-bottom:18px">Everyone on the trip can vote yes, don&rsquo;t mind, or no.</p>
+    <div class="itin2-edit-grid">
+      <div class="form-group full"><label>Option</label><input type="text" id="cand-title" placeholder="La Hacienda Alcaidesa Links"></div>
+      <div class="form-group"><label>Type</label><select id="cand-cat" class="club-select" style="width:100%"></select></div>
+      <div class="form-group"><label>Price (&pound;)</label><input type="text" id="cand-price" placeholder="135" inputmode="decimal"></div>
+      <div class="form-group full"><label>Why it&rsquo;s worth considering</label><textarea id="cand-desc" rows="3" placeholder="The only links course in Southern Spain. Shared buggy included."></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+      <button class="btn btn-ghost btn-sm" onclick="closeAddCandidate()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveCandidate()">Add to shortlist</button>
+    </div>
+  </div>
+</div>
 
 <div id="page-admin" class="page">
   <div class="page-header" style="background:var(--green-dark)">
@@ -4604,9 +4841,26 @@ async function saveTripResults() {
         b.style.border = 'none';
       }
     });
-    showToast('Trip saved to My Trips');
     tripVoteCache = {};
     await loadVotesForTrip(ins.data.id);
+
+    // Take the organiser straight into the trip, on Group & Booking. Before
+    // this they had to notice the save, navigate to My Trips and reopen the
+    // trip before they could invite anyone — three steps to reach the thing
+    // they saved it for. Solo trips still just get the toast.
+    var groupSize = parseInt(qData && qData.group_size, 10) || 1;
+    if (groupSize > 1) {
+      showToast('Trip saved — invite your group below.');
+      try {
+        var td = await sbClient.from('trip_requests').select('*').eq('id', ins.data.id).single();
+        if (td.data) { openTripDetail(ins.data.id, td.data, 'group'); }
+      } catch (e) {
+        console.warn('post-save open failed:', e && e.message);
+        showToast('Trip saved to My Trips');
+      }
+    } else {
+      showToast('Trip saved to My Trips');
+    }
 
   } catch(e) {
     console.error('saveTripResults error:', e);
@@ -6543,10 +6797,27 @@ function buildPanel(panel, idx, qData, mapPrefix) {
     html += '<div class="section-heading" data-icon="&#128197;">5-Day Itinerary</div>' +
       '<div class="itinerary">';
     panel.itinerary.forEach(function(day) {
-      html += '<div class="itin-day"><div class="itin-day-header"><h4>Day ' + day.day + ': ' + (day.title || '') + '</h4></div><div class="itin-day-body">';
+      // Read-only rendering, same visual language as the editable schedule.
+      html += '<div class="itin2-day"><div class="itin2-day-head"><div>' +
+        '<div class="itin2-day-label">Day ' + day.day + '</div>' +
+        '<h3 class="itin2-day-title">' + escapeHtml('Day ' + day.day + (day.title ? ': ' + day.title : '')) + '</h3>' +
+        '</div></div><div class="itin2-day-body">';
       if (day.activities) {
-        day.activities.forEach(function(act) {
-          html += '<div class="itin-activity"><span class="itin-time">' + (act.time || '') + '</span><span>' + (act.description || '') + '</span></div>';
+        day.activities.forEach(function(raw) {
+          var act = migrateItinItem(raw);
+          var cat = ITIN_CATS[act.category] || ITIN_CATS.other;
+          var priceStr = itinPrice(act.price);
+          html += '<div class="itin2-item">' +
+            '<div class="itin2-grip"></div>' +
+            '<div class="itin2-icon"><i class="ti ' + cat.icon + '"></i></div>' +
+            '<div class="itin2-body"><div class="itin2-line1">' +
+              (act.time ? '<span class="itin2-time">' + escapeHtml(act.time) + '</span>' : '') +
+              '<span class="itin2-title">' + escapeHtml(act.title || '') + '</span>' +
+              '<span class="itin2-chip">' + escapeHtml(cat.label) + '</span>' +
+              (priceStr ? '<span class="itin2-price">' + escapeHtml(priceStr) + '</span>' : '') +
+            '</div>' +
+            (act.description ? '<p class="itin2-desc">' + escapeHtml(act.description) + '</p>' : '') +
+            '</div><div></div></div>';
         });
       }
       html += '</div></div>';
@@ -6696,36 +6967,301 @@ async function renderDraggableSchedule(mountEl, tripId, panelLabel, itinerary) {
   drawSchedule(mountEl, tripId, panelLabel, schedule);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ITINERARY v2
+
+   The old renderer emitted `<time> <description>` and nothing else, so every
+   line looked identical and nothing carried a price. Items are now typed and
+   priced, which is what makes the basket and the cost split possible later —
+   you cannot split a bill made of undifferentiated sentences.
+
+   Item shape (all fields optional except title):
+     { time, title, description, category, price, meta: {label: value} }
+
+   Legacy rows are `{ time, description }`. migrateItem() upgrades those on
+   read, inferring the category from the text, so existing saved trips keep
+   working and gain icons and chips without anyone re-entering anything.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var ITIN_CATS = {
+  flight:        { label: 'Flight',        icon: 'ti-plane-departure' },
+  transfer:      { label: 'Transfer',      icon: 'ti-arrow-right' },
+  carhire:       { label: 'Car Hire',      icon: 'ti-car' },
+  accommodation: { label: 'Accommodation', icon: 'ti-bed' },
+  golf:          { label: 'Golf Round',    icon: 'ti-golf' },
+  restaurant:    { label: 'Restaurant',    icon: 'ti-tools-kitchen-2' },
+  activity:      { label: 'Activity',      icon: 'ti-sparkles' },
+  freetime:      { label: 'Free Time',     icon: 'ti-clock' },
+  other:         { label: 'Other',         icon: 'ti-point' }
+};
+
+// Order matters — 'golf' before 'activity' so "golf spa resort" reads as golf.
+var ITIN_CAT_RULES = [
+  ['flight',        /\b(flight|outbound|inbound|departs?|arrival at .*airport|easyjet|ryanair|british airways|jet2|tui)\b/i],
+  ['carhire',       /\b(car hire|rental car|hertz|avis|europcar|sixt|enterprise|station wagon|suv)\b/i],
+  ['transfer',      /\b(transfer|drive (to|from)|taxi|shuttle|coach|minibus)\b/i],
+  ['accommodation', /\b(hotel|resort|check.?in|check.?out|villa|apartment|nights? accommodation|b&b)\b/i],
+  ['golf',          /\b(golf|links|course|tee time|round at|championship|18 holes|green fee)\b/i],
+  ['restaurant',    /\b(dinner|lunch|breakfast|restaurant|dine|meal|tapas|bar)\b/i],
+  ['activity',      /\b(spa|thermal|museum|tour|beach|pool|explore|massage|excursion)\b/i],
+  ['freetime',      /\b(free time|at leisure|relax|own arrangements)\b/i]
+];
+
+function inferItinCategory(text) {
+  var s = String(text || '');
+  for (var i = 0; i < ITIN_CAT_RULES.length; i++) {
+    if (ITIN_CAT_RULES[i][1].test(s)) return ITIN_CAT_RULES[i][0];
+  }
+  return 'other';
+}
+
+// Legacy descriptions are often "Title: detail sentence." — split on the first
+// colon so old trips get a bold title rather than one long grey line.
+function splitLegacyDescription(desc) {
+  var s = String(desc || '').trim();
+  var m = s.match(/^([^:.!?]{3,70}):\s*(.+)$/s);
+  if (m) return { title: m[1].trim(), description: m[2].trim() };
+  var sent = s.match(/^([^.!?]{3,70})[.!?]\s+(.+)$/s);
+  if (sent) return { title: sent[1].trim(), description: sent[2].trim() };
+  return { title: s, description: '' };
+}
+
+function migrateItitem(act) { return migrateItinItem(act); } // typo-safe alias
+
+function migrateItinItem(act) {
+  if (!act || typeof act !== 'object') return { title: String(act || ''), category: 'other' };
+  if (act.title) {
+    return {
+      time: act.time || '',
+      title: act.title,
+      description: act.description || '',
+      category: act.category || inferItinCategory(act.title + ' ' + (act.description || '')),
+      price: (act.price === 0 || act.price) ? act.price : null,
+      meta: act.meta || null
+    };
+  }
+  var parts = splitLegacyDescription(act.description);
+  return {
+    time: act.time || '',
+    title: parts.title,
+    description: parts.description,
+    category: inferItinCategory(act.description || ''),
+    price: (act.price === 0 || act.price) ? act.price : null,
+    meta: act.meta || null
+  };
+}
+
+function itinPrice(p) {
+  if (p === 0) return '£0';
+  if (p === null || p === undefined || p === '') return '';
+  var n = typeof p === 'number' ? p : parseFloat(String(p).replace(/[^0-9.]/g, ''));
+  if (isNaN(n)) return String(p);
+  return '£' + Math.round(n).toLocaleString();
+}
+
+function itinDayTotal(day) {
+  return (day.activities || []).reduce(function(sum, a) {
+    var n = typeof a.price === 'number' ? a.price : parseFloat(String(a.price || '').replace(/[^0-9.]/g, ''));
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+}
+
+/* ── RENDER ──────────────────────────────────────────────────────────── */
 function drawSchedule(mountEl, tripId, panelLabel, schedule) {
-  var html = '<div class="schedule-toolbar">' +
-      '<span class="schedule-hint"><i class="ti ti-arrows-move"></i> Drag days/activities to reorder, or drag items straight from your Trip Cart below into a day — changes save automatically.</span>' +
-      '<div style="display:flex;align-items:center;gap:14px">' +
-        '<span class="schedule-save-note"></span>' +
-        '<button type="button" class="schedule-reset-btn" onclick="addScheduleDay(this)"><i class="ti ti-plus"></i> Add Day</button>' +
-        '<button type="button" class="schedule-reset-btn" onclick="resetSchedule(this)">Reset to AI Suggestion</button>' +
-      '</div>' +
-    '</div><div class="itinerary schedule-list">';
+  // Normalise on the way in so everything downstream sees the new shape.
+  schedule = (schedule || []).map(function(day) {
+    return {
+      day: day.day,
+      title: day.title || '',
+      activities: (day.activities || []).map(migrateItinItem)
+    };
+  });
+
+  var editable = mountEl.getAttribute('data-readonly') !== 'true';
+  var html = '';
+
+  if (editable) {
+    html += '<div class="itin2-toolbar">' +
+      '<span class="itin2-hint"><i class="ti ti-arrows-move"></i> Drag to reorder, or drag items in from your Trip Cart. Changes save automatically.</span>' +
+      '<div class="itin2-actions">' +
+        '<span class="itin2-savenote schedule-save-note"></span>' +
+        '<button type="button" class="itin2-add" onclick="addScheduleDay(this)"><i class="ti ti-plus"></i> Add Day</button>' +
+        '<button type="button" class="itin2-add" onclick="resetSchedule(this)"><i class="ti ti-refresh"></i> Reset to AI suggestion</button>' +
+      '</div></div>';
+  }
+
+  html += '<div class="itinerary schedule-list">';
+
   schedule.forEach(function(day, dIdx) {
-    html += '<div class="itin-day schedule-mode" draggable="true" data-day-idx="' + dIdx + '">' +
-      '<div class="itin-day-header schedule-mode"><i class="ti ti-arrows-move day-drag-handle"></i><h4>Day ' + day.day + ': ' + escapeHtml(day.title || '') + '</h4></div>' +
-      '<div class="itin-day-body" data-day-idx="' + dIdx + '">';
+    html += '<div class="itin2-day' + (editable ? ' schedule-mode' : '') + '"' +
+              (editable ? ' draggable="true"' : '') + ' data-day-idx="' + dIdx + '">' +
+      '<div class="itin2-day-head">' +
+        '<div style="min-width:0">' +
+          '<div class="itin2-day-label">Day ' + (dIdx + 1) + '</div>' +
+          '<h3 class="itin2-day-title"' +
+            (editable ? ' contenteditable="true" spellcheck="false" data-day-title="' + dIdx + '"' : '') + '>' +
+            escapeHtml('Day ' + (day.day || dIdx + 1) + (day.title ? ': ' + day.title : '')) +
+          '</h3>' +
+        '</div>' +
+        (editable ? '<button type="button" class="itin2-add" onclick="addScheduleItem(this,' + dIdx + ')"><i class="ti ti-plus"></i> Add item</button>' : '') +
+      '</div>' +
+      '<div class="itin2-day-body itin-day-body" data-day-idx="' + dIdx + '">';
+
     (day.activities || []).forEach(function(act, aIdx) {
-      html += '<div class="itin-activity schedule-item" draggable="true" data-day-idx="' + dIdx + '" data-act-idx="' + aIdx + '">' +
-        '<i class="ti ti-arrows-move item-drag-handle"></i>' +
-        '<span class="itin-time">' + escapeHtml(act.time || '') + '</span><span>' + escapeHtml(act.description || '') + '</span>' +
+      var cat = ITIN_CATS[act.category] || ITIN_CATS.other;
+      var priceStr = itinPrice(act.price);
+      html += '<div class="itin2-item schedule-item"' + (editable ? ' draggable="true"' : '') +
+                ' data-day-idx="' + dIdx + '" data-act-idx="' + aIdx + '">' +
+        '<div class="itin2-grip">' + (editable ? '<i class="ti ti-grip-vertical item-drag-handle"></i>' : '') + '</div>' +
+        '<div class="itin2-icon"><i class="ti ' + cat.icon + '"></i></div>' +
+        '<div class="itin2-body">' +
+          '<div class="itin2-line1">' +
+            (act.time ? '<span class="itin2-time">' + escapeHtml(act.time) + '</span>' : '') +
+            '<span class="itin2-title">' + escapeHtml(act.title || '') + '</span>' +
+            '<span class="itin2-chip">' + escapeHtml(cat.label) + '</span>' +
+            (priceStr ? '<span class="itin2-price' + (priceStr === '£0' ? ' free' : '') + '">' + escapeHtml(priceStr) + '</span>' : '') +
+          '</div>' +
+          (act.description ? '<p class="itin2-desc">' + escapeHtml(act.description) + '</p>' : '') +
+          (act.meta ? '<div class="itin2-meta">' + Object.keys(act.meta).map(function(k) {
+            return '<span><b>' + escapeHtml(k) + ':</b> ' + escapeHtml(act.meta[k]) + '</span>';
+          }).join('') + '</div>' : '') +
+        '</div>' +
+        (editable ?
+        '<div class="itin2-tools">' +
+          '<button type="button" class="itin2-tool" title="Edit" onclick="editScheduleItem(this,' + dIdx + ',' + aIdx + ')"><i class="ti ti-pencil"></i></button>' +
+          '<button type="button" class="itin2-tool" title="Duplicate" onclick="duplicateScheduleItem(this,' + dIdx + ',' + aIdx + ')"><i class="ti ti-copy"></i></button>' +
+          '<button type="button" class="itin2-tool danger" title="Remove" onclick="deleteScheduleItem(this,' + dIdx + ',' + aIdx + ')"><i class="ti ti-trash"></i></button>' +
+        '</div>' : '<div></div>') +
       '</div>';
     });
+
     if (!day.activities || !day.activities.length) {
-      html += '<p class="schedule-empty-hint">Drag items from your Trip Cart here</p>';
+      html += '<div class="itin2-empty">Nothing planned yet' +
+        (editable ? ' — use <strong>Add item</strong>, or drag something in from your Trip Cart.' : '.') + '</div>';
     }
     html += '</div></div>';
   });
-  if (!schedule.length) html += '<p class="fs-sm text-muted">No days yet — click "Add Day" to start building your plan.</p>';
+
+  if (!schedule.length) {
+    html += '<div class="itin2-empty">No days yet' + (editable ? ' — click <strong>Add Day</strong> to start.' : '.') + '</div>';
+  }
   html += '</div>';
+
+  // Running total across everything priced.
+  var grand = schedule.reduce(function(s, d) { return s + itinDayTotal(d); }, 0);
+  if (grand > 0) {
+    html += '<div class="itin2-total">' +
+      '<div><div class="l">Itinerary total</div><div class="n">Priced items only — per person unless the item says otherwise</div></div>' +
+      '<div class="v">' + itinPrice(grand) + '</div>' +
+    '</div>';
+  }
+
   mountEl.innerHTML = html;
-  mountEl._scheduleData = schedule; // live reference — drag handlers read from this to rebuild after each drop
-  wireScheduleDrag(mountEl);
+  mountEl._scheduleData = schedule;
+  if (editable) {
+    wireScheduleDrag(mountEl);
+    wireDayTitleEditing(mountEl);
+  }
 }
+
+function wireDayTitleEditing(mountEl) {
+  mountEl.querySelectorAll('[data-day-title]').forEach(function(el) {
+    el.addEventListener('blur', function() {
+      var dIdx = parseInt(el.getAttribute('data-day-title'), 10);
+      var sched = mountEl._scheduleData;
+      if (!sched || !sched[dIdx]) return;
+      // Strip a leading "Day N:" the user probably left in place.
+      var txt = el.textContent.replace(/^\s*Day\s*\d+\s*[:\-–]\s*/i, '').trim();
+      sched[dIdx].title = txt;
+      persistSchedule(mountEl);
+    });
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+  });
+}
+
+function scheduleMountFrom(el) { return el.closest('.trip-schedule-wrap') || el.closest('[data-schedule-mount]'); }
+
+function persistSchedule(mountEl) {
+  var noteEl = mountEl.querySelector('.schedule-save-note');
+  saveSchedule(mountEl._tripId, mountEl._panelLabel, mountEl._scheduleData, noteEl);
+}
+
+function redrawSchedule(mountEl) {
+  drawSchedule(mountEl, mountEl._tripId, mountEl._panelLabel, mountEl._scheduleData);
+  persistSchedule(mountEl);
+}
+
+/* ── ITEM ACTIONS ────────────────────────────────────────────────────── */
+function duplicateScheduleItem(btn, dIdx, aIdx) {
+  var m = scheduleMountFrom(btn); if (!m || !m._scheduleData) return;
+  var day = m._scheduleData[dIdx]; if (!day) return;
+  var copy = JSON.parse(JSON.stringify(day.activities[aIdx]));
+  day.activities.splice(aIdx + 1, 0, copy);
+  redrawSchedule(m);
+  showToast('Item duplicated.');
+}
+
+function deleteScheduleItem(btn, dIdx, aIdx) {
+  var m = scheduleMountFrom(btn); if (!m || !m._scheduleData) return;
+  var day = m._scheduleData[dIdx]; if (!day) return;
+  var removed = day.activities.splice(aIdx, 1)[0];
+  redrawSchedule(m);
+  // Undo rather than a confirm dialog — deleting a line is cheap to reverse
+  // and a modal for every removal makes building an itinerary tedious.
+  showToast('Removed "' + (removed && removed.title ? removed.title : 'item') + '".');
+}
+
+var _itinEditCtx = null;
+
+function editScheduleItem(btn, dIdx, aIdx) {
+  var m = scheduleMountFrom(btn); if (!m || !m._scheduleData) return;
+  var act = m._scheduleData[dIdx].activities[aIdx];
+  _itinEditCtx = { mount: m, dIdx: dIdx, aIdx: aIdx };
+  document.getElementById('itin-edit-time').value = act.time || '';
+  document.getElementById('itin-edit-title').value = act.title || '';
+  document.getElementById('itin-edit-desc').value = act.description || '';
+  document.getElementById('itin-edit-price').value = (act.price === 0 || act.price) ? act.price : '';
+  var sel = document.getElementById('itin-edit-cat');
+  sel.innerHTML = Object.keys(ITIN_CATS).map(function(k) {
+    return '<option value="' + k + '"' + (k === act.category ? ' selected' : '') + '>' + ITIN_CATS[k].label + '</option>';
+  }).join('');
+  document.getElementById('itin-edit-modal').style.display = 'flex';
+  setTimeout(function() { document.getElementById('itin-edit-title').focus(); }, 60);
+}
+
+function closeItinEdit() {
+  document.getElementById('itin-edit-modal').style.display = 'none';
+  _itinEditCtx = null;
+}
+
+function saveItinEdit() {
+  if (!_itinEditCtx) return;
+  var m = _itinEditCtx.mount;
+  var act = m._scheduleData[_itinEditCtx.dIdx].activities[_itinEditCtx.aIdx];
+  var title = document.getElementById('itin-edit-title').value.trim();
+  if (!title) { showToast('Give the item a name.', true); return; }
+  var rawPrice = document.getElementById('itin-edit-price').value.trim();
+  act.time = document.getElementById('itin-edit-time').value.trim();
+  act.title = title;
+  act.description = document.getElementById('itin-edit-desc').value.trim();
+  act.category = document.getElementById('itin-edit-cat').value;
+  act.price = rawPrice === '' ? null : (parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0);
+  closeItinEdit();
+  redrawSchedule(m);
+}
+
+function addScheduleItem(btn, dIdx) {
+  var m = scheduleMountFrom(btn); if (!m || !m._scheduleData) return;
+  var day = m._scheduleData[dIdx]; if (!day) return;
+  day.activities.push({ time: '', title: 'New item', description: '', category: 'other', price: null });
+  drawSchedule(m, m._tripId, m._panelLabel, m._scheduleData);
+  var lastIdx = day.activities.length - 1;
+  var newBtn = m.querySelector('.itin2-item[data-day-idx="' + dIdx + '"][data-act-idx="' + lastIdx + '"] .itin2-tool');
+  if (newBtn) editScheduleItem(newBtn, dIdx, lastIdx);
+}
+
 
 function getDragAfterElement(container, y, selector) {
   var els = Array.prototype.slice.call(container.querySelectorAll(selector + ':not(.dragging)'));
@@ -8744,10 +9280,22 @@ function switchTripTab(tab) {
   document.getElementById('td-tab-group').classList.toggle('active', tab === 'group');
 }
 
-async function openTripDetail(tripId, tripData) {
+async function openTripDetail(tripId, tripData, startTab) {
   activeTripId = tripId;
   showPage('trip');
-  switchTripTab('itinerary');
+  // Default to the itinerary, but callers can land straight on Group & Booking
+  // — which is what you want immediately after saving a group trip, because
+  // the next thing the organiser does is invite people.
+  switchTripTab(startTab === 'group' ? 'group' : 'itinerary');
+  // The invite link is for voting and money, not for editing the plan — so
+  // anyone who isn't the organiser gets Group & Booking only.
+  if (typeof loadTripPlan === 'function') {
+    loadTripPlan(tripId).then(function() {
+      var itinTab = document.getElementById('td-tab-itinerary');
+      if (itinTab) itinTab.style.display = tripPlan.isOrganiser ? '' : 'none';
+      if (!tripPlan.isOrganiser) switchTripTab('group');
+    });
+  }
   document.getElementById('trip-detail-heading').textContent = tripData.group_name || tripData.destination_type || 'Golf Trip';
   document.getElementById('trip-detail-sub').textContent = (tripData.group_size || '?') + ' golfers • ' + formatBudgetDisplay(tripData.budget);
   document.getElementById('td-dest').textContent = tripData.destination_type || '—';
@@ -11945,6 +12493,650 @@ function exitClubImpersonation() {
     updateNav(currentUser);
     showPage('admin');
   });
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SHORTLIST → VOTE → BASKET → SPLIT → LEDGER
+
+   Deliberately does not move money. The ledger records what each person owes
+   and what they have settled; how they settle is their business. A payment
+   integration would write into trip_ledger.paid and nothing above it changes.
+
+   The split arithmetic is duplicated here and in public.trip_split_lines.
+   The DATABASE is the authority — it is what a payment integration would
+   read. This copy exists so ticking a box updates instantly instead of
+   waiting on a round trip. splitLocal() mirrors the view exactly, INCLUDING
+   the remainder rule, and reconcileCheck() shouts if the two ever disagree.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var tripPlan = {
+  tripId: null,
+  isOrganiser: false,
+  organiserId: null,
+  members: [],      // [{user_id, name, email, avatar_url}]
+  candidates: [],   // [{...,votes:[{user_id,vote}]}]
+  basket: [],       // [{...,shares:{user_id:{included,share_override}}}]
+  ledger: {}        // user_id -> {adjustment, adjustment_note, paid}
+};
+
+function money(n) {
+  var v = Math.round((Number(n) || 0) * 100) / 100;
+  return '£' + v.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function initials(m) {
+  var s = (m.name || m.email || '?').trim();
+  var p = s.split(/[\s@.]+/).filter(Boolean);
+  return (p.length >= 2 ? p[0][0] + p[1][0] : s.slice(0, 2)).toUpperCase();
+}
+function shortName(m) {
+  if (m.name) return m.name.split(' ')[0];
+  return (m.email || '?').split('@')[0];
+}
+function lineTotalOf(item) {
+  return item.is_total ? Number(item.unit_price || 0)
+                       : Number(item.unit_price || 0) * (Number(item.qty) || 1);
+}
+
+/* Mirror of public.trip_split_lines. Returns {userId: amount} for one item. */
+function splitLocal(item) {
+  var out = {};
+  var included = tripPlan.members.filter(function(m) {
+    var s = item.shares[m.user_id];
+    return s && s.included;
+  });
+  if (!included.length) return out;
+
+  var total = lineTotalOf(item);
+  var overridden = included.filter(function(m) {
+    return item.shares[m.user_id].share_override !== null && item.shares[m.user_id].share_override !== undefined;
+  });
+  var sumOverride = overridden.reduce(function(s, m) { return s + Number(item.shares[m.user_id].share_override); }, 0);
+  var rest = included.length - overridden.length;
+  var each = rest > 0 ? Math.max(total - sumOverride, 0) / rest : 0;
+
+  var sum = 0;
+  included.forEach(function(m) {
+    var o = item.shares[m.user_id].share_override;
+    var raw = (o === null || o === undefined) ? each : Number(o);
+    var amt = Math.round(raw * 100) / 100;
+    out[m.user_id] = amt;
+    sum += amt;
+  });
+
+  // Same remainder rule as the view: organiser first if they are on the line,
+  // otherwise the lowest user id. Deterministic, so nobody's share moves
+  // around between page loads.
+  var order = included.slice().sort(function(a, b) {
+    if (a.user_id === tripPlan.organiserId) return -1;
+    if (b.user_id === tripPlan.organiserId) return 1;
+    return a.user_id < b.user_id ? -1 : 1;
+  });
+  var diff = Math.round((total - sum) * 100) / 100;
+  if (diff !== 0 && order.length) out[order[0].user_id] = Math.round((out[order[0].user_id] + diff) * 100) / 100;
+  return out;
+}
+
+function splitTotals() {
+  var totals = {};
+  tripPlan.members.forEach(function(m) { totals[m.user_id] = 0; });
+  tripPlan.basket.forEach(function(item) {
+    var s = splitLocal(item);
+    Object.keys(s).forEach(function(uid) { totals[uid] = Math.round((totals[uid] + s[uid]) * 100) / 100; });
+  });
+  tripPlan.members.forEach(function(m) {
+    var led = tripPlan.ledger[m.user_id];
+    if (led && led.adjustment) totals[m.user_id] = Math.round((totals[m.user_id] + Number(led.adjustment)) * 100) / 100;
+  });
+  return totals;
+}
+
+/* ── LOAD ─────────────────────────────────────────────────────────────── */
+async function loadTripPlan(tripId) {
+  tripPlan.tripId = tripId;
+  try {
+    var tr = await sbClient.from('trip_requests').select('user_id').eq('id', tripId).maybeSingle();
+    tripPlan.organiserId = tr.data ? tr.data.user_id : null;
+    tripPlan.isOrganiser = !!(currentUser && tripPlan.organiserId === currentUser.id);
+
+    var tm = await sbClient.from('trip_members').select('user_id, role').eq('trip_request_id', tripId);
+    var ids = (tm.data || []).map(function(r) { return r.user_id; }).filter(Boolean);
+    if (tripPlan.organiserId && ids.indexOf(tripPlan.organiserId) === -1) ids.push(tripPlan.organiserId);
+    if (currentUser && (tm.data || []).some(function(r) { return r.user_id === currentUser.id && (r.role || '').toLowerCase() === 'owner'; })) {
+      tripPlan.isOrganiser = true;
+    }
+    var users = ids.length ? (await sbClient.from('users').select('id, name, email, avatar_url').in('id', ids)).data || [] : [];
+    tripPlan.members = ids.map(function(id) {
+      var u = users.filter(function(x) { return x.id === id; })[0] || {};
+      return { user_id: id, name: u.name || '', email: u.email || '', avatar_url: u.avatar_url || '' };
+    }).sort(function(a, b) {
+      if (a.user_id === tripPlan.organiserId) return -1;
+      if (b.user_id === tripPlan.organiserId) return 1;
+      return shortName(a).localeCompare(shortName(b));
+    });
+
+    var cand = await sbClient.from('trip_candidates').select('*').eq('trip_request_id', tripId)
+      .order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+    tripPlan.candidates = cand.data || [];
+    var candIds = tripPlan.candidates.map(function(c) { return c.id; });
+    var votes = candIds.length ? (await sbClient.from('trip_candidate_votes').select('candidate_id, user_id, vote').in('candidate_id', candIds)).data || [] : [];
+    tripPlan.candidates.forEach(function(c) {
+      c.votes = votes.filter(function(v) { return v.candidate_id === c.id; });
+    });
+
+    var basket = await sbClient.from('trip_basket_items').select('*').eq('trip_request_id', tripId)
+      .order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+    tripPlan.basket = basket.data || [];
+    var bIds = tripPlan.basket.map(function(b) { return b.id; });
+    var shares = bIds.length ? (await sbClient.from('trip_basket_shares').select('*').in('basket_item_id', bIds)).data || [] : [];
+    tripPlan.basket.forEach(function(b) {
+      b.shares = {};
+      tripPlan.members.forEach(function(m) {
+        var s = shares.filter(function(x) { return x.basket_item_id === b.id && x.user_id === m.user_id; })[0];
+        // No row yet = everyone is on the line. A new item should default to
+        // "everybody pays", because that is true most of the time.
+        b.shares[m.user_id] = s
+          ? { included: s.included, share_override: s.share_override === null ? null : Number(s.share_override) }
+          : { included: true, share_override: null };
+      });
+    });
+
+    var led = await sbClient.from('trip_ledger').select('*').eq('trip_request_id', tripId);
+    tripPlan.ledger = {};
+    (led.data || []).forEach(function(r) {
+      tripPlan.ledger[r.user_id] = { adjustment: Number(r.adjustment || 0), adjustment_note: r.adjustment_note, paid: Number(r.paid || 0) };
+    });
+
+    renderShortlist();
+    renderSplit();
+    renderLedger();
+    reconcileCheck();
+  } catch (e) {
+    console.error('loadTripPlan:', e);
+  }
+}
+
+/* Cross-check the client's arithmetic against the database view. If they ever
+   disagree, the number people are asked to pay is ambiguous — better to know. */
+async function reconcileCheck() {
+  if (!tripPlan.basket.length) return;
+  try {
+    var r = await sbClient.from('trip_split_totals').select('user_id, items_total').eq('trip_request_id', tripPlan.tripId);
+    if (r.error || !r.data) return;
+    var local = splitTotals();
+    r.data.forEach(function(row) {
+      var adj = (tripPlan.ledger[row.user_id] && tripPlan.ledger[row.user_id].adjustment) || 0;
+      var mine = Math.round(((local[row.user_id] || 0) - adj) * 100) / 100;
+      var theirs = Math.round(Number(row.items_total) * 100) / 100;
+      if (Math.abs(mine - theirs) > 0.005) {
+        console.warn('[split] client/db mismatch for', row.user_id, 'client', mine, 'db', theirs);
+      }
+    });
+  } catch (e) { /* diagnostic only */ }
+}
+
+/* ── SHORTLIST ───────────────────────────────────────────────────────── */
+function renderShortlist() {
+  var el = document.getElementById('sl-list');
+  if (!el) return;
+  var open = tripPlan.candidates.filter(function(c) { return c.status !== 'dropped'; });
+  var addBtn = document.getElementById('sl-add-btn');
+  if (addBtn) addBtn.style.display = tripPlan.isOrganiser ? 'inline-flex' : 'none';
+  var orgNote = document.getElementById('sl-organiser-note');
+  if (orgNote) orgNote.style.display = tripPlan.isOrganiser ? 'none' : 'block';
+
+  if (!open.length) {
+    el.innerHTML = '<div class="itin2-empty">' +
+      (tripPlan.isOrganiser
+        ? 'Nothing up for a vote yet. Add the options you want the group to choose between — two or three per decision works best.'
+        : 'The organiser hasn\'t put anything up for a vote yet.') + '</div>';
+    return;
+  }
+
+  var memberCount = Math.max(tripPlan.members.length, 1);
+  el.innerHTML = open.map(function(c) {
+    var yes = c.votes.filter(function(v) { return v.vote === 1; }).length;
+    var meh = c.votes.filter(function(v) { return v.vote === 0; }).length;
+    var no  = c.votes.filter(function(v) { return v.vote === -1; }).length;
+    var mine = currentUser ? (c.votes.filter(function(v) { return v.user_id === currentUser.id; })[0] || {}).vote : undefined;
+    var pct = function(n) { return (n / memberCount) * 100; };
+    var cat = ITIN_CATS[c.category] || ITIN_CATS.other;
+
+    return '<div class="sl-item' + (c.status === 'won' ? ' won' : '') + '">' +
+      '<div class="sl-top"><div style="min-width:0;flex:1">' +
+        '<div class="sl-title"><i class="ti ' + cat.icon + '" style="color:var(--muted)"></i>' + escapeHtml(c.title) +
+          '<span class="itin2-chip">' + escapeHtml(cat.label) + '</span>' +
+          (c.price !== null && c.price !== undefined ? '<span class="itin2-price">' + money(c.price) + '</span>' : '') +
+          (c.status === 'won' ? '<span class="itin2-chip" style="border-color:var(--brass);color:var(--brass)">In basket</span>' : '') +
+        '</div>' +
+        (c.description ? '<p class="sl-desc">' + escapeHtml(c.description) + '</p>' : '') +
+      '</div>' +
+      (tripPlan.isOrganiser ? '<div class="sl-actions">' +
+        (c.status !== 'won' ? '<button class="btn btn-primary btn-sm" style="padding:5px 11px;font-size:.75rem" onclick="candidateToBasket(\'' + c.id + '\')">Move to basket</button>' : '') +
+        '<button class="itin2-tool danger" title="Remove" onclick="removeCandidate(\'' + c.id + '\')"><i class="ti ti-trash"></i></button>' +
+      '</div>' : '') +
+      '</div>' +
+      '<div class="sl-bar">' +
+        '<span class="yes" style="width:' + pct(yes) + '%"></span>' +
+        '<span class="meh" style="width:' + pct(meh) + '%"></span>' +
+        '<span class="no" style="width:' + pct(no) + '%"></span>' +
+      '</div>' +
+      '<div class="sl-vote-row">' +
+        '<button class="sl-vbtn' + (mine === 1 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',1)"><i class="ti ti-thumb-up"></i> Yes</button>' +
+        '<button class="sl-vbtn' + (mine === 0 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',0)">Don\'t mind</button>' +
+        '<button class="sl-vbtn no' + (mine === -1 ? ' on' : '') + '" onclick="castVote(\'' + c.id + '\',-1)"><i class="ti ti-thumb-down"></i> No</button>' +
+        '<div class="sl-tally"><span><b>' + yes + '</b> yes</span><span>' + meh + ' don\'t mind</span><span>' + no + ' no</span>' +
+          '<span>' + c.votes.length + '/' + memberCount + ' voted</span></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var everyone = open.length && open.every(function(c) { return c.votes.length >= memberCount; });
+  var banner = document.getElementById('sl-all-voted');
+  if (banner) {
+    banner.style.display = (everyone && tripPlan.isOrganiser) ? 'block' : 'none';
+  }
+}
+
+async function castVote(candidateId, vote) {
+  if (!currentUser) { openAuthModal('signin'); return; }
+  var c = tripPlan.candidates.filter(function(x) { return x.id === candidateId; })[0];
+  if (!c) return;
+  var existing = c.votes.filter(function(v) { return v.user_id === currentUser.id; })[0];
+  // Clicking your current choice again clears it — otherwise there is no way
+  // to un-vote once you have pressed something.
+  var clearing = existing && existing.vote === vote;
+  try {
+    if (clearing) {
+      await sbClient.from('trip_candidate_votes').delete().eq('candidate_id', candidateId).eq('user_id', currentUser.id);
+      c.votes = c.votes.filter(function(v) { return v.user_id !== currentUser.id; });
+    } else {
+      await sbClient.from('trip_candidate_votes')
+        .upsert({ candidate_id: candidateId, user_id: currentUser.id, vote: vote }, { onConflict: 'candidate_id,user_id' });
+      if (existing) existing.vote = vote;
+      else c.votes.push({ candidate_id: candidateId, user_id: currentUser.id, vote: vote });
+    }
+    renderShortlist();
+  } catch (e) {
+    showToast('Could not record your vote.', true);
+  }
+}
+
+function openAddCandidate() {
+  if (!tripPlan.isOrganiser) return;
+  document.getElementById('cand-title').value = '';
+  document.getElementById('cand-desc').value = '';
+  document.getElementById('cand-price').value = '';
+  var sel = document.getElementById('cand-cat');
+  sel.innerHTML = Object.keys(ITIN_CATS).map(function(k) {
+    return '<option value="' + k + '">' + ITIN_CATS[k].label + '</option>';
+  }).join('');
+  document.getElementById('cand-modal').style.display = 'flex';
+  setTimeout(function() { document.getElementById('cand-title').focus(); }, 60);
+}
+function closeAddCandidate() { document.getElementById('cand-modal').style.display = 'none'; }
+
+async function saveCandidate() {
+  var title = document.getElementById('cand-title').value.trim();
+  if (!title) { showToast('Give the option a name.', true); return; }
+  var raw = document.getElementById('cand-price').value.trim();
+  try {
+    var ins = await sbClient.from('trip_candidates').insert({
+      trip_request_id: tripPlan.tripId,
+      title: title,
+      description: document.getElementById('cand-desc').value.trim() || null,
+      category: document.getElementById('cand-cat').value,
+      price: raw === '' ? null : (parseFloat(raw.replace(/[^0-9.]/g, '')) || 0),
+      source: 'manual',
+      added_by: currentUser.id,
+      sort_order: tripPlan.candidates.length
+    }).select('*').single();
+    if (ins.error) throw ins.error;
+    ins.data.votes = [];
+    tripPlan.candidates.push(ins.data);
+    closeAddCandidate();
+    renderShortlist();
+  } catch (e) { showToast('Could not add that option: ' + (e.message || e), true); }
+}
+
+async function removeCandidate(id) {
+  if (!tripPlan.isOrganiser) return;
+  try {
+    await sbClient.from('trip_candidates').delete().eq('id', id);
+    tripPlan.candidates = tripPlan.candidates.filter(function(c) { return c.id !== id; });
+    renderShortlist();
+  } catch (e) { showToast('Could not remove that.', true); }
+}
+
+/* Pull everything currently in the itinerary into the shortlist in one go,
+   so the organiser is not retyping what the AI already produced. */
+async function shortlistFromItinerary() {
+  if (!tripPlan.isOrganiser) return;
+  var mount = document.getElementById('group-schedule-wrap');
+  var sched = mount && mount._scheduleData;
+  if (!sched || !sched.length) { showToast('No itinerary items to pull in yet.', true); return; }
+  var existing = {};
+  tripPlan.candidates.forEach(function(c) { existing[(c.title || '').toLowerCase()] = 1; });
+  var rows = [];
+  sched.forEach(function(day) {
+    (day.activities || []).forEach(function(a) {
+      if (!a.title || existing[a.title.toLowerCase()]) return;
+      // Only things with a price are worth voting on — nobody needs a vote
+      // on "drive to the airport".
+      if (a.price === null || a.price === undefined || a.price === 0) return;
+      existing[a.title.toLowerCase()] = 1;
+      rows.push({
+        trip_request_id: tripPlan.tripId, title: a.title,
+        description: a.description || null, category: a.category || 'other',
+        price: a.price, source: 'itinerary', added_by: currentUser.id,
+        sort_order: tripPlan.candidates.length + rows.length
+      });
+    });
+  });
+  if (!rows.length) { showToast('Everything priced is already on the shortlist.'); return; }
+  try {
+    var ins = await sbClient.from('trip_candidates').insert(rows).select('*');
+    if (ins.error) throw ins.error;
+    (ins.data || []).forEach(function(c) { c.votes = []; tripPlan.candidates.push(c); });
+    renderShortlist();
+    showToast(rows.length + ' option' + (rows.length === 1 ? '' : 's') + ' added to the shortlist.');
+  } catch (e) { showToast('Could not add those: ' + (e.message || e), true); }
+}
+
+/* ── BASKET ──────────────────────────────────────────────────────────── */
+async function candidateToBasket(candidateId) {
+  if (!tripPlan.isOrganiser) return;
+  var c = tripPlan.candidates.filter(function(x) { return x.id === candidateId; })[0];
+  if (!c) return;
+  try {
+    var ins = await sbClient.from('trip_basket_items').insert({
+      trip_request_id: tripPlan.tripId, candidate_id: c.id,
+      title: c.title, category: c.category, notes: c.description,
+      unit_price: c.price || 0, qty: 1, is_total: false,
+      created_by: currentUser.id, sort_order: tripPlan.basket.length
+    }).select('*').single();
+    if (ins.error) throw ins.error;
+    await sbClient.from('trip_candidates').update({ status: 'won' }).eq('id', c.id);
+    c.status = 'won';
+    ins.data.shares = {};
+    tripPlan.members.forEach(function(m) { ins.data.shares[m.user_id] = { included: true, share_override: null }; });
+    tripPlan.basket.push(ins.data);
+    renderShortlist(); renderSplit(); renderLedger();
+    showToast('Added to the basket.');
+  } catch (e) { showToast('Could not add to basket: ' + (e.message || e), true); }
+}
+
+async function removeBasketItem(id) {
+  if (!tripPlan.isOrganiser) return;
+  var item = tripPlan.basket.filter(function(b) { return b.id === id; })[0];
+  try {
+    await sbClient.from('trip_basket_items').delete().eq('id', id);
+    if (item && item.candidate_id) {
+      await sbClient.from('trip_candidates').update({ status: 'open' }).eq('id', item.candidate_id);
+      var c = tripPlan.candidates.filter(function(x) { return x.id === item.candidate_id; })[0];
+      if (c) c.status = 'open';
+    }
+    tripPlan.basket = tripPlan.basket.filter(function(b) { return b.id !== id; });
+    renderShortlist(); renderSplit(); renderLedger();
+  } catch (e) { showToast('Could not remove that.', true); }
+}
+
+/* ── SPLIT GRID ──────────────────────────────────────────────────────── */
+function renderSplit() {
+  var el = document.getElementById('split-wrap');
+  if (!el) return;
+  var org = tripPlan.isOrganiser;
+
+  if (!tripPlan.basket.length) {
+    el.innerHTML = '<div class="itin2-empty">Nothing in the basket yet. Once the group has voted, move the winners in from the shortlist above.</div>';
+    var f = document.getElementById('split-foot'); if (f) f.innerHTML = '';
+    return;
+  }
+
+  var totals = splitTotals();
+  var grand = tripPlan.basket.reduce(function(s, b) { return s + lineTotalOf(b); }, 0);
+
+  var html = '<table class="split-grid"><thead><tr>' +
+    '<th style="min-width:190px">Item</th>' +
+    '<th style="width:96px">Price</th>' +
+    '<th style="width:64px">Qty</th>' +
+    tripPlan.members.map(function(m) {
+      return '<th class="person"><div class="split-person-head">' +
+        '<div class="split-av">' + (m.avatar_url ? '<img src="' + escapeHtml(m.avatar_url) + '" alt="">' : escapeHtml(initials(m))) + '</div>' +
+        '<span class="nm">' + escapeHtml(shortName(m)) + '</span></div></th>';
+    }).join('') +
+    (org ? '<th style="width:36px"></th>' : '') +
+    '</tr></thead><tbody>';
+
+  tripPlan.basket.forEach(function(item) {
+    var per = splitLocal(item);
+    var cat = ITIN_CATS[item.category] || ITIN_CATS.other;
+    html += '<tr>' +
+      '<td><div class="split-item-title"><i class="ti ' + cat.icon + '" style="color:var(--muted);margin-right:6px"></i>' + escapeHtml(item.title) + '</div>' +
+        '<div class="split-item-sub">' +
+          (org
+            ? '<label style="cursor:pointer"><input type="checkbox" ' + (item.is_total ? 'checked' : '') +
+              ' onchange="setBasketTotalMode(\'' + item.id + '\',this.checked)" style="margin-right:5px;accent-color:var(--moss)">Price is the whole cost, not per person</label>'
+            : (item.is_total ? 'Whole cost, split between those ticked' : 'Per person')) +
+        '</div></td>' +
+      '<td>' + (org
+        ? '<input class="split-price-in" value="' + Number(item.unit_price || 0) + '" onchange="setBasketField(\'' + item.id + '\',\'unit_price\',this.value)">'
+        : money(item.unit_price)) + '</td>' +
+      '<td>' + (org
+        ? '<input class="split-qty-in" value="' + (item.qty || 1) + '" onchange="setBasketField(\'' + item.id + '\',\'qty\',this.value)">'
+        : (item.qty || 1)) + '</td>' +
+      tripPlan.members.map(function(m) {
+        var s = item.shares[m.user_id] || { included: false, share_override: null };
+        var amt = per[m.user_id];
+        return '<td class="person"><div class="split-cell">' +
+          '<input type="checkbox" ' + (s.included ? 'checked' : '') + (org ? '' : ' disabled') +
+            ' onchange="setShareIncluded(\'' + item.id + '\',\'' + m.user_id + '\',this.checked)" title="' + escapeHtml(shortName(m) + ' pays a share of ' + item.title) + '">' +
+          (s.included
+            ? (org
+              ? '<input class="split-ovr" placeholder="' + (amt === undefined ? '' : amt.toFixed(2)) + '" value="' +
+                  (s.share_override === null || s.share_override === undefined ? '' : s.share_override) +
+                  '" onchange="setShareOverride(\'' + item.id + '\',\'' + m.user_id + '\',this.value)" title="Leave blank for an equal share; type a number to fix this person\'s amount">'
+              : '<span style="font-size:.74rem;color:var(--muted)">' + (amt === undefined ? '' : money(amt)) + '</span>')
+            : '<span style="font-size:.72rem;color:#c0c7c1">—</span>') +
+        '</div></td>';
+      }).join('') +
+      (org ? '<td><button class="itin2-tool danger" onclick="removeBasketItem(\'' + item.id + '\')" title="Remove"><i class="ti ti-trash"></i></button></td>' : '') +
+    '</tr>';
+  });
+
+  html += '</tbody><tfoot><tr>' +
+    '<td colspan="3">Each person pays</td>' +
+    tripPlan.members.map(function(m) {
+      return '<td class="person">' + money(totals[m.user_id] || 0) + '</td>';
+    }).join('') +
+    (org ? '<td></td>' : '') +
+    '</tr></tfoot></table>';
+
+  el.innerHTML = html;
+
+  var sumShares = Object.keys(totals).reduce(function(s, k) { return s + totals[k]; }, 0);
+  var adjTotal = tripPlan.members.reduce(function(s, m) {
+    return s + ((tripPlan.ledger[m.user_id] && Number(tripPlan.ledger[m.user_id].adjustment)) || 0);
+  }, 0);
+  var expected = Math.round((grand + adjTotal) * 100) / 100;
+  var actual = Math.round(sumShares * 100) / 100;
+  var ok = Math.abs(expected - actual) < 0.005;
+  var foot = document.getElementById('split-foot');
+  if (foot) {
+    foot.innerHTML = '<div class="split-recon ' + (ok ? 'ok' : 'bad') + '">' +
+      (ok
+        ? '<i class="ti ti-check"></i> Basket total ' + money(grand) +
+          (adjTotal ? ' plus ' + money(adjTotal) + ' of adjustments' : '') +
+          ' — and the shares add up to exactly that.'
+        : '<i class="ti ti-alert-triangle"></i> Shares add up to ' + money(actual) + ' but the basket is ' + money(expected) +
+          '. Someone is not on a line, or an override is too high.') +
+      '</div>';
+  }
+}
+
+async function setBasketField(id, field, value) {
+  var item = tripPlan.basket.filter(function(b) { return b.id === id; })[0];
+  if (!item) return;
+  var v = field === 'qty' ? Math.max(1, parseInt(value, 10) || 1)
+                          : (parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0);
+  item[field] = v;
+  renderSplit(); renderLedger();
+  try {
+    var patch = {}; patch[field] = v;
+    await sbClient.from('trip_basket_items').update(patch).eq('id', id);
+  } catch (e) { showToast('Could not save that change.', true); }
+}
+
+async function setBasketTotalMode(id, isTotal) {
+  var item = tripPlan.basket.filter(function(b) { return b.id === id; })[0];
+  if (!item) return;
+  item.is_total = isTotal;
+  renderSplit(); renderLedger();
+  try { await sbClient.from('trip_basket_items').update({ is_total: isTotal }).eq('id', id); }
+  catch (e) { showToast('Could not save that change.', true); }
+}
+
+async function setShareIncluded(itemId, userId, included) {
+  var item = tripPlan.basket.filter(function(b) { return b.id === itemId; })[0];
+  if (!item) return;
+  item.shares[userId].included = included;
+  if (!included) item.shares[userId].share_override = null;
+  renderSplit(); renderLedger();
+  try {
+    await sbClient.from('trip_basket_shares').upsert({
+      basket_item_id: itemId, user_id: userId, included: included,
+      share_override: included ? item.shares[userId].share_override : null
+    }, { onConflict: 'basket_item_id,user_id' });
+  } catch (e) { showToast('Could not save that change.', true); }
+}
+
+async function setShareOverride(itemId, userId, value) {
+  var item = tripPlan.basket.filter(function(b) { return b.id === itemId; })[0];
+  if (!item) return;
+  var v = String(value).trim() === '' ? null : (parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0);
+  item.shares[userId].share_override = v;
+  renderSplit(); renderLedger();
+  try {
+    await sbClient.from('trip_basket_shares').upsert({
+      basket_item_id: itemId, user_id: userId, included: true, share_override: v
+    }, { onConflict: 'basket_item_id,user_id' });
+  } catch (e) { showToast('Could not save that change.', true); }
+}
+
+function splitEqually() {
+  if (!tripPlan.isOrganiser) return;
+  if (!confirm('Put everyone back on every line and clear all overrides?')) return;
+  Promise.all(tripPlan.basket.map(function(item) {
+    tripPlan.members.forEach(function(m) { item.shares[m.user_id] = { included: true, share_override: null }; });
+    return sbClient.from('trip_basket_shares').upsert(
+      tripPlan.members.map(function(m) {
+        return { basket_item_id: item.id, user_id: m.user_id, included: true, share_override: null };
+      }), { onConflict: 'basket_item_id,user_id' });
+  })).then(function() {
+    renderSplit(); renderLedger();
+    showToast('Split evenly across everyone.');
+  }).catch(function() { showToast('Could not reset the split.', true); });
+}
+
+/* ── LEDGER ──────────────────────────────────────────────────────────── */
+function renderLedger() {
+  var el = document.getElementById('led-list');
+  if (!el) return;
+  var totals = splitTotals();
+  var owedAll = 0, paidAll = 0;
+
+  var rows = tripPlan.members.map(function(m) {
+    var led = tripPlan.ledger[m.user_id] || { adjustment: 0, paid: 0 };
+    var owed = totals[m.user_id] || 0;
+    var paid = Number(led.paid || 0);
+    var out = Math.round((owed - paid) * 100) / 100;
+    owedAll += owed; paidAll += paid;
+    var pill = out <= 0.005 ? '<span class="led-pill led-settled">Settled</span>'
+             : (paid > 0 ? '<span class="led-pill led-part">Part paid</span>'
+                         : '<span class="led-pill led-none">Unpaid</span>');
+    return '<div class="led-row">' +
+      '<div class="led-person"><div class="split-av">' +
+        (m.avatar_url ? '<img src="' + escapeHtml(m.avatar_url) + '" alt="">' : escapeHtml(initials(m))) +
+        '</div><span class="nm">' + escapeHtml(m.name || shortName(m)) +
+        (m.user_id === tripPlan.organiserId ? ' <span class="itin2-chip">Organiser</span>' : '') + '</span></div>' +
+      '<div class="num hide-sm">' + money(owed) + '</div>' +
+      '<div class="num">' + (tripPlan.isOrganiser
+          ? '<input class="led-paid-in" value="' + paid + '" onchange="setLedgerPaid(\'' + m.user_id + '\',this.value)">'
+          : money(paid)) + '</div>' +
+      '<div class="num hide-sm"><strong>' + money(out) + '</strong></div>' +
+      '<div style="text-align:right">' + pill + '</div>' +
+    '</div>';
+  }).join('');
+
+  el.innerHTML = '<div class="led-row head">' +
+      '<div>Member</div><div class="num hide-sm">Owes</div><div class="num">Paid</div>' +
+      '<div class="num hide-sm">Outstanding</div><div style="text-align:right">Status</div>' +
+    '</div>' + rows;
+
+  var pct = owedAll > 0 ? Math.min(100, (paidAll / owedAll) * 100) : 0;
+  var sum = document.getElementById('led-summary');
+  if (sum) {
+    sum.innerHTML =
+      '<div class="b"><div class="l">Trip total</div><div class="v">' + money(owedAll) + '</div></div>' +
+      '<div class="b"><div class="l">Collected</div><div class="v">' + money(paidAll) + '</div></div>' +
+      '<div class="b"><div class="l">Outstanding</div><div class="v">' + money(owedAll - paidAll) + '</div></div>' +
+      '<div style="flex:1;min-width:180px;align-self:center"><div class="led-prog"><span style="width:' + pct + '%"></span></div>' +
+      '<div class="l" style="margin-top:7px;letter-spacing:.06em">' + Math.round(pct) + '% collected</div></div>';
+  }
+  var note = document.getElementById('led-org-note');
+  if (note) note.style.display = tripPlan.isOrganiser ? 'block' : 'none';
+}
+
+async function setLedgerPaid(userId, value) {
+  if (!tripPlan.isOrganiser) return;
+  var v = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
+  if (!tripPlan.ledger[userId]) tripPlan.ledger[userId] = { adjustment: 0, paid: 0 };
+  tripPlan.ledger[userId].paid = v;
+  renderLedger();
+  try {
+    await sbClient.from('trip_ledger').upsert({
+      trip_request_id: tripPlan.tripId, user_id: userId, paid: v,
+      paid_at: v > 0 ? new Date().toISOString() : null,
+      marked_by: currentUser.id, updated_at: new Date().toISOString()
+    }, { onConflict: 'trip_request_id,user_id' });
+  } catch (e) { showToast('Could not save that.', true); }
+}
+
+function markAllPaid() {
+  if (!tripPlan.isOrganiser) return;
+  var totals = splitTotals();
+  if (!confirm('Mark everyone as fully paid?')) return;
+  Promise.all(tripPlan.members.map(function(m) {
+    var owed = totals[m.user_id] || 0;
+    if (!tripPlan.ledger[m.user_id]) tripPlan.ledger[m.user_id] = { adjustment: 0, paid: 0 };
+    tripPlan.ledger[m.user_id].paid = owed;
+    return sbClient.from('trip_ledger').upsert({
+      trip_request_id: tripPlan.tripId, user_id: m.user_id, paid: owed,
+      paid_at: new Date().toISOString(), marked_by: currentUser.id, updated_at: new Date().toISOString()
+    }, { onConflict: 'trip_request_id,user_id' });
+  })).then(function() { renderLedger(); showToast('Everyone marked as paid.'); });
+}
+
+function copySplitSummary() {
+  var totals = splitTotals();
+  var lines = ['Trip costs — who owes what', ''];
+  tripPlan.basket.forEach(function(item) {
+    var on = tripPlan.members.filter(function(m) { return item.shares[m.user_id] && item.shares[m.user_id].included; });
+    lines.push('• ' + item.title + ' — ' + money(lineTotalOf(item)) +
+      (on.length === tripPlan.members.length ? ' (everyone)' : ' (' + on.map(shortName).join(', ') + ')'));
+  });
+  lines.push('');
+  tripPlan.members.forEach(function(m) {
+    var led = tripPlan.ledger[m.user_id] || { paid: 0 };
+    var owed = totals[m.user_id] || 0;
+    var out = owed - Number(led.paid || 0);
+    lines.push(shortName(m) + ': ' + money(owed) + (led.paid ? ' (paid ' + money(led.paid) + ', ' + money(out) + ' to go)' : ''));
+  });
+  var text = lines.join('\n');
+  navigator.clipboard.writeText(text)
+    .then(function() { showToast('Copied — paste it into your group chat.'); })
+    .catch(function() { showToast('Could not copy.', true); });
 }
 
 </script>
