@@ -2283,7 +2283,8 @@ body.guest-mode .nav-hamburger { display:none !important; }
             <div class="gp-section-head"><i class="ti ti-users"></i> Group Members</div>
             <div id="members-list"></div>
             <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-              <div class="gp-section-head"><i class="ti ti-link"></i> Invite</div>
+              <div class="gp-section-head"><i class="ti ti-link"></i> Invite to the group</div>
+              <p class="fs-sm text-muted" style="margin:0 0 8px;line-height:1.55">Full access to the trip. They'll need a GolfTrip account.</p>
               <div style="display:flex;gap:6px;margin-bottom:10px">
                 <input type="email" id="invite-email" placeholder="email@example.com" style="flex:1">
                 <button class="btn btn-primary btn-sm" onclick="inviteMember()">Invite</button>
@@ -2291,6 +2292,17 @@ body.guest-mode .nav-hamburger { display:none !important; }
               <div class="invite-link-box">
                 <input type="text" id="invite-link" readonly>
                 <button class="btn btn-ghost btn-sm" id="copy-link-btn">Copy</button>
+              </div>
+
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+                <div class="gp-section-head"><i class="ti ti-thumb-up"></i> Voting link</div>
+                <p class="fs-sm text-muted" style="margin:0 0 10px;line-height:1.55">
+                  For everyone else. <strong>No account needed</strong> &mdash; they type their name and vote.
+                  They see the shortlist and who's coming, never the costs or the split. Expires after 60 days.
+                </p>
+                <button class="btn btn-primary btn-sm" style="width:100%" onclick="copyVotingLink()">
+                  <i class="ti ti-copy"></i> Copy voting link
+                </button>
               </div>
             </div>
           </div>
