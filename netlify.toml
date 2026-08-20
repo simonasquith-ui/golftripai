@@ -39,3 +39,60 @@
 # If the individual app's nav has a "Destinations" link that pushes a
 # different path, change the `from` to match it. Check with:
 #   grep -n "ROUTED_PAGES" index.html
+# ═══════════════════════════════════════════════════════════════════════════
+# APPEND this to the BOTTOM of the existing netlify.toml in the
+# gogolftrip.co.uk repo. Do NOT replace the whole file — your existing build
+# and function config must stay.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── SPA ROUTES ─────────────────────────────────────────────────────────────
+# index.html pushes real URLs via history.pushState. Netlify knows nothing
+# about them, so a direct visit, a refresh, or a link you send someone
+# returns Netlify's 404 instead of the app. These rewrites (status 200, not
+# 301) serve index.html at those paths and let the app's router pick the
+# page from window.location.pathname.
+#
+# Netlify serves real files before consulting redirects, so these cannot
+# shadow anything in /destinations/ or /blog/. Explicit rather than a
+# catch-all: a catch-all turns every typo into the homepage and hides
+# broken internal links.
+
+# The seasonal destinations guide. Matches /destinations EXACTLY —
+# /destinations/portugal-golf-trips.html is a real file and is served as one.
+[[redirects]]
+  from = "/destinations"
+  to = "/index.html"
+  status = 200
+
+# Club portal. /club-login is the URL you send to a club secretary.
+[[redirects]]
+  from = "/club-login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/club"
+  to = "/index.html"
+  status = 200
+
+# Public club pages, once you start using them: /club/<slug>
+[[redirects]]
+  from = "/club/*"
+  to = "/index.html"
+  status = 200
+
+# Admin dashboard. Needs a URL of its own so it stays reachable even when the
+# nav link is hidden — otherwise a broken is_admin flag locks you out of the
+# one page that would tell you the flag is broken.
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+
+# ── FUNCTION TIMEOUT ───────────────────────────────────────────────────────
+# A 500-recipient campaign is five sequential Resend batch calls and will
+# exceed Netlify's 10-second default. Without this, large sends fail halfway
+# with a timeout and the client records a partial result.
+[functions."send-club-campaign"]
+  timeout = 26
