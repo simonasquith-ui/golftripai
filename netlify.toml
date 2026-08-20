@@ -96,3 +96,60 @@
 # with a timeout and the client records a partial result.
 [functions."send-club-campaign"]
   timeout = 26
+# ═══════════════════════════════════════════════════════════════════════════
+# APPEND to the BOTTOM of the existing netlify.toml in the gogolftrip.co.uk
+# repo. Do NOT replace the file — your build and function config must stay.
+#
+# If you already pasted an earlier version of this block, the only NEW entry
+# is /vote at the bottom. Adding a duplicate [[redirects]] is harmless, but
+# you can just add the /vote one on its own if you prefer.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── SPA ROUTES ─────────────────────────────────────────────────────────────
+# index.html pushes real URLs via history.pushState. Netlify knows nothing
+# about them, so a direct visit, a refresh, or a link you send someone returns
+# Netlify's 404 instead of the app. These rewrites (status 200, not 301) serve
+# index.html at those paths and let the app's router pick the page.
+#
+# Netlify serves real files before consulting redirects, so these cannot
+# shadow anything in /destinations/ or /blog/.
+
+[[redirects]]
+  from = "/destinations"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/club-login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/club"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/club/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+# THE GUEST VOTING LINK. Without this, every link you copy from the Voting
+# link button returns Netlify's "Page not found" — the app never even loads,
+# so nothing in index.html can help.
+[[redirects]]
+  from = "/vote"
+  to = "/index.html"
+  status = 200
+
+
+# ── FUNCTION TIMEOUT ───────────────────────────────────────────────────────
+# A 500-recipient campaign is five sequential Resend batch calls and will
+# exceed Netlify's 10-second default.
+[functions."send-club-campaign"]
+  timeout = 26
