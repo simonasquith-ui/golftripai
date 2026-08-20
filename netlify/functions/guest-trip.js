@@ -13,16 +13,51 @@
  *   - see the shortlist and vote on it
  *   - see the first names of who else is coming
  *
- * WHAT A GUEST MAY NEVER SEE. None of this is returned by any branch below:
- *   - the basket, the cost split, or the ledger (who owes and who has paid)
+ * Guests now also get the day-by-day itinerary and, when the organiser
+ * allows it (trip_requests.guest_sees_costs), the basket, split and ledger.
+ *
+ * WHAT A GUEST MAY NEVER SEE, regardless of any setting:
  *   - anybody's email address, user id, or account details
  *   - any other trip, including other trips by the same organiser
+ *   - the share token itself
  *
+ * Money is shown by NAME and AMOUNT only — never joined back to an account.
  * If you add a field to a response, check it against that list first.
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ddordyjwkdwqaarplwmc.supabase.co';
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+/* The key has to be a SECRET one — Supabase's `service_role` JWT, or a newer
+   `sb_secret_...` key. Both bypass Row Level Security, which is the whole
+   reason this function can serve a guest who has no login.
+   
+   Accepts several names because projects call it different things. If none
+   is set, or the wrong KIND of key is set, the function refuses to start
+   rather than half-working. */
+const SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_SERVICE_KEY ||
+  process.env.SUPABASE_SECRET_KEY ||
+  null;
+
+/* Distinguishes a secret key from a publishable one WITHOUT logging the key.
+   A publishable/anon key here would not error loudly — it would silently
+   return empty lists, because RLS blocks anon on every table this touches.
+   Guests would see "nothing to vote on yet" and nobody would know why. */
+function keyLooksSecret(k) {
+  if (!k) return false;
+  if (k.startsWith('sb_secret_')) return true;
+  if (k.startsWith('sb_publishable_')) return false;
+  // Legacy JWT: the middle segment carries {"role":"service_role"|"anon"}.
+  var parts = k.split('.');
+  if (parts.length === 3) {
+    try {
+      var payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+      return payload.role === 'service_role';
+    } catch (e) { return false; }
+  }
+  return false;
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -68,7 +103,7 @@ async function requireTrip(tripId, token) {
 
   const rows = await db(
     `trip_requests?id=eq.${tripId}&share_token=eq.${token}` +
-    `&select=id,destination_type,group_size,travel_dates,user_id,guest_voting,share_expires_at`
+    `&select=id,destination_type,group_size,travel_dates,user_id,guest_voting,share_expires_at,guest_sees_costs`
   );
   const trip = rows && rows[0];
   // Same message whether the id is wrong, the token is wrong, or the pair
@@ -91,7 +126,7 @@ async function requireTrip(tripId, token) {
 async function guestView(trip, guest) {
   const [candidates, members, guests] = await Promise.all([
     db(`trip_candidates?trip_request_id=eq.${trip.id}&status=neq.dropped` +
-       `&select=id,title,description,category,price,status,sort_order&order=sort_order.asc`),
+       `&select=id,title,description,category,price,status,sort_order,meta&order=sort_order.asc`),
     db(`trip_members?trip_request_id=eq.${trip.id}&select=user_id,role,status`),
     db(`trip_guests?trip_request_id=eq.${trip.id}&select=id,name`)
   ]);
@@ -107,9 +142,38 @@ async function guestView(trip, guest) {
   // selected — no email leaves this function.
   const memberIds = (members || []).map(m => m.user_id).filter(Boolean);
   let memberNames = [];
+  const nameById = {};
   if (memberIds.length) {
     const users = await db(`users?id=in.(${memberIds.join(',')})&select=id,name`);
+    (users || []).forEach(u => { nameById[u.id] = firstName(u.name); });
     memberNames = (users || []).map(u => firstName(u.name)).filter(Boolean);
+  }
+
+  // The agreed day-by-day plan. Read-only for a guest; there is no write
+  // path to trip_schedule anywhere in this function.
+  let itinerary = null;
+  try {
+    const sched = await db(`trip_schedule?trip_request_id=eq.${trip.id}&select=schedule,panel_label&limit=1`);
+    if (sched && sched[0] && sched[0].schedule) itinerary = sched[0].schedule;
+  } catch (e) { itinerary = null; }
+
+  // Money, only if the organiser has left it on. Names and amounts only —
+  // user ids are mapped to first names here and never sent.
+  let costs = null;
+  if (trip.guest_sees_costs) {
+    try {
+      const [items, totals] = await Promise.all([
+        db(`trip_basket_items?trip_request_id=eq.${trip.id}&select=id,title,category,unit_price,qty,is_total&order=sort_order.asc`),
+        db(`trip_split_totals?trip_request_id=eq.${trip.id}&select=user_id,items_total,adjustment,owed,paid,outstanding`)
+      ]);
+      costs = {
+        items: items || [],
+        people: (totals || []).map(t => ({
+          name: nameById[t.user_id] || 'A member',
+          owed: t.owed, paid: t.paid, outstanding: t.outstanding
+        }))
+      };
+    } catch (e) { costs = null; }
   }
 
   const tally = {};
@@ -132,8 +196,13 @@ async function guestView(trip, guest) {
     candidates: (candidates || []).map(c => ({
       id: c.id, title: c.title, description: c.description,
       category: c.category, price: c.price, status: c.status,
+      // Photos, links, cuisine and so on — what a voter needs to actually
+      // judge the option rather than guess from a name.
+      meta: c.meta || null,
       votes: tally[c.id] || { yes: 0, meh: 0, no: 0 }
     })),
+    itinerary: itinerary,
+    costs: costs,
     people: memberNames.concat((guests || []).map(g => firstName(g.name))).filter(Boolean),
     myVotes: mine,
     guest: guest ? { name: guest.name } : null
@@ -155,7 +224,16 @@ function safeDates(raw) {
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
-  if (!SERVICE_KEY) return reply(500, { error: 'SUPABASE_SERVICE_ROLE_KEY not set' });
+  if (!SERVICE_KEY) {
+    console.error('guest-trip: no secret key. Set SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_KEY) in Netlify.');
+    return reply(500, { error: 'Guest voting is not configured yet.' });
+  }
+  if (!keyLooksSecret(SERVICE_KEY)) {
+    // Fail loudly here rather than returning empty shortlists forever.
+    console.error('guest-trip: the configured key is a publishable/anon key, not a secret key. ' +
+                  'Guests would see an empty shortlist. Use the service_role (or sb_secret_) key.');
+    return reply(500, { error: 'Guest voting is not configured correctly.' });
+  }
 
   let body;
   try { body = JSON.parse(event.body || '{}'); }
